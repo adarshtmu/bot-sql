@@ -1,4 +1,15 @@
 import streamlit as st
+
+hide_github = """
+    <style>
+    header {visibility: hidden;}
+    </style>
+"""
+st.markdown(hide_github, unsafe_allow_html=True)
+
+
+
+import streamlit as st
 import google.generativeai as genai
 import pandas as pd
 
