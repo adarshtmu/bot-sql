@@ -44,13 +44,14 @@ st.markdown("""
         margin-top: 10px;
     }
     .note {
-        background-color: #fef9e7; /* Yellow background */
-        color: white; /* White text */
+        background-color: #fef9e7; /* Light yellow */
+        color: #333;               /* Dark text for contrast */
         padding: 15px;
         border-left: 5px solid #f39c12; /* Orange border for emphasis */
         margin-top: 20px;
         border-radius: 5px;
     }
+
 </style>
 """, unsafe_allow_html=True)
 
