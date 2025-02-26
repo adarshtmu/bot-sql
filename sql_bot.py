@@ -44,9 +44,10 @@ st.markdown("""
         margin-top: 10px;
     }
     .note {
-        background-color: #fef9e7;
+        background-color: #fef9e7; /* Yellow background */
+        color: white; /* White text */
         padding: 15px;
-        border-left: 5px solid #f39c12;
+        border-left: 5px solid #f39c12; /* Orange border for emphasis */
         margin-top: 20px;
         border-radius: 5px;
     }
