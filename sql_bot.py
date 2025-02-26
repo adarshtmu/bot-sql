@@ -15,7 +15,95 @@ gemini_api_key = "AIzaSyAfzl_66GZsgaYjAM7cT2djVCBCAr86t2k"  # Replace with your 
 genai.configure(api_key=gemini_api_key)
 model = genai.GenerativeModel('gemini-2.0-flash')
 
-# Sample Tables for Quiz
+import streamlit as st
+import google.generativeai as genai
+import pandas as pd
+
+# ----- PAGE CONFIG & CUSTOM STYLING -----
+st.set_page_config(
+    page_title="SQL Mentor - Interactive SQL Query Practice",
+    page_icon=":bar_chart:",
+    layout="wide",
+)
+
+# Define a custom CSS style to enhance the UI
+custom_css = """
+<style>
+/* Gradient background */
+body {
+    background: linear-gradient(to right, #1e3c72, #2a5298);
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    color: #fff;
+}
+
+/* Hide the default Streamlit header and footer */
+header, footer {
+    visibility: hidden;
+}
+
+/* Custom container with dark background and rounded corners */
+.section {
+    background-color: rgba(0, 0, 0, 0.3);
+    padding: 2rem;
+    margin-bottom: 2rem;
+    border-radius: 10px;
+}
+
+/* Headings */
+h1, h2, h3, h4 {
+    color: #ffd700; /* Gold color for contrast */
+    margin-top: 0;
+}
+
+/* Table styles */
+table {
+    color: #000;
+    background-color: #fff;
+    border-radius: 5px;
+    overflow: hidden;
+}
+thead tr {
+    background-color: #c9d1d9 !important;
+}
+tbody tr:nth-child(even) {
+    background-color: #f6f8fa;
+}
+
+/* Button styles */
+button {
+    background-color: #ffd700 !important;
+    color: #000 !important;
+    border-radius: 5px !important;
+    border: none !important;
+    font-weight: bold !important;
+    padding: 0.6rem 1rem !important;
+    cursor: pointer !important;
+}
+button:hover {
+    background-color: #ffbf00 !important;
+}
+
+/* Progress bar override */
+[data-testid="stProgress"] > div > div > div > div {
+    background-image: linear-gradient(to right, #ffd700 , #ffc107);
+}
+
+/* Expander styling */
+.streamlit-expanderHeader {
+    font-weight: bold;
+    color: #ffd700;
+}
+</style>
+"""
+st.markdown(custom_css, unsafe_allow_html=True)
+
+# ----- SET UP GEMINI API -----
+gemini_api_key = "REPLACE_WITH_YOUR_GEMINI_API_KEY"
+genai.configure(api_key=gemini_api_key)
+# NOTE: Make sure you use a valid model name from the Gemini ListModels, e.g., 'chat-bison-001' or similar
+model = genai.GenerativeModel("chat-bison-001")  
+
+# ----- SAMPLE DATA -----
 employees_table = pd.DataFrame({
     "employee_id": [101, 102, 103, 104, 105, 106, 107, 108],
     "name": ["Alice", "Bob", "Charlie", "David", "Eve", "Frank", "Grace", "Helen"],
@@ -29,7 +117,6 @@ departments_table = pd.DataFrame({
     "location": ["New York", "Chicago", "San Francisco", "Boston", "Seattle"]
 })
 
-# Revised SQL questions using only the Employees and Departments tables with easier queries
 sql_questions = [
     {
         "question": "Write a query to select all columns from the employees table.",
@@ -68,7 +155,7 @@ sql_questions = [
     }
 ]
 
-# Initialize session state
+# ----- STATE INITIALIZATION -----
 if "user_answers" not in st.session_state:
     st.session_state.user_answers = []
 if "current_question" not in st.session_state:
@@ -82,6 +169,7 @@ if "show_detailed_feedback" not in st.session_state:
 if "awaiting_final_submission" not in st.session_state:
     st.session_state.awaiting_final_submission = False
 
+# ----- HELPER FUNCTIONS -----
 def simulate_query(query, sample_table):
     """Simulate SQL queries on a pandas DataFrame in a flexible way."""
     try:
@@ -95,27 +183,22 @@ def simulate_query(query, sample_table):
             
             # Handle COUNT(*)
             if "count(*)" in select_part:
-                result = pd.DataFrame({"count": [len(sample_table)]})
-                return result.reset_index(drop=True)
+                return pd.DataFrame({"count": [len(sample_table)]}).reset_index(drop=True)
             
             # Handle AVG(column)
             elif "avg(" in select_part:
                 column = select_part.split("avg(")[1].split(")")[0].strip()
-                result = pd.DataFrame({"avg": [sample_table[column].mean()]})
-                return result.reset_index(drop=True)
+                return pd.DataFrame({"avg": [sample_table[column].mean()]}).reset_index(drop=True)
             
             # Handle SUM(column)
             elif "sum(" in select_part:
                 column = select_part.split("sum(")[1].split(")")[0].strip()
-                result = pd.DataFrame({"sum": [sample_table[column].sum()]})
-                return result.reset_index(drop=True)
+                return pd.DataFrame({"sum": [sample_table[column].sum()]}).reset_index(drop=True)
             
             # Handle SELECT * (all columns)
             elif "*" in select_part:
                 if "where" in from_part:
-                    # Extract the condition after WHERE
                     condition = from_part.split("where")[1].strip()
-                    # Replace SQL equality operator with Python's
                     condition = condition.replace("=", "==")
                     result = sample_table.query(condition)
                 else:
@@ -126,21 +209,15 @@ def simulate_query(query, sample_table):
             else:
                 columns = [col.strip() for col in select_part.split(",")]
                 if "where" in from_part:
-                    # Extract the condition after WHERE
                     condition = from_part.split("where")[1].strip()
-                    # Replace SQL equality operator with Python's
                     condition = condition.replace("=", "==")
                     result = sample_table.query(condition)[columns]
                 else:
                     result = sample_table[columns]
                 return result.reset_index(drop=True)
         
-        # Handle unsupported queries
         else:
             return "Query simulation is only supported for SELECT statements."
-    
-    except Exception as e:
-        return f"Error simulating query: {str(e)}"
     
     except Exception as e:
         return f"Error simulating query: {str(e)}"
@@ -153,19 +230,19 @@ def evaluate_answer(question, correct_answer, student_answer, sample_table):
     # Simulate the actual query (user's answer)
     actual_result = simulate_query(student_answer, sample_table)
     
-    # Determine if the answer is correct
+    # Determine correctness
     if isinstance(expected_result, pd.DataFrame) and isinstance(actual_result, pd.DataFrame):
         is_correct = expected_result.equals(actual_result)
     else:
         is_correct = str(expected_result) == str(actual_result)
     
-    # Prepare feedback message
+    # Provide a short default feedback
     if is_correct:
         feedback = "Correct answer! Well done."
     else:
         feedback = f"Incorrect answer. Expected result was:\n{expected_result}"
     
-    # Evaluate the answer using Gemini API
+    # Evaluate using Gemini (replace 'student' with 'you' in the output)
     prompt = f"""
     Question: {question}
     Correct Answer: {correct_answer}
@@ -174,149 +251,171 @@ def evaluate_answer(question, correct_answer, student_answer, sample_table):
     Actual Query Result: {actual_result}
     Evaluate your answer and provide feedback. Mention if the answer is correct or incorrect, and explain why.
     """
-    response = model.generate_content(prompt)
-    feedback_api = response.text
-    feedback_api = feedback_api.replace("student", "you")
+    try:
+        response = model.generate_content(prompt)
+        feedback_api = response.text
+        feedback_api = feedback_api.replace("student", "you")
+    except Exception as e:
+        # If Gemini call fails, fall back to default feedback
+        feedback_api = f"{feedback}\n\n[Gemini API Error: {e}]"
     
     return feedback_api, is_correct, expected_result, actual_result
 
 def calculate_score(user_answers):
-    """Calculate the score based on correct answers."""
     correct_answers = sum(1 for ans in user_answers if ans["is_correct"])
     total_questions = len(user_answers)
     return (correct_answers / total_questions) * 100
 
 def analyze_performance(user_answers):
-    """Analyze the user's performance and provide detailed feedback."""
-    # Calculate areas of strength and weakness
     correct_questions = [ans["question"] for ans in user_answers if ans["is_correct"]]
     incorrect_questions = [ans["question"] for ans in user_answers if not ans["is_correct"]]
     
-    # Generate detailed feedback
     feedback = {
         "strengths": correct_questions,
         "weaknesses": incorrect_questions,
         "overall_feedback": ""
     }
     
-    # Use Gemini API to generate overall feedback
     prompt = f"""
     You answered {len(correct_questions)} out of {len(user_answers)} questions correctly.
     Correct Questions: {correct_questions}
     Incorrect Questions: {incorrect_questions}
     Provide detailed feedback on your overall performance, including areas of strength and weakness.
     """
-    response = model.generate_content(prompt)
-    feedback["overall_feedback"] = response.text
+    try:
+        response = model.generate_content(prompt)
+        feedback["overall_feedback"] = response.text
+    except Exception as e:
+        feedback["overall_feedback"] = f"[Gemini API Error: {e}]"
     
     return feedback
 
 def get_emoji(is_correct):
     return "😊" if is_correct else "😢"
 
-# Streamlit App
+# ----- MAIN LAYOUT -----
+# Wrap the main sections in "section" containers for a nicer look
+
 if not st.session_state.quiz_started:
-    st.title("SQL Mentor - Interactive SQL Query Practice")
+    with st.container():
+        st.markdown("<h1 style='text-align: center;'>SQL Mentor - Interactive SQL Query Practice</h1>", unsafe_allow_html=True)
     
-    # Enhanced Table Introduction
-    st.write("### Welcome to Your SQL Learning Journey!")
-    
-    # Inform the user about the SQL dialect
-    st.markdown("""
-    **📌 Important Note:**
-    - This quiz uses **MySQL syntax** for all SQL queries.
-    - Ensure your answers follow MySQL conventions (e.g., `LIMIT` for row limits, backticks for identifiers, etc.).
-    - If you're familiar with other SQL dialects (e.g., PostgreSQL, SQL Server), some syntax may differ.
-    """)
-    
-    # Create columns for visual layout
-    col1, col2 = st.columns([2, 1])
-    
-    with col1:
-        st.write("""
-        In this interactive SQL quiz, you'll work with two interconnected tables:
-        - **Employees Table**: Tracks employee details like ID, name, department, salary, and manager.
-        - **Departments Table**: Contains department locations.
-        """)
-    
-    with col2:
-        st.markdown("#### Tables Overview")
-        table_overview = pd.DataFrame({
-            "Table": ["Employees", "Departments"],
-            "Rows": [len(employees_table), len(departments_table)]
-        })
-        st.table(table_overview)
-    
-    # Detailed Table Previews
-    st.write("### 🔍 Table Previews")
-    
-    # Create tabs for each table
-    tab1, tab2 = st.tabs(["Employees", "Departments"])
-    
-    with tab1:
-        st.write("**Employees Table**")
-        st.dataframe(employees_table)
-    
-    with tab2:
-        st.write("**Departments Table**")
-        st.dataframe(departments_table)
-    
-    # Additional Context
-    with st.expander("📝 About This Quiz"):
-        st.write("""
-        - You'll solve several SQL query challenges.
-        - Each question tests a different SQL concept.
-        - Immediate feedback after each answer.
-        - Final score and detailed performance analysis.
-        - **SQL Dialect:** MySQL
-        """)
-    
-    # Start Quiz Button
-    if st.button("🚀 Start SQL Challenge"):
-        st.session_state.quiz_started = True
-        st.rerun()
+    with st.container():
+        st.markdown("<div class='section'>", unsafe_allow_html=True)
+        st.write("### Welcome to Your SQL Learning Journey!")
+        st.markdown(
+            """
+            **Important Note:**
+            - This quiz uses **MySQL** conventions for all SQL queries.
+            - Ensure your answers follow MySQL syntax (e.g., `LIMIT` for row limits, etc.).
+            - If you're familiar with other SQL dialects, some syntax may differ.
+            """,
+            unsafe_allow_html=True
+        )
+        st.markdown("</div>", unsafe_allow_html=True)
 
-# Display chat history only when quiz is ongoing
+    with st.container():
+        st.markdown("<div class='section'>", unsafe_allow_html=True)
+        col1, col2 = st.columns([2, 1])
+        with col1:
+            st.write(
+                """
+                In this interactive SQL quiz, you'll work with two interconnected tables:
+                - **Employees Table**: Tracks employee details (ID, name, department, salary, manager).
+                - **Departments Table**: Contains department locations.
+                """
+            )
+        with col2:
+            st.markdown("#### Tables Overview")
+            table_overview = pd.DataFrame({
+                "Table": ["Employees", "Departments"],
+                "Rows": [len(employees_table), len(departments_table)]
+            })
+            st.table(table_overview)
+        st.markdown("</div>", unsafe_allow_html=True)
+    
+    # Table Previews
+    with st.container():
+        st.markdown("<div class='section'>", unsafe_allow_html=True)
+        st.write("### 🔍 Table Previews")
+        tab1, tab2 = st.tabs(["Employees", "Departments"])
+        with tab1:
+            st.write("**Employees Table**")
+            st.dataframe(employees_table)
+        with tab2:
+            st.write("**Departments Table**")
+            st.dataframe(departments_table)
+        st.markdown("</div>", unsafe_allow_html=True)
+    
+    # About This Quiz
+    with st.container():
+        st.markdown("<div class='section'>", unsafe_allow_html=True)
+        with st.expander("📝 About This Quiz"):
+            st.write("""
+            - You'll solve several SQL query challenges.
+            - Each question tests a different SQL concept.
+            - Immediate feedback after each answer.
+            - Final score and detailed performance analysis.
+            - **SQL Dialect:** MySQL
+            """)
+        st.markdown("</div>", unsafe_allow_html=True)
+    
+    # Start Quiz
+    with st.container():
+        if st.button("🚀 Start SQL Challenge"):
+            st.session_state.quiz_started = True
+            st.experimental_rerun()
+
+# Quiz in progress
 if st.session_state.quiz_started and not st.session_state.quiz_completed:
-    if st.session_state.user_answers:
-        st.write("### Chat History")
-        for i, ans in enumerate(st.session_state.user_answers):
-            with st.expander(f"Question {i + 1}: {ans['question']}", expanded=True):
-                st.write(f"**Your Answer:** {ans['student_answer']}")
-                if ans["is_correct"]:
-                    st.markdown(f"<span style='color:green'>✅ **Feedback:** {ans['feedback']} {get_emoji(True)}</span>", unsafe_allow_html=True)
-                else:
-                    st.markdown(f"<span style='color:red'>❌ **Feedback:** {ans['feedback']} {get_emoji(False)}</span>", unsafe_allow_html=True)
-                st.write("**Expected Query Result:**")
-                if isinstance(ans["expected_result"], pd.DataFrame):
-                    st.dataframe(ans["expected_result"])
-                else:
-                    st.write(ans["expected_result"])
-                st.write("**Actual Query Result:**")
-                if isinstance(ans["actual_result"], pd.DataFrame):
-                    st.dataframe(ans["actual_result"])
-                else:
-                    st.write(ans["actual_result"])
-                st.write("---")
+    with st.container():
+        st.markdown("<div class='section'>", unsafe_allow_html=True)
+        # Display chat history
+        if st.session_state.user_answers:
+            st.write("### Chat History")
+            for i, ans in enumerate(st.session_state.user_answers):
+                with st.expander(f"Question {i + 1}: {ans['question']}", expanded=True):
+                    st.write(f"**Your Answer:** {ans['student_answer']}")
+                    if ans["is_correct"]:
+                        st.markdown(
+                            f"<span style='color:lightgreen'>✅ **Feedback:** {ans['feedback']} {get_emoji(True)}</span>",
+                            unsafe_allow_html=True
+                        )
+                    else:
+                        st.markdown(
+                            f"<span style='color:salmon'>❌ **Feedback:** {ans['feedback']} {get_emoji(False)}</span>",
+                            unsafe_allow_html=True
+                        )
+                    st.write("**Expected Query Result:**")
+                    if isinstance(ans["expected_result"], pd.DataFrame):
+                        st.dataframe(ans["expected_result"])
+                    else:
+                        st.write(ans["expected_result"])
+                    st.write("**Actual Query Result:**")
+                    if isinstance(ans["actual_result"], pd.DataFrame):
+                        st.dataframe(ans["actual_result"])
+                    else:
+                        st.write(ans["actual_result"])
+                    st.write("---")
+        st.markdown("</div>", unsafe_allow_html=True)
 
-# Quiz logic
-if st.session_state.quiz_started:
-    if not st.session_state.quiz_completed:
+    with st.container():
+        st.markdown("<div class='section'>", unsafe_allow_html=True)
         progress = (st.session_state.current_question + 1) / len(sql_questions)
         st.progress(progress)
         st.write(f"**Progress:** {st.session_state.current_question + 1}/{len(sql_questions)} questions completed.")
         
-        # Display the current question
+        # Display current question
         question_data = sql_questions[st.session_state.current_question]
         st.write(f"**Question {st.session_state.current_question + 1}:** {question_data['question']}")
         
-        # Display sample table
         st.write("**Sample Table:**")
         st.dataframe(question_data["sample_table"])
         
-        # Input for user's answer
+        # Answer input
         student_answer = st.text_input("Your answer:", key=f"answer_{st.session_state.current_question}")
         
+        # Submit answer
         if st.button("Submit Answer"):
             if student_answer.strip():
                 feedback, is_correct, expected_result, actual_result = evaluate_answer(
@@ -335,34 +434,35 @@ if st.session_state.quiz_started:
                     "actual_result": actual_result
                 })
                 
+                # Show immediate feedback
                 if is_correct:
-                    st.markdown(f"<span style='color:green'>**Feedback:** {feedback} {get_emoji(True)}</span>", unsafe_allow_html=True)
+                    st.markdown(f"<span style='color:lightgreen'>**Feedback:** {feedback} {get_emoji(True)}</span>", unsafe_allow_html=True)
                 else:
-                    st.markdown(f"<span style='color:red'>**Feedback:** {feedback} {get_emoji(False)}</span>", unsafe_allow_html=True)
+                    st.markdown(f"<span style='color:salmon'>**Feedback:** {feedback} {get_emoji(False)}</span>", unsafe_allow_html=True)
                 
+                # Move to next question or await final submission
                 if st.session_state.current_question < len(sql_questions) - 1:
                     st.session_state.current_question += 1
-                    st.rerun()
+                    st.experimental_rerun()
                 else:
                     st.session_state.awaiting_final_submission = True
-                    st.rerun()
+                    st.experimental_rerun()
             else:
                 st.warning("Please enter an answer before submitting.")
         
+        # Final submission
         if st.session_state.awaiting_final_submission:
             if st.button("Submit All Answers"):
                 st.session_state.quiz_completed = True
-                st.rerun()
-    else:
+                st.experimental_rerun()
+        st.markdown("</div>", unsafe_allow_html=True)
+
+# Quiz completed
+if st.session_state.quiz_completed:
+    with st.container():
+        st.markdown("<div class='section'>", unsafe_allow_html=True)
         st.balloons()
-        st.markdown(
-            """
-            <h1 style="color: white; font-size: 36px; text-align: left;">
-                Quiz Completed!
-            </h1>
-            """,
-            unsafe_allow_html=True
-        )
+        st.markdown("<h1>Quiz Completed!</h1>", unsafe_allow_html=True)
         
         score = calculate_score(st.session_state.user_answers)
         st.write(f"**Your Score:** {score:.2f}%")
@@ -374,9 +474,7 @@ if st.session_state.quiz_started:
                     <h2 style="color: #000000;">Your score is below 50% 😢</h2>
                     <p style="font-size: 18px; color: #000000;">Book a mentor now to upgrade your SQL skills!</p>
                     <a href="https://www.corporatebhaiya.com/" target="_blank">
-                        <button style="background-color: #cc0000; color: white; padding: 10px 20px; border: none; border-radius: 5px; font-size: 16px; cursor: pointer;">
-                            Book Now
-                        </button>
+                        <button>Book Now</button>
                     </a>
                 </div>
                 """,
@@ -389,9 +487,7 @@ if st.session_state.quiz_started:
                     <h2 style="color: #000000;">Great job scoring above 50%! 🎉</h2>
                     <p style="font-size: 18px; color: #000000;">Take the next step with a mock interview and resume building session!</p>
                     <a href="https://www.corporatebhaiya.com/" target="_blank">
-                        <button style="background-color: #008000; color: white; padding: 10px 20px; border: none; border-radius: 5px; font-size: 16px; cursor: pointer;">
-                            Book Now
-                        </button>
+                        <button>Book Now</button>
                     </a>
                 </div>
                 """,
@@ -400,11 +496,10 @@ if st.session_state.quiz_started:
         
         if st.button("📊 Detailed Feedback"):
             st.session_state.show_detailed_feedback = True
-            st.rerun()
+            st.experimental_rerun()
         
         if st.session_state.show_detailed_feedback:
             performance_feedback = analyze_performance(st.session_state.user_answers)
-            
             st.write("### Detailed Performance Analysis")
             
             st.write("**Strengths (Questions you answered correctly):**")
@@ -425,4 +520,5 @@ if st.session_state.quiz_started:
             st.session_state.quiz_completed = False
             st.session_state.show_detailed_feedback = False
             st.session_state.awaiting_final_submission = False
-            st.rerun()
+            st.experimental_rerun()
+        st.markdown("</div>", unsafe_allow_html=True)
