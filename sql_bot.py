@@ -19,13 +19,20 @@ import streamlit as st
 import google.generativeai as genai
 import pandas as pd
 
-# ----- PAGE CONFIG & CUSTOM STYLING -----
+# ✅ Must be the first Streamlit command in the script
 st.set_page_config(
     page_title="SQL Mentor - Interactive SQL Query Practice",
     page_icon=":bar_chart:",
-    layout="wide",
+    layout="wide"
 )
 
+# Now you can safely do other Streamlit operations
+hide_github = """
+    <style>
+    header {visibility: hidden;}
+    </style>
+"""
+st.markdown(hide_github, unsafe_allow_html=True)
 # Define a custom CSS style to enhance the UI
 custom_css = """
 <style>
