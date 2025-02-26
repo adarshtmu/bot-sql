@@ -1,14 +1,57 @@
 import streamlit as st
-
-hide_github = """
-    <style>
-    header {visibility: hidden;}
-    </style>
-"""
-st.markdown(hide_github, unsafe_allow_html=True)
-
 import google.generativeai as genai
 import pandas as pd
+
+# Custom CSS for styling
+st.markdown("""
+<style>
+    /* General styling */
+    body {
+        font-family: 'Arial', sans-serif;
+    }
+    h1 {
+        color: #2c3e50;
+        text-align: center;
+        margin-bottom: 20px;
+    }
+    h2 {
+        color: #34495e;
+    }
+    p {
+        color: #5d6d7e;
+    }
+    .stButton button {
+        background-color: #1abc9c;
+        border: none;
+        color: white;
+        padding: 10px 20px;
+        text-align: center;
+        text-decoration: none;
+        display: inline-block;
+        font-size: 16px;
+        margin: 4px 2px;
+        cursor: pointer;
+        border-radius: 8px;
+        transition: background-color 0.3s ease;
+    }
+    .stButton button:hover {
+        background-color: #16a085;
+    }
+    .table-preview {
+        background-color: #ecf0f1;
+        padding: 15px;
+        border-radius: 10px;
+        margin-top: 10px;
+    }
+    .note {
+        background-color: #fef9e7;
+        padding: 15px;
+        border-left: 5px solid #f39c12;
+        margin-top: 20px;
+        border-radius: 5px;
+    }
+</style>
+""", unsafe_allow_html=True)
 
 # Set up Gemini API
 gemini_api_key = "AIzaSyAfzl_66GZsgaYjAM7cT2djVCBCAr86t2k"  # Replace with your Gemini API key
@@ -141,9 +184,6 @@ def simulate_query(query, sample_table):
     
     except Exception as e:
         return f"Error simulating query: {str(e)}"
-    
-    except Exception as e:
-        return f"Error simulating query: {str(e)}"
 
 def evaluate_answer(question, correct_answer, student_answer, sample_table):
     """Evaluate the user's answer using Gemini API and simulate the query."""
@@ -216,29 +256,41 @@ def get_emoji(is_correct):
 
 # Streamlit App
 if not st.session_state.quiz_started:
-    st.title("SQL Mentor - Interactive SQL Query Practice")
-    
-    # Enhanced Table Introduction
-    st.write("### Welcome to Your SQL Learning Journey!")
-    
-    # Inform the user about the SQL dialect
-    st.markdown("""
-    **📌 Important Note:**
-    - This quiz uses **MySQL syntax** for all SQL queries.
-    - Ensure your answers follow MySQL conventions (e.g., `LIMIT` for row limits, backticks for identifiers, etc.).
-    - If you're familiar with other SQL dialects (e.g., PostgreSQL, SQL Server), some syntax may differ.
+    # Title and Introduction
+    st.title("🚀 SQL Mentor - Interactive SQL Query Practice 🚀")
+    st.markdown("<h2 style='text-align: center;'>Welcome to Your SQL Learning Journey!</h2>", unsafe_allow_html=True)
+    st.write("""
+    Dive into the world of SQL with our interactive quiz designed to sharpen your query-writing skills. 
+    Whether you're a beginner or looking to refine your expertise, this platform provides hands-on practice with real-world scenarios.
     """)
-    
-    # Create columns for visual layout
+
+    # Important Note Section
+    st.markdown("""
+    <div class="note">
+        <strong>📌 Important Note:</strong>
+        <ul>
+            <li>This quiz uses <strong>MySQL syntax</strong> for all SQL queries.</li>
+            <li>Ensure your answers follow MySQL conventions (e.g., `LIMIT` for row limits, backticks for identifiers).</li>
+            <li>If you're familiar with other SQL dialects (e.g., PostgreSQL, SQL Server), some syntax may differ.</li>
+        </ul>
+    </div>
+    """, unsafe_allow_html=True)
+
+    # Layout with Columns
     col1, col2 = st.columns([2, 1])
-    
+
     with col1:
         st.write("""
+        ### About the Quiz
         In this interactive SQL quiz, you'll work with two interconnected tables:
         - **Employees Table**: Tracks employee details like ID, name, department, salary, and manager.
         - **Departments Table**: Contains department locations.
         """)
-    
+        st.write("""
+        Each question tests a different SQL concept, and you'll receive immediate feedback on your answers. 
+        At the end of the quiz, you'll get a detailed performance analysis to help you identify strengths and areas for improvement.
+        """)
+
     with col2:
         st.markdown("#### Tables Overview")
         table_overview = pd.DataFrame({
@@ -246,33 +298,38 @@ if not st.session_state.quiz_started:
             "Rows": [len(employees_table), len(departments_table)]
         })
         st.table(table_overview)
-    
+
     # Detailed Table Previews
     st.write("### 🔍 Table Previews")
-    
-    # Create tabs for each table
+
+    # Tabs for Table Previews
     tab1, tab2 = st.tabs(["Employees", "Departments"])
-    
+
     with tab1:
+        st.markdown("<div class='table-preview'>", unsafe_allow_html=True)
         st.write("**Employees Table**")
         st.dataframe(employees_table)
-    
+        st.markdown("</div>", unsafe_allow_html=True)
+
     with tab2:
+        st.markdown("<div class='table-preview'>", unsafe_allow_html=True)
         st.write("**Departments Table**")
         st.dataframe(departments_table)
-    
-    # Additional Context
+        st.markdown("</div>", unsafe_allow_html=True)
+
+    # Additional Context in an Expander
     with st.expander("📝 About This Quiz"):
         st.write("""
-        - You'll solve several SQL query challenges.
-        - Each question tests a different SQL concept.
-        - Immediate feedback after each answer.
-        - Final score and detailed performance analysis.
+        - Solve several SQL query challenges.
+        - Each question focuses on a specific SQL concept.
+        - Get immediate feedback after each answer.
+        - Receive a final score and detailed performance analysis.
         - **SQL Dialect:** MySQL
         """)
-    
+
     # Start Quiz Button
-    if st.button("🚀 Start SQL Challenge"):
+    st.markdown("<h3 style='text-align: center;'>Ready to Begin?</h3>", unsafe_allow_html=True)
+    if st.button("🚀 Start SQL Challenge", key="start_quiz_button"):
         st.session_state.quiz_started = True
         st.rerun()
 
@@ -284,9 +341,9 @@ if st.session_state.quiz_started and not st.session_state.quiz_completed:
             with st.expander(f"Question {i + 1}: {ans['question']}", expanded=True):
                 st.write(f"**Your Answer:** {ans['student_answer']}")
                 if ans["is_correct"]:
-                    st.markdown(f"<span style='color:green'>✅ **Feedback:** {ans['feedback']} {get_emoji(True)}</span>", unsafe_allow_html=True)
+                    st.markdown(f" ✅ **Feedback:** {ans['feedback']} {get_emoji(True)} ", unsafe_allow_html=True)
                 else:
-                    st.markdown(f"<span style='color:red'>❌ **Feedback:** {ans['feedback']} {get_emoji(False)}</span>", unsafe_allow_html=True)
+                    st.markdown(f" ❌ **Feedback:** {ans['feedback']} {get_emoji(False)} ", unsafe_allow_html=True)
                 st.write("**Expected Query Result:**")
                 if isinstance(ans["expected_result"], pd.DataFrame):
                     st.dataframe(ans["expected_result"])
@@ -336,9 +393,9 @@ if st.session_state.quiz_started:
                 })
                 
                 if is_correct:
-                    st.markdown(f"<span style='color:green'>**Feedback:** {feedback} {get_emoji(True)}</span>", unsafe_allow_html=True)
+                    st.markdown(f" **Feedback:** {feedback} {get_emoji(True)} ", unsafe_allow_html=True)
                 else:
-                    st.markdown(f"<span style='color:red'>**Feedback:** {feedback} {get_emoji(False)}</span>", unsafe_allow_html=True)
+                    st.markdown(f" **Feedback:** {feedback} {get_emoji(False)} ", unsafe_allow_html=True)
                 
                 if st.session_state.current_question < len(sql_questions) - 1:
                     st.session_state.current_question += 1
@@ -357,9 +414,10 @@ if st.session_state.quiz_started:
         st.balloons()
         st.markdown(
             """
-            <h1 style="color: white; font-size: 36px; text-align: left;">
+             
                 Quiz Completed!
-            </h1>
+            
+
             """,
             unsafe_allow_html=True
         )
@@ -370,30 +428,24 @@ if st.session_state.quiz_started:
         if score < 50:
             st.markdown(
                 """
-                <div style="background-color: #ffcccc; padding: 20px; border-radius: 10px; text-align: center;">
-                    <h2 style="color: #000000;">Your score is below 50% 😢</h2>
-                    <p style="font-size: 18px; color: #000000;">Book a mentor now to upgrade your SQL skills!</p>
-                    <a href="https://www.corporatebhaiya.com/" target="_blank">
-                        <button style="background-color: #cc0000; color: white; padding: 10px 20px; border: none; border-radius: 5px; font-size: 16px; cursor: pointer;">
+                   Your score is below 50% 😢
+Book a mentor now to upgrade your SQL skills!
+  
                             Book Now
-                        </button>
-                    </a>
-                </div>
+                          
+
                 """,
                 unsafe_allow_html=True
             )
         else:
             st.markdown(
                 """
-                <div style="background-color: #ccffcc; padding: 20px; border-radius: 10px; text-align: center;">
-                    <h2 style="color: #000000;">Great job scoring above 50%! 🎉</h2>
-                    <p style="font-size: 18px; color: #000000;">Take the next step with a mock interview and resume building session!</p>
-                    <a href="https://www.corporatebhaiya.com/" target="_blank">
-                        <button style="background-color: #008000; color: white; padding: 10px 20px; border: none; border-radius: 5px; font-size: 16px; cursor: pointer;">
+                   Great job scoring above 50%! 🎉
+Take the next step with a mock interview and resume building session!
+  
                             Book Now
-                        </button>
-                    </a>
-                </div>
+                          
+
                 """,
                 unsafe_allow_html=True
             )
@@ -404,7 +456,7 @@ if st.session_state.quiz_started:
         
         if st.session_state.show_detailed_feedback:
             performance_feedback = analyze_performance(st.session_state.user_answers)
-            
+             
             st.write("### Detailed Performance Analysis")
             
             st.write("**Strengths (Questions you answered correctly):**")
@@ -426,6 +478,3 @@ if st.session_state.quiz_started:
             st.session_state.show_detailed_feedback = False
             st.session_state.awaiting_final_submission = False
             st.rerun()
-
-
-
