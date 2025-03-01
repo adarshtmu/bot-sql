@@ -4,7 +4,7 @@ import pandas as pd
 
 # Custom CSS to hide Streamlit and GitHub elements
 # IMPORTANT: Replace the placeholder class names below with the actual class names found by inspecting the elements in your deployed app.
-hide_streamlit_style = """
+hide_streamlit_style = 
 <style>
 /* Hide the hamburger menu icon */
 #MainMenu {visibility: hidden;}
@@ -54,7 +54,7 @@ a[href*="github.com"] {
 }
 */
 </style>
-"""
+
 
 # Inject the CSS into the app
 st.markdown(hide_streamlit_style, unsafe_allow_html=True)
