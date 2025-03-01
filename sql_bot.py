@@ -20,7 +20,7 @@ footer {visibility: hidden;}
 st.markdown(hide_streamlit_style, unsafe_allow_html=True)
 
 # Set Streamlit page config to override default settings
-st.set_page_config(page_title="SQL Mentor", page_icon="🧑‍💻", layout="wide")
+# st.set_page_config(page_title="SQL Mentor", page_icon="🧑‍💻", layout="wide")
 
 # Set up Gemini API
 gemini_api_key = "AIzaSyAfzl_66GZsgaYjAM7cT2djVCBCAr86t2k"  # Replace with your Gemini API key
