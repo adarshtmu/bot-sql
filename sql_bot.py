@@ -7,20 +7,24 @@ import pandas as pd
 # Hide unwanted UI elements
 import streamlit as st
 
-# Apply custom CSS to hide the Streamlit branding elements
+import streamlit as st
+
+# Apply custom CSS to hide Streamlit branding elements
 hide_streamlit_style = """
     <style>
         header {visibility: hidden;}
         #MainMenu {visibility: hidden;}
         footer {visibility: hidden;}
         .viewerBadge_container__1QSob {display: none !important;}
+        .stDeployButton {display: none !important;}
+        [data-testid="stToolbar"] {display: none !important;} /* Hides Streamlit toolbar */
+        [data-testid="stDecoration"] {display: none !important;} /* Hides bottom right profile */
     </style>
 """
 st.markdown(hide_streamlit_style, unsafe_allow_html=True)
 
 
-# Set Streamlit page config to override default settings
-# st.set_page_config(page_title="SQL Mentor", page_icon="🧑‍💻", layout="wide")
+
 
 # Set up Gemini API
 gemini_api_key = "AIzaSyAfzl_66GZsgaYjAM7cT2djVCBCAr86t2k"  # Replace with your Gemini API key
