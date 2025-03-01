@@ -51,7 +51,6 @@ st.markdown("""
         margin-top: 20px;
         border-radius: 5px;
     }
-
 </style>
 """, unsafe_allow_html=True)
 
@@ -60,56 +59,80 @@ gemini_api_key = "AIzaSyAfzl_66GZsgaYjAM7cT2djVCBCAr86t2k"  # Replace with your 
 genai.configure(api_key=gemini_api_key)
 model = genai.GenerativeModel('gemini-2.0-flash')
 
-# Sample Tables for Quiz
-employees_table = pd.DataFrame({
-    "employee_id": [101, 102, 103, 104, 105, 106, 107, 108],
-    "name": ["Alice", "Bob", "Charlie", "David", "Eve", "Frank", "Grace", "Helen"],
-    "department": ["HR", "Sales", "IT", "Marketing", "Finance", "IT", "Sales", "HR"],
-    "salary": [50000, 60000, 70000, 55000, 65000, 75000, 62000, 52000],
-    "manager_id": [None, 101, 101, 102, 102, 103, 103, 104]
+# Define Users and Orders Tables for Quiz
+users_table = pd.DataFrame({
+    "user_id": [1, 2, 3, 4],
+    "name": ["Alice", "Bob", "Charlie", "David"],
+    "email": ["alice@example.com", "bob@example.com", "charlie@example.com", "david@example.com"],
+    "age": [25, 30, 35, 40],
+    "city": ["New York", "Los Angeles", "Chicago", "Houston"]
 })
 
-departments_table = pd.DataFrame({
-    "dept_id": ["HR", "Sales", "IT", "Marketing", "Finance"],
-    "location": ["New York", "Chicago", "San Francisco", "Boston", "Seattle"]
+orders_table = pd.DataFrame({
+    "order_id": [101, 102, 103, 104, 105],
+    "user_id": [1, 2, 3, 1, 4],
+    "amount": [50.00, 75.50, 120.00, 200.00, 35.00],
+    "order_date": ["2024-02-01", "2024-02-05", "2024-02-10", "2024-02-15", "2024-02-20"],
+    "status": ["Completed", "Pending", "Completed", "Shipped", "Cancelled"]
 })
 
-# Revised SQL questions using only the Employees and Departments tables with easier queries
+# Updated SQL questions following the desired order:
+# New ordering: New Q1 (SELECT * FROM users) then original queries in order: 1,2,4,8,10,7,3,6,9,5
 sql_questions = [
     {
-        "question": "Write a query to select all columns from the employees table.",
-        "correct_answer": "SELECT * FROM employees",
-        "sample_table": employees_table
+        "question": "Write a query to select all columns from the users table.",
+        "correct_answer": "SELECT * FROM users",
+        "sample_table": users_table
     },
     {
-        "question": "Write a query to select only the names of all employees.",
-        "correct_answer": "SELECT name FROM employees",
-        "sample_table": employees_table
+        "question": "How many users are there?",
+        "correct_answer": "SELECT COUNT(*) FROM users",
+        "sample_table": users_table
     },
     {
-        "question": "Retrieve employees with salary greater than 60000.",
-        "correct_answer": "SELECT * FROM employees WHERE salary > 60000",
-        "sample_table": employees_table
+        "question": "List users older than 30.",
+        "correct_answer": "SELECT * FROM users WHERE age > 30",
+        "sample_table": users_table
     },
     {
-        "question": "Count the number of employees in each department.",
-        "correct_answer": "SELECT department, COUNT(*) as employee_count FROM employees GROUP BY department",
-        "sample_table": employees_table
+        "question": "Find all pending orders.",
+        "correct_answer": "SELECT * FROM orders WHERE status = 'Pending'",
+        "sample_table": orders_table
     },
     {
-        "question": "Perform an INNER JOIN between employees and departments tables to list employee names with department locations.",
-        "correct_answer": "SELECT e.name, d.location FROM employees e INNER JOIN departments d ON e.department = d.dept_id",
-        "sample_table": pd.merge(employees_table, departments_table, left_on='department', right_on='dept_id')
+        "question": "Most recent order placed.",
+        "correct_answer": "SELECT * FROM orders ORDER BY order_date DESC LIMIT 1",
+        "sample_table": orders_table
     },
     {
-        "question": "Select employees who have a manager (non-null manager_id).",
-        "correct_answer": "SELECT * FROM employees WHERE manager_id IS NOT NULL",
-        "sample_table": employees_table
+        "question": "Average order amount.",
+        "correct_answer": "SELECT AVG(amount) FROM orders",
+        "sample_table": orders_table
     },
     {
-        "question": "List employees sorted by salary in ascending order.",
-        "correct_answer": "SELECT * FROM employees ORDER BY salary ASC",
-        "sample_table": employees_table
+        "question": "Users who never placed an order.",
+        "correct_answer": "SELECT * FROM users WHERE user_id NOT IN (SELECT DISTINCT user_id FROM orders)",
+        "sample_table": users_table
+    },
+    {
+        "question": "Total amount spent by each user.",
+        "correct_answer": "SELECT users.name, SUM(orders.amount) AS total_spent FROM users JOIN orders ON users.user_id = orders.user_id GROUP BY users.name",
+        "sample_table": pd.merge(users_table, orders_table, on="user_id")
+    },
+    {
+        "question": "Number of orders per user.",
+        "correct_answer": "SELECT users.name, COUNT(orders.order_id) AS order_count FROM users LEFT JOIN orders ON users.user_id = orders.user_id GROUP BY users.name",
+        "sample_table": pd.merge(users_table, orders_table, on="user_id", how="left")
+    },
+    {
+        "question": "Users from New York or Chicago.",
+        "correct_answer": "SELECT * FROM users WHERE city IN ('New York', 'Chicago')",
+        "sample_table": users_table
+    },
+    {
+        "question": "Who made the highest order?",
+        "correct_answer": "SELECT users.name, orders.amount FROM users JOIN orders ON users.user_id = orders.user_id ORDER BY orders.amount DESC LIMIT 1",
+        "sample_table": pd.merge(users_table, orders_table, on="user_id")
     }
 ]
 
@@ -284,9 +307,9 @@ if not st.session_state.quiz_started:
     with col1:
         st.write("""
         ### About the Quiz
-        In this interactive SQL quiz, you'll work with two interconnected tables:
-        - **Employees Table**: Tracks employee details like ID, name, department, salary, and manager.
-        - **Departments Table**: Contains department locations.
+        In this interactive SQL quiz, you'll work with two core tables:
+        - **Users Table**: Contains details like user ID, name, email, age, and city.
+        - **Orders Table**: Tracks order information such as order ID, user ID, amount, order date, and status.
         """)
         st.write("""
         Each question tests a different SQL concept, and you'll receive immediate feedback on your answers. 
@@ -296,8 +319,8 @@ if not st.session_state.quiz_started:
     with col2:
         st.markdown("#### Tables Overview")
         table_overview = pd.DataFrame({
-            "Table": ["Employees", "Departments"],
-            "Rows": [len(employees_table), len(departments_table)]
+            "Table": ["Users", "Orders"],
+            "Rows": [len(users_table), len(orders_table)]
         })
         st.table(table_overview)
 
@@ -305,18 +328,18 @@ if not st.session_state.quiz_started:
     st.write("### 🔍 Table Previews")
 
     # Tabs for Table Previews
-    tab1, tab2 = st.tabs(["Employees", "Departments"])
+    tab1, tab2 = st.tabs(["Users", "Orders"])
 
     with tab1:
         st.markdown("<div class='table-preview'>", unsafe_allow_html=True)
-        st.write("**Employees Table**")
-        st.dataframe(employees_table)
+        st.write("**Users Table**")
+        st.dataframe(users_table)
         st.markdown("</div>", unsafe_allow_html=True)
 
     with tab2:
         st.markdown("<div class='table-preview'>", unsafe_allow_html=True)
-        st.write("**Departments Table**")
-        st.dataframe(departments_table)
+        st.write("**Orders Table**")
+        st.dataframe(orders_table)
         st.markdown("</div>", unsafe_allow_html=True)
 
     # Additional Context in an Expander
