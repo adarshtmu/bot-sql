@@ -10,15 +10,20 @@ import streamlit as st
 import streamlit as st
 
 # Apply custom CSS to hide Streamlit branding elements
+import streamlit as st
+
+# Apply custom CSS to hide Streamlit branding elements
 hide_streamlit_style = """
     <style>
         header {visibility: hidden;}
         #MainMenu {visibility: hidden;}
         footer {visibility: hidden;}
-        .viewerBadge_container__1QSob {display: none !important;}
-        .stDeployButton {display: none !important;}
+        .viewerBadge_container__1QSob {display: none !important;}  /* Hides the profile icon */
+        .stDeployButton {display: none !important;} /* Hides deploy button */
         [data-testid="stToolbar"] {display: none !important;} /* Hides Streamlit toolbar */
-        [data-testid="stDecoration"] {display: none !important;} /* Hides bottom right profile */
+        [data-testid="stDecoration"] {display: none !important;} /* Hides Streamlit branding */
+        [data-testid="stDeployButton"] {display: none !important;} /* Hides Streamlit deploy button */
+        .st-emotion-cache-1r8d6ul {display: none !important;} /* Additional class for profile image */
     </style>
 """
 st.markdown(hide_streamlit_style, unsafe_allow_html=True)
