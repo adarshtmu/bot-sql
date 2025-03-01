@@ -4,13 +4,23 @@ import pandas as pd
 import streamlit as st
 
 # Hide Streamlit's default menu and footer
+# Hide Streamlit menu, footer, and top-right viewer badge (Share, Star, GitHub)
 hide_streamlit_style = """
-            <style>
-            #MainMenu {visibility: hidden;}
-            footer {visibility: hidden;}
-            </style>
-            """
+    <style>
+    /* Hide the hamburger menu */
+    #MainMenu {visibility: hidden;}
+
+    /* Hide the footer (Made with Streamlit) */
+    footer {visibility: hidden;}
+
+    /* Hide the top-right Share, Star, and GitHub buttons */
+    .viewerBadge_container__1QSob {
+        visibility: hidden;
+    }
+    </style>
+"""
 st.markdown(hide_streamlit_style, unsafe_allow_html=True)
+
 
 # Set up Gemini API
 gemini_api_key = "AIzaSyAfzl_66GZsgaYjAM7cT2djVCBCAr86t2k"  # Replace with your Gemini API key
