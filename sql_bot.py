@@ -2,9 +2,8 @@ import streamlit as st
 import google.generativeai as genai
 import pandas as pd
 
-# Note: To hide the GitHub fork sign and profile picture, inspect the elements in your deployed app
-# and replace .github-fork and .profile-pic with the actual class names found in the HTML.
-# You can do this by right-clicking the elements and selecting "Inspect" in your browser.
+# Custom CSS to hide Streamlit and GitHub elements
+# IMPORTANT: Replace the placeholder class names below with the actual class names found by inspecting the elements in your deployed app.
 hide_streamlit_style = """
 <style>
 /* Hide the hamburger menu icon */
@@ -13,22 +12,39 @@ hide_streamlit_style = """
 /* Hide the 'Made with Streamlit' footer */
 footer {visibility: hidden;}
 
-/* Hide the top-right viewer badge container */
+/* Hide the top-right viewer badge container (if present) */
 .viewerBadge_container__1QSob {
     display: none !important;
 }
 
-/* Hide GitHub fork sign - replace .github-fork with actual class */
-.github-fork {
+/* Hide the Fork button - replace .fork-button with actual class */
+.fork-button {
     display: none;
 }
 
-/* Hide profile picture - replace .profile-pic with actual class */
-.profile-pic {
+/* Hide the settings menu (three dots) - replace .settings-menu with actual class */
+.settings-menu {
     display: none;
 }
 
-/* Optional: Broader rules to hide GitHub images and links */
+/* Hide the profile picture badge - replace .profile-avatar with actual class */
+.profile-avatar {
+    display: none;
+}
+
+/* Hide the red tab with crown - replace .owner-tab with actual class */
+.owner-tab {
+    display: none;
+}
+
+/* Optional: Hide the vertical scrollbar (use only if needed) */
+/*
+::-webkit-scrollbar {
+    display: none;
+}
+*/
+
+/* Optional: Broader rules to hide GitHub images and links (use with caution) */
 /*
 img[src*="github"] {
     display: none;
@@ -39,6 +55,8 @@ a[href*="github.com"] {
 */
 </style>
 """
+
+# Inject the CSS into the app
 st.markdown(hide_streamlit_style, unsafe_allow_html=True)
 
 # Set up Gemini API
@@ -69,20 +87,7 @@ orders_table = pd.DataFrame({
 # Create a merged table for join-based queries
 merged_table = pd.merge(users_table, orders_table, on="user_id", how="inner")
 
-# Updated SQL Questions list with the desired order.
-# Final ordering (with new Q1 at the beginning):
-# Q1: Retrieve all users.
-# Q2: How many users are there?
-# Q3: List users older than 30.
-# Q4: Find all pending orders.
-# Q5: Most recent order placed.
-# Q6: Average order amount.
-# Q7: Users who never placed an order.
-# Q8: Total amount spent by each user.
-# Q9: Number of orders per user.
-# Q10: Users from New York or Chicago.
-# Q11: Who made the highest order?
-
+# Updated SQL Questions list with the desired order
 sql_questions = [
     {
         "question": "Retrieve all users.",
@@ -136,12 +141,6 @@ sql_questions = [
         "correct_answer": "SELECT * FROM users WHERE city IN ('New York', 'Chicago');",
         "sample_table": users_table
     }
-    # {
-    #     "question": "Who made the highest order?",
-    #     "correct_answer": ("SELECT users.name, orders.amount FROM users "
-    #                        "JOIN orders ON users.user_id = orders.user_id ORDER BY orders.amount DESC LIMIT 1;"),
-    #     "sample_table": merged_table
-    # }
 ]
 
 # Initialize session state
@@ -329,7 +328,7 @@ if not st.session_state.quiz_started:
     
     with st.expander("📝 About This Quiz"):
         st.write("""
-        - You will solve 11 progressive SQL query challenges.
+        - You will solve 10 progressive SQL query challenges.
         - Each question tests a different SQL concept.
         - Immediate feedback is provided after each answer.
         - Your final score and detailed performance analysis will be shown at the end.
