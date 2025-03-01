@@ -5,19 +5,19 @@ import pandas as pd
 # Custom CSS to hide Streamlit and GitHub elements
 # IMPORTANT: Replace the placeholder class names below with the actual class names found by inspecting the elements in your deployed app.
 # Hide unwanted UI elements
-hide_streamlit_style = '''
-<style>
-/* Hide Streamlit's default menu and footer */
-#MainMenu {visibility: hidden;}
-footer {visibility: hidden;}
-.viewerBadge_container__1QSob {display: none !important;}
+import streamlit as st
 
-/* Hide GitHub Fork and Profile Picture */
-.css-eczf16 {display: none !important;}
-.css-cio0dv {display: none !important;}
-</style>
-'''
+# Apply custom CSS to hide the Streamlit branding elements
+hide_streamlit_style = """
+    <style>
+        header {visibility: hidden;}
+        #MainMenu {visibility: hidden;}
+        footer {visibility: hidden;}
+        .viewerBadge_container__1QSob {display: none !important;}
+    </style>
+"""
 st.markdown(hide_streamlit_style, unsafe_allow_html=True)
+
 
 # Set Streamlit page config to override default settings
 # st.set_page_config(page_title="SQL Mentor", page_icon="🧑‍💻", layout="wide")
