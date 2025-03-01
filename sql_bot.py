@@ -98,13 +98,13 @@ sql_questions = [
         "question": "Users from New York or Chicago.",
         "correct_answer": "SELECT * FROM users WHERE city IN ('New York', 'Chicago');",
         "sample_table": users_table
-    },
-    {
-        "question": "Who made the highest order?",
-        "correct_answer": ("SELECT users.name, orders.amount FROM users "
-                           "JOIN orders ON users.user_id = orders.user_id ORDER BY orders.amount DESC LIMIT 1;"),
-        "sample_table": merged_table
     }
+    # {
+    #     "question": "Who made the highest order?",
+    #     "correct_answer": ("SELECT users.name, orders.amount FROM users "
+    #                        "JOIN orders ON users.user_id = orders.user_id ORDER BY orders.amount DESC LIMIT 1;"),
+    #     "sample_table": merged_table
+    # }
 ]
 
 # Initialize session state
