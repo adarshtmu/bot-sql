@@ -5,7 +5,7 @@ import streamlit as st
 
 # Hide Streamlit's default menu and footer
 # Hide Streamlit menu, footer, and top-right viewer badge (Share, Star, GitHub)
-hide_streamlit_style = """
+hide_streamlit_style = 
     <style>
     /* Hide the hamburger menu */
     #MainMenu {visibility: hidden;}
@@ -18,7 +18,7 @@ hide_streamlit_style = """
         visibility: hidden;
     }
     </style>
-"""
+
 st.markdown(hide_streamlit_style, unsafe_allow_html=True)
 
 
