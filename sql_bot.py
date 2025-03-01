@@ -7,18 +7,39 @@ import pandas as pd
 # Hide unwanted UI elements
 hide_streamlit_style = """
 <style>
-/* Hide Streamlit's default menu and footer */
+/* Hide the hamburger menu icon */
 #MainMenu {visibility: hidden;}
-footer {visibility: hidden;}
-.viewerBadge_container__1QSob {display: none !important;}
 
-/* Hide GitHub Fork and Profile Picture */
-.css-eczf16 {display: none !important;}
-.css-cio0dv {display: none !important;}
+/* Hide the 'Made with Streamlit' footer */
+footer {visibility: hidden;}
+
+/* Hide the top-right viewer badge container */
+.viewerBadge_container__1QSob {
+    display: none !important;
+}
+
+/* Hide GitHub fork sign - replace .github-fork with actual class */
+.github-fork {
+    display: none;
+}
+
+/* Hide profile picture - replace .profile-pic with actual class */
+.profile-pic {
+    display: none;
+}
+
+/* Optional: Broader rules to hide GitHub images and links */
+/*
+img[src*="github"] {
+    display: none;
+}
+a[href*="github.com"] {
+    display: none;
+}
+*/
 </style>
 """
 st.markdown(hide_streamlit_style, unsafe_allow_html=True)
-
 
 # Set up Gemini API
 gemini_api_key = "AIzaSyAfzl_66GZsgaYjAM7cT2djVCBCAr86t2k"  # Replace with your Gemini API key
