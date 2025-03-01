@@ -4,60 +4,21 @@ import pandas as pd
 
 # Custom CSS to hide Streamlit and GitHub elements
 # IMPORTANT: Replace the placeholder class names below with the actual class names found by inspecting the elements in your deployed app.
-hide_streamlit_style = 
+# Hide unwanted UI elements
+hide_streamlit_style = """
 <style>
-/* Hide the hamburger menu icon */
+/* Hide Streamlit's default menu and footer */
 #MainMenu {visibility: hidden;}
-
-/* Hide the 'Made with Streamlit' footer */
 footer {visibility: hidden;}
+.viewerBadge_container__1QSob {display: none !important;}
 
-/* Hide the top-right viewer badge container (if present) */
-.viewerBadge_container__1QSob {
-    display: none !important;
-}
-
-/* Hide the Fork button - replace .fork-button with actual class */
-.fork-button {
-    display: none;
-}
-
-/* Hide the settings menu (three dots) - replace .settings-menu with actual class */
-.settings-menu {
-    display: none;
-}
-
-/* Hide the profile picture badge - replace .profile-avatar with actual class */
-.profile-avatar {
-    display: none;
-}
-
-/* Hide the red tab with crown - replace .owner-tab with actual class */
-.owner-tab {
-    display: none;
-}
-
-/* Optional: Hide the vertical scrollbar (use only if needed) */
-/*
-::-webkit-scrollbar {
-    display: none;
-}
-*/
-
-/* Optional: Broader rules to hide GitHub images and links (use with caution) */
-/*
-img[src*="github"] {
-    display: none;
-}
-a[href*="github.com"] {
-    display: none;
-}
-*/
+/* Hide GitHub Fork and Profile Picture */
+.css-eczf16 {display: none !important;}
+.css-cio0dv {display: none !important;}
 </style>
-
-
-# Inject the CSS into the app
+"""
 st.markdown(hide_streamlit_style, unsafe_allow_html=True)
+
 
 # Set up Gemini API
 gemini_api_key = "AIzaSyAfzl_66GZsgaYjAM7cT2djVCBCAr86t2k"  # Replace with your Gemini API key
