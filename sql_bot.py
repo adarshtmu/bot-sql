@@ -1,11 +1,10 @@
 import streamlit as st
 import google.generativeai as genai
 import pandas as pd
-import streamlit as st
 
-# Hide Streamlit's default menu and footer
-import streamlit as st
-
+# Note: To hide the GitHub fork sign and profile picture, inspect the elements in your deployed app
+# and replace .github-fork and .profile-pic with the actual class names found in the HTML.
+# You can do this by right-clicking the elements and selecting "Inspect" in your browser.
 hide_streamlit_style = """
 <style>
 /* Hide the hamburger menu icon */
@@ -18,19 +17,34 @@ footer {visibility: hidden;}
 .viewerBadge_container__1QSob {
     display: none !important;
 }
+
+/* Hide GitHub fork sign - replace .github-fork with actual class */
+.github-fork {
+    display: none;
+}
+
+/* Hide profile picture - replace .profile-pic with actual class */
+.profile-pic {
+    display: none;
+}
+
+/* Optional: Broader rules to hide GitHub images and links */
+/*
+img[src*="github"] {
+    display: none;
+}
+a[href*="github.com"] {
+    display: none;
+}
+*/
 </style>
 """
 st.markdown(hide_streamlit_style, unsafe_allow_html=True)
-
-
-
 
 # Set up Gemini API
 gemini_api_key = "AIzaSyAfzl_66GZsgaYjAM7cT2djVCBCAr86t2k"  # Replace with your Gemini API key
 genai.configure(api_key=gemini_api_key)
 model = genai.GenerativeModel('gemini-2.0-flash')
-
-
 
 # Define sample tables for the quiz
 
