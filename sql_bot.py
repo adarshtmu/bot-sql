@@ -5,41 +5,22 @@ import pandas as pd
 # Custom CSS to hide Streamlit and GitHub elements
 # IMPORTANT: Replace the placeholder class names below with the actual class names found by inspecting the elements in your deployed app.
 # Hide unwanted UI elements
-hide_streamlit_style = """
+hide_streamlit_style = '''
 <style>
-/* Hide the hamburger menu icon */
+/* Hide Streamlit's default menu and footer */
 #MainMenu {visibility: hidden;}
-
-/* Hide the 'Made with Streamlit' footer */
 footer {visibility: hidden;}
+.viewerBadge_container__1QSob {display: none !important;}
 
-/* Hide the top-right viewer badge container */
-.viewerBadge_container__1QSob {
-    display: none !important;
-}
-
-/* Hide GitHub fork sign - replace .github-fork with actual class */
-.github-fork {
-    display: none;
-}
-
-/* Hide profile picture - replace .profile-pic with actual class */
-.profile-pic {
-    display: none;
-}
-
-/* Optional: Broader rules to hide GitHub images and links */
-/*
-img[src*="github"] {
-    display: none;
-}
-a[href*="github.com"] {
-    display: none;
-}
-*/
+/* Hide GitHub Fork and Profile Picture */
+.css-eczf16 {display: none !important;}
+.css-cio0dv {display: none !important;}
 </style>
-"""
+'''
 st.markdown(hide_streamlit_style, unsafe_allow_html=True)
+
+# Set Streamlit page config to override default settings
+st.set_page_config(page_title="SQL Mentor", page_icon="🧑‍💻", layout="wide")
 
 # Set up Gemini API
 gemini_api_key = "AIzaSyAfzl_66GZsgaYjAM7cT2djVCBCAr86t2k"  # Replace with your Gemini API key
