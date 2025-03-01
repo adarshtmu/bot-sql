@@ -4,14 +4,24 @@ import pandas as pd
 import streamlit as st
 
 # Hide Streamlit's default menu and footer
-# Hide Streamlit menu, footer, and top-right viewer badge (Share, Star, GitHub)
-hide_streamlit_header = """
-    <style>
-    header {display: none;}
-    footer {visibility: hidden;}
-    </style>
+import streamlit as st
+
+hide_streamlit_style = """
+<style>
+/* Hide the hamburger menu icon */
+#MainMenu {visibility: hidden;}
+
+/* Hide the 'Made with Streamlit' footer */
+footer {visibility: hidden;}
+
+/* Hide the top-right viewer badge container */
+.viewerBadge_container__1QSob {
+    display: none !important;
+}
+</style>
 """
-st.markdown(hide_streamlit_header, unsafe_allow_html=True)
+st.markdown(hide_streamlit_style, unsafe_allow_html=True)
+
 
 
 
