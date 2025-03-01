@@ -5,21 +5,14 @@ import streamlit as st
 
 # Hide Streamlit's default menu and footer
 # Hide Streamlit menu, footer, and top-right viewer badge (Share, Star, GitHub)
-hide_streamlit_style = 
+hide_streamlit_header = """
     <style>
-    /* Hide the hamburger menu */
-    #MainMenu {visibility: hidden;}
-
-    /* Hide the footer (Made with Streamlit) */
+    header {display: none;}
     footer {visibility: hidden;}
-
-    /* Hide the top-right Share, Star, and GitHub buttons */
-    .viewerBadge_container__1QSob {
-        visibility: hidden;
-    }
     </style>
+"""
+st.markdown(hide_streamlit_header, unsafe_allow_html=True)
 
-st.markdown(hide_streamlit_style, unsafe_allow_html=True)
 
 
 # Set up Gemini API
