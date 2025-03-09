@@ -2,128 +2,32 @@ import streamlit as st
 import google.generativeai as genai
 import pandas as pd
 
-# Custom CSS for a cleaner, more modern UI
-st.markdown("""
-<style>
-    /* Overall page styling */
-    .main {
-        padding: 2rem;
-        max-width: 1000px;
-        margin: 0 auto;
-    }
-    
-    /* Header styling */
-    h1, h2, h3 {
-        margin-bottom: 1.5rem;
-        color: #1E88E5;
-        font-weight: 600;
-    }
-    
-    /* Card styling */
-    .card {
-        background-color: #1E1E1E;
-        border-radius: 10px;
-        padding: 1.5rem;
-        margin-bottom: 2rem;
-        border: 1px solid #333;
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    }
-    
-    /* Table styling */
-    .dataframe {
-        width: 100%;
-        margin-top: 1rem;
-        margin-bottom: 2rem;
-        border-collapse: separate;
-        border-spacing: 0;
-        border-radius: 8px;
-        overflow: hidden;
-    }
-    
-    .dataframe th {
-        background-color: #2C3E50;
-        color: white;
-        text-align: left;
-        padding: 12px 15px;
-        font-weight: 500;
-    }
-    
-    .dataframe td {
-        padding: 10px 15px;
-        border-bottom: 1px solid #333;
-    }
-    
-    .dataframe tr:nth-child(even) {
-        background-color: #222;
-    }
-    
-    .dataframe tr:hover {
-        background-color: #333;
-    }
-    
-    /* Button styling */
-    .stButton > button {
-        background-color: #1E88E5;
-        color: white;
-        border: none;
-        border-radius: 8px;
-        padding: 10px 24px;
-        font-size: 16px;
-        font-weight: 500;
-        transition: all 0.3s;
-    }
-    
-    .stButton > button:hover {
-        background-color: #1565C0;
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-    }
-    
-    /* Progress bar styling */
-    .stProgress > div > div {
-        background-color: #1E88E5;
-    }
-    
-    /* Expander styling */
-    .streamlit-expanderHeader {
-        font-size: 16px;
-        font-weight: 500;
-        color: #1E88E5;
-    }
-    
-    /* Info box styling */
-    .stAlert {
-        padding: 16px;
-        border-radius: 8px;
-    }
-    
-    /* Text input styling */
-    .stTextInput > div > div > input {
-        border-radius: 8px;
-        padding: 10px 15px;
-        font-size: 16px;
-        border: 1px solid #333;
-    }
-    
-    /* Hide Streamlit elements */
-    header {visibility: hidden;}
-    #MainMenu {visibility: hidden;}
-    footer {visibility: hidden;}
-    .viewerBadge_container__1QSob {display: none !important;}
-    .stDeployButton {display: none !important;}
-    [data-testid="stToolbar"] {display: none !important;}
-    [data-testid="stDecoration"] {display: none !important;}
-    [data-testid="stDeployButton"] {display: none !important;}
-    .st-emotion-cache-1r8d6ul {display: none !important;}
-    .st-emotion-cache-1jicfl2 {display: none !important;}
-</style>
-""", unsafe_allow_html=True)
+# Custom CSS to hide Streamlit and GitHub elements
+import streamlit as st
+
+hide_streamlit_style = """
+    <style>
+        header {visibility: hidden;}
+        #MainMenu {visibility: hidden;}
+        footer {visibility: hidden;}
+        .viewerBadge_container__1QSob {display: none !important;}  /* Hides the GitHub profile image */
+        .stDeployButton {display: none !important;} /* Hides deploy button */
+        [data-testid="stToolbar"] {display: none !important;} /* Hides Streamlit toolbar */
+        [data-testid="stDecoration"] {display: none !important;} /* Hides Streamlit branding */
+        [data-testid="stDeployButton"] {display: none !important;} /* Hides Streamlit deploy button */
+        .st-emotion-cache-1r8d6ul {display: none !important;} /* Additional class for profile image */
+        .st-emotion-cache-1jicfl2 {display: none !important;} /* Hides Streamlit's footer */
+    </style>
+"""
+st.markdown(hide_streamlit_style, unsafe_allow_html=True)
 
 # Set up Gemini API
-gemini_api_key = "AIzaSyAfzl_66GZsgaYjAM7cT2djVCBCAr86t2k"
+gemini_api_key = "AIzaSyAfzl_66GZsgaYjAM7cT2djVCBCAr86t2k"  # Replace with your Gemini API key
 genai.configure(api_key=gemini_api_key)
 model = genai.GenerativeModel('gemini-2.0-flash')
 
 # Define sample tables for the quiz
+
 # Users Table
 users_table = pd.DataFrame({
     "user_id": [1, 2, 3, 4],
@@ -145,15 +49,60 @@ orders_table = pd.DataFrame({
 # Create a merged table for join-based queries
 merged_table = pd.merge(users_table, orders_table, on="user_id", how="inner")
 
-# SQL Questions list with enhanced, detailed instructions
+# Updated SQL Questions list with enhanced, detailed instructions
 sql_questions = [
     {
         "question": "Imagine you are the database guardian responsible for managing user data. Your task is to extract a complete snapshot of all users from the 'users' table. Write a SQL query that retrieves every column and every record so you can see all the details of each user.",
         "correct_answer": "SELECT * FROM users;",
         "sample_table": users_table
     },
-    # Add other questions here...
-    # (remaining questions omitted for brevity)
+    {
+        "question": "As part of your data analytics duties, you need to determine the total number of users in the system. Write a SQL query that counts all the records in the 'users' table, giving you a clear tally of registered users.",
+        "correct_answer": "SELECT COUNT(*) FROM users;",
+        "sample_table": users_table
+    },
+    {
+        "question": "You are tasked with segmenting our audience for targeted outreach. Write a SQL query that retrieves all user records from the 'users' table where the age is greater than 30, helping you identify users in a specific age bracket.",
+        "correct_answer": "SELECT * FROM users WHERE age > 30;",
+        "sample_table": users_table
+    },
+    {
+        "question": "In your role as an order processing specialist, you must quickly identify which orders are still pending. Write a SQL query that selects all records from the 'orders' table with a status of 'Pending' so that you can follow up promptly.",
+        "correct_answer": "SELECT * FROM orders WHERE status = 'Pending';",
+        "sample_table": orders_table
+    },
+    {
+        "question": "To ensure our order tracking is up-to-date, you need to find the most recent order placed. Write a SQL query that orders the 'orders' table by the order date in descending order and retrieves just the top record, highlighting the latest transaction.",
+        "correct_answer": "SELECT * FROM orders ORDER BY order_date DESC LIMIT 1;",
+        "sample_table": orders_table
+    },
+    {
+        "question": "For financial analysis, it's important to understand customer spending behavior. Write a SQL query that calculates the average order amount from the 'orders' table, providing insights into typical purchase values.",
+        "correct_answer": "SELECT AVG(amount) FROM orders;",
+        "sample_table": orders_table
+    },
+    {
+        "question": "To better engage with inactive customers, you need to identify users who have never placed an order. Write a SQL query that retrieves all user records from the 'users' table which do not have any associated entries in the 'orders' table.",
+        "correct_answer": "SELECT * FROM users WHERE user_id NOT IN (SELECT DISTINCT user_id FROM orders);",
+        "sample_table": users_table
+    },
+    {
+        "question": "For a comprehensive spending analysis, write a SQL query that calculates the total amount spent by each user. Join the 'users' and 'orders' tables, sum the order amounts per user, and display each user's name along with their total expenditure.",
+        "correct_answer": ("SELECT users.name, SUM(orders.amount) AS total_spent FROM users "
+                           "JOIN orders ON users.user_id = orders.user_id GROUP BY users.name;"),
+        "sample_table": merged_table
+    },
+    {
+        "question": "Understanding customer engagement is key. Write a SQL query that counts the number of orders each user has placed. Use a LEFT JOIN between the 'users' and 'orders' tables and display the user's name along with their order count.",
+        "correct_answer": ("SELECT users.name, COUNT(orders.order_id) AS order_count FROM users "
+                           "LEFT JOIN orders ON users.user_id = orders.user_id GROUP BY users.name;"),
+        "sample_table": merged_table
+    },
+    {
+        "question": "For targeted regional marketing, you need to focus on users from specific cities. Write a SQL query that retrieves all user records from the 'users' table where the city is either 'New York' or 'Chicago'.",
+        "correct_answer": "SELECT * FROM users WHERE city IN ('New York', 'Chicago');",
+        "sample_table": users_table
+    }
 ]
 
 # Initialize session state variables
@@ -293,13 +242,11 @@ def analyze_performance(user_answers):
 def get_emoji(is_correct):
     return "😊" if is_correct else "😢"
 
-
-# Streamlit App - Welcome Page
+# Streamlit App
 if not st.session_state.quiz_started:
-    st.markdown("<h1 style='text-align: center; color: #1E88E5;'>SQL Mentor - Interactive SQL Query Practice</h1>", unsafe_allow_html=True)
+    st.title("SQL Mentor - Interactive SQL Query Practice")
     
-    st.markdown("<div class='card'>", unsafe_allow_html=True)
-    st.markdown("### Welcome to Your SQL Learning Journey! 🚀")
+    st.write("### Welcome to Your SQL Learning Journey!")
     
     st.markdown("""
     **📌 Important Note:**
@@ -307,17 +254,13 @@ if not st.session_state.quiz_started:
     - Ensure your answers follow MySQL conventions.
     """)
     
-    st.markdown("<div style='display: flex; margin-top: 20px;'>", unsafe_allow_html=True)
-    
-    col1, col2 = st.columns([3, 1])
+    col1, col2 = st.columns([2, 1])
     
     with col1:
-        st.markdown("""
+        st.write("""
         In this interactive SQL quiz, you'll work with two main tables:
-        
-        **Users Table**: Contains user details such as ID, name, email, age, and city.
-        
-        **Orders Table**: Stores order details including order ID, user ID, amount, order date, and status.
+        - **Users Table**: Contains user details such as ID, name, email, age, and city.
+        - **Orders Table**: Stores order details including order ID, user ID, amount, order date, and status.
         """)
     
     with col2:
@@ -328,67 +271,65 @@ if not st.session_state.quiz_started:
         })
         st.table(table_overview)
     
-    st.markdown("</div>", unsafe_allow_html=True)
-    st.markdown("</div>", unsafe_allow_html=True)
+    st.write("### 🔍 Table Previews")
     
-    # Table Previews section with improved styling
-    st.markdown("<div class='card'>", unsafe_allow_html=True)
-    st.markdown("### 🔍 Table Previews")
-    
-    tab1, tab2 = st.tabs(["Users Table", "Orders Table"])
+    tab1, tab2 = st.tabs(["Users", "Orders"])
     
     with tab1:
-        st.dataframe(users_table, use_container_width=True)
+        st.write("**Users Table**")
+        st.dataframe(users_table)
     
     with tab2:
-        st.dataframe(orders_table, use_container_width=True)
+        st.write("**Orders Table**")
+        st.dataframe(orders_table)
     
-    st.markdown("</div>", unsafe_allow_html=True)
+    with st.expander("📝 About This Quiz"):
+        st.write("""
+        - You will solve 10 progressive SQL query challenges.
+        - Each question tests a different SQL concept.
+        - Immediate feedback is provided after each answer.
+        - Your final score and detailed performance analysis will be shown at the end.
+        - **SQL Dialect:** MySQL
+        """)
     
-    # Quiz overview
-    st.markdown("<div class='card'>", unsafe_allow_html=True)
-    st.markdown("### 📋 Quiz Overview")
-    
-    st.markdown("""
-    - You'll solve 10 progressive SQL query challenges
-    - Each question tests a different SQL concept
-    - Immediate feedback after each answer
-    - Final score and detailed analysis at the end
-    """)
-    
-    st.markdown("</div>", unsafe_allow_html=True)
-    
-    # Call to action button
-    st.markdown("<div style='text-align: center; margin-top: 30px;'>", unsafe_allow_html=True)
-    if st.button("🚀 Start SQL Challenge", use_container_width=True):
+    if st.button("🚀 Start SQL Challenge"):
         st.session_state.quiz_started = True
         st.rerun()
-    st.markdown("</div>", unsafe_allow_html=True)
 
-# Quiz Page
 if st.session_state.quiz_started and not st.session_state.quiz_completed:
-    st.markdown("<h1 style='text-align: center; color: #1E88E5;'>SQL Challenge</h1>", unsafe_allow_html=True)
+    if st.session_state.user_answers:
+        st.write("### Chat History")
+        for i, ans in enumerate(st.session_state.user_answers):
+            with st.expander(f"Question {i + 1}: {ans['question']}", expanded=True):
+                st.write(f"**Your Answer:** {ans['student_answer']}")
+                if ans["is_correct"]:
+                    st.markdown(f"<span style='color:green'>✅ **Feedback:** {ans['feedback']} {get_emoji(True)}</span>", unsafe_allow_html=True)
+                else:
+                    st.markdown(f"<span style='color:red'>❌ **Feedback:** {ans['feedback']} {get_emoji(False)}</span>", unsafe_allow_html=True)
+                st.write("**Expected Query Result:**")
+                if isinstance(ans["expected_result"], pd.DataFrame):
+                    st.dataframe(ans["expected_result"])
+                else:
+                    st.write(ans["expected_result"])
+                st.write("**Actual Query Result:**")
+                if isinstance(ans["actual_result"], pd.DataFrame):
+                    st.dataframe(ans["actual_result"])
+                else:
+                    st.write(ans["actual_result"])
+                st.write("---")
     
-    # Progress indicator
     progress = (st.session_state.current_question + 1) / len(sql_questions)
     st.progress(progress)
-    st.markdown(f"<p style='text-align: center; margin-bottom: 30px;'><b>Progress:</b> {st.session_state.current_question + 1}/{len(sql_questions)} questions completed</p>", unsafe_allow_html=True)
+    st.write(f"**Progress:** {st.session_state.current_question + 1}/{len(sql_questions)} questions completed.")
     
-    # Current question
-    st.markdown("<div class='card'>", unsafe_allow_html=True)
     question_data = sql_questions[st.session_state.current_question]
-    st.markdown(f"### Question {st.session_state.current_question + 1}")
-    st.write(question_data["question"])
+    st.write(f"**Question {st.session_state.current_question + 1}:** {question_data['question']}")
+    st.write("**Sample Table:**")
+    st.dataframe(question_data["sample_table"])
     
-    # Sample table for reference
-    st.markdown("#### Sample Table for Reference:")
-    st.dataframe(question_data["sample_table"], use_container_width=True)
+    student_answer = st.text_input("Your answer:", key=f"answer_{st.session_state.current_question}")
     
-    # Answer input
-    st.markdown("#### Your Answer:")
-    student_answer = st.text_area("Enter your SQL query here:", key=f"answer_{st.session_state.current_question}", height=100)
-    
-    if st.button("Submit Answer", use_container_width=True):
+    if st.button("Submit Answer"):
         if student_answer.strip():
             feedback, is_correct, expected_result, actual_result = evaluate_answer(
                 question_data["question"],
@@ -396,8 +337,6 @@ if st.session_state.quiz_started and not st.session_state.quiz_completed:
                 student_answer,
                 question_data["sample_table"]
             )
-            
-            # Add to session state
             st.session_state.user_answers.append({
                 "question": question_data["question"],
                 "student_answer": student_answer,
@@ -406,94 +345,47 @@ if st.session_state.quiz_started and not st.session_state.quiz_completed:
                 "expected_result": expected_result,
                 "actual_result": actual_result
             })
-            
-            # Display feedback
             if is_correct:
-                st.success(f"**Feedback:** {feedback}")
+                st.markdown(f"<span style='color:green'>**Feedback:** {feedback} {get_emoji(True)}</span>", unsafe_allow_html=True)
             else:
-                st.error(f"**Feedback:** {feedback}")
-                
-            # Show query results
-            col1, col2 = st.columns(2)
+                st.markdown(f"<span style='color:red'>**Feedback:** {feedback} {get_emoji(False)}</span>", unsafe_allow_html=True)
             
-            with col1:
-                st.markdown("**Expected Result:**")
-                if isinstance(expected_result, pd.DataFrame):
-                    st.dataframe(expected_result, use_container_width=True)
-                else:
-                    st.write(expected_result)
-            
-            with col2:
-                st.markdown("**Your Result:**")
-                if isinstance(actual_result, pd.DataFrame):
-                    st.dataframe(actual_result, use_container_width=True)
-                else:
-                    st.write(actual_result)
-            
-            # Move to next question
             if st.session_state.current_question < len(sql_questions) - 1:
                 st.session_state.current_question += 1
                 st.rerun()
             else:
                 st.session_state.awaiting_final_submission = True
-                st.markdown("### You've completed all questions!")
-                if st.button("Finish Quiz", use_container_width=True):
-                    st.session_state.quiz_completed = True
-                    st.rerun()
+                st.rerun()
         else:
             st.warning("Please enter an answer before submitting.")
     
-    st.markdown("</div>", unsafe_allow_html=True)
-    
-    # Previous questions/answers
-    if st.session_state.user_answers:
-        st.markdown("<div class='card'>", unsafe_allow_html=True)
-        st.markdown("### Previous Questions")
-        
-        for i, ans in enumerate(st.session_state.user_answers):
-            with st.expander(f"Question {i + 1}", expanded=False):
-                st.write(ans["question"])
-                st.markdown("**Your Answer:**")
-                st.code(ans["student_answer"])
-                
-                if ans["is_correct"]:
-                    st.markdown(f"<span style='color: #4CAF50;'>✅ **Correct!** {ans['feedback']}</span>", unsafe_allow_html=True)
-                else:
-                    st.markdown(f"<span style='color: #F44336;'>❌ **Not Quite Right.** {ans['feedback']}</span>", unsafe_allow_html=True)
-        
-        st.markdown("</div>", unsafe_allow_html=True)
+    if st.session_state.awaiting_final_submission:
+        if st.button("Submit All Answers"):
+            st.session_state.quiz_completed = True
+            st.rerun()
 
-# Results Page
 if st.session_state.quiz_completed:
     st.balloons()
-    st.markdown("<h1 style='text-align: center; color: #1E88E5;'>Quiz Completed!</h1>", unsafe_allow_html=True)
-    
+    st.markdown(
+        """
+        <h1 style="color: white; font-size: 36px; text-align: left;">
+            Quiz Completed!
+        </h1>
+        """,
+        unsafe_allow_html=True
+    )
     score = calculate_score(st.session_state.user_answers)
+    st.write(f"**Your Score:** {score:.2f}%")
     
-    # Score card
-    st.markdown("<div class='card' style='text-align: center;'>", unsafe_allow_html=True)
-    st.markdown(f"<h2>Your Score: {score:.1f}%</h2>", unsafe_allow_html=True)
-    
-    # Performance rating based on score
-    if score >= 90:
-        st.markdown("<h3 style='color: #4CAF50;'>Outstanding! 🌟</h3>", unsafe_allow_html=True)
-    elif score >= 70:
-        st.markdown("<h3 style='color: #2196F3;'>Great Job! 👍</h3>", unsafe_allow_html=True)
-    elif score >= 50:
-        st.markdown("<h3 style='color: #FF9800;'>Good Effort! 👍</h3>", unsafe_allow_html=True)
-    else:
-        st.markdown("<h3 style='color: #F44336;'>Keep Practicing! 💪</h3>", unsafe_allow_html=True)
-    
-    # CTA based on score
     if score < 50:
         st.markdown(
             """
-            <div style="background-color: rgba(244, 67, 54, 0.1); padding: 20px; border-radius: 10px; margin-top: 20px; text-align: center; border: 1px solid #F44336;">
-                <h3 style="color: #F44336;">Need to improve your SQL skills?</h3>
-                <p style="font-size: 16px; margin-bottom: 20px;">Book a mentor session now to upgrade your SQL knowledge!</p>
+            <div style="background-color: #ffcccc; padding: 20px; border-radius: 10px; text-align: center;">
+                <h2 style="color: #000000;">Your score is below 50% 😢</h2>
+                <p style="font-size: 18px; color: #000000;">Book a mentor now to upgrade your SQL skills!</p>
                 <a href="https://www.corporatebhaiya.com/" target="_blank">
-                    <button style="background-color: #F44336; color: white; padding: 12px 24px; border: none; border-radius: 8px; font-size: 16px; cursor: pointer; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);">
-                        Book A Mentor
+                    <button style="background-color: #cc0000; color: white; padding: 10px 20px; border: none; border-radius: 5px; font-size: 16px; cursor: pointer;">
+                        Book Now
                     </button>
                 </a>
             </div>
@@ -503,12 +395,12 @@ if st.session_state.quiz_completed:
     else:
         st.markdown(
             """
-            <div style="background-color: rgba(76, 175, 80, 0.1); padding: 20px; border-radius: 10px; margin-top: 20px; text-align: center; border: 1px solid #4CAF50;">
-                <h3 style="color: #4CAF50;">Ready for the next level?</h3>
-                <p style="font-size: 16px; margin-bottom: 20px;">Schedule a mock interview and resume building session!</p>
+            <div style="background-color: #ccffcc; padding: 20px; border-radius: 10px; text-align: center;">
+                <h2 style="color: #000000;">Great job scoring above 50%! 🎉</h2>
+                <p style="font-size: 18px; color: #000000;">Take the next step with a mock interview and resume building session!</p>
                 <a href="https://www.corporatebhaiya.com/" target="_blank">
-                    <button style="background-color: #4CAF50; color: white; padding: 12px 24px; border: none; border-radius: 8px; font-size: 16px; cursor: pointer; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);">
-                        Level Up Your Career
+                    <button style="background-color: #008000; color: white; padding: 10px 20px; border: none; border-radius: 5px; font-size: 16px; cursor: pointer;">
+                        Book Now
                     </button>
                 </a>
             </div>
@@ -516,54 +408,30 @@ if st.session_state.quiz_completed:
             unsafe_allow_html=True
         )
     
-    st.markdown("</div>", unsafe_allow_html=True)
+    if st.button("📊 Detailed Feedback"):
+        st.session_state.show_detailed_feedback = True
+        st.rerun()
     
-    # Detailed feedback section
-    col1, col2 = st.columns(2)
-    
-    with col1:
-        if st.button("📊 View Detailed Feedback", use_container_width=True):
-            st.session_state.show_detailed_feedback = True
-            st.rerun()
-    
-    with col2:
-        if st.button("🔄 Restart Quiz", use_container_width=True):
-            st.session_state.user_answers = []
-            st.session_state.current_question = 0
-            st.session_state.quiz_started = False
-            st.session_state.quiz_completed = False
-            st.session_state.show_detailed_feedback = False
-            st.session_state.awaiting_final_submission = False
-            st.rerun()
-    
-    # Show detailed feedback if requested
     if st.session_state.show_detailed_feedback:
         performance_feedback = analyze_performance(st.session_state.user_answers)
-        
-        st.markdown("<div class='card'>", unsafe_allow_html=True)
-        st.markdown("### Detailed Performance Analysis")
-        
-        # Strengths and weaknesses in columns
-        col1, col2 = st.columns(2)
-        
-        with col1:
-            st.markdown("#### 💪 Strengths")
-            if performance_feedback["strengths"]:
-                for i, question in enumerate(performance_feedback["strengths"]):
-                    st.markdown(f"✅ {question[:100]}...")
-            else:
-                st.markdown("No strengths identified.")
-        
-        with col2:
-            st.markdown("#### 🎯 Areas to Improve")
-            if performance_feedback["weaknesses"]:
-                for i, question in enumerate(performance_feedback["weaknesses"]):
-                    st.markdown(f"❌ {question[:100]}...")
-            else:
-                st.markdown("No weaknesses identified.")
-        
-        # Overall feedback
-        st.markdown("#### 💬 Overall Feedback")
+        st.write("### Detailed Performance Analysis")
+        st.write("**Strengths (Questions you answered correctly):**")
+        for i, question in enumerate(performance_feedback["strengths"]):
+            st.success(f"{i + 1}. {question} ✅")
+        st.write("**Weaknesses (Questions you answered incorrectly):**")
+        for i, question in enumerate(performance_feedback["weaknesses"]):
+            st.error(f"{i + 1}. {question} ❌")
+        st.write("**Overall Feedback:**")
         st.info(performance_feedback["overall_feedback"])
-        
-        st.markdown("</div>", unsafe_allow_html=True)
+    
+    if st.button("🔄 Restart Quiz"):
+        st.session_state.user_answers = []
+        st.session_state.current_question = 0
+        st.session_state.quiz_started = False
+        st.session_state.quiz_completed = False
+        st.session_state.show_detailed_feedback = False
+        st.session_state.awaiting_final_submission = False
+        st.rerun()
+
+
+
