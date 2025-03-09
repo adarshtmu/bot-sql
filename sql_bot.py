@@ -3,13 +3,8 @@ import google.generativeai as genai
 import pandas as pd
 
 # Custom CSS to hide Streamlit and GitHub elements
-# IMPORTANT: Replace the placeholder class names below with the actual class names found by inspecting the elements in your deployed app.
-# Hide unwanted UI elements
 import streamlit as st
 
-import streamlit as st
-
-# Apply custom CSS to hide Streamlit branding elements and GitHub profile image
 hide_streamlit_style = """
     <style>
         header {visibility: hidden;}
@@ -25,10 +20,6 @@ hide_streamlit_style = """
     </style>
 """
 st.markdown(hide_streamlit_style, unsafe_allow_html=True)
-
-
-
-
 
 # Set up Gemini API
 gemini_api_key = "AIzaSyAfzl_66GZsgaYjAM7cT2djVCBCAr86t2k"  # Replace with your Gemini API key
@@ -58,57 +49,57 @@ orders_table = pd.DataFrame({
 # Create a merged table for join-based queries
 merged_table = pd.merge(users_table, orders_table, on="user_id", how="inner")
 
-# Updated SQL Questions list with the desired order
+# Updated SQL Questions list with more detailed, user-specific prompts
 sql_questions = [
     {
-        "question": "Retrieve all users.",
+        "question": "As a database administrator, please retrieve and display all records from the 'users' table, including every available column.",
         "correct_answer": "SELECT * FROM users;",
         "sample_table": users_table
     },
     {
-        "question": "How many users are there?",
+        "question": "Please determine and return the total number of users in the database by counting all records in the 'users' table.",
         "correct_answer": "SELECT COUNT(*) FROM users;",
         "sample_table": users_table
     },
     {
-        "question": "List users older than 30.",
+        "question": "Kindly list all user records where the age is greater than 30, ensuring that you filter the results accurately.",
         "correct_answer": "SELECT * FROM users WHERE age > 30;",
         "sample_table": users_table
     },
     {
-        "question": "Find all pending orders.",
+        "question": "Please identify and retrieve all orders from the 'orders' table that are currently marked as 'Pending'.",
         "correct_answer": "SELECT * FROM orders WHERE status = 'Pending';",
         "sample_table": orders_table
     },
     {
-        "question": "Most recent order placed.",
+        "question": "As a report generator, please fetch the most recent order placed by ordering the results based on the order_date in descending order and limiting the output to a single record.",
         "correct_answer": "SELECT * FROM orders ORDER BY order_date DESC LIMIT 1;",
         "sample_table": orders_table
     },
     {
-        "question": "Average order amount.",
+        "question": "Please calculate and display the average order amount from the 'orders' table, summarizing the overall spending behavior.",
         "correct_answer": "SELECT AVG(amount) FROM orders;",
         "sample_table": orders_table
     },
     {
-        "question": "Users who never placed an order.",
+        "question": "Identify and list all users who have not placed any orders, ensuring that you exclude any users with associated order records.",
         "correct_answer": "SELECT * FROM users WHERE user_id NOT IN (SELECT DISTINCT user_id FROM orders);",
         "sample_table": users_table
     },
     {
-        "question": "Total amount spent by each user.",
+        "question": "For each user, please compute the total amount spent by summing up all orders placed, and display the user's name alongside the calculated total.",
         "correct_answer": ("SELECT users.name, SUM(orders.amount) AS total_spent FROM users "
                            "JOIN orders ON users.user_id = orders.user_id GROUP BY users.name;"),
         "sample_table": merged_table
     },
     {
-        "question": "Number of orders per user.",
+        "question": "Please count the number of orders each user has placed and display the result along with the user's name.",
         "correct_answer": ("SELECT users.name, COUNT(orders.order_id) AS order_count FROM users "
                            "LEFT JOIN orders ON users.user_id = orders.user_id GROUP BY users.name;"),
         "sample_table": merged_table
     },
     {
-        "question": "Users from New York or Chicago.",
+        "question": "Please retrieve all users from the database who are located in either New York or Chicago, ensuring accurate filtering based on the city.",
         "correct_answer": "SELECT * FROM users WHERE city IN ('New York', 'Chicago');",
         "sample_table": users_table
     }
