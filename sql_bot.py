@@ -2,31 +2,132 @@ import streamlit as st
 import google.generativeai as genai
 import pandas as pd
 
-# Custom CSS to hide Streamlit and GitHub elements
-import streamlit as st
+# Configure page settings for a cleaner look
+st.set_page_config(
+    page_title="SQL Mentor",
+    page_icon="🔍",
+    layout="wide",
+    initial_sidebar_state="collapsed"
+)
 
-hide_streamlit_style = """
-    <style>
-        header {visibility: hidden;}
-        #MainMenu {visibility: hidden;}
-        footer {visibility: hidden;}
-        .viewerBadge_container__1QSob {display: none !important;}  /* Hides the GitHub profile image */
-        .stDeployButton {display: none !important;} /* Hides deploy button */
-        [data-testid="stToolbar"] {display: none !important;} /* Hides Streamlit toolbar */
-        [data-testid="stDecoration"] {display: none !important;} /* Hides Streamlit branding */
-        [data-testid="stDeployButton"] {display: none !important;} /* Hides Streamlit deploy button */
-        .st-emotion-cache-1r8d6ul {display: none !important;} /* Additional class for profile image */
-        .st-emotion-cache-1jicfl2 {display: none !important;} /* Hides Streamlit's footer */
-    </style>
+# Custom CSS for a cleaner, more professional UI
+custom_css = """
+<style>
+    /* Clean up Streamlit elements */
+    header {visibility: hidden;}
+    #MainMenu {visibility: hidden;}
+    footer {visibility: hidden;}
+    .viewerBadge_container__1QSob {display: none !important;}
+    .stDeployButton {display: none !important;}
+    [data-testid="stToolbar"] {display: none !important;}
+    [data-testid="stDecoration"] {display: none !important;}
+    [data-testid="stDeployButton"] {display: none !important;}
+    .st-emotion-cache-1r8d6ul {display: none !important;}
+    .st-emotion-cache-1jicfl2 {display: none !important;}
+    
+    /* Modern UI elements */
+    .main {
+        background-color: #f8f9fa;
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        max-width: 1200px;
+        margin: 0 auto;
+    }
+    
+    /* Typography */
+    h1, h2, h3 {
+        color: #2c3e50;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+    
+    /* Card-style elements */
+    .question-card {
+        background-color: white;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        margin-bottom: 20px;
+    }
+    
+    /* Button styling */
+    .stButton button {
+        background-color: #0066cc;
+        color: white;
+        font-weight: 500;
+        border-radius: 4px;
+        border: none;
+        padding: 8px 16px;
+        transition: all 0.2s;
+    }
+    
+    .stButton button:hover {
+        background-color: #0055aa;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    }
+    
+    /* Table styling */
+    .table-container {
+        border-radius: 8px;
+        overflow: hidden;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        margin-bottom: 20px;
+    }
+    
+    /* Progress bar styling */
+    .stProgress > div > div {
+        background-color: #0066cc;
+    }
+    
+    /* Text input styling */
+    .stTextInput input {
+        border-radius: 4px;
+        border: 1px solid #ddd;
+        padding: 10px;
+        font-family: monospace;
+    }
+    
+    /* Feedback styling */
+    .feedback-correct {
+        background-color: #e6f4ea;
+        color: #137333;
+        padding: 10px;
+        border-radius: 4px;
+        margin-top: 10px;
+    }
+    
+    .feedback-incorrect {
+        background-color: #fce8e6;
+        color: #c5221f;
+        padding: 10px;
+        border-radius: 4px;
+        margin-top: 10px;
+    }
+    
+    /* Tab styling */
+    .stTabs [data-baseweb="tab-list"] {
+        gap: 8px;
+    }
+    
+    .stTabs [data-baseweb="tab"] {
+        background-color: #f1f3f4;
+        border-radius: 4px 4px 0 0;
+        padding: 8px 16px;
+        margin-right: 4px;
+    }
+    
+    .stTabs [aria-selected="true"] {
+        background-color: white;
+        border-bottom: 2px solid #0066cc;
+    }
+</style>
 """
-st.markdown(hide_streamlit_style, unsafe_allow_html=True)
+st.markdown(custom_css, unsafe_allow_html=True)
 
 # Set up Gemini API
 gemini_api_key = "AIzaSyAfzl_66GZsgaYjAM7cT2djVCBCAr86t2k"  # Replace with your Gemini API key
 genai.configure(api_key=gemini_api_key)
 model = genai.GenerativeModel('gemini-2.0-flash')
-
-# Define sample tables for the quiz
 
 # Users Table
 users_table = pd.DataFrame({
