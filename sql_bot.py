@@ -49,7 +49,7 @@ orders_table = pd.DataFrame({
 # Create a merged table for join-based queries
 merged_table = pd.merge(users_table, orders_table, on="user_id", how="inner")
 
-# Updated SQL Questions list with enhanced, detailed instructions in English.
+# Updated SQL Questions list with enhanced, detailed instructions
 sql_questions = [
     {
         "question": "Imagine you are the database guardian responsible for managing user data. Your task is to extract a complete snapshot of all users from the 'users' table. Write a SQL query that retrieves every column and every record so you can see all the details of each user.",
@@ -193,24 +193,18 @@ def evaluate_answer(question, correct_answer, student_answer, sample_table):
     else:
         is_correct = str(expected_result) == str(actual_result)
     
-    # Prepare basic feedback message (not shown to the user directly)
-    if is_correct:
-        base_feedback = "Sahi jawab diya. Bahut acha!"
-    else:
-        base_feedback = f"Galat jawab. Sahi result tha:\n{expected_result}"
-    
-    # Generate detailed feedback using Gemini API in Hindi with layman terms
+    # Generate detailed, friendly feedback using Gemini API in Hindi with a casual tone.
     prompt = f"""
     Question: {question}
     Correct Answer: {correct_answer}
     Your Answer: {student_answer}
     Expected Query Result: {expected_result}
     Actual Query Result: {actual_result}
-    Ab aap apne answer ka feedback Hindi mein den, bilkul aam bhasha mein. Agar aapka answer sahi hai, toh kuch aise likho: 'Bahut acha answer diya'. Agar answer galat hai, toh likho: 'Oops, apna kuch miss kardiya, agali bar try kara acha sa', aur thoda vishleshan bhi kar do.
+    
+    Ab ek dost ke andaaz mein Hindi mein feedback dein. Agar aapka jawab sahi hai, toh kuch aise kehna: "Wah yaar, zabardast jawab diya!" Aur agar jawab galat hai, toh casually bolna: "Arre yaar, thoda gadbad ho gaya, koi baat nahi, agli baar aur accha karna." Thoda detail mein bhi batana ki kya chuk hua ya sahi kyu hai.
     """
     response = model.generate_content(prompt)
     feedback_api = response.text
-    # Optionally replace certain words if needed (for example "student" to "aap")
     feedback_api = feedback_api.replace("student", "aap")
     
     return feedback_api, is_correct, expected_result, actual_result
@@ -238,7 +232,7 @@ def analyze_performance(user_answers):
     Aapne {len(user_answers)} mein se {len(correct_questions)} sawalon ka sahi jawab diya.
     Sahi jawab wale sawal: {correct_questions}
     Galat jawab wale sawal: {incorrect_questions}
-    Kripya, inhe dhyaan mein rakhte hue, aam bhasha mein overall performance par feedback dein.
+    Ab ek dost ke tarah casual Hindi mein overall performance ka feedback dein.
     """
     response = model.generate_content(prompt)
     feedback["overall_feedback"] = response.text
