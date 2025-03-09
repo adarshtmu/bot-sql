@@ -49,63 +49,63 @@ orders_table = pd.DataFrame({
 # Create a merged table for join-based queries
 merged_table = pd.merge(users_table, orders_table, on="user_id", how="inner")
 
-# Updated SQL Questions list with more detailed, user-specific prompts
+# Updated SQL Questions list with enhanced, detailed instructions in English.
 sql_questions = [
     {
-        "question": "As a database administrator, please retrieve and display all records from the 'users' table, including every available column.",
+        "question": "Imagine you are the database guardian responsible for managing user data. Your task is to extract a complete snapshot of all users from the 'users' table. Write a SQL query that retrieves every column and every record so you can see all the details of each user.",
         "correct_answer": "SELECT * FROM users;",
         "sample_table": users_table
     },
     {
-        "question": "Please determine and return the total number of users in the database by counting all records in the 'users' table.",
+        "question": "As part of your data analytics duties, you need to determine the total number of users in the system. Write a SQL query that counts all the records in the 'users' table, giving you a clear tally of registered users.",
         "correct_answer": "SELECT COUNT(*) FROM users;",
         "sample_table": users_table
     },
     {
-        "question": "Kindly list all user records where the age is greater than 30, ensuring that you filter the results accurately.",
+        "question": "You are tasked with segmenting our audience for targeted outreach. Write a SQL query that retrieves all user records from the 'users' table where the age is greater than 30, helping you identify users in a specific age bracket.",
         "correct_answer": "SELECT * FROM users WHERE age > 30;",
         "sample_table": users_table
     },
     {
-        "question": "Please identify and retrieve all orders from the 'orders' table that are currently marked as 'Pending'.",
+        "question": "In your role as an order processing specialist, you must quickly identify which orders are still pending. Write a SQL query that selects all records from the 'orders' table with a status of 'Pending' so that you can follow up promptly.",
         "correct_answer": "SELECT * FROM orders WHERE status = 'Pending';",
         "sample_table": orders_table
     },
     {
-        "question": "As a report generator, please fetch the most recent order placed by ordering the results based on the order_date in descending order and limiting the output to a single record.",
+        "question": "To ensure our order tracking is up-to-date, you need to find the most recent order placed. Write a SQL query that orders the 'orders' table by the order date in descending order and retrieves just the top record, highlighting the latest transaction.",
         "correct_answer": "SELECT * FROM orders ORDER BY order_date DESC LIMIT 1;",
         "sample_table": orders_table
     },
     {
-        "question": "Please calculate and display the average order amount from the 'orders' table, summarizing the overall spending behavior.",
+        "question": "For financial analysis, it's important to understand customer spending behavior. Write a SQL query that calculates the average order amount from the 'orders' table, providing insights into typical purchase values.",
         "correct_answer": "SELECT AVG(amount) FROM orders;",
         "sample_table": orders_table
     },
     {
-        "question": "Identify and list all users who have not placed any orders, ensuring that you exclude any users with associated order records.",
+        "question": "To better engage with inactive customers, you need to identify users who have never placed an order. Write a SQL query that retrieves all user records from the 'users' table which do not have any associated entries in the 'orders' table.",
         "correct_answer": "SELECT * FROM users WHERE user_id NOT IN (SELECT DISTINCT user_id FROM orders);",
         "sample_table": users_table
     },
     {
-        "question": "For each user, please compute the total amount spent by summing up all orders placed, and display the user's name alongside the calculated total.",
+        "question": "For a comprehensive spending analysis, write a SQL query that calculates the total amount spent by each user. Join the 'users' and 'orders' tables, sum the order amounts per user, and display each user's name along with their total expenditure.",
         "correct_answer": ("SELECT users.name, SUM(orders.amount) AS total_spent FROM users "
                            "JOIN orders ON users.user_id = orders.user_id GROUP BY users.name;"),
         "sample_table": merged_table
     },
     {
-        "question": "Please count the number of orders each user has placed and display the result along with the user's name.",
+        "question": "Understanding customer engagement is key. Write a SQL query that counts the number of orders each user has placed. Use a LEFT JOIN between the 'users' and 'orders' tables and display the user's name along with their order count.",
         "correct_answer": ("SELECT users.name, COUNT(orders.order_id) AS order_count FROM users "
                            "LEFT JOIN orders ON users.user_id = orders.user_id GROUP BY users.name;"),
         "sample_table": merged_table
     },
     {
-        "question": "Please retrieve all users from the database who are located in either New York or Chicago, ensuring accurate filtering based on the city.",
+        "question": "For targeted regional marketing, you need to focus on users from specific cities. Write a SQL query that retrieves all user records from the 'users' table where the city is either 'New York' or 'Chicago'.",
         "correct_answer": "SELECT * FROM users WHERE city IN ('New York', 'Chicago');",
         "sample_table": users_table
     }
 ]
 
-# Initialize session state
+# Initialize session state variables
 if "user_answers" not in st.session_state:
     st.session_state.user_answers = []
 if "current_question" not in st.session_state:
@@ -193,24 +193,25 @@ def evaluate_answer(question, correct_answer, student_answer, sample_table):
     else:
         is_correct = str(expected_result) == str(actual_result)
     
-    # Prepare feedback message
+    # Prepare basic feedback message (not shown to the user directly)
     if is_correct:
-        feedback = "Correct answer! Well done."
+        base_feedback = "Sahi jawab diya. Bahut acha!"
     else:
-        feedback = f"Incorrect answer. Expected result was:\n{expected_result}"
+        base_feedback = f"Galat jawab. Sahi result tha:\n{expected_result}"
     
-    # Evaluate the answer using Gemini API
+    # Generate detailed feedback using Gemini API in Hindi with layman terms
     prompt = f"""
     Question: {question}
     Correct Answer: {correct_answer}
     Your Answer: {student_answer}
     Expected Query Result: {expected_result}
     Actual Query Result: {actual_result}
-    Evaluate your answer and provide feedback. Mention if the answer is correct or incorrect, and explain why.
+    Ab aap apne answer ka feedback Hindi mein den, bilkul aam bhasha mein. Agar aapka answer sahi hai, toh kuch aise likho: 'Bahut acha answer diya'. Agar answer galat hai, toh likho: 'Oops, apna kuch miss kardiya, agali bar try kara acha sa', aur thoda vishleshan bhi kar do.
     """
     response = model.generate_content(prompt)
     feedback_api = response.text
-    feedback_api = feedback_api.replace("student", "you")
+    # Optionally replace certain words if needed (for example "student" to "aap")
+    feedback_api = feedback_api.replace("student", "aap")
     
     return feedback_api, is_correct, expected_result, actual_result
 
@@ -234,10 +235,10 @@ def analyze_performance(user_answers):
     }
     
     prompt = f"""
-    You answered {len(correct_questions)} out of {len(user_answers)} questions correctly.
-    Correct Questions: {correct_questions}
-    Incorrect Questions: {incorrect_questions}
-    Provide detailed feedback on your overall performance, including areas of strength and weakness.
+    Aapne {len(user_answers)} mein se {len(correct_questions)} sawalon ka sahi jawab diya.
+    Sahi jawab wale sawal: {correct_questions}
+    Galat jawab wale sawal: {incorrect_questions}
+    Kripya, inhe dhyaan mein rakhte hue, aam bhasha mein overall performance par feedback dein.
     """
     response = model.generate_content(prompt)
     feedback["overall_feedback"] = response.text
