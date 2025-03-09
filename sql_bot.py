@@ -208,16 +208,128 @@ def create_progress_steps(current, total):
     return progress_html
 
 def simulate_query(query, sample_table):
-    # ... (keep original simulate_query implementation)
+    """Simulate SQL queries on a pandas DataFrame in a flexible way."""
+    try:
+        query = query.strip().lower().replace(";", "")
+        
+        # Handle SELECT queries
+        if query.startswith("select"):
+            # Extract the part after SELECT and before FROM
+            select_part = query.split("select")[1].split("from")[0].strip()
+            from_part = query.split("from")[1].strip()
+            
+            # Handle COUNT(*)
+            if "count(*)" in select_part:
+                result = pd.DataFrame({"count": [len(sample_table)]})
+                return result.reset_index(drop=True)
+            
+            # Handle AVG(column)
+            elif "avg(" in select_part:
+                column = select_part.split("avg(")[1].split(")")[0].strip()
+                result = pd.DataFrame({"avg": [sample_table[column].mean()]})
+                return result.reset_index(drop=True)
+            
+            # Handle SUM(column)
+            elif "sum(" in select_part:
+                column = select_part.split("sum(")[1].split(")")[0].strip()
+                result = pd.DataFrame({"sum": [sample_table[column].sum()]})
+                return result.reset_index(drop=True)
+            
+            # Handle SELECT * (all columns)
+            elif "*" in select_part:
+                if "where" in from_part:
+                    # Extract the condition after WHERE
+                    condition = from_part.split("where")[1].strip()
+                    # Replace SQL equality operator with Python's
+                    condition = condition.replace("=", "==")
+                    result = sample_table.query(condition)
+                else:
+                    result = sample_table.copy()
+                return result.reset_index(drop=True)
+            
+            # Handle specific columns (not fully featured for complex queries)
+            else:
+                columns = [col.strip() for col in select_part.split(",")]
+                if "where" in from_part:
+                    # Extract the condition after WHERE
+                    condition = from_part.split("where")[1].strip()
+                    # Replace SQL equality operator with Python's
+                    condition = condition.replace("=", "==")
+                    result = sample_table.query(condition)[columns]
+                else:
+                    result = sample_table[columns]
+                return result.reset_index(drop=True)
+        
+        # Handle unsupported queries
+        else:
+            return "Query simulation is only supported for SELECT statements."
+    
+    except Exception as e:
+        return f"Error simulating query: {str(e)}"
 
 def evaluate_answer(question, correct_answer, student_answer, sample_table):
-    # ... (keep original evaluate_answer implementation)
+    """Evaluate the user's answer using Gemini API and simulate the query."""
+    # Simulate the expected query (correct answer)
+    expected_result = simulate_query(correct_answer, sample_table)
+    
+    # Simulate the actual query (user's answer)
+    actual_result = simulate_query(student_answer, sample_table)
+    
+    # Determine if the answer is correct
+    if isinstance(expected_result, pd.DataFrame) and isinstance(actual_result, pd.DataFrame):
+        is_correct = expected_result.equals(actual_result)
+    else:
+        is_correct = str(expected_result) == str(actual_result)
+    
+    # Generate detailed, friendly feedback using Gemini API in Hindi with a casual tone.
+    prompt = f"""
+    Question: {question}
+    Correct Answer: {correct_answer}
+    Your Answer: {student_answer}
+    Expected Query Result: {expected_result}
+    Actual Query Result: {actual_result}
+    
+    Ab ek dost ke andaaz mein Hindi mein feedback dein. Agar aapka jawab sahi hai, toh kuch aise kehna: "Wah yaar, zabardast jawab diya!" Aur agar jawab galat hai, toh casually bolna: "Arre yaar, thoda gadbad ho gaya, koi baat nahi, agli baar aur accha karna." Thoda detail mein bhi batana ki kya chuk hua ya sahi kyu hai.
+    """
+    response = model.generate_content(prompt)
+    feedback_api = response.text
+    feedback_api = feedback_api.replace("student", "aap")
+    
+    return feedback_api, is_correct, expected_result, actual_result
 
 def calculate_score(user_answers):
-    # ... (keep original calculate_score implementation)
+    """Calculate the score based on correct answers."""
+    correct_answers = sum(1 for ans in user_answers if ans["is_correct"])
+    total_questions = len(user_answers)
+    return (correct_answers / total_questions) * 100
 
 def analyze_performance(user_answers):
-    # ... (keep original analyze_performance implementation)
+    """Analyze the user's performance and provide detailed feedback."""
+    # Calculate areas of strength and weakness
+    correct_questions = [ans["question"] for ans in user_answers if ans["is_correct"]]
+    incorrect_questions = [ans["question"] for ans in user_answers if not ans["is_correct"]]
+    
+    # Generate detailed feedback
+    feedback = {
+        "strengths": correct_questions,
+        "weaknesses": incorrect_questions,
+        "overall_feedback": ""
+    }
+    
+    prompt = f"""
+    Aapne {len(user_answers)} mein se {len(correct_questions)} sawalon ka sahi jawab diya.
+    Sahi jawab wale sawal: {correct_questions}
+    Galat jawab wale sawal: {incorrect_questions}
+    Ab ek dost ke tarah casual Hindi mein overall performance ka feedback dein.
+    """
+    response = model.generate_content(prompt)
+    feedback["overall_feedback"] = response.text
+    
+    return feedback
+
+def get_emoji(is_correct):
+    return "😊" if is_correct else "😢"
+
 
 # Streamlit App Flow
 if not st.session_state.quiz_started:
