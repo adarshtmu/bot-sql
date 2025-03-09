@@ -1,16 +1,17 @@
 import streamlit as st
 import google.generativeai as genai
 import pandas as pd
+from datetime import datetime
 
 # Configure page settings for a cleaner look
 st.set_page_config(
-    page_title="SQL Mentor",
+    page_title="SQL Mentor Pro",
     page_icon="🔍",
     layout="wide",
-    initial_sidebar_state="collapsed"
+    initial_sidebar_state="expanded"
 )
 
-# Custom CSS for a cleaner, more professional UI
+# Custom CSS for an advanced, professional UI inspired by HackerRank
 custom_css = """
 <style>
     /* Clean up Streamlit elements */
@@ -22,103 +23,454 @@ custom_css = """
     [data-testid="stToolbar"] {display: none !important;}
     [data-testid="stDecoration"] {display: none !important;}
     [data-testid="stDeployButton"] {display: none !important;}
-    .st-emotion-cache-1r8d6ul {display: none !important;}
-    .st-emotion-cache-1jicfl2 {display: none !important;}
     
     /* Modern UI elements */
     .main {
-        background-color: #f8f9fa;
-        padding: 20px;
-        border-radius: 10px;
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        max-width: 1200px;
-        margin: 0 auto;
+        background-color: #0e1117;
+        color: #e0e0e0;
+        font-family: 'Inter', 'Segoe UI', sans-serif;
+    }
+    
+    /* Sidebar styling */
+    .css-1d391kg {
+        background-color: #1a1e29;
     }
     
     /* Typography */
-    h1, h2, h3 {
-        color: #2c3e50;
-        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    h1 {
+        color: #39e991;
+        font-size: 2.2rem;
+        font-weight: 700;
+        margin-bottom: 1.5rem;
+    }
+    
+    h2 {
+        color: #39e991;
+        font-size: 1.8rem;
+        font-weight: 600;
+        margin-bottom: 1rem;
+    }
+    
+    h3 {
+        color: #e0e0e0;
+        font-size: 1.4rem;
+        font-weight: 600;
+        margin-bottom: 0.75rem;
     }
     
     /* Card-style elements */
     .question-card {
-        background-color: white;
-        padding: 20px;
+        background-color: #1e2433;
+        padding: 1.5rem;
         border-radius: 8px;
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-        margin-bottom: 20px;
+        border-left: 4px solid #39e991;
+        margin-bottom: 1.5rem;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+    
+    .table-card {
+        background-color: #1e2433;
+        padding: 1rem;
+        border-radius: 8px;
+        margin-bottom: 1.5rem;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+    
+    .sidebar-card {
+        background-color: #1e2433;
+        padding: 1rem;
+        border-radius: 8px;
+        margin-bottom: 1rem;
     }
     
     /* Button styling */
     .stButton button {
-        background-color: #0066cc;
-        color: white;
-        font-weight: 500;
+        background-color: #39e991;
+        color: #0e1117;
+        font-weight: 600;
         border-radius: 4px;
         border: none;
-        padding: 8px 16px;
+        padding: 0.6rem 1.2rem;
         transition: all 0.2s;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
     }
     
     .stButton button:hover {
-        background-color: #0055aa;
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        background-color: #2fd67e;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        transform: translateY(-2px);
+    }
+    
+    .secondary-button button {
+        background-color: transparent;
+        color: #39e991;
+        border: 1px solid #39e991;
+    }
+    
+    .secondary-button button:hover {
+        background-color: rgba(57, 233, 145, 0.1);
     }
     
     /* Table styling */
-    .table-container {
+    .dataframe {
+        width: 100%;
+        border-collapse: separate;
+        border-spacing: 0;
+        border: 1px solid #2d3748;
         border-radius: 8px;
         overflow: hidden;
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-        margin-bottom: 20px;
+        margin-bottom: 1rem;
+    }
+    
+    .dataframe th {
+        background-color: #2d3748;
+        color: #39e991;
+        padding: 0.75rem 1rem;
+        text-align: left;
+        font-weight: 600;
+        border-bottom: 1px solid #3e4c63;
+    }
+    
+    .dataframe td {
+        padding: 0.75rem 1rem;
+        border-bottom: 1px solid #2d3748;
+        color: #e0e0e0;
+    }
+    
+    .dataframe tr:nth-child(even) {
+        background-color: #212736;
+    }
+    
+    .dataframe tr:hover {
+        background-color: #2a3344;
+    }
+    
+    /* Code editor */
+    .stTextInput > div > div > input {
+        background-color: #1a1f2c;
+        color: #e0e0e0;
+        font-family: 'JetBrains Mono', 'Fira Code', monospace;
+        border: 1px solid #2d3748;
+        border-radius: 4px;
+        padding: 0.75rem;
+        height: 100px;
+        font-size: 14px;
+    }
+    
+    .sql-editor {
+        background-color: #1a1f2c;
+        border: 1px solid #2d3748;
+        border-radius: 4px;
+        padding: 0;
+        font-family: 'JetBrains Mono', 'Fira Code', monospace;
+        margin-bottom: 1rem;
+    }
+    
+    .sql-editor-header {
+        background-color: #2d3748;
+        padding: 0.5rem 1rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        color: #e0e0e0;
+        font-size: 0.85rem;
+        border-top-left-radius: 4px;
+        border-top-right-radius: 4px;
     }
     
     /* Progress bar styling */
     .stProgress > div > div {
-        background-color: #0066cc;
+        background-color: #39e991;
+        height: 0.5rem;
+        border-radius: 4px;
     }
     
-    /* Text input styling */
-    .stTextInput input {
+    .stProgress > div {
+        background-color: #2d3748;
+        height: 0.5rem;
         border-radius: 4px;
-        border: 1px solid #ddd;
-        padding: 10px;
-        font-family: monospace;
     }
     
     /* Feedback styling */
     .feedback-correct {
-        background-color: #e6f4ea;
-        color: #137333;
-        padding: 10px;
+        background-color: rgba(52, 211, 153, 0.2);
+        color: #34d399;
+        padding: 1rem;
         border-radius: 4px;
-        margin-top: 10px;
+        margin-top: 1rem;
+        border-left: 4px solid #34d399;
     }
     
     .feedback-incorrect {
-        background-color: #fce8e6;
-        color: #c5221f;
-        padding: 10px;
+        background-color: rgba(239, 68, 68, 0.2);
+        color: #ef4444;
+        padding: 1rem;
         border-radius: 4px;
-        margin-top: 10px;
+        margin-top: 1rem;
+        border-left: 4px solid #ef4444;
     }
     
     /* Tab styling */
     .stTabs [data-baseweb="tab-list"] {
-        gap: 8px;
+        gap: 0;
+        background-color: #1e2433;
+        border-radius: 8px 8px 0 0;
+        padding: 0 4px;
     }
     
     .stTabs [data-baseweb="tab"] {
-        background-color: #f1f3f4;
-        border-radius: 4px 4px 0 0;
-        padding: 8px 16px;
-        margin-right: 4px;
+        background-color: transparent;
+        color: #e0e0e0;
+        padding: 0.75rem 1.25rem;
+        border-radius: 0;
+        border-bottom: 2px solid transparent;
+        margin: 0;
+        transition: all 0.2s;
     }
     
     .stTabs [aria-selected="true"] {
-        background-color: white;
-        border-bottom: 2px solid #0066cc;
+        background-color: transparent;
+        color: #39e991;
+        border-bottom: 2px solid #39e991;
+        font-weight: 600;
+    }
+    
+    /* Custom components */
+    .timer {
+        background-color: #1e2433;
+        color: #e0e0e0;
+        padding: 0.5rem 1rem;
+        border-radius: 4px;
+        display: inline-block;
+        font-family: monospace;
+        margin-bottom: 1rem;
+    }
+    
+    .badge {
+        display: inline-block;
+        padding: 0.25rem 0.5rem;
+        border-radius: 4px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        margin-right: 0.5rem;
+    }
+    
+    .badge-easy {
+        background-color: #10b981;
+        color: #ffffff;
+    }
+    
+    .badge-medium {
+        background-color: #f59e0b;
+        color: #ffffff;
+    }
+    
+    .badge-hard {
+        background-color: #ef4444;
+        color: #ffffff;
+    }
+    
+    /* Expander */
+    .stExpander {
+        border: 1px solid #2d3748;
+        border-radius: 8px;
+        overflow: hidden;
+        margin-bottom: 1rem;
+    }
+    
+    .stExpander > details > summary {
+        background-color: #212736;
+        padding: 1rem;
+        font-weight: 600;
+        color: #e0e0e0;
+    }
+    
+    .stExpander > details > summary:hover {
+        background-color: #2a3344;
+    }
+    
+    .stExpander > details > div {
+        padding: 1rem;
+        background-color: #1e2433;
+    }
+    
+    /* Tooltips */
+    .tooltip {
+        position: relative;
+        display: inline-block;
+        cursor: pointer;
+    }
+    
+    .tooltip .tooltiptext {
+        visibility: hidden;
+        width: 200px;
+        background-color: #2d3748;
+        color: #fff;
+        text-align: center;
+        border-radius: 6px;
+        padding: 0.5rem;
+        position: absolute;
+        z-index: 1;
+        bottom: 125%;
+        left: 50%;
+        margin-left: -100px;
+        opacity: 0;
+        transition: opacity 0.3s;
+    }
+    
+    .tooltip:hover .tooltiptext {
+        visibility: visible;
+        opacity: 1;
+    }
+    
+    /* Status indicators */
+    .status-circle {
+        display: inline-block;
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        margin-right: 0.5rem;
+    }
+    
+    .status-completed {
+        background-color: #10b981;
+    }
+    
+    .status-in-progress {
+        background-color: #f59e0b;
+    }
+    
+    .status-not-started {
+        background-color: #6b7280;
+    }
+    
+    /* Profile section */
+    .profile-section {
+        display: flex;
+        align-items: center;
+        padding: 1rem;
+        background-color: #1e2433;
+        border-radius: 8px;
+        margin-bottom: 1.5rem;
+    }
+    
+    .profile-avatar {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        background-color: #39e991;
+        color: #0e1117;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 700;
+        font-size: 1.25rem;
+        margin-right: 1rem;
+    }
+    
+    .profile-info h3 {
+        margin: 0;
+        font-size: 1.25rem;
+    }
+    
+    .profile-info p {
+        margin: 0;
+        color: #9ca3af;
+    }
+    
+    /* Leaderboard */
+    .leaderboard {
+        background-color: #1e2433;
+        border-radius: 8px;
+        overflow: hidden;
+        margin-bottom: 1.5rem;
+    }
+    
+    .leaderboard-header {
+        background-color: #2d3748;
+        padding: 0.75rem 1rem;
+        font-weight: 600;
+        color: #e0e0e0;
+    }
+    
+    .leaderboard-row {
+        display: flex;
+        align-items: center;
+        padding: 0.75rem 1rem;
+        border-bottom: 1px solid #2d3748;
+    }
+    
+    .leaderboard-rank {
+        width: 40px;
+        font-weight: 600;
+    }
+    
+    .leaderboard-name {
+        flex-grow: 1;
+    }
+    
+    .leaderboard-score {
+        font-weight: 600;
+        color: #39e991;
+    }
+    
+    /* Result table */
+    .result-table th {
+        background-color: #2d3748;
+        color: #39e991;
+        padding: 0.6rem 1rem;
+        text-align: left;
+    }
+    
+    .result-table td {
+        padding: 0.6rem 1rem;
+        border-bottom: 1px solid #2d3748;
+    }
+    
+    /* Query information */
+    .query-info {
+        display: flex;
+        justify-content: space-between;
+        background-color: #212736;
+        padding: 0.5rem 1rem;
+        border-radius: 4px;
+        margin-bottom: 1rem;
+        font-size: 0.85rem;
+        color: #9ca3af;
+    }
+    
+    /* Query execution status */
+    .execution-status {
+        display: flex;
+        align-items: center;
+        margin-top: 0.5rem;
+        font-size: 0.85rem;
+    }
+    
+    .execution-time {
+        margin-left: 0.5rem;
+        color: #9ca3af;
+    }
+    
+    /* Hide default Streamlit spinner */
+    div.stSpinner > div {
+        visibility: hidden;
+        display: none;
+    }
+    
+    /* Custom spinner */
+    .custom-spinner {
+        width: 40px;
+        height: 40px;
+        border: 4px solid rgba(57, 233, 145, 0.2);
+        border-left-color: #39e991;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+    }
+    
+    @keyframes spin {
+        to { transform: rotate(360deg); }
     }
 </style>
 """
