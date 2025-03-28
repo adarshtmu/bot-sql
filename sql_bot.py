@@ -52,54 +52,54 @@ merged_table = pd.merge(users_table, orders_table, on="user_id", how="inner")
 # Updated SQL Questions list with enhanced, detailed instructions
 sql_questions = [
     {
-        "question": "Imagine you are the database guardian responsible for managing user data. Your task is to extract a complete snapshot of all users from the 'users' table. Write a SQL query that retrieves every column and every record so you can see all the details of each user.",
+        "question": "Write a SQL query to get all details about users from the 'users' table.",
         "correct_answer": "SELECT * FROM users;",
         "sample_table": users_table
     },
     {
-        "question": "As part of your data analytics duties, you need to determine the total number of users in the system. Write a SQL query that counts all the records in the 'users' table, giving you a clear tally of registered users.",
+        "question": "Write a SQL query to count the total number of users in the 'users' table.",
         "correct_answer": "SELECT COUNT(*) FROM users;",
         "sample_table": users_table
     },
     {
-        "question": "You are tasked with segmenting our audience for targeted outreach. Write a SQL query that retrieves all user records from the 'users' table where the age is greater than 30, helping you identify users in a specific age bracket.",
+        "question": "Write a SQL query to get all users older than 30 from the 'users' table.",
         "correct_answer": "SELECT * FROM users WHERE age > 30;",
         "sample_table": users_table
     },
     {
-        "question": "In your role as an order processing specialist, you must quickly identify which orders are still pending. Write a SQL query that selects all records from the 'orders' table with a status of 'Pending' so that you can follow up promptly.",
+        "question": "Write a SQL query to find all orders with a status of 'Pending' from the 'orders' table.",
         "correct_answer": "SELECT * FROM orders WHERE status = 'Pending';",
         "sample_table": orders_table
     },
     {
-        "question": "To ensure our order tracking is up-to-date, you need to find the most recent order placed. Write a SQL query that orders the 'orders' table by the order date in descending order and retrieves just the top record, highlighting the latest transaction.",
+        "question": "Write a SQL query to find the most recent order from the 'orders' table by order date.",
         "correct_answer": "SELECT * FROM orders ORDER BY order_date DESC LIMIT 1;",
         "sample_table": orders_table
     },
     {
-        "question": "For financial analysis, it's important to understand customer spending behavior. Write a SQL query that calculates the average order amount from the 'orders' table, providing insights into typical purchase values.",
+        "question": "Write a SQL query to find the average order amount from the 'orders' table.",
         "correct_answer": "SELECT AVG(amount) FROM orders;",
         "sample_table": orders_table
     },
     {
-        "question": "To better engage with inactive customers, you need to identify users who have never placed an order. Write a SQL query that retrieves all user records from the 'users' table which do not have any associated entries in the 'orders' table.",
+        "question": "Write a SQL query to find users who have not placed any orders in the 'orders' table.",
         "correct_answer": "SELECT * FROM users WHERE user_id NOT IN (SELECT DISTINCT user_id FROM orders);",
         "sample_table": users_table
     },
     {
-        "question": "For a comprehensive spending analysis, write a SQL query that calculates the total amount spent by each user. Join the 'users' and 'orders' tables, sum the order amounts per user, and display each user's name along with their total expenditure.",
+        "question": "Write a SQL query to calculate the total amount spent by each user by joining the 'users' and 'orders' tables.",
         "correct_answer": ("SELECT users.name, SUM(orders.amount) AS total_spent FROM users "
                            "JOIN orders ON users.user_id = orders.user_id GROUP BY users.name;"),
         "sample_table": merged_table
     },
     {
-        "question": "Understanding customer engagement is key. Write a SQL query that counts the number of orders each user has placed. Use a LEFT JOIN between the 'users' and 'orders' tables and display the user's name along with their order count.",
+        "question": "Write a SQL query to count how many orders each user has placed using a LEFT JOIN between 'users' and 'orders'.",
         "correct_answer": ("SELECT users.name, COUNT(orders.order_id) AS order_count FROM users "
                            "LEFT JOIN orders ON users.user_id = orders.user_id GROUP BY users.name;"),
         "sample_table": merged_table
     },
     {
-        "question": "For targeted regional marketing, you need to focus on users from specific cities. Write a SQL query that retrieves all user records from the 'users' table where the city is either 'New York' or 'Chicago'.",
+        "question": "Write a SQL query to find users from 'New York' or 'Chicago' in the 'users' table.",
         "correct_answer": "SELECT * FROM users WHERE city IN ('New York', 'Chicago');",
         "sample_table": users_table
     }
