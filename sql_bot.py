@@ -577,7 +577,7 @@ elif st.session_state.quiz_completed:
     st.subheader("📝 Review Your Answers")
     st.caption("Expand questions below to see your answer, the AI feedback, and simulation results.")
     for i, ans_data in enumerate(st.session_state.user_answers):
-        with st.expander(f"Question {i + 1}: {ans_data['question']} {get_emoji(ans_data.get('is_correct', False))", expanded=False):
+        with st.expander(f"Question {i + 1}: {ans_data['question']} {get_emoji(ans_data.get('is_correct', False))}", expanded=False):
             st.write(f"**Your Answer:**")
             st.code(ans_data.get('student_answer', '(No answer)'), language='sql')
             st.write(f"**SQL Mentor Feedback:**")
