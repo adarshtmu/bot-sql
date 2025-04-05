@@ -168,12 +168,6 @@ if "show_detailed_feedback" not in st.session_state:
 # --- Helper Functions ---
 
 def simulate_query(query, sample_table):
-    """
-    Simulate SQL SELECT queries on a pandas DataFrame.
-    NOTE: This is a basic simulator and may not handle all SQL syntax correctly.
-    It's primarily for displaying expected/actual results based on simple queries.
-    The LLM evaluation is the primary method for judging correctness.
-    """
 # --- Inside simulate_query function ---
 
         # Handle SELECT * or specific columns
