@@ -48,7 +48,7 @@ orders_table = pd.DataFrame({
 # Create a merged table for join-based queries
 merged_table = pd.merge(users_table, orders_table, on="user_id", how="inner")
 
-# Updated SQL Questions list with question #4 using double quotes for the status value
+# Updated SQL Questions list with consistent quotes for question #4
 sql_questions = [
     {
         "question": "Write a SQL query to get all details about users from the 'users' table.",
@@ -67,8 +67,7 @@ sql_questions = [
     },
     {
         "question": "Write a SQL query to find all orders with a status of 'Pending' from the 'orders' table.",
-        # Using double quotes for 'Pending'
-        "correct_answer": "SELECT * FROM orders WHERE status = \"Pending\";",
+        "correct_answer": "SELECT * FROM orders WHERE status = 'Pending';",
         "sample_table": orders_table
     },
     {
@@ -88,14 +87,18 @@ sql_questions = [
     },
     {
         "question": "Write a SQL query to calculate the total amount spent by each user by joining the 'users' and 'orders' tables.",
-        "correct_answer": ("SELECT users.name, SUM(orders.amount) AS total_spent FROM users "
-                           "JOIN orders ON users.user_id = orders.user_id GROUP BY users.name;"),
+        "correct_answer": (
+            "SELECT users.name, SUM(orders.amount) AS total_spent FROM users "
+            "JOIN orders ON users.user_id = orders.user_id GROUP BY users.name;"
+        ),
         "sample_table": merged_table
     },
     {
         "question": "Write a SQL query to count how many orders each user has placed using a LEFT JOIN between 'users' and 'orders'.",
-        "correct_answer": ("SELECT users.name, COUNT(orders.order_id) AS order_count FROM users "
-                           "LEFT JOIN orders ON users.user_id = orders.user_id GROUP BY users.name;"),
+        "correct_answer": (
+            "SELECT users.name, COUNT(orders.order_id) AS order_count FROM users "
+            "LEFT JOIN orders ON users.user_id = orders.user_id GROUP BY users.name;"
+        ),
         "sample_table": merged_table
     },
     {
@@ -122,82 +125,90 @@ if "awaiting_final_submission" not in st.session_state:
 def simulate_query(query, sample_table):
     """Simulate SQL queries on a pandas DataFrame in a flexible way."""
     try:
-        # Remove trailing semicolon and whitespace; keep original case for literals
+        # Check that essential keywords exist
+        lower_q = query.lower()
+        if "select" not in lower_q or "from" not in lower_q:
+            return "Invalid query: missing SELECT or FROM"
+
+        # Remove trailing semicolon and extra whitespace (preserving literal case)
         query = query.strip().replace(";", "")
         
-        if query.lower().startswith("select"):
-            # Extract parts using case-insensitive splitting for keywords
-            select_lower = query.lower().split("select", 1)[1]
-            select_part = select_lower.split("from", 1)[0].strip()
-            from_part = query.split("from", 1)[1].strip()  # preserve case for literals
-            
-            # Handle COUNT(*)
-            if "count(*)" in select_part:
-                result = pd.DataFrame({"count": [len(sample_table)]})
-                return result.reset_index(drop=True)
-            
-            # Handle AVG(column)
-            elif "avg(" in select_part:
-                column = query.split("avg(", 1)[1].split(")", 1)[0].strip()
-                result = pd.DataFrame({"avg": [sample_table[column].mean()]})
-                return result.reset_index(drop=True)
-            
-            # Handle SUM(column)
-            elif "sum(" in select_part:
-                column = query.split("sum(", 1)[1].split(")", 1)[0].strip()
-                result = pd.DataFrame({"sum": [sample_table[column].sum()]})
-                return result.reset_index(drop=True)
-            
-            # Handle SELECT * (all columns)
-            elif "*" in select_part:
-                if "where" in from_part.lower():
-                    # Extract the WHERE condition preserving original case
-                    condition = query.split("where", 1)[1].strip()
-                    # Use regex to replace '=' with '==' only when not already '==' or '!='
-                    condition = re.sub(r'(?<![=!])=(?![=])', '==', condition)
-                    result = sample_table.query(condition)
-                else:
-                    result = sample_table.copy()
-                return result.reset_index(drop=True)
-            
-            # Handle specific columns (not fully featured for complex queries)
+        # Split into parts using case-insensitive search for keywords
+        select_lower = query.lower().split("select", 1)[1]
+        select_part = select_lower.split("from", 1)[0].strip()
+        from_part = query.split("from", 1)[1].strip()  # preserve literal casing
+
+        # Handle COUNT(*)
+        if "count(*)" in select_part:
+            result = pd.DataFrame({"count": [len(sample_table)]})
+            return result.reset_index(drop=True)
+        
+        # Handle AVG(column)
+        elif "avg(" in select_part:
+            column = query.split("avg(", 1)[1].split(")", 1)[0].strip()
+            result = pd.DataFrame({"avg": [sample_table[column].mean()]})
+            return result.reset_index(drop=True)
+        
+        # Handle SUM(column)
+        elif "sum(" in select_part:
+            column = query.split("sum(", 1)[1].split(")", 1)[0].strip()
+            result = pd.DataFrame({"sum": [sample_table[column].sum()]})
+            return result.reset_index(drop=True)
+        
+        # Handle SELECT * (all columns)
+        elif "*" in select_part:
+            if "where" in from_part.lower():
+                # Extract the WHERE condition preserving original case
+                condition = query.split("where", 1)[1].strip()
+                # Replace '=' with '==' using regex (only single '=' not part of '==' or '!=')
+                condition = re.sub(r'(?<![=!])=(?![=])', '==', condition)
+                result = sample_table.query(condition)
             else:
-                columns = [col.strip() for col in select_part.split(",")]
-                if "where" in from_part.lower():
-                    condition = query.split("where", 1)[1].strip()
-                    condition = re.sub(r'(?<![=!])=(?![=])', '==', condition)
-                    result = sample_table.query(condition)[columns]
-                else:
-                    result = sample_table[columns]
-                return result.reset_index(drop=True)
+                result = sample_table.copy()
+            return result.reset_index(drop=True)
+        
+        # Handle specific columns (simplified; not for complex queries)
         else:
-            return "Query simulation is only supported for SELECT statements."
-    
+            columns = [col.strip() for col in select_part.split(",")]
+            if "where" in from_part.lower():
+                condition = query.split("where", 1)[1].strip()
+                condition = re.sub(r'(?<![=!])=(?![=])', '==', condition)
+                result = sample_table.query(condition)[columns]
+            else:
+                result = sample_table[columns]
+            return result.reset_index(drop=True)
     except Exception as e:
         return f"Error simulating query: {str(e)}"
 
 def evaluate_answer(question, correct_answer, student_answer, sample_table):
     """Evaluate the user's answer using Gemini API and simulate the query."""
-    # Simulate the expected query (correct answer)
     expected_result = simulate_query(correct_answer, sample_table)
-    
-    # Simulate the actual query (user's answer)
     actual_result = simulate_query(student_answer, sample_table)
     
-    # Compare results – using DataFrame equality if possible
+    # Reset indexes for proper DataFrame comparison (if applicable)
+    if isinstance(expected_result, pd.DataFrame):
+        expected_result = expected_result.reset_index(drop=True)
+    if isinstance(actual_result, pd.DataFrame):
+        actual_result = actual_result.reset_index(drop=True)
+    
+    # Compare results using DataFrame equality if possible
     if isinstance(expected_result, pd.DataFrame) and isinstance(actual_result, pd.DataFrame):
         is_correct = expected_result.equals(actual_result)
     else:
         is_correct = str(expected_result) == str(actual_result)
     
-    # Generate detailed, friendly feedback using Gemini API in Hindi
+    # Prepare verdict flag for the LLM prompt
+    correctness_text = "Yes" if is_correct else "No"
+    
+    # Build the prompt for Gemini API with the verdict included
     prompt = f"""
     Question: {question}
     Correct Answer: {correct_answer}
     Your Answer: {student_answer}
     Expected Query Result: {expected_result}
     Actual Query Result: {actual_result}
-    
+    Is Correct? {correctness_text}
+
     Ab ek dost ke andaaz mein Hindi mein feedback dein. Agar aapka jawab sahi hai, toh kuch aise kehna: "Wah yaar, zabardast jawab diya!" Aur agar jawab galat hai, toh casually bolna: "Arre yaar, thoda gadbad ho gaya, koi baat nahi, agli baar aur accha karna." Thoda detail mein bhi batana ki kya chuk hua ya sahi kyu hai.
     """
     response = model.generate_content(prompt)
@@ -236,27 +247,24 @@ def analyze_performance(user_answers):
 def get_emoji(is_correct):
     return "😊" if is_correct else "😢"
 
-# Streamlit App
+# Streamlit App UI
 if not st.session_state.quiz_started:
     st.title("SQL Mentor - Interactive SQL Query Practice")
-    
     st.write("### Welcome to Your SQL Learning Journey!")
     
     st.markdown("""
     **📌 Important Note:**
     - This quiz uses **MySQL syntax** for all SQL queries.
-    - Ensure your answers follow MySQL conventions.
+    - Please use single quotes for string literals (e.g., 'Pending').
     """)
     
     col1, col2 = st.columns([2, 1])
-    
     with col1:
         st.write("""
         In this interactive SQL quiz, you'll work with two main tables:
         - **Users Table**: Contains user details such as ID, name, email, age, and city.
         - **Orders Table**: Stores order details including order ID, user ID, amount, order date, and status.
         """)
-    
     with col2:
         st.markdown("#### Tables Overview")
         table_overview = pd.DataFrame({
@@ -266,13 +274,10 @@ if not st.session_state.quiz_started:
         st.table(table_overview)
     
     st.write("### 🔍 Table Previews")
-    
     tab1, tab2 = st.tabs(["Users", "Orders"])
-    
     with tab1:
         st.write("**Users Table**")
         st.dataframe(users_table)
-    
     with tab2:
         st.write("**Orders Table**")
         st.dataframe(orders_table)
@@ -297,9 +302,15 @@ if st.session_state.quiz_started and not st.session_state.quiz_completed:
             with st.expander(f"Question {i + 1}: {ans['question']}", expanded=True):
                 st.write(f"**Your Answer:** {ans['student_answer']}")
                 if ans["is_correct"]:
-                    st.markdown(f"<span style='color:green'>✅ **Feedback:** {ans['feedback']} {get_emoji(True)}</span>", unsafe_allow_html=True)
+                    st.markdown(
+                        f"<span style='color:green'>✅ **Feedback:** {ans['feedback']} {get_emoji(True)}</span>",
+                        unsafe_allow_html=True
+                    )
                 else:
-                    st.markdown(f"<span style='color:red'>❌ **Feedback:** {ans['feedback']} {get_emoji(False)}</span>", unsafe_allow_html=True)
+                    st.markdown(
+                        f"<span style='color:red'>❌ **Feedback:** {ans['feedback']} {get_emoji(False)}</span>",
+                        unsafe_allow_html=True
+                    )
                 st.write("**Expected Query Result:**")
                 if isinstance(ans["expected_result"], pd.DataFrame):
                     st.dataframe(ans["expected_result"])
@@ -340,10 +351,15 @@ if st.session_state.quiz_started and not st.session_state.quiz_completed:
                 "actual_result": actual_result
             })
             if is_correct:
-                st.markdown(f"<span style='color:green'>**Feedback:** {feedback} {get_emoji(True)}</span>", unsafe_allow_html=True)
+                st.markdown(
+                    f"<span style='color:green'>**Feedback:** {feedback} {get_emoji(True)}</span>",
+                    unsafe_allow_html=True
+                )
             else:
-                st.markdown(f"<span style='color:red'>**Feedback:** {feedback} {get_emoji(False)}</span>", unsafe_allow_html=True)
-            
+                st.markdown(
+                    f"<span style='color:red'>**Feedback:** {feedback} {get_emoji(False)}</span>",
+                    unsafe_allow_html=True
+                )
             if st.session_state.current_question < len(sql_questions) - 1:
                 st.session_state.current_question += 1
                 st.rerun()
