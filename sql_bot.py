@@ -28,7 +28,7 @@ try:
     gemini_api_key = st.secrets["GEMINI_API_KEY"]
 except (FileNotFoundError, KeyError):
     # Fallback or default if secrets aren't set
-    gemini_api_key = "YOUR_GEMINI_API_KEY" # Replace with your key if not using secrets
+    gemini_api_key = "AIzaSyAfzl_66GZsgaYjAM7cT2djVCBCAr86t2k" # Replace with your key if not using secrets
 
 # Basic check if the key looks like a placeholder
 if gemini_api_key == "AIzaSyAfzl_66GZsgaYjAM7cT2djVCBCAr86t2k" or not gemini_api_key:
