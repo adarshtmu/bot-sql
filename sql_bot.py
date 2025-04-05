@@ -53,7 +53,6 @@ orders_table = pd.DataFrame({
     "status": ["Completed", "Pending", "Completed", "Shipped", "Cancelled"]
 })
 original_tables = {
-    # Use lowercase names matching standard SQL conventions if possible
     "users": users_table,
     "orders": orders_table
 }
@@ -66,62 +65,62 @@ sql_questions = [
         "sample_table": users_table,
         "relevant_tables": ["users"]
     },
-    {
-        "question": "Write a SQL query to count the total number of users in the 'users' table.",
-        "correct_answer_example": "SELECT COUNT(*) AS user_count FROM users;",
-        "sample_table": users_table,
-        "relevant_tables": ["users"]
-    },
-    {
-        "question": "Write a SQL query to get all users older than 30 from the 'users' table.",
-        "correct_answer_example": "SELECT * FROM users WHERE age > 30;",
-        "sample_table": users_table,
-        "relevant_tables": ["users"]
-    },
-    {
-        "question": "Write a SQL query to find all orders with a status of 'Pending' from the 'orders' table.",
-        "correct_answer_example": "SELECT * FROM orders WHERE status = 'Pending';",
-        "sample_table": orders_table,
-        "relevant_tables": ["orders"]
-    },
-    {
-        "question": "Write a SQL query to find the most recent order from the 'orders' table by order date.",
-        "correct_answer_example": "SELECT * FROM orders ORDER BY order_date DESC LIMIT 1;",
-        "sample_table": orders_table,
-        "relevant_tables": ["orders"]
-    },
-    {
-        "question": "Write a SQL query to find the average order amount from the 'orders' table.",
-        "correct_answer_example": "SELECT AVG(amount) AS average_amount FROM orders;",
-        "sample_table": orders_table,
-        "relevant_tables": ["orders"]
-    },
-    {
-        "question": "Write a SQL query to find users who have not placed any orders. Use the 'users' and 'orders' tables.",
-        "correct_answer_example": "SELECT u.* FROM users u LEFT JOIN orders o ON u.user_id = o.user_id WHERE o.order_id IS NULL;",
-        "sample_table": users_table,
-        "relevant_tables": ["users", "orders"]
-    },
-    {
-        "question": "Write a SQL query to calculate the total amount spent by each user by joining the 'users' and 'orders' tables.",
-        "correct_answer_example": ("SELECT u.name, SUM(o.amount) AS total_spent FROM users u "
-                           "JOIN orders o ON u.user_id = o.user_id GROUP BY u.name ORDER BY u.name;"),
-        "sample_table": users_table,
-        "relevant_tables": ["users", "orders"]
-    },
-    {
-        "question": "Write a SQL query to count how many orders each user has placed using a LEFT JOIN between 'users' and 'orders'. Include users with zero orders.",
-        "correct_answer_example": ("SELECT u.name, COUNT(o.order_id) AS order_count FROM users u "
-                           "LEFT JOIN orders o ON u.user_id = o.user_id GROUP BY u.name ORDER BY u.name;"),
-        "sample_table": users_table,
-        "relevant_tables": ["users", "orders"]
-    },
-    {
-        "question": "Write a SQL query to find users from 'New York' or 'Chicago' in the 'users' table.",
-        "correct_answer_example": "SELECT * FROM users WHERE city IN ('New York', 'Chicago');",
-        "sample_table": users_table,
-        "relevant_tables": ["users"]
-    }
+    # {
+    #     "question": "Write a SQL query to count the total number of users in the 'users' table.",
+    #     "correct_answer_example": "SELECT COUNT(*) AS user_count FROM users;",
+    #     "sample_table": users_table,
+    #     "relevant_tables": ["users"]
+    # },
+    # {
+    #     "question": "Write a SQL query to get all users older than 30 from the 'users' table.",
+    #     "correct_answer_example": "SELECT * FROM users WHERE age > 30;",
+    #     "sample_table": users_table,
+    #     "relevant_tables": ["users"]
+    # },
+    # {
+    #     "question": "Write a SQL query to find all orders with a status of 'Pending' from the 'orders' table.",
+    #     "correct_answer_example": "SELECT * FROM orders WHERE status = 'Pending';",
+    #     "sample_table": orders_table,
+    #     "relevant_tables": ["orders"]
+    # },
+    # {
+    #     "question": "Write a SQL query to find the most recent order from the 'orders' table by order date.",
+    #     "correct_answer_example": "SELECT * FROM orders ORDER BY order_date DESC LIMIT 1;",
+    #     "sample_table": orders_table,
+    #     "relevant_tables": ["orders"]
+    # },
+    # {
+    #     "question": "Write a SQL query to find the average order amount from the 'orders' table.",
+    #     "correct_answer_example": "SELECT AVG(amount) AS average_amount FROM orders;",
+    #     "sample_table": orders_table,
+    #     "relevant_tables": ["orders"]
+    # },
+    # {
+    #     "question": "Write a SQL query to find users who have not placed any orders. Use the 'users' and 'orders' tables.",
+    #     "correct_answer_example": "SELECT u.* FROM users u LEFT JOIN orders o ON u.user_id = o.user_id WHERE o.order_id IS NULL;",
+    #     "sample_table": users_table,
+    #     "relevant_tables": ["users", "orders"]
+    # },
+    # {
+    #     "question": "Write a SQL query to calculate the total amount spent by each user by joining the 'users' and 'orders' tables.",
+    #     "correct_answer_example": ("SELECT u.name, SUM(o.amount) AS total_spent FROM users u "
+    #                        "JOIN orders o ON u.user_id = o.user_id GROUP BY u.name ORDER BY u.name;"),
+    #     "sample_table": users_table,
+    #     "relevant_tables": ["users", "orders"]
+    # },
+    # {
+    #     "question": "Write a SQL query to count how many orders each user has placed using a LEFT JOIN between 'users' and 'orders'. Include users with zero orders.",
+    #     "correct_answer_example": ("SELECT u.name, COUNT(o.order_id) AS order_count FROM users u "
+    #                        "LEFT JOIN orders o ON u.user_id = o.user_id GROUP BY u.name ORDER BY u.name;"),
+    #     "sample_table": users_table,
+    #     "relevant_tables": ["users", "orders"]
+    # },
+    # {
+    #     "question": "Write a SQL query to find users from 'New York' or 'Chicago' in the 'users' table.",
+    #     "correct_answer_example": "SELECT * FROM users WHERE city IN ('New York', 'Chicago');",
+    #     "sample_table": users_table,
+    #     "relevant_tables": ["users"]
+    # }
 ]
 
 # --- Session State Initialization ---
@@ -133,7 +132,6 @@ if "show_detailed_feedback" not in st.session_state: st.session_state.show_detai
 
 # --- Helper Functions ---
 
-# --- simulate_query using DuckDB with simplified/corrected error hint ---
 def simulate_query_duckdb(sql_query, tables_dict):
     """Simulates an SQL query using DuckDB on in-memory pandas DataFrames."""
     if not sql_query or not sql_query.strip():
@@ -141,7 +139,7 @@ def simulate_query_duckdb(sql_query, tables_dict):
     if not tables_dict:
         return "Simulation Error: No tables provided for context."
 
-    con = None # Initialize con outside try
+    con = None
     try:
         con = duckdb.connect(database=':memory:', read_only=False)
         for table_name, df in tables_dict.items():
@@ -155,36 +153,23 @@ def simulate_query_duckdb(sql_query, tables_dict):
         return result_df
 
     except Exception as e:
-        # Default error message
         error_message = f"Simulation Error: Failed to execute query. Reason: {str(e)}"
-
-        # --- Add specific hint for double-quote string issue (Simplified Logic) ---
         try:
-            e_str = str(e).lower() # Use lowercase for easier matching
-            # Check if it's a Binder Error about a referenced column not found
+            e_str = str(e).lower()
             binder_match = re.search(r'(binder error|catalog error|parser error).*referenced column "([^"]+)" not found', e_str)
-            # Also check for syntax errors near a double quoted string
-            syntax_match = re.search(r'syntax error.*at or near ""([^"]+)""', e_str) # Matches ""Value"" pattern in errors
-
+            syntax_match = re.search(r'syntax error.*at or near ""([^"]+)""', e_str)
             if binder_match:
-                 # If the specific Binder Error pattern matched, add the hint directly
-                 double_quoted_value = binder_match.group(2) # Get the problematic value like 'pending'
+                 double_quoted_value = binder_match.group(2)
                  error_message += f"\n\n**Hint:** SQL standard uses single quotes (') for text values. Try using `'{double_quoted_value}'` instead of `\"{double_quoted_value}\"` in your `WHERE` clause."
             elif syntax_match:
-                 # If a syntax error near a double-quoted string occurred
                  double_quoted_value = syntax_match.group(1)
                  error_message += f"\n\n**Hint:** It looks like double quotes (\") were used for the text value `\"{double_quoted_value}\"`. SQL standard uses single quotes ('). Try `'{double_quoted_value}'` instead."
-
-        except Exception as e_hint:
-            # Avoid breaking the app if hint generation fails
-            print(f"Error generating hint for simulation error: {e_hint}")
-        # --- End of hint ---
-
-        print(f"ERROR [simulate_query_duckdb]: {error_message}\nQuery: {sql_query}") # Log error
+        except Exception as e_hint: print(f"Error generating hint: {e_hint}")
+        print(f"ERROR [simulate_query_duckdb]: {error_message}\nQuery: {sql_query}")
         if con:
-            try: con.close() # Ensure connection is closed on error
+            try: con.close()
             except: pass
-        return error_message # Return the potentially enhanced error message
+        return error_message
 
 
 def get_table_schema(table_name, tables_dict):
@@ -197,8 +182,6 @@ def evaluate_answer_with_llm(question_data, student_answer, original_tables_dict
     """Evaluate the user's answer using Gemini API and simulate using DuckDB."""
     if not student_answer.strip(): return "Please provide an answer.", False, "N/A", "N/A", "No input."
     question = question_data["question"]; relevant_table_names = question_data["relevant_tables"]; correct_answer_example = question_data["correct_answer_example"]
-
-    # --- Schema Information ---
     schema_info = ""
     if not relevant_table_names: schema_info = "No table schema context.\n"
     else:
@@ -206,18 +189,12 @@ def evaluate_answer_with_llm(question_data, student_answer, original_tables_dict
             columns = get_table_schema(name, original_tables_dict)
             if columns:
                 try:
-                    # Ensure we access the dict correctly
                     df = original_tables_dict[name]
-                    if isinstance(df, pd.DataFrame):
-                        dtypes = df.dtypes.to_string()
-                        schema_info += f"Table '{name}': Columns {columns}\n DataTypes:\n{dtypes}\n\n"
-                    else:
-                         schema_info += f"Table '{name}': Columns {columns} (DataTypes unavailable - not a DataFrame)\n\n"
+                    if isinstance(df, pd.DataFrame): dtypes = df.dtypes.to_string(); schema_info += f"Table '{name}': Columns {columns}\n DataTypes:\n{dtypes}\n\n"
+                    else: schema_info += f"Table '{name}': Columns {columns} (DataTypes unavailable - not a DataFrame)\n\n"
                 except KeyError: schema_info += f"Table '{name}': Columns {columns} (DataTypes unavailable - Key Error)\n\n"
                 except Exception as e_schema: schema_info += f"Table '{name}': Columns {columns} (Schema Error: {e_schema})\n\n"
             else: schema_info += f"Table '{name}': Schema not found.\n"
-
-    # --- LLM Prompt ---
     prompt = f"""
     You are an expert SQL evaluator acting as a friendly SQL mentor. Analyze the student's SQL query based on the question asked and the provided table schemas (including data types). Assume standard SQL syntax (like MySQL/PostgreSQL).
 
@@ -244,11 +221,9 @@ def evaluate_answer_with_llm(question_data, student_answer, original_tables_dict
 
     **Begin Evaluation:**
     """
-
-    # --- Call Gemini API ---
     feedback_llm = "AI feedback failed."; is_correct_llm = False; llm_output = "Error: No LLM response."
     try:
-        response = model.generate_content(prompt)
+        response = model.generate_content(prompt);
         if response.parts: llm_output = "".join(part.text for part in response.parts)
         else: llm_output = response.text
         llm_output = llm_output.strip(); verdict_match = re.search(r'^Verdict:\s*(Correct|Incorrect)\s*$', llm_output, re.M | re.I)
@@ -257,7 +232,6 @@ def evaluate_answer_with_llm(question_data, student_answer, original_tables_dict
         feedback_llm = feedback_llm.replace("student", "aap")
     except Exception as e: st.error(f"🚨 AI Error: {e}"); print(f"ERROR: Gemini call: {e}"); feedback_llm = f"AI feedback error: {e}"; is_correct_llm = False; llm_output = f"Error: {e}"
 
-    # --- Simulation using DuckDB ---
     actual_result_sim = simulate_query_duckdb(student_answer, original_tables_dict)
     expected_result_sim = simulate_query_duckdb(correct_answer_example, original_tables_dict)
 
@@ -266,7 +240,10 @@ def evaluate_answer_with_llm(question_data, student_answer, original_tables_dict
 
 def calculate_score(user_answers):
     """Calculate the score based on correct answers."""
-    if not user_answers: return 0; correct = sum(1 for ans in user_answers if ans.get("is_correct", False)); total = len(user_answers); return (correct / total) * 100 if total > 0 else 0
+    if not user_answers: return 0
+    correct = sum(1 for ans in user_answers if ans.get("is_correct", False))
+    total = len(user_answers)
+    return (correct / total) * 100 if total > 0 else 0
 
 def analyze_performance(user_answers):
     """Analyze the user's performance and provide detailed feedback via LLM."""
@@ -291,7 +268,6 @@ def display_simulation(title, result_data):
         else:
             st.dataframe(result_data.reset_index(drop=True), hide_index=True)
     elif isinstance(result_data, str) and "Simulation Error" in result_data:
-        # Use markdown to render the hint potentially added to the error message
         st.warning(result_data, icon="⚠️") # Use icon parameter for warning
     elif result_data == "N/A":
         st.info("_(Simulation not applicable for this query)_")
@@ -311,7 +287,6 @@ if not st.session_state.quiz_started:
         - Your queries will be evaluated by an AI for correctness and logic.
         - Query simulation is powered by DuckDB to show results based on sample data.
         """)
-
     col1, col2 = st.columns([2, 1])
     with col1:
         st.write("""
@@ -321,20 +296,11 @@ if not st.session_state.quiz_started:
         """)
     with col2:
         st.markdown("#### Tables Overview")
-        table_overview_data = {
-            "Table": list(original_tables.keys()),
-            "Rows": [len(df) for df in original_tables.values()],
-            "Columns": [len(df.columns) for df in original_tables.values()]
-         }
+        table_overview_data = {"Table": list(original_tables.keys()), "Rows": [len(df) for df in original_tables.values()], "Columns": [len(df.columns) for df in original_tables.values()]}
         st.dataframe(pd.DataFrame(table_overview_data), hide_index=True)
-
-    st.write("### 🔍 Table Previews")
-    tab1, tab2 = st.tabs(["Users Table", "Orders Table"])
-    with tab1:
-        st.dataframe(users_table, hide_index=True)
-    with tab2:
-        st.dataframe(orders_table, hide_index=True)
-
+    st.write("### 🔍 Table Previews"); tab1, tab2 = st.tabs(["Users Table", "Orders Table"])
+    with tab1: st.dataframe(users_table, hide_index=True)
+    with tab2: st.dataframe(orders_table, hide_index=True)
     with st.expander("📝 Quiz Ke Baare Mein"):
         st.write(f"""
         - Aapko {len(sql_questions)} SQL query challenges solve karne honge.
@@ -342,20 +308,12 @@ if not st.session_state.quiz_started:
         - Aapka final score aur detailed performance analysis end mein dikhaya jayega.
         - **SQL Dialect Focus:** Standard SQL (MySQL/PostgreSQL like)
         """)
-
-    # Start button should be outside the expander
     if st.button("🚀 Start SQL Challenge!"):
-        st.session_state.quiz_started = True
-        st.session_state.user_answers = []
-        st.session_state.current_question = 0
-        st.session_state.quiz_completed = False
-        st.session_state.show_detailed_feedback = False
-        st.rerun()
+        st.session_state.quiz_started = True; st.session_state.user_answers = []; st.session_state.current_question = 0; st.session_state.quiz_completed = False; st.session_state.show_detailed_feedback = False; st.rerun()
 
 # --- Quiz In Progress ---
-elif st.session_state.quiz_started and not st.session_state.quiz_completed: # Use elif for clarity
+elif st.session_state.quiz_started and not st.session_state.quiz_completed:
     st.title("✍️ SQL Query Challenge")
-    # --- Display Past Answers (Chat History) ---
     if st.session_state.user_answers:
         st.markdown("---"); st.subheader("📖 Ab Tak Ke Jawaab Aur Feedback")
         for i, ans_data in enumerate(reversed(st.session_state.user_answers)):
@@ -368,8 +326,6 @@ elif st.session_state.quiz_started and not st.session_state.quiz_completed: # Us
                 with col_sim1: display_simulation("Simulated Result (Aapka Query)", ans_data.get("actual_result"))
                 with col_sim2: display_simulation("Simulated Result (Example Query)", ans_data.get("expected_result"))
         st.markdown("---")
-
-    # --- Current Question ---
     current_q_index = st.session_state.current_question
     if current_q_index < len(sql_questions):
         question_data = sql_questions[current_q_index]; st.subheader(f"Sawaal {current_q_index + 1} / {len(sql_questions)}"); st.markdown(f"**{question_data['question']}**"); st.write("**Relevant Table(s) Preview:**");
@@ -394,9 +350,14 @@ elif st.session_state.quiz_started and not st.session_state.quiz_completed: # Us
     else: st.warning("Quiz state error."); st.session_state.quiz_completed = True; st.rerun()
 
 # --- Quiz Completed Screen ---
-elif st.session_state.quiz_completed: # Use elif for clarity
+elif st.session_state.quiz_completed:
     st.balloons(); st.title("🎉 Quiz Complete!")
-    score = calculate_score(st.session_state.user_answers); st.metric(label="Your Final Score", value=f"{score:.2f}%")
+    score = calculate_score(st.session_state.user_answers)
+
+    # --- CORRECTED st.metric CALL ---
+    st.metric(label="Your Final Score (%)", value=score)
+    # --- END CORRECTION ---
+
     st.subheader("📝 Final Review: Aapke Jawaab Aur Feedback")
     for i, ans_data in enumerate(st.session_state.user_answers):
         with st.expander(f"Question {i + 1}: {ans_data['question']} {get_emoji(ans_data.get('is_correct', False))}", expanded=False):
@@ -433,7 +394,6 @@ elif st.session_state.quiz_completed: # Use elif for clarity
 # Fallback if state is somehow invalid
 else:
     st.error("An unexpected error occurred with the application state. Please restart.")
-    # Offer a way to restart manually
     if st.button("Force Restart App State"):
          keys_to_reset = ["user_answers", "current_question", "quiz_started","quiz_completed", "show_detailed_feedback"]
          for key in keys_to_reset:
