@@ -128,26 +128,36 @@ def evaluate_answer_with_llm(question_data, student_answer, original_tables_dict
                 try: df = original_tables_dict[name]; dtypes = df.dtypes.to_string() if isinstance(df, pd.DataFrame) else "N/A"; schema_info += f"Table '{name}': Columns {columns}\n DataTypes:\n{dtypes}\n\n"
                 except Exception as e_schema: schema_info += f"Table '{name}': Columns {columns} (Schema Error: {e_schema})\n\n"
             else: schema_info += f"Table '{name}': Schema not found.\n"
+
+    # --- LLM Prompt --- # STRONGER ENGLISH INSTRUCTION
     prompt = f"""
-    You are an expert SQL evaluator acting as a friendly SQL mentor. Analyze the student's SQL query based on the question asked and the provided table schemas (including data types). Assume standard SQL syntax (like MySQL/PostgreSQL).
+    You are an expert SQL evaluator acting as a friendly SQL mentor. Your response MUST be in **English**. Analyze the student's SQL query based on the question asked and the provided table schemas (including data types). Assume standard SQL syntax (like MySQL/PostgreSQL). **Do NOT use Hindi.**
 
     **Evaluation Task:**
     1.  **Question:** {question}
-    2.  **Relevant Table Schemas:** {schema_info.strip()}
-    3.  **Student's SQL Query:**\n```sql\n{student_answer}\n```
+    2.  **Relevant Table Schemas:**
+        {schema_info.strip()}
+    3.  **Student's SQL Query:**
+        ```sql
+        {student_answer}
+        ```
 
     **Analysis Instructions:**
-    * **Correctness:** ...
-    * **Validity:** ...
-    * **Logic:** ...
-    * **Alternatives:** ...
-    * **Feedback:** Provide clear, constructive feedback in a friendly, encouraging, casual Hindi tone...
-        * If correct: Praise...
-        * If incorrect: Gently point out the error... Explain *what* is wrong (syntax - like using " vs ' for strings, logic, columns, etc.)... Suggest how to fix it...
-    * **Verdict:** Conclude with "Verdict: Correct" or "Verdict: Incorrect". ...
+    * **Correctness:** Does the student's query accurately and completely answer the **Question** based on the **Relevant Table Schemas**? Consider edge cases if applicable.
+    * **Validity:** Is the query syntactically valid SQL? Briefly mention any syntax errors.
+    * **Logic:** Does the query use appropriate SQL clauses correctly? Is the logic sound? Are comparisons appropriate?
+    * **Alternatives:** Briefly acknowledge valid alternative approaches. Efficiency is a minor point.
+    * **Feedback:** Provide clear, constructive, and encouraging feedback in **English ONLY**. Do not use any Hindi words or phrases.
+        * If correct: Explain *briefly* why the query is correct or mention if it's a standard/good approach. Offer positive reinforcement using English phrases (e.g., "Great job!", "Excellent work!", "That's the correct way to do it!").
+        * If incorrect: Gently point out the specific error(s) (syntax, logic, wrong columns/tables, missed conditions, data type mismatch). Explain *why* it's incorrect in English. Suggest how to fix it or what the correct concept/approach might involve in English (e.g., "Consider using a LEFT JOIN here because..." or "Remember to enclose string values like 'Pending' in single quotes (') in the WHERE clause..." or "Check the column name used in the COUNT function."). Keep the tone supportive and focused on learning. Avoid just giving the full correct query away unless necessary for explaining a small fix.
+    * **Verdict:** Conclude your entire response with *exactly* one line formatted as: "Verdict: Correct" or "Verdict: Incorrect". This line MUST be the very last line.
 
-    **Begin Evaluation:**
+    **Begin Evaluation (Respond ONLY in English):**
     """
+    # --- End of modified prompt ---
+
+    # --- Call Gemini API ---
+    # ... (rest of the function remains the same) ...
     feedback_llm = "AI feedback failed."; is_correct_llm = False; llm_output = "Error: No LLM response."
     try:
         response = model.generate_content(prompt);
