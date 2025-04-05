@@ -24,7 +24,7 @@ st.markdown(hide_streamlit_style, unsafe_allow_html=True)
 # Set up Gemini API
 gemini_api_key = "AIzaSyAfzl_66GZsgaYjAM7cT2djVCBCAr86t2k"  # Replace with your Gemini API key
 genai.configure(api_key=gemini_api_key)
-model = genai.GenerativeModel('gemini-2.5')
+model = genai.GenerativeModel('gemini-2.0-flash')
 
 # Define sample tables for the quiz
 
