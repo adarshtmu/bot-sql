@@ -128,6 +128,7 @@ def evaluate_answer_with_llm(question_data, student_answer, original_tables_dict
                 try: df = original_tables_dict[name]; dtypes = df.dtypes.to_string() if isinstance(df, pd.DataFrame) else "N/A"; schema_info += f"Table '{name}': Columns {columns}\n DataTypes:\n{dtypes}\n\n"
                 except Exception as e_schema: schema_info += f"Table '{name}': Columns {columns} (Schema Error: {e_schema})\n\n"
             else: schema_info += f"Table '{name}': Schema not found.\n"
+
     prompt = f"""
     You are an expert SQL evaluator acting as a friendly SQL mentor. Analyze the student's SQL query based on the question asked and the provided table schemas (including data types). Assume standard SQL syntax (like MySQL/PostgreSQL).
 
@@ -154,6 +155,7 @@ def evaluate_answer_with_llm(question_data, student_answer, original_tables_dict
 
     **Begin Evaluation:**
     """
+
     feedback_llm = "AI feedback failed."; is_correct_llm = False; llm_output = "Error: No LLM response."
     try:
         response = model.generate_content(prompt);
