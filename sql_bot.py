@@ -260,9 +260,9 @@ elif st.session_state.quiz_started and not st.session_state.quiz_completed:
 
                 # --- CORRECTED: Display tables vertically ---
                 st.markdown("---") # Separator before tables
-                display_simulation("Simulated Result (Aapka Query)", ans_data.get("actual_result"))
+                display_simulation("Simulated Result (User Results)", ans_data.get("actual_result"))
                 st.divider() # Optional: Add a visual divider between the two tables
-                display_simulation("Simulated Result (Example Query)", ans_data.get("expected_result"))
+                display_simulation("Simulated Result (Expected Results)", ans_data.get("expected_result"))
                 # --- END CORRECTION ---
         st.markdown("---")
     # --- Current Question ---
