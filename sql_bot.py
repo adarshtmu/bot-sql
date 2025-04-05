@@ -43,7 +43,7 @@ orders_table = pd.DataFrame({
 
 merged_table = pd.merge(users_table, orders_table, on="user_id", how="inner")
 
-# Updated SQL Questions with expected results
+# SQL Questions with expected results
 sql_questions = [
     {
         "question": "Write a SQL query to get all details about users from the 'users' table.",
@@ -97,7 +97,7 @@ sql_questions = [
     }
 ]
 
-# Initialize session state
+# Initialize session state variables
 if "user_answers" not in st.session_state:
     st.session_state.user_answers = []
 if "current_question" not in st.session_state:
@@ -204,45 +204,30 @@ def evaluate_answer(question, expected_result, student_answer, sample_table):
     
     return feedback, is_correct, expected_result, actual_result
 
-# Remaining functions (calculate_score, analyze_performance, get_emoji) remain same as original
-# Streamlit UI components remain same as original with proper variable name changes
-
-# ... [Rest of the Streamlit UI code remains identical except for variable name changes from 'correct_answer' to 'expected_result']
-
 def calculate_score(user_answers):
-    """Calculate the score based on correct answers."""
+    """Calculate the score based on correct answers"""
     correct_answers = sum(1 for ans in user_answers if ans["is_correct"])
-    total_questions = len(user_answers)
-    return (correct_answers / total_questions) * 100
+    return (correct_answers / len(user_answers)) * 100
 
 def analyze_performance(user_answers):
-    """Analyze the user's performance and provide detailed feedback."""
-    # Calculate areas of strength and weakness
-    correct_questions = [ans["question"] for ans in user_answers if ans["is_correct"]]
-    incorrect_questions = [ans["question"] for ans in user_answers if not ans["is_correct"]]
-    
-    # Generate detailed feedback
-    feedback = {
-        "strengths": correct_questions,
-        "weaknesses": incorrect_questions,
-        "overall_feedback": ""
-    }
+    """Analyze user performance and generate feedback"""
+    correct = [ans["question"] for ans in user_answers if ans["is_correct"]]
+    incorrect = [ans["question"] for ans in user_answers if not ans["is_correct"]]
     
     prompt = f"""
-    Aapne {len(user_answers)} mein se {len(correct_questions)} sawalon ka sahi jawab diya.
-    Sahi jawab wale sawal: {correct_questions}
-    Galat jawab wale sawal: {incorrect_questions}
-    Ab ek dost ke tarah casual Hindi mein overall performance ka feedback dein.
+    User scored {len(correct)}/{len(user_answers)}.
+    Correct Questions: {correct}
+    Incorrect Questions: {incorrect}
+    Generate friendly Hindi performance analysis with emojis.
+    Highlight strengths and areas needing improvement.
     """
     response = model.generate_content(prompt)
-    feedback["overall_feedback"] = response.text
-    
-    return feedback
+    return response.text
 
 def get_emoji(is_correct):
-    return "😊" if is_correct else "😢"
+    return "✅" if is_correct else "❌"
 
-# Streamlit App
+# Streamlit UI Implementation
 if not st.session_state.quiz_started:
     st.title("SQL Mentor - Interactive SQL Query Practice")
     
@@ -303,128 +288,113 @@ if st.session_state.quiz_started and not st.session_state.quiz_completed:
             with st.expander(f"Question {i + 1}: {ans['question']}", expanded=True):
                 st.write(f"**Your Answer:** {ans['student_answer']}")
                 if ans["is_correct"]:
-                    st.markdown(f"<span style='color:green'>✅ **Feedback:** {ans['feedback']} {get_emoji(True)}</span>", unsafe_allow_html=True)
+                    st.markdown(f"<span style='color:green'>✅ **Feedback:** {ans['feedback']}</span>", unsafe_allow_html=True)
                 else:
-                    st.markdown(f"<span style='color:red'>❌ **Feedback:** {ans['feedback']} {get_emoji(False)}</span>", unsafe_allow_html=True)
-                st.write("**Expected Query Result:**")
+                    st.markdown(f"<span style='color:red'>❌ **Feedback:** {ans['feedback']}</span>", unsafe_allow_html=True)
+                st.write("**Expected Result:**")
                 if isinstance(ans["expected_result"], pd.DataFrame):
                     st.dataframe(ans["expected_result"])
                 else:
                     st.write(ans["expected_result"])
-                st.write("**Actual Query Result:**")
+                st.write("**Actual Result:**")
                 if isinstance(ans["actual_result"], pd.DataFrame):
                     st.dataframe(ans["actual_result"])
                 else:
                     st.write(ans["actual_result"])
                 st.write("---")
     
-    progress = (st.session_state.current_question + 1) / len(sql_questions)
-    st.progress(progress)
-    st.write(f"**Progress:** {st.session_state.current_question + 1}/{len(sql_questions)} questions completed.")
+    # Get current question data
+    current_index = st.session_state.current_question
+    question_data = sql_questions[current_index]
     
-    question_data = sql_questions[st.session_state.current_question]
-    st.write(f"**Question {st.session_state.current_question + 1}:** {question_data['question']}")
+    # Progress display
+    progress = (current_index + 1) / len(sql_questions)
+    st.progress(progress)
+    st.write(f"**Progress:** {current_index + 1}/{len(sql_questions)} questions")
+    
+    # Question display
+    st.write(f"**Question {current_index + 1}:** {question_data['question']}")
     st.write("**Sample Table:**")
     st.dataframe(question_data["sample_table"])
     
-    student_answer = st.text_input("Your answer:", key=f"answer_{st.session_state.current_question}")
+    # Answer input
+    student_answer = st.text_input("Your SQL query:", key=f"answer_{current_index}")
     
     if st.button("Submit Answer"):
         if student_answer.strip():
-            feedback, is_correct, expected_result, actual_result = evaluate_answer(
+            # Evaluate answer
+            feedback, is_correct, expected, actual = evaluate_answer(
                 question_data["question"],
-                question_data["correct_answer"],
+                question_data["expected_result"],
                 student_answer,
                 question_data["sample_table"]
             )
+            
+            # Store answer
             st.session_state.user_answers.append({
                 "question": question_data["question"],
                 "student_answer": student_answer,
                 "feedback": feedback,
                 "is_correct": is_correct,
-                "expected_result": expected_result,
-                "actual_result": actual_result
+                "expected_result": expected,
+                "actual_result": actual
             })
-            if is_correct:
-                st.markdown(f"<span style='color:green'>**Feedback:** {feedback} {get_emoji(True)}</span>", unsafe_allow_html=True)
-            else:
-                st.markdown(f"<span style='color:red'>**Feedback:** {feedback} {get_emoji(False)}</span>", unsafe_allow_html=True)
             
-            if st.session_state.current_question < len(sql_questions) - 1:
+            # Move to next question or finish
+            if current_index < len(sql_questions) - 1:
                 st.session_state.current_question += 1
-                st.rerun()
             else:
                 st.session_state.awaiting_final_submission = True
-                st.rerun()
+            st.rerun()
         else:
             st.warning("Please enter an answer before submitting.")
-    
-    if st.session_state.awaiting_final_submission:
-        if st.button("Submit All Answers"):
-            st.session_state.quiz_completed = True
-            st.rerun()
+
+if st.session_state.awaiting_final_submission:
+    st.session_state.quiz_completed = True
+    st.rerun()
 
 if st.session_state.quiz_completed:
     st.balloons()
-    st.markdown(
-        """
-        <h1 style="color: white; font-size: 36px; text-align: left;">
-            Quiz Completed!
-        </h1>
-        """,
-        unsafe_allow_html=True
-    )
+    st.markdown("<h1 style='text-align: left; color: #2e86c1;'>Quiz Completed! 🎉</h1>", unsafe_allow_html=True)
+    
+    # Calculate score
     score = calculate_score(st.session_state.user_answers)
     st.write(f"**Your Score:** {score:.2f}%")
     
+    # Performance banner
     if score < 50:
-        st.markdown(
-            """
-            <div style="background-color: #ffcccc; padding: 20px; border-radius: 10px; text-align: center;">
-                <h2 style="color: #000000;">Your score is below 50% 😢</h2>
-                <p style="font-size: 18px; color: #000000;">Book a mentor now to upgrade your SQL skills!</p>
-                <a href="https://www.corporatebhaiya.com/" target="_blank">
-                    <button style="background-color: #cc0000; color: white; padding: 10px 20px; border: none; border-radius: 5px; font-size: 16px; cursor: pointer;">
-                        Book Now
-                    </button>
-                </a>
-            </div>
-            """,
-            unsafe_allow_html=True
-        )
+        st.markdown("""
+        <div style='background-color: #f8d7da; padding: 20px; border-radius: 10px;'>
+            <h3 style='color: #721c24;'>Need Improvement 😢</h3>
+            <p>Book a mentor session to boost your SQL skills!</p>
+            <a href='https://www.corporatebhaiya.com/' target='_blank'>
+                <button style='background-color: #dc3545; color: white; padding: 10px 20px; border: none; border-radius: 5px;'>
+                    Book Mentor Session
+                </button>
+            </a>
+        </div>
+        """, unsafe_allow_html=True)
     else:
-        st.markdown(
-            """
-            <div style="background-color: #ccffcc; padding: 20px; border-radius: 10px; text-align: center;">
-                <h2 style="color: #000000;">Great job scoring above 50%! 🎉</h2>
-                <p style="font-size: 18px; color: #000000;">Take the next step with a mock interview and resume building session!</p>
-                <a href="https://www.corporatebhaiya.com/" target="_blank">
-                    <button style="background-color: #008000; color: white; padding: 10px 20px; border: none; border-radius: 5px; font-size: 16px; cursor: pointer;">
-                        Book Now
-                    </button>
-                </a>
-            </div>
-            """,
-            unsafe_allow_html=True
-        )
+        st.markdown("""
+        <div style='background-color: #d4edda; padding: 20px; border-radius: 10px;'>
+            <h3 style='color: #155724;'>Great Job! 🚀</h3>
+            <p>Practice more with advanced challenges!</p>
+            <a href='https://www.corporatebhaiya.com/' target='_blank'>
+                <button style='background-color: #28a745; color: white; padding: 10px 20px; border: none; border-radius: 5px;'>
+                    Advanced Exercises
+                </button>
+            </a>
+        </div>
+        """, unsafe_allow_html=True)
     
-    if st.button("📊 Detailed Feedback"):
-        st.session_state.show_detailed_feedback = True
-        st.rerun()
-    
-    if st.session_state.show_detailed_feedback:
+    # Detailed feedback
+    if st.button("📊 Show Detailed Analysis"):
         performance_feedback = analyze_performance(st.session_state.user_answers)
-        st.write("### Detailed Performance Analysis")
-        st.write("**Strengths (Questions you answered correctly):**")
-        for i, question in enumerate(performance_feedback["strengths"]):
-            st.success(f"{i + 1}. {question} ✅")
-        st.write("**Weaknesses (Questions you answered incorrectly):**")
-        for i, question in enumerate(performance_feedback["weaknesses"]):
-            st.error(f"{i + 1}. {question} ❌")
-        st.write("**Overall Feedback:**")
-        st.info(performance_feedback["overall_feedback"])
+        st.write("### Performance Breakdown")
+        st.write(performance_feedback)
     
-    if st.button("🔄 Restart Quiz"):
+    # Restart option
+    if st.button("🔄 Take Quiz Again"):
         st.session_state.user_answers = []
         st.session_state.current_question = 0
         st.session_state.quiz_started = False
@@ -432,8 +402,3 @@ if st.session_state.quiz_completed:
         st.session_state.show_detailed_feedback = False
         st.session_state.awaiting_final_submission = False
         st.rerun()
-
-
-
-
-
