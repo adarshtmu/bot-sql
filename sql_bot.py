@@ -119,73 +119,59 @@ def normalize_dataframe(df):
 
 
 def simulate_query(query, sample_table):
-    """Simulate SQL queries on pandas DataFrame with case-sensitive handling"""
+    """Simulate SQL queries with proper operator handling"""
     try:
-        # Remove semicolons and clean whitespace (preserve case)
         query = re.sub(r'\s+', ' ', query.strip().replace(";", ""))
         
-        # Handle WHERE clause quotes conversion (preserve case inside quotes)
-        if "where" in query.lower():
-            # Split query case-insensitively
-            query_parts = re.split(r' where ', query, flags=re.IGNORECASE)
-            where_part = query_parts[1] if len(query_parts) > 1 else ""
-            
-            # Convert double quotes to single quotes without changing case
-            where_part = re.sub(r'"([^"]*)"', r"'\1'", where_part)
-            query = query_parts[0] + " WHERE " + where_part
-
-        # Case-insensitive parsing for SQL structure
-        # SELECT clause
+        # Process WHERE clause
+        if 'where' in query.lower():
+            parts = re.split(r' where ', query, flags=re.IGNORECASE)
+            base_query = parts[0]
+            where_condition = process_where_clause(' '.join(parts[1:]))
+            query = f"{base_query} WHERE {where_condition}"
+        
+        # Parse SELECT query
         select_match = re.match(r'^select\s+(.*?)\s+from\s+', query, re.IGNORECASE)
         if select_match:
-            select_part = select_match.group(1).strip()
+            select_part = select_match.group(1)
             from_part = query[select_match.end():].split('WHERE')[0].strip()
             
-            # Handle aggregations (case-sensitive column names)
+            # Handle aggregations
             agg_map = {
                 r'count\(\*\)': lambda df: pd.DataFrame({"count": [len(df)]}),
-                r'avg\(amount\)': lambda df: pd.DataFrame({"avg": [df["amount"].mean()]}),
-                r'sum\(amount\)': lambda df: pd.DataFrame({"sum": [df["amount"].sum()]})
+                r'avg\(amount\)': lambda df: pd.DataFrame({"avg": [df.amount.mean()]}),
+                r'sum\(amount\)': lambda df: pd.DataFrame({"sum": [df.amount.sum()]})
             }
+            for pattern, func in agg_map.items():
+                if re.search(pattern, select_part, re.IGNORECASE):
+                    return func(sample_table)
             
-            for agg_pattern, agg_func in agg_map.items():
-                if re.search(agg_pattern, select_part, re.IGNORECASE):
-                    return agg_func(sample_table)
-            
-            # Handle WHERE clauses (case-sensitive values)
-            where_condition = ""
+            # Apply WHERE condition
             if 'WHERE' in query.upper():
-                where_condition = re.split(r' where ', query, flags=re.IGNORECASE)[1]
-                try:
-                    filtered_df = sample_table.query(where_condition)
-                except Exception as e:
-                    return f"Error in WHERE condition: {str(e)}"
+                where_condition = query.upper().split('WHERE')[1].strip()
+                filtered_df = sample_table.query(where_condition)
             else:
-                filtered_df = sample_table.copy()
+                filtered_df = sample_table
             
-            # Handle column selection (case-sensitive)
+            # Select columns
             if "*" in select_part:
-                result_df = filtered_df
+                result = filtered_df
             else:
-                columns = [col.strip() for col in select_part.split(",")]
-                result_df = filtered_df[columns]
+                cols = [c.strip() for c in select_part.split(',')]
+                result = filtered_df[cols]
             
-            # Handle ORDER BY (case-sensitive column names)
+            # Handle ORDER BY
             if 'ORDER BY' in query.upper():
-                order_part = re.split(r' order by ', query, flags=re.IGNORECASE)[1]
-                order_col = re.split(r'\s+', order_part)[0].strip()
-                direction = 'desc' if 'desc' in order_part.lower() else 'asc'
-                limit = int(re.search(r'limit (\d+)', query).group(1)) if 'limit' in query.lower() else None
-                result_df = result_df.sort_values(order_col, ascending=(direction == 'asc'))
-                if limit:
-                    result_df = result_df.head(limit)
-            
-            return result_df.reset_index(drop=True)
+                order_part = query.upper().split('ORDER BY')[1].strip()
+                col, direction = re.split(r'\s+', order_part, 1)
+                result = result.sort_values(col, ascending='DESC' not in direction.upper())
+                
+            return result.reset_index(drop=True)
         
-        return "Unsupported query type"
+        return "Unsupported query"
     
     except Exception as e:
-        return f"Error simulating query: {str(e)}"
+        return f"Error: {str(e)}"
 
 def evaluate_answer(question, expected_result, student_answer, sample_table):
     """Evaluate answer using result comparison and LLM analysis"""
