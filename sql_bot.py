@@ -1,3 +1,4 @@
+import re
 import streamlit as st
 import google.generativeai as genai
 import pandas as pd
@@ -20,7 +21,7 @@ hide_streamlit_style = """
 st.markdown(hide_streamlit_style, unsafe_allow_html=True)
 
 # Set up Gemini API
-gemini_api_key = "AIzaSyAfzl_66GZsgaYjAM7cT2djVCBCAr86t2k" # Replace with your Gemini API key
+gemini_api_key = "YOUR_GEMINI_API_KEY"  # Replace with your Gemini API key
 genai.configure(api_key=gemini_api_key)
 model = genai.GenerativeModel('gemini-2.0-flash')
 
@@ -47,7 +48,7 @@ orders_table = pd.DataFrame({
 # Create a merged table for join-based queries
 merged_table = pd.merge(users_table, orders_table, on="user_id", how="inner")
 
-# Updated SQL Questions list with the correct_answer for Q4 using double quotes
+# Updated SQL Questions list with question #4 using double quotes for the status value
 sql_questions = [
     {
         "question": "Write a SQL query to get all details about users from the 'users' table.",
@@ -66,7 +67,7 @@ sql_questions = [
     },
     {
         "question": "Write a SQL query to find all orders with a status of 'Pending' from the 'orders' table.",
-        # NOTE the change here: using \"Pending\" instead of 'Pending'
+        # Using double quotes for 'Pending'
         "correct_answer": "SELECT * FROM orders WHERE status = \"Pending\";",
         "sample_table": orders_table
     },
@@ -87,18 +88,14 @@ sql_questions = [
     },
     {
         "question": "Write a SQL query to calculate the total amount spent by each user by joining the 'users' and 'orders' tables.",
-        "correct_answer": (
-            "SELECT users.name, SUM(orders.amount) AS total_spent FROM users "
-            "JOIN orders ON users.user_id = orders.user_id GROUP BY users.name;"
-        ),
+        "correct_answer": ("SELECT users.name, SUM(orders.amount) AS total_spent FROM users "
+                           "JOIN orders ON users.user_id = orders.user_id GROUP BY users.name;"),
         "sample_table": merged_table
     },
     {
         "question": "Write a SQL query to count how many orders each user has placed using a LEFT JOIN between 'users' and 'orders'.",
-        "correct_answer": (
-            "SELECT users.name, COUNT(orders.order_id) AS order_count FROM users "
-            "LEFT JOIN orders ON users.user_id = orders.user_id GROUP BY users.name;"
-        ),
+        "correct_answer": ("SELECT users.name, COUNT(orders.order_id) AS order_count FROM users "
+                           "LEFT JOIN orders ON users.user_id = orders.user_id GROUP BY users.name;"),
         "sample_table": merged_table
     },
     {
@@ -125,15 +122,14 @@ if "awaiting_final_submission" not in st.session_state:
 def simulate_query(query, sample_table):
     """Simulate SQL queries on a pandas DataFrame in a flexible way."""
     try:
-        # Remove trailing semicolon and leading/trailing whitespace without lowercasing
+        # Remove trailing semicolon and whitespace; keep original case for literals
         query = query.strip().replace(";", "")
         
-        # Handle SELECT queries
         if query.lower().startswith("select"):
-            # Extract the part after SELECT and before FROM (case insensitive)
-            select_lower = query.lower().split("select")[1]
-            select_part = select_lower.split("from")[0].strip()
-            from_part = query.split("from", 1)[1].strip()  # keep original casing for from part
+            # Extract parts using case-insensitive splitting for keywords
+            select_lower = query.lower().split("select", 1)[1]
+            select_part = select_lower.split("from", 1)[0].strip()
+            from_part = query.split("from", 1)[1].strip()  # preserve case for literals
             
             # Handle COUNT(*)
             if "count(*)" in select_part:
@@ -142,23 +138,23 @@ def simulate_query(query, sample_table):
             
             # Handle AVG(column)
             elif "avg(" in select_part:
-                column = query.split("avg(")[1].split(")")[0].strip()
+                column = query.split("avg(", 1)[1].split(")", 1)[0].strip()
                 result = pd.DataFrame({"avg": [sample_table[column].mean()]})
                 return result.reset_index(drop=True)
             
             # Handle SUM(column)
             elif "sum(" in select_part:
-                column = query.split("sum(")[1].split(")")[0].strip()
+                column = query.split("sum(", 1)[1].split(")", 1)[0].strip()
                 result = pd.DataFrame({"sum": [sample_table[column].sum()]})
                 return result.reset_index(drop=True)
             
             # Handle SELECT * (all columns)
             elif "*" in select_part:
                 if "where" in from_part.lower():
-                    # Extract the condition after WHERE, using the original query to preserve case
+                    # Extract the WHERE condition preserving original case
                     condition = query.split("where", 1)[1].strip()
-                    # Replace SQL equality operator with Python's operator
-                    condition = condition.replace("=", "==")
+                    # Use regex to replace '=' with '==' only when not already '==' or '!='
+                    condition = re.sub(r'(?<![=!])=(?![=])', '==', condition)
                     result = sample_table.query(condition)
                 else:
                     result = sample_table.copy()
@@ -169,13 +165,11 @@ def simulate_query(query, sample_table):
                 columns = [col.strip() for col in select_part.split(",")]
                 if "where" in from_part.lower():
                     condition = query.split("where", 1)[1].strip()
-                    condition = condition.replace("=", "==")
+                    condition = re.sub(r'(?<![=!])=(?![=])', '==', condition)
                     result = sample_table.query(condition)[columns]
                 else:
                     result = sample_table[columns]
                 return result.reset_index(drop=True)
-        
-        # Handle unsupported queries
         else:
             return "Query simulation is only supported for SELECT statements."
     
@@ -190,13 +184,13 @@ def evaluate_answer(question, correct_answer, student_answer, sample_table):
     # Simulate the actual query (user's answer)
     actual_result = simulate_query(student_answer, sample_table)
     
-    # Determine if the answer is correct
+    # Compare results – using DataFrame equality if possible
     if isinstance(expected_result, pd.DataFrame) and isinstance(actual_result, pd.DataFrame):
         is_correct = expected_result.equals(actual_result)
     else:
         is_correct = str(expected_result) == str(actual_result)
     
-    # Generate detailed, friendly feedback using Gemini API in Hindi with a casual tone.
+    # Generate detailed, friendly feedback using Gemini API in Hindi
     prompt = f"""
     Question: {question}
     Correct Answer: {correct_answer}
@@ -207,8 +201,7 @@ def evaluate_answer(question, correct_answer, student_answer, sample_table):
     Ab ek dost ke andaaz mein Hindi mein feedback dein. Agar aapka jawab sahi hai, toh kuch aise kehna: "Wah yaar, zabardast jawab diya!" Aur agar jawab galat hai, toh casually bolna: "Arre yaar, thoda gadbad ho gaya, koi baat nahi, agli baar aur accha karna." Thoda detail mein bhi batana ki kya chuk hua ya sahi kyu hai.
     """
     response = model.generate_content(prompt)
-    feedback_api = response.text
-    feedback_api = feedback_api.replace("student", "aap")
+    feedback_api = response.text.replace("student", "aap")
     
     return feedback_api, is_correct, expected_result, actual_result
 
@@ -220,11 +213,9 @@ def calculate_score(user_answers):
 
 def analyze_performance(user_answers):
     """Analyze the user's performance and provide detailed feedback."""
-    # Calculate areas of strength and weakness
     correct_questions = [ans["question"] for ans in user_answers if ans["is_correct"]]
     incorrect_questions = [ans["question"] for ans in user_answers if not ans["is_correct"]]
     
-    # Generate detailed feedback
     feedback = {
         "strengths": correct_questions,
         "weaknesses": incorrect_questions,
@@ -306,15 +297,9 @@ if st.session_state.quiz_started and not st.session_state.quiz_completed:
             with st.expander(f"Question {i + 1}: {ans['question']}", expanded=True):
                 st.write(f"**Your Answer:** {ans['student_answer']}")
                 if ans["is_correct"]:
-                    st.markdown(
-                        f"<span style='color:green'>✅ **Feedback:** {ans['feedback']} {get_emoji(True)}</span>",
-                        unsafe_allow_html=True
-                    )
+                    st.markdown(f"<span style='color:green'>✅ **Feedback:** {ans['feedback']} {get_emoji(True)}</span>", unsafe_allow_html=True)
                 else:
-                    st.markdown(
-                        f"<span style='color:red'>❌ **Feedback:** {ans['feedback']} {get_emoji(False)}</span>",
-                        unsafe_allow_html=True
-                    )
+                    st.markdown(f"<span style='color:red'>❌ **Feedback:** {ans['feedback']} {get_emoji(False)}</span>", unsafe_allow_html=True)
                 st.write("**Expected Query Result:**")
                 if isinstance(ans["expected_result"], pd.DataFrame):
                     st.dataframe(ans["expected_result"])
@@ -355,15 +340,9 @@ if st.session_state.quiz_started and not st.session_state.quiz_completed:
                 "actual_result": actual_result
             })
             if is_correct:
-                st.markdown(
-                    f"<span style='color:green'>**Feedback:** {feedback} {get_emoji(True)}</span>",
-                    unsafe_allow_html=True
-                )
+                st.markdown(f"<span style='color:green'>**Feedback:** {feedback} {get_emoji(True)}</span>", unsafe_allow_html=True)
             else:
-                st.markdown(
-                    f"<span style='color:red'>**Feedback:** {feedback} {get_emoji(False)}</span>",
-                    unsafe_allow_html=True
-                )
+                st.markdown(f"<span style='color:red'>**Feedback:** {feedback} {get_emoji(False)}</span>", unsafe_allow_html=True)
             
             if st.session_state.current_question < len(sql_questions) - 1:
                 st.session_state.current_question += 1
