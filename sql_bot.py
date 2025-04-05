@@ -63,7 +63,7 @@ sql_questions = [
     {
         "question": "Write a SQL query to find all orders with a status of 'Pending' from the 'orders' table.",
         "sample_table": orders_table,
-        "expected_result": orders_table[orders_table["status"] = "Pending"].reset_index(drop=True)
+        "expected_result": orders_table[orders_table["status"] == "Pending"].reset_index(drop=True)
     },
     {
         "question": "Write a SQL query to find the most recent order from the 'orders' table by order date.",
