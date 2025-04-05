@@ -247,14 +247,84 @@ def calculate_score(user_answers):
 
 def analyze_performance(user_answers):
     """Analyze the user's performance and provide detailed feedback via LLM."""
-    if not user_answers: return {"strengths": [], "weaknesses": [], "overall_feedback": "No answers yet."}; correct_q = [ans["question"] for ans in user_answers if ans.get("is_correct")]; incorrect_ans = [{"question": ans["question"], "your_answer": ans["student_answer"], "feedback_received": ans.get("feedback", "N/A")} for ans in user_answers if not ans.get("is_correct")]; feedback_summary = { "overall_feedback": "Summary generation failed." }; total_q, correct_c, score = len(user_answers), len(correct_q), calculate_score(user_answers); incorrect_sum = "\n".join([ f"  Q: {item['question']}\n    Aapka Jawaab: {item['your_answer']}\n    Feedback Mila: {item['feedback_received']}\n" for item in incorrect_ans]).strip() if incorrect_ans else "Koi nahi! Sab sahi the!"; prompt = f"""Ek student ne SQL quiz diya hai...\nTotal Questions: {total_q}\nCorrect Answers: {correct_c}\nScore: {score:.2f}%\nCorrectly Answered Questions:\n{chr(10).join(f'  - {q}' for q in correct_q) if correct_q else '  (Koi nahi)'}\nIncorrectly Answered Questions:\n{incorrect_sum}\nTask: Ab ek dost ki tarah, casual Hindi mein overall performance ka ek summary feedback do...""";
+
+    # Initialize the dictionary that will be returned with default values
+    performance_data = {
+        "strengths": [],
+        "weaknesses": [],
+        "overall_feedback": "Analysis could not be completed." # Default error/fallback message
+    }
+
+    # Handle empty input case
+    if not user_answers:
+        performance_data["overall_feedback"] = "Koi jawab nahi diya gaya."
+        return performance_data # Return the initialized dict with the updated message
+
+    # --- Prepare data for analysis and prompt ---
+    try:
+        correct_q = [ans["question"] for ans in user_answers if ans.get("is_correct")]
+        incorrect_ans = [{"question": ans["question"], "your_answer": ans["student_answer"], "feedback_received": ans.get("feedback", "N/A")} for ans in user_answers if not ans.get("is_correct")]
+
+        # Populate strengths and weaknesses directly into the return dict
+        performance_data["strengths"] = correct_q
+        # Store only the questions for consistency with display logic
+        performance_data["weaknesses"] = [item["question"] for item in incorrect_ans]
+
+        total_q, correct_c, score = len(user_answers), len(correct_q), calculate_score(user_answers)
+        incorrect_sum = "\n".join([ f"  Q: {item['question']}\n    Aapka Jawaab: {item['your_answer']}\n    Feedback Mila: {item['feedback_received']}\n" for item in incorrect_ans]).strip() if incorrect_ans else "Koi nahi! Sab sahi the!"
+
+        prompt = f"""
+        Ek student ne SQL quiz diya hai. Unke performance ka summary neeche hai:
+
+        Total Questions: {total_q}
+        Correct Answers: {correct_c}
+        Score: {score:.2f}%
+
+        Correctly Answered Questions:
+        {chr(10).join(f'  - {q}' for q in correct_q) if correct_q else '  (Koi nahi)'}
+
+        Incorrectly Answered Questions (with their answer and feedback given):
+        {incorrect_sum}
+
+        Task: Ab ek dost ki tarah, casual Hindi mein overall performance ka ek summary feedback do.
+        - Achhe performance ko appreciate karo (score aur sahi jawaabon ka zikr karo).
+        - Jin topics mein galti hui (incorrect answers ke basis par), unko gently highlight karo aur improve karne ke liye encourage karo. Feedback received ko consider karke common themes batao, jaise ki 'JOINs pe thoda aur practice karo' ya 'WHERE clause mein string values ko quotes mein daalna yaad rakho'.
+        - Ek positive aur motivating tone rakho. Final score ke hisaab se encouragement adjust karo (e.g., high score = "keep it up", low score = "koi baat nahi, practice se improve hoga").
+        """
+    except Exception as data_prep_error:
+         # Handle potential errors during data preparation itself
+         print(f"Error preparing data for performance analysis: {data_prep_error}")
+         performance_data["overall_feedback"] = f"Analysis failed during data preparation: {data_prep_error}"
+         return performance_data
+
+
+    # --- Try to get LLM Feedback ---
     try:
         response = model.generate_content(prompt);
-        if response.parts: feedback_summary["overall_feedback"] = "".join(part.text for part in response.parts).strip()
-        else: feedback_summary["overall_feedback"] = response.text.strip()
-    except Exception as e: print(f"Error generating performance summary: {e}"); feedback_summary["overall_feedback"] = f"Summary error: {e}"
-    feedback_display = {"strengths": correct_q, "weaknesses": [item["question"] for item in incorrect_ans], "overall_feedback": feedback_summary["overall_feedback"]}; return feedback_display
+        generated_feedback = None
+        if response.parts:
+            generated_feedback = "".join(part.text for part in response.parts).strip()
+        elif hasattr(response, 'text'): # Check if response.text exists
+            generated_feedback = response.text.strip()
 
+        # Update feedback only if successfully generated
+        if generated_feedback:
+             performance_data["overall_feedback"] = generated_feedback
+        else:
+             # Handle cases where response might not have parts or text
+             performance_data["overall_feedback"] = "AI response format unclear, summary unavailable."
+             print(f"Warning: Unexpected LLM response object type or empty content.")
+
+
+    except Exception as e:
+        # If LLM call fails, update the overall_feedback in the return dict
+        print(f"Error generating performance summary with LLM: {e}")
+        # Assign error message to the 'overall_feedback' key
+        performance_data["overall_feedback"] = f"Performance summary generate karne mein dikkat aa gayi: {e}"
+
+    # Return the single dictionary containing all performance data
+    return performance_data
+    
 def get_emoji(is_correct):
     return "✅" if is_correct else "❌"
 
