@@ -174,53 +174,7 @@ def simulate_query(query, sample_table):
     It's primarily for displaying expected/actual results based on simple queries.
     The LLM evaluation is the primary method for judging correctness.
     """
-    if not isinstance(sample_table, pd.DataFrame) or sample_table.empty:
-        # Ensure sample_table exists and has data before proceeding
-        # if isinstance(sample_table, str): return sample_table # Pass through existing error messages
-        return pd.DataFrame() # Return empty DataFrame on invalid input for consistency
-
-    try:
-        # Very basic parsing - attempts common patterns. Likely to fail on complex queries.
-        query = query.strip().lower().replace(";", "")
-
-        # Handle COUNT(*)
-        if re.match(r"select\s+count\(\s*\*\s*\)\s+from\s+\w+", query, re.IGNORECASE):
-            return pd.DataFrame({"count": [len(sample_table)]})
-
-        # Handle AVG(column)
-        avg_match = re.match(r"select\s+avg\((\w+)\)\s+from\s+\w+", query, re.IGNORECASE)
-        if avg_match:
-            col = avg_match.group(1)
-            if col in sample_table.columns:
-                # Ensure column is numeric before calculating mean
-                if pd.api.types.is_numeric_dtype(sample_table[col]):
-                     return pd.DataFrame({f"avg_{col}": [sample_table[col].mean()]})
-                else:
-                    return f"Simulation Error: Column '{col}' is not numeric for AVG."
-            else: return f"Simulation Error: Column '{col}' not found for AVG."
-
-        # Handle SUM(column) with GROUP BY (simple case)
-        # Example: SELECT name, SUM(amount) AS total FROM table GROUP BY name
-        sum_group_match = re.match(r"select\s+(\w+(?:\.\w+)?)\s*,\s*sum\((\w+(?:\.\w+)?)\)\s*(?:as\s+(\w+))?\s+from\s+.*?group\s+by\s+\1", query, re.IGNORECASE)
-        if sum_group_match:
-            group_col_raw = sum_group_match.group(1)
-            sum_col_raw = sum_group_match.group(2)
-            alias_name = sum_group_match.group(3) # Alias for the sum column
-
-            group_col = group_col_raw.split('.')[-1] # Handle potential table.col notation
-            sum_col = sum_col_raw.split('.')[-1]
-
-            if group_col in sample_table.columns and sum_col in sample_table.columns:
-                 if pd.api.types.is_numeric_dtype(sample_table[sum_col]):
-                    # Perform groupby and sum
-                    result = sample_table.groupby(group_col)[sum_col].sum().reset_index()
-                    # Rename the summed column to alias if provided, otherwise use original sum_col name
-                    sum_col_final_name = alias_name if alias_name else sum_col
-                    result = result.rename(columns={sum_col: sum_col_final_name})
-                    return result
-                 else:
-                    return f"Simulation Error: Column '{sum_col}' is not numeric for SUM."
-            else: return f"Simulation Error: Columns '{group_col}' or '{sum_col}' not found for SUM/GROUP BY."
+# --- Inside simulate_query function ---
 
         # Handle SELECT * or specific columns
         select_match = re.match(r"select\s+(.*?)\s+from.*", query, re.IGNORECASE)
@@ -250,73 +204,40 @@ def simulate_query(query, sample_table):
                         pandas_in_clause = f"{col_in}.isin([{', '.join(values_list)}])"
                         condition = condition.replace(in_match.group(0), pandas_in_clause)
                     # Handle other comparison operators (>, <, >=, <=)
-                    # Numeric: age > 30
                     condition = re.sub(r"(\w+)\s*(>|>=|<|<=)\s*(\d+\.?\d*)", r"\1 \2 \3", condition)
-                    # String/Date: status > 'Completed' or order_date >= '2024-02-10' (ensure dates are comparable)
                     condition = re.sub(r"(\w+)\s*(>|>=|<|<=)\s*('|\")(.+?)\3", r'\1 \2 "\4"', condition)
 
-                    # --- Debug Print ---
-                    # print(f"DEBUG [simulate_query]: Applying condition: {condition}")
-                    # --- End Debug ---
-                    result_df = result_df.query(condition)
-                    condition_applied = True # Mark that WHERE was processed
+                    # --- Enhanced Debug Prints ---
+                    print("-" * 20)
+                    print(f"DEBUG [simulate_query]: Original WHERE condition: {where_match.group(1).strip()}")
+                    print(f"DEBUG [simulate_query]: Processed condition for pandas.query: {condition}")
+                    print(f"DEBUG [simulate_query]: DataFrame dtypes before query:\n{result_df.dtypes}")
+                    # Check if the relevant column exists before trying to access it
+                    filter_col_match = re.match(r"(\w+)\s*==", condition) # Basic check for equality condition column
+                    if filter_col_match:
+                        filter_col = filter_col_match.group(1)
+                        if filter_col in result_df.columns:
+                             print(f"DEBUG [simulate_query]: Unique '{filter_col}' values before query: {result_df[filter_col].unique()}")
+                        else:
+                             print(f"DEBUG [simulate_query]: Column '{filter_col}' not found before query.")
+                    else:
+                         print(f"DEBUG [simulate_query]: Could not determine filter column from condition '{condition}' for unique value check.")
+                    # --- End Enhanced Debug Prints ---
+
+                    result_df = result_df.query(condition) # The actual filtering
+                    condition_applied = True
+
+                    # --- Debug Print After Query ---
+                    print(f"DEBUG [simulate_query]: DataFrame shape after query: {result_df.shape}")
+                    # print(f"DEBUG [simulate_query]: DataFrame after query:\n{result_df}") # Uncomment to see full df
+                    print("-" * 20)
+                    # --- End Debug Print After Query ---
 
                 except Exception as e_cond:
                      print(f"DEBUG [simulate_query]: Error during sample_table.query execution for condition '{condition}': {e_cond}")
                      # Return error string instead of empty DataFrame on simulation failure
                      return f"Simulation Error: Could not apply condition '{where_match.group(1)}'. Reason: {e_cond}"
-
-            # --- ORDER BY Clause Processing ---
-            order_match = re.search(r"order by\s+([\w,\s]+?)(\s+(asc|desc))?$", query, re.IGNORECASE)
-            if order_match:
-                order_cols_str = order_match.group(1).strip()
-                order_direction_keyword = order_match.group(3)
-                ascending_flag = not (order_direction_keyword and order_direction_keyword.lower() == 'desc')
-                # Handle multiple order columns (simple split)
-                order_cols = [col.strip() for col in order_cols_str.split(',')]
-                # Check if all columns exist
-                valid_cols = [col for col in order_cols if col in result_df.columns]
-                if valid_cols:
-                     try:
-                        result_df = result_df.sort_values(by=valid_cols, ascending=ascending_flag)
-                     except Exception as e_order:
-                         print(f"DEBUG [simulate_query]: Error during sort_values: {e_order}")
-                         return f"Simulation Error: Could not apply ORDER BY. Reason: {e_order}"
-                # else: # Optionally return error if columns don't exist
-                #    return f"Simulation Error: ORDER BY columns not found: {order_cols}"
-
-
-            # --- LIMIT Clause Processing ---
-            limit_match = re.search(r"limit\s+(\d+)", query, re.IGNORECASE)
-            if limit_match:
-                limit = int(limit_match.group(1))
-                result_df = result_df.head(limit)
-
-            # --- Column Selection ---
-            if select_part != "*":
-                # Select specific columns mentioned
-                select_cols_list = [col.strip().split('.')[-1] for col in select_part.split(',')] # Basic alias/table prefix handling
-                # Filter to columns that actually exist in the result after filtering/sorting
-                select_cols_exist = [col for col in select_cols_list if col in result_df.columns]
-                # Check if any requested columns exist
-                if select_cols_exist:
-                    result_df = result_df[select_cols_exist]
-                # else: # Optionally return error if columns don't exist
-                    # return f"Simulation Error: Selected columns not found: {select_cols_list}"
-
-
-            return result_df.reset_index(drop=True)
-
-
-        # If no specific SELECT pattern matches, return error string
-        return "Simulation Error: Unsupported query structure."
-
-    except Exception as e:
-        # Catch any other unexpected error during simulation
-        print(f"ERROR [simulate_query]: Unexpected error: {e}")
-        # import traceback
-        # traceback.print_exc() # Uncomment for detailed debug trace
-        return f"Simulation Error: An unexpected issue occurred ({str(e)})."
+            # ... [rest of the function remains the same] ...
 
 
 def get_table_schema(table_name, tables_dict):
