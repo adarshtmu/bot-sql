@@ -3,8 +3,6 @@ import google.generativeai as genai
 import pandas as pd
 
 # Custom CSS to hide Streamlit and GitHub elements
-import streamlit as st
-
 hide_streamlit_style = """
     <style>
         header {visibility: hidden;}
@@ -122,13 +120,15 @@ if "awaiting_final_submission" not in st.session_state:
 def simulate_query(query, sample_table):
     """Simulate SQL queries on a pandas DataFrame in a flexible way."""
     try:
-        query = query.strip().lower().replace(";", "")
+        # Remove trailing semicolon and leading/trailing whitespace without lowercasing
+        query = query.strip().replace(";", "")
         
         # Handle SELECT queries
-        if query.startswith("select"):
-            # Extract the part after SELECT and before FROM
-            select_part = query.split("select")[1].split("from")[0].strip()
-            from_part = query.split("from")[1].strip()
+        if query.lower().startswith("select"):
+            # Extract the part after SELECT and before FROM (case insensitive)
+            select_lower = query.lower().split("select")[1]
+            select_part = select_lower.split("from")[0].strip()
+            from_part = query.split("from", 1)[1].strip()  # keep original casing for from part
             
             # Handle COUNT(*)
             if "count(*)" in select_part:
@@ -137,22 +137,23 @@ def simulate_query(query, sample_table):
             
             # Handle AVG(column)
             elif "avg(" in select_part:
-                column = select_part.split("avg(")[1].split(")")[0].strip()
+                # Find the column name preserving the original query's casing
+                column = query.split("avg(")[1].split(")")[0].strip()
                 result = pd.DataFrame({"avg": [sample_table[column].mean()]})
                 return result.reset_index(drop=True)
             
             # Handle SUM(column)
             elif "sum(" in select_part:
-                column = select_part.split("sum(")[1].split(")")[0].strip()
+                column = query.split("sum(")[1].split(")")[0].strip()
                 result = pd.DataFrame({"sum": [sample_table[column].sum()]})
                 return result.reset_index(drop=True)
             
             # Handle SELECT * (all columns)
             elif "*" in select_part:
-                if "where" in from_part:
-                    # Extract the condition after WHERE
-                    condition = from_part.split("where")[1].strip()
-                    # Replace SQL equality operator with Python's
+                if "where" in from_part.lower():
+                    # Extract the condition after WHERE, using the original query to preserve case
+                    condition = query.split("where", 1)[1].strip()
+                    # Replace SQL equality operator with Python's operator
                     condition = condition.replace("=", "==")
                     result = sample_table.query(condition)
                 else:
@@ -162,10 +163,8 @@ def simulate_query(query, sample_table):
             # Handle specific columns (not fully featured for complex queries)
             else:
                 columns = [col.strip() for col in select_part.split(",")]
-                if "where" in from_part:
-                    # Extract the condition after WHERE
-                    condition = from_part.split("where")[1].strip()
-                    # Replace SQL equality operator with Python's
+                if "where" in from_part.lower():
+                    condition = query.split("where", 1)[1].strip()
                     condition = condition.replace("=", "==")
                     result = sample_table.query(condition)[columns]
                 else:
@@ -432,7 +431,3 @@ if st.session_state.quiz_completed:
         st.session_state.show_detailed_feedback = False
         st.session_state.awaiting_final_submission = False
         st.rerun()
-
-
-
-
