@@ -48,7 +48,7 @@ orders_table = pd.DataFrame({
 # Create a merged table for join-based queries
 merged_table = pd.merge(users_table, orders_table, on="user_id", how="inner")
 
-# Updated SQL Questions list (no restriction on quotes)
+# Updated SQL Questions list (user can use single or double quotes)
 sql_questions = [
     {
         "question": "Write a SQL query to get all details about users from the 'users' table.",
@@ -108,7 +108,10 @@ sql_questions = [
     }
 ]
 
-# Initialize session state variables
+#########################
+# Session State Tracking
+#########################
+
 if "user_answers" not in st.session_state:
     st.session_state.user_answers = []
 if "current_question" not in st.session_state:
@@ -122,7 +125,22 @@ if "show_detailed_feedback" not in st.session_state:
 if "awaiting_final_submission" not in st.session_state:
     st.session_state.awaiting_final_submission = False
 
-def simulate_query(query, sample_table):
+#########################
+# Helper Functions
+#########################
+
+def sort_df_for_comparison(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    Sorts the DataFrame by column names and then by row values
+    so that .equals() won't fail just because of a different row/column order.
+    """
+    # Sort columns by name
+    df_sorted_cols = df.reindex(sorted(df.columns), axis=1)
+    # Sort rows by all columns
+    df_sorted_rows = df_sorted_cols.sort_values(by=list(df_sorted_cols.columns))
+    return df_sorted_rows.reset_index(drop=True)
+
+def simulate_query(query: str, sample_table: pd.DataFrame):
     """Simulate SQL queries on a pandas DataFrame in a flexible way."""
     try:
         # Check that essential keywords exist
@@ -160,10 +178,11 @@ def simulate_query(query, sample_table):
             if "where" in from_part.lower():
                 # Extract the WHERE condition preserving original case
                 condition = query.split("where", 1)[1].strip()
-                # Normalize quotes: convert double quotes to single quotes
-                condition = condition.replace("\"", "'")
-                # Replace '=' with '==' using regex (only single '=' not part of '==' or '!=')
+                # Normalize double quotes => single quotes
+                condition = condition.replace('"', "'")
+                # Replace '=' with '==' using regex (only single '=' not part of '!=' or '==')
                 condition = re.sub(r'(?<![=!])=(?![=])', '==', condition)
+                # Evaluate the condition
                 result = sample_table.query(condition)
             else:
                 result = sample_table.copy()
@@ -174,7 +193,7 @@ def simulate_query(query, sample_table):
             columns = [col.strip() for col in select_part.split(",")]
             if "where" in from_part.lower():
                 condition = query.split("where", 1)[1].strip()
-                condition = condition.replace("\"", "'")
+                condition = condition.replace('"', "'")
                 condition = re.sub(r'(?<![=!])=(?![=])', '==', condition)
                 result = sample_table.query(condition)[columns]
             else:
@@ -188,11 +207,11 @@ def evaluate_answer(question, correct_answer, student_answer, sample_table):
     expected_result = simulate_query(correct_answer, sample_table)
     actual_result = simulate_query(student_answer, sample_table)
     
-    # Reset indexes for proper DataFrame comparison (if applicable)
+    # If we got DataFrames, sort them to ensure a fair comparison
     if isinstance(expected_result, pd.DataFrame):
-        expected_result = expected_result.reset_index(drop=True)
+        expected_result = sort_df_for_comparison(expected_result)
     if isinstance(actual_result, pd.DataFrame):
-        actual_result = actual_result.reset_index(drop=True)
+        actual_result = sort_df_for_comparison(actual_result)
     
     # Compare results using DataFrame equality if possible
     if isinstance(expected_result, pd.DataFrame) and isinstance(actual_result, pd.DataFrame):
@@ -212,7 +231,9 @@ def evaluate_answer(question, correct_answer, student_answer, sample_table):
     Actual Query Result: {actual_result}
     Is Correct? {correctness_text}
 
-    Ab ek dost ke andaaz mein Hindi mein feedback dein. Agar aapka jawab sahi hai, toh kuch aise kehna: "Wah yaar, zabardast jawab diya!" Aur agar jawab galat hai, toh casually bolna: "Arre yaar, thoda gadbad ho gaya, koi baat nahi, agli baar aur accha karna." Thoda detail mein bhi batana ki kya chuk hua ya sahi kyu hai.
+    Ab ek dost ke andaaz mein Hindi mein feedback dein. Agar aapka jawab sahi hai, toh kuch aise kehna: "Wah yaar, zabardast jawab diya!" 
+    Aur agar jawab galat hai, toh casually bolna: "Arre yaar, thoda gadbad ho gaya, koi baat nahi, agli baar aur accha karna." 
+    Thoda detail mein bhi batana ki kya chuk hua ya sahi kyu hai.
     """
     response = model.generate_content(prompt)
     feedback_api = response.text.replace("student", "aap")
@@ -250,7 +271,10 @@ def analyze_performance(user_answers):
 def get_emoji(is_correct):
     return "😊" if is_correct else "😢"
 
+#########################
 # Streamlit App UI
+#########################
+
 if not st.session_state.quiz_started:
     st.title("SQL Mentor - Interactive SQL Query Practice")
     st.write("### Welcome to Your SQL Learning Journey!")
@@ -258,7 +282,7 @@ if not st.session_state.quiz_started:
     st.markdown("""
     **📌 Important Note:**
     - This quiz uses **MySQL syntax** for all SQL queries.
-    - You may use single or double quotes for string literals.
+    - You can use **single or double quotes** for string literals (e.g., `'Pending'` or `"Pending"`).
     """)
     
     col1, col2 = st.columns([2, 1])
