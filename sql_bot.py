@@ -278,7 +278,7 @@ elif st.session_state.quiz_started and not st.session_state.quiz_completed:
     # --- Current Question ---
     current_q_index = st.session_state.current_question
     if current_q_index < len(sql_questions):
-        question_data = sql_questions[current_q_index]; st.subheader(f"Question {current_q_index + 1} / {len(sql_questions)}"); st.markdown(f"**{question_data['question']}**"); st.write("**Relevant Table(s) Preview:**");
+        question_data = sql_questions[current_q_index]; st.subheader(f"Question {current_q_index + 1} / {len(sql_questions)}"); st.markdown(f"**{question_data['question']}**"); st.write("****");
         rel_tables = question_data.get("relevant_tables", []);
         if rel_tables:
             tabs = st.tabs([f"{name.capitalize()} Table" for name in rel_tables]);
