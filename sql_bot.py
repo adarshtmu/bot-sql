@@ -175,16 +175,37 @@ def simulate_query_duckdb(sql_query, tables_dict):
         con.close() # Close connection immediately after use
         return result_df
 
-    except Exception as e:
-        # Catch DuckDB execution errors (syntax errors, etc.)
-        error_message = f"Simulation Error: Failed to execute query. Reason: {str(e)}"
-        print(f"ERROR [simulate_query_duckdb]: {error_message}\nQuery: {sql_query}") # Log error
-        if con:
+# --- Inside simulate_query_duckdb function ---
+
+        except Exception as e:
+            # Catch DuckDB execution errors (syntax errors, etc.)
+            # Default error message
+            error_message = f"Simulation Error: Failed to execute query. Reason: {str(e)}"
+    
+            # --- Add specific hint for double-quote string issue ---
             try:
-                con.close() # Ensure connection is closed on error
-            except: pass # Ignore close error after another error
-        return error_message
-    # finally block is less necessary if connection is closed in try/except
+                e_str = str(e).lower() # Use lowercase for easier matching
+                # Check if it's a Binder Error about a referenced column not found
+                binder_match = re.search(r'(binder error|catalog error).*referenced column "([^"]+)" not found', e_str)
+    
+                if binder_match:
+                     double_quoted_value = binder_match.group(2) # Get the problematic value like 'pending'
+                     # Check if the problematic value (with double quotes) likely exists in the original query string
+                     # This avoids adding the hint for unrelated binder errors
+                     if f'"{double_quoted_value}"' in sql_query.lower().replace("'", '"'): # Check query for "value" pattern
+                         # Add a specific, user-friendly hint
+                         error_message += f"\n\n**Hint:** SQL standard uses single quotes (') for text values. Try using `'{double_quoted_value}'` instead of `\"{double_quoted_value}\"` in your `WHERE` clause."
+            except Exception as e_hint:
+                # Avoid breaking the app if hint generation fails
+                print(f"Error generating hint for simulation error: {e_hint}")
+            # --- End of hint ---
+    
+            print(f"ERROR [simulate_query_duckdb]: {error_message}\nQuery: {sql_query}") # Log error
+            if con:
+                try: con.close()
+                except: pass # Ignore close error after another error
+            return error_message # Return the potentially enhanced error message
+        # finally block is less necessary if connection is closed in try/except
 
 # --- OLD simulate_query function is removed ---
 
