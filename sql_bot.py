@@ -21,7 +21,7 @@ hide_streamlit_style = """
 st.markdown(hide_streamlit_style, unsafe_allow_html=True)
 
 # Set up Gemini API
-gemini_api_key = "AIzaSyAfzl_66GZsgaYjAM7cT2djVCBCAr86t2k"  # Replace with your Gemini API key
+gemini_api_key = "YOUR_GEMINI_API_KEY"  # Replace with your Gemini API key
 genai.configure(api_key=gemini_api_key)
 model = genai.GenerativeModel('gemini-2.0-flash')
 
@@ -48,7 +48,7 @@ orders_table = pd.DataFrame({
 # Create a merged table for join-based queries
 merged_table = pd.merge(users_table, orders_table, on="user_id", how="inner")
 
-# Updated SQL Questions list with consistent quotes for question #4
+# Updated SQL Questions list (no restriction on quotes)
 sql_questions = [
     {
         "question": "Write a SQL query to get all details about users from the 'users' table.",
@@ -129,7 +129,7 @@ def simulate_query(query, sample_table):
         lower_q = query.lower()
         if "select" not in lower_q or "from" not in lower_q:
             return "Invalid query: missing SELECT or FROM"
-
+        
         # Remove trailing semicolon and extra whitespace (preserving literal case)
         query = query.strip().replace(";", "")
         
@@ -160,6 +160,8 @@ def simulate_query(query, sample_table):
             if "where" in from_part.lower():
                 # Extract the WHERE condition preserving original case
                 condition = query.split("where", 1)[1].strip()
+                # Normalize quotes: convert double quotes to single quotes
+                condition = condition.replace("\"", "'")
                 # Replace '=' with '==' using regex (only single '=' not part of '==' or '!=')
                 condition = re.sub(r'(?<![=!])=(?![=])', '==', condition)
                 result = sample_table.query(condition)
@@ -172,6 +174,7 @@ def simulate_query(query, sample_table):
             columns = [col.strip() for col in select_part.split(",")]
             if "where" in from_part.lower():
                 condition = query.split("where", 1)[1].strip()
+                condition = condition.replace("\"", "'")
                 condition = re.sub(r'(?<![=!])=(?![=])', '==', condition)
                 result = sample_table.query(condition)[columns]
             else:
@@ -255,7 +258,7 @@ if not st.session_state.quiz_started:
     st.markdown("""
     **📌 Important Note:**
     - This quiz uses **MySQL syntax** for all SQL queries.
-    - Please use single quotes for string literals (e.g., 'Pending').
+    - You may use single or double quotes for string literals.
     """)
     
     col1, col2 = st.columns([2, 1])
