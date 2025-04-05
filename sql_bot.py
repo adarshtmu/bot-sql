@@ -1,7 +1,7 @@
 import streamlit as st
 import google.generativeai as genai
 import pandas as pd
-import re # Import regex for parsing LLM output
+import re # Import regex for parsing LLM output and simulation
 
 # --- Custom CSS ---
 hide_streamlit_style = """
@@ -28,10 +28,10 @@ try:
     gemini_api_key = st.secrets["GEMINI_API_KEY"]
 except (FileNotFoundError, KeyError):
     # Fallback or default if secrets aren't set
-    gemini_api_key = "AIzaSyAfzl_66GZsgaYjAM7cT2djVCBCAr86t2k" # Replace with your key if not using secrets
+    gemini_api_key = "YOUR_GEMINI_API_KEY" # Replace with your key if not using secrets
 
 # Basic check if the key looks like a placeholder
-if gemini_api_key == "YOUR_GEMINI_API_KEY" or not gemini_api_key:
+if gemini_api_key == "AIzaSyAfzl_66GZsgaYjAM7cT2djVCBCAr86t2k" or not gemini_api_key:
     st.error("🚨 Gemini API Key not found. Please set it using Streamlit Secrets (key: GEMINI_API_KEY) or replace the placeholder in the code.")
     st.stop()
 
@@ -61,7 +61,8 @@ orders_table = pd.DataFrame({
     "order_id": [101, 102, 103, 104, 105],
     "user_id": [1, 2, 3, 1, 4],
     "amount": [50.00, 75.50, 120.00, 200.00, 35.00],
-    "order_date": pd.to_datetime(["2024-02-01", "2024-02-05", "2024-02-10", "2024-02-15", "2024-02-20"]), # Use datetime
+    # Ensure order_date is datetime type for potential date comparisons in simulation
+    "order_date": pd.to_datetime(["2024-02-01", "2024-02-05", "2024-02-10", "2024-02-15", "2024-02-20"]),
     "status": ["Completed", "Pending", "Completed", "Shipped", "Cancelled"]
 })
 
@@ -166,91 +167,148 @@ def simulate_query(query, sample_table):
     The LLM evaluation is the primary method for judging correctness.
     """
     if not isinstance(sample_table, pd.DataFrame) or sample_table.empty:
-        return "Invalid or empty sample table provided for simulation."
+        # Ensure sample_table exists and has data before proceeding
+        # if isinstance(sample_table, str): return sample_table # Pass through existing error messages
+        return pd.DataFrame() # Return empty DataFrame on invalid input for consistency
 
     try:
         # Very basic parsing - attempts common patterns. Likely to fail on complex queries.
         query = query.strip().lower().replace(";", "")
 
         # Handle COUNT(*)
-        if re.match(r"select\s+count\(\s*\*\s*\)\s+from\s+\w+", query):
+        if re.match(r"select\s+count\(\s*\*\s*\)\s+from\s+\w+", query, re.IGNORECASE):
             return pd.DataFrame({"count": [len(sample_table)]})
 
         # Handle AVG(column)
-        avg_match = re.match(r"select\s+avg\((\w+)\)\s+from\s+\w+", query)
+        avg_match = re.match(r"select\s+avg\((\w+)\)\s+from\s+\w+", query, re.IGNORECASE)
         if avg_match:
             col = avg_match.group(1)
             if col in sample_table.columns:
-                return pd.DataFrame({f"avg_{col}": [sample_table[col].mean()]})
-            else: return f"Column '{col}' not found for AVG."
+                # Ensure column is numeric before calculating mean
+                if pd.api.types.is_numeric_dtype(sample_table[col]):
+                     return pd.DataFrame({f"avg_{col}": [sample_table[col].mean()]})
+                else:
+                    return f"Simulation Error: Column '{col}' is not numeric for AVG."
+            else: return f"Simulation Error: Column '{col}' not found for AVG."
 
         # Handle SUM(column) with GROUP BY (simple case)
-        sum_group_match = re.match(r"select\s+(\w+(?:\.\w+)?)\s*,\s*sum\((\w+(?:\.\w+)?)\)\s*(?:as\s+\w+)?\s+from\s+[\w\s\.\=]+group\s+by\s+\1", query, re.IGNORECASE)
+        # Example: SELECT name, SUM(amount) AS total FROM table GROUP BY name
+        sum_group_match = re.match(r"select\s+(\w+(?:\.\w+)?)\s*,\s*sum\((\w+(?:\.\w+)?)\)\s*(?:as\s+(\w+))?\s+from\s+.*?group\s+by\s+\1", query, re.IGNORECASE)
         if sum_group_match:
-            group_col = sum_group_match.group(1).split('.')[-1] # Handle potential alias.col
-            sum_col = sum_group_match.group(2).split('.')[-1]
+            group_col_raw = sum_group_match.group(1)
+            sum_col_raw = sum_group_match.group(2)
+            alias_name = sum_group_match.group(3) # Alias for the sum column
+
+            group_col = group_col_raw.split('.')[-1] # Handle potential table.col notation
+            sum_col = sum_col_raw.split('.')[-1]
+
             if group_col in sample_table.columns and sum_col in sample_table.columns:
-                 # Pandas groupby().sum() can simulate this
-                result = sample_table.groupby(group_col)[sum_col].sum().reset_index()
-                # Rename sum column if needed (basic alias handling)
-                alias_match = re.search(r"sum\(\w+(?:\.\w+)?\)\s+as\s+(\w+)", query, re.IGNORECASE)
-                if alias_match:
-                    result = result.rename(columns={sum_col: alias_match.group(1)})
-                return result
-            else: return f"Columns '{group_col}' or '{sum_col}' not found for SUM/GROUP BY."
+                 if pd.api.types.is_numeric_dtype(sample_table[sum_col]):
+                    # Perform groupby and sum
+                    result = sample_table.groupby(group_col)[sum_col].sum().reset_index()
+                    # Rename the summed column to alias if provided, otherwise use original sum_col name
+                    sum_col_final_name = alias_name if alias_name else sum_col
+                    result = result.rename(columns={sum_col: sum_col_final_name})
+                    return result
+                 else:
+                    return f"Simulation Error: Column '{sum_col}' is not numeric for SUM."
+            else: return f"Simulation Error: Columns '{group_col}' or '{sum_col}' not found for SUM/GROUP BY."
 
+        # Handle SELECT * or specific columns
+        select_match = re.match(r"select\s+(.*?)\s+from.*", query, re.IGNORECASE)
+        if select_match:
+            select_part = select_match.group(1).strip()
 
-        # Handle SELECT *
-        if query.startswith("select *"):
-            # Basic WHERE clause handling (simple conditions)
-            where_match = re.search(r"where\s+(.*)", query)
+            # --- WHERE Clause Processing ---
+            result_df = sample_table.copy() # Start with the full table
+            where_match = re.search(r"where\s+(.*)", query, re.IGNORECASE)
+            condition_applied = False # Flag if WHERE clause was processed
             if where_match:
-                condition = where_match.group(1)
-                # VERY basic condition parsing - replace SQL operators. Prone to errors.
+                condition = where_match.group(1).strip()
+                # Process the condition string for pandas.query()
                 try:
-                    condition = condition.replace("=", "==").replace("'", "\"").replace(" and ", " & ").replace(" or ", " | ")
-                    # Handle IN operator crudely
-                    in_match = re.search(r"(\w+)\s+in\s+\(([^)]+)\)", condition)
+                    # Convert SQL-style string comparisons: col = 'value' or col = "value" -> col == "value"
+                    condition = re.sub(r"(\w+)\s*=\s*('|\")(.+?)\2", r'\1 == "\3"', condition)
+                    # Convert numeric/boolean equality: col = 123 -> col == 123
+                    condition = re.sub(r"(\w+)\s*=\s*(\d+\.?\d*|True|False)", r'\1 == \2', condition, flags=re.IGNORECASE)
+                    # Handle AND/OR (case-insensitive)
+                    condition = re.sub(r"\s+and\s+", " & ", condition, flags=re.IGNORECASE)
+                    condition = re.sub(r"\s+or\s+", " | ", condition, flags=re.IGNORECASE)
+                    # Handle IN operator: city in ('New York', 'Chicago') -> city.isin(["New York", "Chicago"])
+                    in_match = re.search(r"(\w+)\s+in\s+\((.+)\)", condition, flags=re.IGNORECASE)
                     if in_match:
-                        col_in, values_in = in_match.groups()
-                        values_list = [v.strip().strip('"') for v in values_in.split(',')]
-                        condition = condition.replace(in_match.group(0), f"{col_in}.isin({values_list})")
+                        col_in, values_in_str = in_match.groups()
+                        values_list = [f'"{v.strip().strip( "\' ")}"' for v in values_in_str.split(',')]
+                        pandas_in_clause = f"{col_in}.isin([{', '.join(values_list)}])"
+                        condition = condition.replace(in_match.group(0), pandas_in_clause)
+                    # Handle other comparison operators (>, <, >=, <=)
+                    # Numeric: age > 30
+                    condition = re.sub(r"(\w+)\s*(>|>=|<|<=)\s*(\d+\.?\d*)", r"\1 \2 \3", condition)
+                    # String/Date: status > 'Completed' or order_date >= '2024-02-10' (ensure dates are comparable)
+                    condition = re.sub(r"(\w+)\s*(>|>=|<|<=)\s*('|\")(.+?)\3", r'\1 \2 "\4"', condition)
 
-                    # Handle > , < , >=, <= (ensure they are not part of strings)
-                    condition = re.sub(r"(\w+)\s*(>|>=|<|<=)\s*(\d+)", r"\1 \2 \3", condition)
-                    condition = re.sub(r"(\w+)\s*(>|>=|<|<=)\s*'([^']*)'", r"\1 \2 '\3'", condition) # Dates/Strings might fail
+                    # --- Debug Print ---
+                    # print(f"DEBUG [simulate_query]: Applying condition: {condition}")
+                    # --- End Debug ---
+                    result_df = result_df.query(condition)
+                    condition_applied = True # Mark that WHERE was processed
 
-                    result = sample_table.query(condition)
                 except Exception as e_cond:
-                     return f"Error simulating WHERE clause '{condition}': {e_cond}"
-            else:
-                result = sample_table.copy()
+                     print(f"DEBUG [simulate_query]: Error during sample_table.query execution for condition '{condition}': {e_cond}")
+                     # Return error string instead of empty DataFrame on simulation failure
+                     return f"Simulation Error: Could not apply condition '{where_match.group(1)}'. Reason: {e_cond}"
 
-            # Basic ORDER BY
-            order_match = re.search(r"order by\s+(\w+)(\s+desc)?", query)
+            # --- ORDER BY Clause Processing ---
+            order_match = re.search(r"order by\s+([\w,\s]+?)(\s+(asc|desc))?$", query, re.IGNORECASE)
             if order_match:
-                order_col = order_match.group(1)
-                desc = bool(order_match.group(2))
-                if order_col in result.columns:
-                    result = result.sort_values(by=order_col, ascending=not desc)
-                else: return f"Column '{order_col}' not found for ORDER BY."
+                order_cols_str = order_match.group(1).strip()
+                order_direction_keyword = order_match.group(3)
+                ascending_flag = not (order_direction_keyword and order_direction_keyword.lower() == 'desc')
+                # Handle multiple order columns (simple split)
+                order_cols = [col.strip() for col in order_cols_str.split(',')]
+                # Check if all columns exist
+                valid_cols = [col for col in order_cols if col in result_df.columns]
+                if valid_cols:
+                     try:
+                        result_df = result_df.sort_values(by=valid_cols, ascending=ascending_flag)
+                     except Exception as e_order:
+                         print(f"DEBUG [simulate_query]: Error during sort_values: {e_order}")
+                         return f"Simulation Error: Could not apply ORDER BY. Reason: {e_order}"
+                # else: # Optionally return error if columns don't exist
+                #    return f"Simulation Error: ORDER BY columns not found: {order_cols}"
 
-            # Basic LIMIT
-            limit_match = re.search(r"limit\s+(\d+)", query)
+
+            # --- LIMIT Clause Processing ---
+            limit_match = re.search(r"limit\s+(\d+)", query, re.IGNORECASE)
             if limit_match:
                 limit = int(limit_match.group(1))
-                result = result.head(limit)
+                result_df = result_df.head(limit)
 
-            return result.reset_index(drop=True)
+            # --- Column Selection ---
+            if select_part != "*":
+                # Select specific columns mentioned
+                select_cols_list = [col.strip().split('.')[-1] for col in select_part.split(',')] # Basic alias/table prefix handling
+                # Filter to columns that actually exist in the result after filtering/sorting
+                select_cols_exist = [col for col in select_cols_list if col in result_df.columns]
+                # Check if any requested columns exist
+                if select_cols_exist:
+                    result_df = result_df[select_cols_exist]
+                # else: # Optionally return error if columns don't exist
+                    # return f"Simulation Error: Selected columns not found: {select_cols_list}"
 
-        # If no specific pattern matches, return error
-        return "Simulation for this specific query type is not fully supported."
+
+            return result_df.reset_index(drop=True)
+
+
+        # If no specific SELECT pattern matches, return error string
+        return "Simulation Error: Unsupported query structure."
 
     except Exception as e:
         # Catch any other unexpected error during simulation
+        print(f"ERROR [simulate_query]: Unexpected error: {e}")
         # import traceback
         # traceback.print_exc() # Uncomment for detailed debug trace
-        return f"Error simulating query: {str(e)}"
+        return f"Simulation Error: An unexpected issue occurred ({str(e)})."
 
 
 def get_table_schema(table_name, tables_dict):
@@ -263,7 +321,7 @@ def get_table_schema(table_name, tables_dict):
 def evaluate_answer_with_llm(question_data, student_answer, original_tables_dict):
     """Evaluate the user's answer using Gemini API based on question intent and schema."""
     if not student_answer.strip():
-        return "Please provide an answer.", False, "N/A", "N/A"
+        return "Please provide an answer.", False, "N/A", "N/A", "No input."
 
     question = question_data["question"]
     relevant_table_names = question_data["relevant_tables"]
@@ -278,18 +336,22 @@ def evaluate_answer_with_llm(question_data, student_answer, original_tables_dict
         for name in relevant_table_names:
             columns = get_table_schema(name, original_tables_dict)
             if columns:
-                schema_info += f"Table '{name}': Columns {columns}\n"
+                # Include data types for better context
+                dtypes = original_tables_dict[name].dtypes.to_string()
+                schema_info += f"Table '{name}': Columns {columns}\n DataTypes:\n{dtypes}\n\n"
             else:
                 # Try to infer from sample_table if original not found (less ideal)
-                fallback_cols = question_data.get("sample_table", pd.DataFrame()).columns.astype(str).tolist()
-                if fallback_cols:
-                     schema_info += f"Table '{name}' (inferred): Columns {fallback_cols}\n"
+                fallback_df = question_data.get("sample_table")
+                if isinstance(fallback_df, pd.DataFrame) and not fallback_df.empty:
+                     fallback_cols = fallback_df.columns.astype(str).tolist()
+                     fallback_dtypes = fallback_df.dtypes.to_string()
+                     schema_info += f"Table '{name}' (inferred): Columns {fallback_cols}\n DataTypes:\n{fallback_dtypes}\n\n"
                 else:
                     schema_info += f"Table '{name}': Schema not found.\n"
 
     # --- LLM Prompt ---
     prompt = f"""
-    You are an expert SQL evaluator acting as a friendly SQL mentor. Analyze the student's SQL query based on the question asked and the provided table schemas. Assume standard SQL syntax (like MySQL/PostgreSQL).
+    You are an expert SQL evaluator acting as a friendly SQL mentor. Analyze the student's SQL query based on the question asked and the provided table schemas (including data types). Assume standard SQL syntax (like MySQL/PostgreSQL).
 
     **Evaluation Task:**
 
@@ -303,13 +365,13 @@ def evaluate_answer_with_llm(question_data, student_answer, original_tables_dict
 
     **Analysis Instructions:**
 
-    * **Correctness:** Does the student's query accurately and completely answer the **Question** based on the **Relevant Table Schemas**? Consider edge cases if applicable (e.g., users with no orders).
+    * **Correctness:** Does the student's query accurately and completely answer the **Question** based on the **Relevant Table Schemas**? Consider edge cases if applicable (e.g., users with no orders, data types for comparisons).
     * **Validity:** Is the query syntactically valid SQL? Briefly mention any syntax errors.
-    * **Logic:** Does the query use appropriate SQL clauses (SELECT, FROM, WHERE, JOIN, GROUP BY, ORDER BY, aggregates, etc.) correctly for the task? Is the logic sound?
+    * **Logic:** Does the query use appropriate SQL clauses (SELECT, FROM, WHERE, JOIN, GROUP BY, ORDER BY, aggregates, etc.) correctly for the task? Is the logic sound? Are comparisons appropriate for the data types?
     * **Alternatives:** Briefly acknowledge if the student used a valid alternative approach (e.g., different JOIN type if appropriate, subquery vs. JOIN). Efficiency is a minor point unless significantly poor.
     * **Feedback:** Provide clear, constructive feedback in a friendly, encouraging, casual Hindi tone (like a helpful senior or 'bhaiya' talking to a learner).
         * If correct: Praise the student (e.g., "Wah yaar, zabardast query likhi hai! Bilkul sahi logic lagaya.") and briefly explain *why* it's correct or mention if it's a common/good way.
-        * If incorrect: Gently point out the error (e.g., "Arre yaar, yahaan thoda sa check karo..." or "Ek chhoti si galti ho gayi hai..."). Explain *what* is wrong (syntax, logic, wrong columns/tables, missed conditions) and *why*. Suggest how to fix it or what the correct concept/approach might involve (e.g., "Yahaan `LEFT JOIN` use karna better rahega kyunki..." or "WHERE clause mein condition check karo..."). Avoid just giving the full correct query away unless needed for a specific small fix explanation. Keep it encouraging.
+        * If incorrect: Gently point out the error (e.g., "Arre yaar, yahaan thoda sa check karo..." or "Ek chhoti si galti ho gayi hai..."). Explain *what* is wrong (syntax, logic, wrong columns/tables, missed conditions, data type mismatch) and *why*. Suggest how to fix it or what the correct concept/approach might involve (e.g., "Yahaan `LEFT JOIN` use karna better rahega kyunki..." or "WHERE clause mein condition check karo... Status ek text hai, toh quotes use karna hoga..."). Avoid just giving the full correct query away unless needed for a specific small fix explanation. Keep it encouraging.
     * **Verdict:** Conclude your entire response with *exactly* one line formatted as: "Verdict: Correct" or "Verdict: Incorrect". This line MUST be the very last line.
 
     **Begin Evaluation:**
@@ -325,8 +387,7 @@ def evaluate_answer_with_llm(question_data, student_answer, original_tables_dict
             llm_output = "".join(part.text for part in response.parts)
         else:
             # Fallback for simpler response structures or if parts is empty
-             llm_output = response.text
-
+             llm_output = response.text # Assuming response.text exists
 
         llm_output = llm_output.strip()
         # print(f"DEBUG: LLM Raw Output:\n---\n{llm_output}\n---") # Uncomment for debugging
@@ -336,7 +397,8 @@ def evaluate_answer_with_llm(question_data, student_answer, original_tables_dict
         is_correct_llm = False
 
         # Find the verdict line (case-insensitive, anchoring to end of string potentially safer)
-        verdict_match = re.search(r'^Verdict:\s*(Correct|Incorrect)$', llm_output, re.MULTILINE | re.IGNORECASE)
+        # Use re.MULTILINE and check end of string ($) for robustness
+        verdict_match = re.search(r'^Verdict:\s*(Correct|Incorrect)\s*$', llm_output, re.MULTILINE | re.IGNORECASE)
 
         if verdict_match:
             verdict = verdict_match.group(1).lower()
@@ -345,7 +407,7 @@ def evaluate_answer_with_llm(question_data, student_answer, original_tables_dict
             feedback_llm = llm_output[:verdict_match.start()].strip()
         else:
             # If verdict line is missing or malformed, log it, default to incorrect
-            st.warning(f"⚠️ System Warning: Could not parse final verdict from LLM response. Please review feedback carefully.")
+            st.warning(f"⚠️ System Warning: Could not parse final verdict from AI feedback. Please review feedback carefully.")
             print(f"WARNING: Could not parse verdict from LLM output. Full output was:\n{llm_output}") # Log for server-side debugging
             # Keep the full output as feedback in this case
             feedback_llm = llm_output + "\n\n_(System Note: Automatic correctness check failed. Review feedback manually.)_"
@@ -362,7 +424,11 @@ def evaluate_answer_with_llm(question_data, student_answer, original_tables_dict
         llm_output = f"Error: {e}" # Store error message
 
     # --- Simulation for Comparison Display (using sample_table) ---
-    simulation_table = question_data.get("sample_table", pd.DataFrame())
+    # Ensure simulation uses the correct table intended for the question's simulation display
+    simulation_table = question_data.get("sample_table")
+    if not isinstance(simulation_table, pd.DataFrame):
+         simulation_table = pd.DataFrame() # Avoid errors if sample_table is missing/invalid
+
     # Simulate the *student's* query
     actual_result_sim = simulate_query(student_answer, simulation_table)
     # Simulate one *possible* correct answer for reference
@@ -390,7 +456,7 @@ def analyze_performance(user_answers):
         {
             "question": ans["question"],
             "your_answer": ans["student_answer"],
-            "feedback_received": ans["feedback"]
+            "feedback_received": ans.get("feedback", "N/A") # Use .get for safety
          } for ans in user_answers if not ans.get("is_correct")
     ]
 
@@ -407,9 +473,9 @@ def analyze_performance(user_answers):
 
     # Prepare incorrect answers summary for the prompt
     incorrect_summary = "\n".join([
-        f"  Q: {item['question']}\n    A: {item['your_answer']}\n    F: {item['feedback_received']}"
+        f"  Q: {item['question']}\n    Aapka Jawaab: {item['your_answer']}\n    Feedback Mila: {item['feedback_received']}\n"
         for item in incorrect_answers
-    ]) if incorrect_answers else "Koi nahi! Sab sahi the!"
+    ]).strip() if incorrect_answers else "Koi nahi! Sab sahi the!"
 
     prompt = f"""
     Ek student ne SQL quiz diya hai. Unke performance ka summary neeche hai:
@@ -419,15 +485,15 @@ def analyze_performance(user_answers):
     Score: {score:.2f}%
 
     Correctly Answered Questions:
-    {chr(10).join(f'  - {q}' for q in correct_questions) if correct_questions else '  (None)'}
+    {chr(10).join(f'  - {q}' for q in correct_questions) if correct_questions else '  (Koi nahi)'}
 
     Incorrectly Answered Questions (with their answer and feedback given):
     {incorrect_summary}
 
     Task: Ab ek dost ki tarah, casual Hindi mein overall performance ka ek summary feedback do.
-    - Achhe performance ko appreciate karo.
-    - Jin topics mein galti hui (incorrect answers ke basis par), unko highlight karo aur improve karne ke liye encourage karo. General areas batao jaise ki 'JOINs pe thoda aur dhyan do' ya 'Aggregate functions aapse miss ho gaye'.
-    - Ek positive aur motivating tone rakho.
+    - Achhe performance ko appreciate karo (score aur sahi jawaabon ka zikr karo).
+    - Jin topics mein galti hui (incorrect answers ke basis par), unko gently highlight karo aur improve karne ke liye encourage karo. Feedback received ko consider karke common themes batao, jaise ki 'JOINs pe thoda aur practice karo' ya 'WHERE clause mein string values ko quotes mein daalna yaad rakho'.
+    - Ek positive aur motivating tone rakho. Final score ke hisaab se encouragement adjust karo (e.g., high score = "keep it up", low score = "koi baat nahi, practice se improve hoga").
     """
 
     try:
@@ -435,7 +501,7 @@ def analyze_performance(user_answers):
         if response.parts:
             feedback_summary["overall_feedback"] = "".join(part.text for part in response.parts).strip()
         else:
-             feedback_summary["overall_feedback"] = response.text.strip()
+             feedback_summary["overall_feedback"] = response.text.strip() # Fallback
 
     except Exception as e:
         print(f"Error generating performance summary with LLM: {e}")
@@ -451,7 +517,7 @@ def analyze_performance(user_answers):
 
 
 def get_emoji(is_correct):
-    return "✅" if is_correct else "❌" # Changed emojis slightly
+    return "✅" if is_correct else "❌"
 
 
 # --- Streamlit App ---
@@ -466,6 +532,7 @@ if not st.session_state.quiz_started:
     **📌 Important Note:**
     - This quiz assumes standard **SQL syntax** (similar to MySQL/PostgreSQL).
     - Your queries will be evaluated by an AI for correctness and logic.
+    - Query simulation is basic and may not perfectly match a real database. Focus on the AI feedback.
     """)
 
     col1, col2 = st.columns([2, 1])
@@ -533,31 +600,34 @@ if st.session_state.quiz_started and not st.session_state.quiz_completed:
                 st.write(f"**Aapka Jawaab:**")
                 st.code(ans_data['student_answer'], language='sql')
                 st.write(f"**SQL Mentor Feedback:**")
-                if ans_data["is_correct"]:
-                    st.success(ans_data['feedback'])
+                if ans_data.get("is_correct", False): # Use .get for safety
+                    st.success(ans_data.get('feedback', 'No feedback provided.'))
                 else:
-                    st.error(ans_data['feedback'])
+                    st.error(ans_data.get('feedback', 'No feedback provided.'))
 
                 # Display simulated results if available
                 st.markdown("---")
                 col_sim1, col_sim2 = st.columns(2)
-                with col_sim1:
-                    st.write("**Simulated Result (Aapka Query):**")
-                    if isinstance(ans_data["actual_result"], pd.DataFrame):
-                        st.dataframe(ans_data["actual_result"], hide_index=True)
-                    elif isinstance(ans_data["actual_result"], str):
-                         st.warning(f"Simulation Note: {ans_data['actual_result']}") # Show simulation errors/notes
-                    else:
-                        st.info("Simulation result not available.")
-
-                with col_sim2:
-                     st.write("**Simulated Result (Example Correct Query):**")
-                     if isinstance(ans_data["expected_result"], pd.DataFrame):
-                         st.dataframe(ans_data["expected_result"], hide_index=True)
-                     elif isinstance(ans_data["expected_result"], str):
-                         st.warning(f"Simulation Note: {ans_data['expected_result']}")
+                # Helper function to display simulation results cleanly
+                def display_simulation(title, result_data):
+                     st.write(f"**{title}:**")
+                     if isinstance(result_data, pd.DataFrame):
+                        if result_data.empty:
+                            st.info("_(Simulation returned empty results)_")
+                        else:
+                            st.dataframe(result_data, hide_index=True)
+                     elif isinstance(result_data, str) and "Simulation Error" in result_data:
+                          st.warning(result_data) # Show simulation errors clearly
+                     elif result_data == "N/A":
+                         st.info("_(Simulation not applicable)_")
                      else:
-                         st.info("Simulation result not available.")
+                         st.info("_(Simulation result not available or invalid)_")
+
+                with col_sim1:
+                    display_simulation("Simulated Result (Aapka Query)", ans_data.get("actual_result"))
+                with col_sim2:
+                     display_simulation("Simulated Result (Example Query)", ans_data.get("expected_result"))
+
         st.markdown("---")
 
 
@@ -571,14 +641,17 @@ if st.session_state.quiz_started and not st.session_state.quiz_completed:
 
         st.write("**Relevant Table(s) Preview:**")
         # Show previews of tables relevant to *this* question
-        rel_tables = question_data["relevant_tables"]
-        tabs = st.tabs([f"{name.capitalize()} Table" for name in rel_tables])
-        for i, table_name in enumerate(rel_tables):
-            with tabs[i]:
-                if table_name in original_tables:
-                    st.dataframe(original_tables[table_name], hide_index=True)
-                else:
-                    st.warning(f"Schema/Preview for '{table_name}' not found.")
+        rel_tables = question_data.get("relevant_tables", [])
+        if rel_tables:
+            tabs = st.tabs([f"{name.capitalize()} Table" for name in rel_tables])
+            for i, table_name in enumerate(rel_tables):
+                with tabs[i]:
+                    if table_name in original_tables:
+                        st.dataframe(original_tables[table_name], hide_index=True)
+                    else:
+                        st.warning(f"Schema/Preview for '{table_name}' not found.")
+        else:
+             st.info("No specific tables indicated for preview for this question.")
 
 
         # Use text_area for multi-line SQL input
@@ -624,7 +697,7 @@ if st.session_state.quiz_started and not st.session_state.quiz_completed:
 
     else:
         # This state should ideally not be reached if logic is correct, but as a fallback:
-        st.warning("Quiz state error. Restarting.")
+        st.warning("Quiz state error. Showing results.")
         st.session_state.quiz_completed = True # Mark as completed to show results
         st.rerun()
 
@@ -639,34 +712,37 @@ if st.session_state.quiz_completed:
 
     # --- Display Final Answers and Feedback ---
     st.subheader("📝 Final Review: Aapke Jawaab Aur Feedback")
+    # Helper function to display simulation results cleanly (defined again for scope)
+    def display_simulation(title, result_data):
+        st.write(f"**{title}:**")
+        if isinstance(result_data, pd.DataFrame):
+            if result_data.empty:
+                st.info("_(Simulation returned empty results)_")
+            else:
+                st.dataframe(result_data, hide_index=True)
+        elif isinstance(result_data, str) and "Simulation Error" in result_data:
+            st.warning(result_data) # Show simulation errors clearly
+        elif result_data == "N/A":
+            st.info("_(Simulation not applicable)_")
+        else:
+            st.info("_(Simulation result not available or invalid)_")
+
     for i, ans_data in enumerate(st.session_state.user_answers):
         with st.expander(f"Question {i + 1}: {ans_data['question']} {get_emoji(ans_data['is_correct'])}", expanded=False):
             st.write(f"**Aapka Jawaab:**")
-            st.code(ans_data['student_answer'], language='sql')
+            st.code(ans_data.get('student_answer', '(No answer provided)'), language='sql')
             st.write(f"**SQL Mentor Feedback:**")
-            if ans_data["is_correct"]:
-                st.success(ans_data['feedback'])
+            if ans_data.get("is_correct", False):
+                st.success(ans_data.get('feedback', 'No feedback provided.'))
             else:
-                st.error(ans_data['feedback'])
+                st.error(ans_data.get('feedback', 'No feedback provided.'))
              # Display simulated results if available
             st.markdown("---")
             col_sim1, col_sim2 = st.columns(2)
             with col_sim1:
-                 st.write("**Simulated Result (Aapka Query):**")
-                 if isinstance(ans_data["actual_result"], pd.DataFrame):
-                     st.dataframe(ans_data["actual_result"], hide_index=True)
-                 elif isinstance(ans_data["actual_result"], str):
-                      st.warning(f"Simulation Note: {ans_data['actual_result']}")
-                 else:
-                      st.info("Simulation result not available.")
+                display_simulation("Simulated Result (Aapka Query)", ans_data.get("actual_result"))
             with col_sim2:
-                 st.write("**Simulated Result (Example Correct Query):**")
-                 if isinstance(ans_data["expected_result"], pd.DataFrame):
-                     st.dataframe(ans_data["expected_result"], hide_index=True)
-                 elif isinstance(ans_data["expected_result"], str):
-                      st.warning(f"Simulation Note: {ans_data['expected_result']}")
-                 else:
-                      st.info("Simulation result not available.")
+                display_simulation("Simulated Result (Example Query)", ans_data.get("expected_result"))
 
     st.markdown("---") # Separator
 
@@ -681,15 +757,11 @@ if st.session_state.quiz_completed:
         # Corporate Bhaiya CTA (Conditional) - Example Link
         if score < 60: # Adjusted threshold
              st.error("Score thoda kam hai. Practice jaari rakhein!")
-             if st.button("Need Help? Connect with a Mentor"):
-                  # Redirect using JavaScript - Replace URL if needed
-                 st.markdown('<meta http-equiv="refresh" content="0; url=https://www.corporatebhaiya.com/" />', unsafe_allow_html=True)
-                 # st.link_button("Connect with a Mentor", "https://www.corporatebhaiya.com/") # Alternative simple link
+             # Simple link button is safer than JS redirect unless needed
+             st.link_button("Need Help? Connect with a Mentor", "https://www.corporatebhaiya.com/", use_container_width=True)
         else:
              st.success("Bahut badhiya score! Keep it up! 👍")
-             if st.button("Next Steps? Mock Interview Practice"):
-                 st.markdown('<meta http-equiv="refresh" content="0; url=https://www.corporatebhaiya.com/mock-interview" />', unsafe_allow_html=True) # Example specific link
-                 # st.link_button("Prepare for Interviews", "https://www.corporatebhaiya.com/mock-interview")
+             st.link_button("Next Steps? Mock Interview Practice", "https://www.corporatebhaiya.com/mock-interview", use_container_width=True) # Example specific link
 
 
     # --- Detailed Feedback Section ---
@@ -700,18 +772,20 @@ if st.session_state.quiz_completed:
             performance_feedback = analyze_performance(st.session_state.user_answers)
 
         st.write("**Overall Feedback:**")
-        st.info(performance_feedback["overall_feedback"]) # Display LLM generated summary
+        st.info(performance_feedback.get("overall_feedback", "Summary not available.")) # Use .get
 
-        st.write("**Strengths (Questions you answered correctly):**")
-        if performance_feedback["strengths"]:
-            for i, question in enumerate(performance_feedback["strengths"]):
+        st.write("**Strengths (Questions answered correctly):**")
+        strengths = performance_feedback.get("strengths", [])
+        if strengths:
+            for i, question in enumerate(strengths):
                 st.success(f"{i + 1}. {question} ✅")
         else:
             st.write("_(No questions answered correctly in this attempt.)_")
 
         st.write("**Areas for Improvement (Questions answered incorrectly):**")
-        if performance_feedback["weaknesses"]:
-            for i, question in enumerate(performance_feedback["weaknesses"]):
+        weaknesses = performance_feedback.get("weaknesses", [])
+        if weaknesses:
+            for i, question in enumerate(weaknesses):
                 st.error(f"{i + 1}. {question} ❌")
         else:
              st.write("_(No questions answered incorrectly. Great job!)_")
