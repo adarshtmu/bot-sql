@@ -140,14 +140,10 @@ def simulate_query(query, sample_table):
             
             # Handle WHERE clauses
             if "where" in query:
-                where_condition = query.split("where")[1].strip()
-                where_condition = where_condition.replace("=", "==").replace("!=", "!").replace("''", "'")
-                try:
-                    filtered_df = sample_table.query(where_condition)
-                except:
-                    return f"Error in WHERE condition: {where_condition}"
-            else:
-                filtered_df = sample_table.copy()
+                # Convert double quotes to single quotes for string values
+                where_part = query.split("where")[1]
+                where_part = re.sub(r'"([^"]*)"', r"'\1'", where_part)  # Fix quotes
+                query = query.split("where")[0] + " where " + where_part
             
             # Handle column selection
             if "*" in select_part:
