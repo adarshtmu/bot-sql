@@ -119,59 +119,68 @@ def normalize_dataframe(df):
 
 
 def simulate_query(query, sample_table):
-    """Simulate SQL queries on pandas DataFrame with enhanced quote handling"""
+    """Simulate SQL queries on pandas DataFrame with case-sensitive handling"""
     try:
-        query = re.sub(r'\s+', ' ', query.strip().lower().replace(";", ""))
+        # Remove semicolons and clean whitespace (preserve case)
+        query = re.sub(r'\s+', ' ', query.strip().replace(";", ""))
         
-        # Handle WHERE clause quotes conversion
-        if "where" in query:
-            # Convert double quotes to single quotes for string values
-            where_part = query.split("where")[1]
-            where_part = re.sub(r'"([^"]*)"', r"'\1'", where_part)
-            query = query.split("where")[0] + " where " + where_part
-
-        # Basic SELECT query parsing
-        if query.startswith("select"):
-            select_part = query.split("from")[0].replace("select", "").strip()
-            from_part = query.split("from")[1].split("where")[0].strip() if "where" in query else query.split("from")[1].strip()
+        # Handle WHERE clause quotes conversion (preserve case inside quotes)
+        if "where" in query.lower():
+            # Split query case-insensitively
+            query_parts = re.split(r' where ', query, flags=re.IGNORECASE)
+            where_part = query_parts[1] if len(query_parts) > 1 else ""
             
-            # Handle aggregations
+            # Convert double quotes to single quotes without changing case
+            where_part = re.sub(r'"([^"]*)"', r"'\1'", where_part)
+            query = query_parts[0] + " WHERE " + where_part
+
+        # Case-insensitive parsing for SQL structure
+        # SELECT clause
+        select_match = re.match(r'^select\s+(.*?)\s+from\s+', query, re.IGNORECASE)
+        if select_match:
+            select_part = select_match.group(1).strip()
+            from_part = query[select_match.end():].split('WHERE')[0].strip()
+            
+            # Handle aggregations (case-sensitive column names)
             agg_map = {
-                "count(*)": lambda df: pd.DataFrame({"count": [len(df)]}),
-                "avg(amount)": lambda df: pd.DataFrame({"avg": [df["amount"].mean()]}),
-                "sum(amount)": lambda df: pd.DataFrame({"sum": [df["amount"].sum()]})
+                r'count\(\*\)': lambda df: pd.DataFrame({"count": [len(df)]}),
+                r'avg\(amount\)': lambda df: pd.DataFrame({"avg": [df["amount"].mean()]}),
+                r'sum\(amount\)': lambda df: pd.DataFrame({"sum": [df["amount"].sum()]})
             }
             
-            for agg_key, agg_func in agg_map.items():
-                if agg_key in select_part:
+            for agg_pattern, agg_func in agg_map.items():
+                if re.search(agg_pattern, select_part, re.IGNORECASE):
                     return agg_func(sample_table)
             
-            # Handle WHERE clauses
-            if "where" in query:
-                where_condition = query.split("where")[1].strip()
-                where_condition = where_condition.replace("!=", "!=").replace("''", "'")
+            # Handle WHERE clauses (case-sensitive values)
+            where_condition = ""
+            if 'WHERE' in query.upper():
+                where_condition = re.split(r' where ', query, flags=re.IGNORECASE)[1]
                 try:
                     filtered_df = sample_table.query(where_condition)
-                except:
-                    return f"Error in WHERE condition: {where_condition}"
+                except Exception as e:
+                    return f"Error in WHERE condition: {str(e)}"
             else:
                 filtered_df = sample_table.copy()
             
-            # Handle column selection
+            # Handle column selection (case-sensitive)
             if "*" in select_part:
-                return filtered_df
+                result_df = filtered_df
             else:
                 columns = [col.strip() for col in select_part.split(",")]
-                return filtered_df[columns]
-        
-        # Handle ORDER BY with LIMIT
-        if "order by" in query:
-            order_part = query.split("order by")[1]
-            column = order_part.split()[0].strip()
-            direction = "ascending" if "desc" in order_part.lower() else "ascending"
-            limit = int(re.search(r"limit (\d+)", query).group(1)) if "limit" in query else None
-            sorted_df = sample_table.sort_values(column, ascending=(direction == "ascending"))
-            return sorted_df.head(limit) if limit else sorted_df
+                result_df = filtered_df[columns]
+            
+            # Handle ORDER BY (case-sensitive column names)
+            if 'ORDER BY' in query.upper():
+                order_part = re.split(r' order by ', query, flags=re.IGNORECASE)[1]
+                order_col = re.split(r'\s+', order_part)[0].strip()
+                direction = 'desc' if 'desc' in order_part.lower() else 'asc'
+                limit = int(re.search(r'limit (\d+)', query).group(1)) if 'limit' in query.lower() else None
+                result_df = result_df.sort_values(order_col, ascending=(direction == 'asc'))
+                if limit:
+                    result_df = result_df.head(limit)
+            
+            return result_df.reset_index(drop=True)
         
         return "Unsupported query type"
     
