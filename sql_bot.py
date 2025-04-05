@@ -20,7 +20,7 @@ hide_streamlit_style = """
 st.markdown(hide_streamlit_style, unsafe_allow_html=True)
 
 # Set up Gemini API
-gemini_api_key = "AIzaSyAfzl_66GZsgaYjAM7cT2djVCBCAr86t2k"  # Replace with your Gemini API key
+gemini_api_key = "YOUR_GEMINI_API_KEY"  # Replace with your Gemini API key
 genai.configure(api_key=gemini_api_key)
 model = genai.GenerativeModel('gemini-2.0-flash')
 
@@ -47,7 +47,7 @@ orders_table = pd.DataFrame({
 # Create a merged table for join-based queries
 merged_table = pd.merge(users_table, orders_table, on="user_id", how="inner")
 
-# Updated SQL Questions list with enhanced, detailed instructions
+# Updated SQL Questions list with the correct_answer for Q4 using double quotes
 sql_questions = [
     {
         "question": "Write a SQL query to get all details about users from the 'users' table.",
@@ -66,7 +66,8 @@ sql_questions = [
     },
     {
         "question": "Write a SQL query to find all orders with a status of 'Pending' from the 'orders' table.",
-        "correct_answer": "SELECT * FROM orders WHERE status = 'Pending';",
+        # NOTE the change here: using \"Pending\" instead of 'Pending'
+        "correct_answer": "SELECT * FROM orders WHERE status = \"Pending\";",
         "sample_table": orders_table
     },
     {
@@ -86,14 +87,18 @@ sql_questions = [
     },
     {
         "question": "Write a SQL query to calculate the total amount spent by each user by joining the 'users' and 'orders' tables.",
-        "correct_answer": ("SELECT users.name, SUM(orders.amount) AS total_spent FROM users "
-                           "JOIN orders ON users.user_id = orders.user_id GROUP BY users.name;"),
+        "correct_answer": (
+            "SELECT users.name, SUM(orders.amount) AS total_spent FROM users "
+            "JOIN orders ON users.user_id = orders.user_id GROUP BY users.name;"
+        ),
         "sample_table": merged_table
     },
     {
         "question": "Write a SQL query to count how many orders each user has placed using a LEFT JOIN between 'users' and 'orders'.",
-        "correct_answer": ("SELECT users.name, COUNT(orders.order_id) AS order_count FROM users "
-                           "LEFT JOIN orders ON users.user_id = orders.user_id GROUP BY users.name;"),
+        "correct_answer": (
+            "SELECT users.name, COUNT(orders.order_id) AS order_count FROM users "
+            "LEFT JOIN orders ON users.user_id = orders.user_id GROUP BY users.name;"
+        ),
         "sample_table": merged_table
     },
     {
@@ -137,7 +142,6 @@ def simulate_query(query, sample_table):
             
             # Handle AVG(column)
             elif "avg(" in select_part:
-                # Find the column name preserving the original query's casing
                 column = query.split("avg(")[1].split(")")[0].strip()
                 result = pd.DataFrame({"avg": [sample_table[column].mean()]})
                 return result.reset_index(drop=True)
@@ -302,9 +306,15 @@ if st.session_state.quiz_started and not st.session_state.quiz_completed:
             with st.expander(f"Question {i + 1}: {ans['question']}", expanded=True):
                 st.write(f"**Your Answer:** {ans['student_answer']}")
                 if ans["is_correct"]:
-                    st.markdown(f"<span style='color:green'>✅ **Feedback:** {ans['feedback']} {get_emoji(True)}</span>", unsafe_allow_html=True)
+                    st.markdown(
+                        f"<span style='color:green'>✅ **Feedback:** {ans['feedback']} {get_emoji(True)}</span>",
+                        unsafe_allow_html=True
+                    )
                 else:
-                    st.markdown(f"<span style='color:red'>❌ **Feedback:** {ans['feedback']} {get_emoji(False)}</span>", unsafe_allow_html=True)
+                    st.markdown(
+                        f"<span style='color:red'>❌ **Feedback:** {ans['feedback']} {get_emoji(False)}</span>",
+                        unsafe_allow_html=True
+                    )
                 st.write("**Expected Query Result:**")
                 if isinstance(ans["expected_result"], pd.DataFrame):
                     st.dataframe(ans["expected_result"])
@@ -345,9 +355,15 @@ if st.session_state.quiz_started and not st.session_state.quiz_completed:
                 "actual_result": actual_result
             })
             if is_correct:
-                st.markdown(f"<span style='color:green'>**Feedback:** {feedback} {get_emoji(True)}</span>", unsafe_allow_html=True)
+                st.markdown(
+                    f"<span style='color:green'>**Feedback:** {feedback} {get_emoji(True)}</span>",
+                    unsafe_allow_html=True
+                )
             else:
-                st.markdown(f"<span style='color:red'>**Feedback:** {feedback} {get_emoji(False)}</span>", unsafe_allow_html=True)
+                st.markdown(
+                    f"<span style='color:red'>**Feedback:** {feedback} {get_emoji(False)}</span>",
+                    unsafe_allow_html=True
+                )
             
             if st.session_state.current_question < len(sql_questions) - 1:
                 st.session_state.current_question += 1
