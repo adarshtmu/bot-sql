@@ -132,19 +132,25 @@ def evaluate_answer_with_llm(question_data, student_answer, original_tables_dict
     You are an expert SQL evaluator acting as a friendly SQL mentor. Analyze the student's SQL query based on the question asked and the provided table schemas (including data types). Assume standard SQL syntax (like MySQL/PostgreSQL).
 
     **Evaluation Task:**
+
     1.  **Question:** {question}
-    2.  **Relevant Table Schemas:** {schema_info.strip()}
-    3.  **Student's SQL Query:**\n```sql\n{student_answer}\n```
+    2.  **Relevant Table Schemas:**
+        {schema_info.strip()}
+    3.  **Student's SQL Query:**
+        ```sql
+        {student_answer}
+        ```
 
     **Analysis Instructions:**
-    * **Correctness:** ...
-    * **Validity:** ...
-    * **Logic:** ...
-    * **Alternatives:** ...
-    * **Feedback:** Provide clear, constructive feedback in a friendly, encouraging, casual Hindi tone...
-        * If correct: Praise...
-        * If incorrect: Gently point out the error... Explain *what* is wrong (syntax - like using " vs ' for strings, logic, columns, etc.)... Suggest how to fix it...
-    * **Verdict:** Conclude with "Verdict: Correct" or "Verdict: Incorrect". ...
+
+    * **Correctness:** Does the student's query accurately and completely answer the **Question** based on the **Relevant Table Schemas**? Consider edge cases if applicable (e.g., users with no orders, data types for comparisons).
+    * **Validity:** Is the query syntactically valid SQL? Briefly mention any syntax errors.
+    * **Logic:** Does the query use appropriate SQL clauses (SELECT, FROM, WHERE, JOIN, GROUP BY, ORDER BY, aggregates, etc.) correctly for the task? Is the logic sound? Are comparisons appropriate for the data types?
+    * **Alternatives:** Briefly acknowledge if the student used a valid alternative approach (e.g., different JOIN type if appropriate, subquery vs. JOIN). Efficiency is a minor point unless significantly poor.
+    * **Feedback:** Provide clear, constructive feedback in a friendly, encouraging, casual Hindi tone (like a helpful senior or 'bhaiya' talking to a learner).
+        * If correct: Praise the student (e.g., "Wah yaar, zabardast query likhi hai! Bilkul sahi logic lagaya.") and briefly explain *why* it's correct or mention if it's a common/good way.
+        * If incorrect: Gently point out the error (e.g., "Arre yaar, yahaan thoda sa check karo..." or "Ek chhoti si galti ho gayi hai..."). Explain *what* is wrong (syntax - like using " vs ' for strings, logic, columns, etc.)... Suggest how to fix it or what the correct concept/approach might involve (e.g., "Yahaan `LEFT JOIN` use karna better rahega kyunki..." or "WHERE clause mein condition check karo... Status ek text hai, toh quotes use karna hoga..."). Avoid just giving the full correct query away unless needed for a specific small fix explanation. Keep it encouraging.
+    * **Verdict:** Conclude your entire response with *exactly* one line formatted as: "Verdict: Correct" or "Verdict: Incorrect". This line MUST be the very last line.
 
     **Begin Evaluation:**
     """
