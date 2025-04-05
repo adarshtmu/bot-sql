@@ -23,16 +23,24 @@ st.markdown(hide_streamlit_style, unsafe_allow_html=True)
 # --- Set up Gemini API ---
 # IMPORTANT: Replace with your actual Gemini API Key
 # Consider using Streamlit Secrets for API key management in deployment
-try:
-    # Try getting the key from secrets first
-    gemini_api_key = st.secrets["GEMINI_API_KEY"]
-except (FileNotFoundError, KeyError):
-    # Fallback or default if secrets aren't set
-    gemini_api_key = "AIzaSyAfzl_66GZsgaYjAM7cT2djVCBCAr86t2k" # Replace with your key if not using secrets
+# --- Set up Gemini API ---
+# WARNING: Hardcoding API keys is insecure. Consider environment variables or secrets for deployment.
+gemini_api_key = "AIzaSyAfzl_66GZsgaYjAM7cT2djVCBCAr86t2k" # Your specific API Key
 
-# Basic check if the key looks like a placeholder
-if gemini_api_key == "AIzaSyAfzl_66GZsgaYjAM7cT2djVCBCAr86t2k" or not gemini_api_key:
-    st.error("🚨 Gemini API Key not found. Please set it using Streamlit Secrets (key: GEMINI_API_KEY) or replace the placeholder in the code.")
+if not gemini_api_key: # Basic check if the key is empty
+    st.error("🚨 Gemini API Key is missing in the code.")
+    st.stop()
+
+try:
+    genai.configure(api_key=gemini_api_key)
+    # Use a model suitable for complex reasoning like query analysis
+    # gemini-1.5-flash is a good balance of capability and speed
+    model = genai.GenerativeModel('gemini-1.5-flash')
+    # Optional: Add a check to see if the model is accessible
+    # model.generate_content("Test", generation_config=genai.types.GenerationConfig(max_output_tokens=5))
+    # st.success("Gemini Model Configured Successfully.") # Optional success message
+except Exception as e:
+    st.error(f"🚨 Failed to configure Gemini API or access the model: {e}")
     st.stop()
 
 try:
