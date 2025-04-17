@@ -50,7 +50,7 @@ orders_table = pd.DataFrame({
     "user_id": [1, 2, 3, 1, 4],
     "amount": [50.00, 75.50, 120.00, 200.00, 35.00],
     "order_date": pd.to_datetime(["2024-02-01", "2024-02-05", "2024-02-10", "2024-02-15", "2024-02-20"]),
-    "status": ["Completed", "Pending", "Completed", "Shipped", "Cancelled"]
+    "status": ["Completed", "pending", "Completed", "Shipped", "Cancelled"]  # Using lowercase "pending" for consistency
 })
 original_tables = {
     "users": users_table,
@@ -62,15 +62,13 @@ sql_questions = [
     { "question": "Write a SQL query to get all details about users from the 'users' table.", "correct_answer_example": "SELECT * FROM users;", "sample_table": users_table, "relevant_tables": ["users"] },
     { "question": "Write a SQL query to count the total number of users in the 'users' table.", "correct_answer_example": "SELECT COUNT(*) AS user_count FROM users;", "sample_table": users_table, "relevant_tables": ["users"] },
     { "question": "Write a SQL query to get all users older than 30 from the 'users' table.", "correct_answer_example": "SELECT * FROM users WHERE age > 30;", "sample_table": users_table, "relevant_tables": ["users"] },
-    { "question": "Write a SQL query to find all orders with a status of 'Pending' from the 'orders' table.", "correct_answer_example": "SELECT * FROM orders WHERE status = 'Pending';", "sample_table": orders_table, "relevant_tables": ["orders"] },
+    { "question": "Write a SQL query to find all orders with a status of 'Pending' from the 'orders' table.", "correct_answer_example": "SELECT * FROM orders WHERE LOWER(status) = 'pending';", "sample_table": orders_table, "relevant_tables": ["orders"] },  # Updated to use LOWER()
     { "question": "Write a SQL query to find the most recent order from the 'orders' table by order date.", "correct_answer_example": "SELECT * FROM orders ORDER BY order_date DESC LIMIT 1;", "sample_table": orders_table, "relevant_tables": ["orders"] },
     { "question": "Write a SQL query to find the average order amount from the 'orders' table.", "correct_answer_example": "SELECT AVG(amount) AS average_amount FROM orders;", "sample_table": orders_table, "relevant_tables": ["orders"] },
-    { "question": "Write a SQL query to find users from 'New York' or 'Chicago' in the 'users' table.", "correct_answer_example": "SELECT * FROM users WHERE city IN ('New York', 'Chicago');", "sample_table": users_table, "relevant_tables": ["users"] },
-
+    { "question": "Write a SQL query to find users from 'New York' or 'Chicago' in the 'users' table.", "correct_answer_example": "SELECT * FROM users WHERE LOWER(city) IN (LOWER('New York'), LOWER('Chicago'));", "sample_table": users_table, "relevant_tables": ["users"] },  # Updated to use LOWER()
     { "question": "Write a SQL query to find users who have not placed any orders. Use the 'users' and 'orders' tables.", "correct_answer_example": "SELECT u.* FROM users u LEFT JOIN orders o ON u.user_id = o.user_id WHERE o.order_id IS NULL;", "sample_table": users_table, "relevant_tables": ["users", "orders"] },
     { "question": "Write a SQL query to calculate the total amount spent by each user by joining the 'users' and 'orders' tables.", "correct_answer_example": "SELECT u.name, SUM(o.amount) AS total_spent FROM users u JOIN orders o ON u.user_id = o.user_id GROUP BY u.name ORDER BY u.name;", "sample_table": users_table, "relevant_tables": ["users", "orders"] },
     { "question": "Write a SQL query to count how many orders each user has placed using a LEFT JOIN between 'users' and 'orders'. Include users with zero orders.", "correct_answer_example": "SELECT u.name, COUNT(o.order_id) AS order_count FROM users u LEFT JOIN orders o ON u.user_id = o.user_id GROUP BY u.name ORDER BY u.name;", "sample_table": users_table, "relevant_tables": ["users", "orders"] }
-
 ]
 
 # --- Session State Initialization ---
@@ -82,20 +80,71 @@ if "show_detailed_feedback" not in st.session_state: st.session_state.show_detai
 
 # --- Helper Functions ---
 
-def simulate_query_duckdb(sql_query, tables_dict):
-    """Simulates an SQL query using DuckDB on in-memory pandas DataFrames."""
+def make_query_case_insensitive(sql_query):
+    """Makes string comparisons in SQL queries case-insensitive by adding LOWER() function"""
+    # Common patterns for string comparisons in SQL
+    patterns = [
+        # status = 'value' pattern
+        (r"status\s*=\s*'([^']*)'", r"LOWER(status) = LOWER('\1')"),
+        # city = 'value' pattern
+        (r"city\s*=\s*'([^']*)'", r"LOWER(city) = LOWER('\1')"),
+        # name = 'value' pattern
+        (r"name\s*=\s*'([^']*)'", r"LOWER(name) = LOWER('\1')"),
+        # email = 'value' pattern
+        (r"email\s*=\s*'([^']*)'", r"LOWER(email) = LOWER('\1')"),
+        # status IN ('value1', 'value2') pattern
+        (r"status\s+IN\s*\(([^)]*)\)", lambda m: f"LOWER(status) IN ({','.join([f'LOWER({x.strip()})' for x in m.group(1).split(',')])})")
+    ]
+    
+    modified_query = sql_query
+    for pattern, replacement in patterns:
+        modified_query = re.sub(pattern, replacement, modified_query, flags=re.IGNORECASE)
+    
+    return modified_query
+
+def smart_query_evaluator(sql_query, tables_dict):
+    """Evaluates SQL query with automatic case sensitivity handling"""
     if not sql_query or not sql_query.strip():
-        return "Simulation Error: No query provided."
+        return "Simulation Error: No query provided.", False
     if not tables_dict:
-        return "Simulation Error: No tables provided for context."
+        return "Simulation Error: No tables provided for context.", False
+    
+    # Try to make the query case-insensitive
+    case_insensitive_query = make_query_case_insensitive(sql_query)
+    case_fix_applied = (case_insensitive_query != sql_query)
+    
+    # Try the case-insensitive query first
     con = None
     try:
         con = duckdb.connect(database=':memory:', read_only=False)
         for table_name, df in tables_dict.items():
             if isinstance(df, pd.DataFrame): con.register(str(table_name), df)
             else: print(f"Warning [simulate_query]: Item '{table_name}' not a DataFrame.")
-        result_df = con.execute(sql_query).df()
-        con.close(); return result_df
+        
+        # Try the case-insensitive query first
+        try:
+            result_df = con.execute(case_insensitive_query).df()
+            con.close()
+            return result_df, case_fix_applied
+        except Exception as e:
+            # If case-insensitive query fails, try the original query
+            try:
+                result_df = con.execute(sql_query).df()
+                con.close()
+                return result_df, False
+            except Exception as e2:
+                error_message = f"Simulation Error: Failed to execute query. Reason: {str(e2)}"
+                try:
+                    e_str = str(e2).lower()
+                    binder_match = re.search(r'(binder error|catalog error|parser error).*referenced column "([^"]+)" not found', e_str)
+                    syntax_match = re.search(r'syntax error.*at or near ""([^"]+)""', e_str)
+                    if binder_match: error_message += f"\n\n**Hint:** Use single quotes (') for text values like `'{binder_match.group(2)}'` instead of double quotes (\")."
+                    elif syntax_match: error_message += f"\n\n**Hint:** Use single quotes (') for text values like `'{syntax_match.group(1)}'` instead of double quotes (\")."
+                except Exception as e_hint: print(f"Error generating hint: {e_hint}")
+                if con:
+                    try: con.close()
+                    except: pass
+                return error_message, False
     except Exception as e:
         error_message = f"Simulation Error: Failed to execute query. Reason: {str(e)}"
         try:
@@ -105,11 +154,15 @@ def simulate_query_duckdb(sql_query, tables_dict):
             if binder_match: error_message += f"\n\n**Hint:** Use single quotes (') for text values like `'{binder_match.group(2)}'` instead of double quotes (\")."
             elif syntax_match: error_message += f"\n\n**Hint:** Use single quotes (') for text values like `'{syntax_match.group(1)}'` instead of double quotes (\")."
         except Exception as e_hint: print(f"Error generating hint: {e_hint}")
-        print(f"ERROR [simulate_query_duckdb]: {error_message}\nQuery: {sql_query}")
         if con:
             try: con.close()
             except: pass
-        return error_message
+        return error_message, False
+
+def simulate_query_duckdb(sql_query, tables_dict):
+    """Legacy simulation function that calls the smart evaluator"""
+    result, _ = smart_query_evaluator(sql_query, tables_dict)
+    return result
 
 def get_table_schema(table_name, tables_dict):
     """Gets column names for a given table name."""
@@ -119,7 +172,7 @@ def get_table_schema(table_name, tables_dict):
 
 def evaluate_answer_with_llm(question_data, student_answer, original_tables_dict):
     """Evaluate the user's answer using Gemini API and simulate using DuckDB."""
-    if not student_answer.strip(): return "Please provide an answer.", False, "N/A", "N/A", "No input."
+    if not student_answer.strip(): return "Please provide an answer.", False, "N/A", "N/A", "No input.", False
     question = question_data["question"]; relevant_table_names = question_data["relevant_tables"]; correct_answer_example = question_data["correct_answer_example"]
     schema_info = ""
     if not relevant_table_names: schema_info = "No table schema context.\n"
@@ -130,6 +183,14 @@ def evaluate_answer_with_llm(question_data, student_answer, original_tables_dict
                 try: df = original_tables_dict[name]; dtypes = df.dtypes.to_string() if isinstance(df, pd.DataFrame) else "N/A"; schema_info += f"Table '{name}': Columns {columns}\n DataTypes:\n{dtypes}\n\n"
                 except Exception as e_schema: schema_info += f"Table '{name}': Columns {columns} (Schema Error: {e_schema})\n\n"
             else: schema_info += f"Table '{name}': Schema not found.\n"
+
+    # Add note about case-insensitivity to the prompt
+    case_insensitivity_note = """
+    Note: This SQL quiz accepts case-insensitive string comparisons. For example, both of these are considered correct:
+    - WHERE status = 'pending'
+    - WHERE status = 'Pending'
+    - WHERE LOWER(status) = 'pending'
+    """
 
     prompt = f"""
     You are an expert SQL evaluator acting as a friendly SQL mentor. Analyze the student's SQL query based on the question asked and the provided table schemas (including data types). Assume standard SQL syntax (like MySQL/PostgreSQL).
@@ -143,6 +204,8 @@ def evaluate_answer_with_llm(question_data, student_answer, original_tables_dict
         ```sql
         {student_answer}
         ```
+    
+    {case_insensitivity_note}
 
     **Analysis Instructions:**
 
@@ -169,9 +232,11 @@ def evaluate_answer_with_llm(question_data, student_answer, original_tables_dict
         feedback_llm = feedback_llm.replace("student", "aap")
     except Exception as e: st.error(f"🚨 AI Error: {e}"); print(f"ERROR: Gemini call: {e}"); feedback_llm = f"AI feedback error: {e}"; is_correct_llm = False; llm_output = f"Error: {e}"
 
-    actual_result_sim = simulate_query_duckdb(student_answer, original_tables)
-    expected_result_sim = simulate_query_duckdb(correct_answer_example, original_tables)
-    return feedback_llm, is_correct_llm, expected_result_sim, actual_result_sim, llm_output
+    # Use smart query evaluator for both student answer and correct example
+    actual_result_sim, case_fix_applied = smart_query_evaluator(student_answer, original_tables_dict)
+    expected_result_sim, _ = smart_query_evaluator(correct_answer_example, original_tables_dict)
+    
+    return feedback_llm, is_correct_llm, expected_result_sim, actual_result_sim, llm_output, case_fix_applied
 
 def calculate_score(user_answers):
     """Calculate the score based on correct answers."""
@@ -182,7 +247,6 @@ def calculate_score(user_answers):
 
 def analyze_performance(user_answers):
     """Analyze the user's performance and provide detailed feedback via LLM."""
-    # [analyze_performance function remains the same as the last working version]
     performance_data = { "strengths": [], "weaknesses": [], "overall_feedback": "Analysis could not be completed." }
     if not user_answers: performance_data["overall_feedback"] = "Koi jawab nahi diya gaya."; return performance_data
     try:
@@ -205,9 +269,12 @@ def analyze_performance(user_answers):
 def get_emoji(is_correct):
     return "✅" if is_correct else "❌"
 
-def display_simulation(title, result_data):
+def display_simulation(title, result_data, case_fix_applied=False):
     """Helper function to display simulation results (DataFrame or error)."""
     st.write(f"**{title}:**")
+    if case_fix_applied:
+        st.info("Note: Case-insensitive query was automatically applied to show results.")
+        
     if isinstance(result_data, pd.DataFrame):
         if result_data.empty:
             st.info("_(Simulation resulted in an empty table)_")
@@ -223,139 +290,145 @@ def display_simulation(title, result_data):
 
 # --- Streamlit App ---
 
-# --- Start Screen --- # CORRECTED FORMATTING
+# --- Start Screen ---
+st.title("SQL Practice Quiz")
+st.write("Test your SQL knowledge with interactive questions!")
+
+# Note about case-insensitivity
+st.info("""
+**Note about case sensitivity:** This SQL quiz accepts case-insensitive string comparisons. 
+For example, all of these are considered correct:
+- `WHERE status = 'pending'`
+- `WHERE status = 'Pending'`
+- `WHERE LOWER(status) = 'pending'`
+
+Feel free to use any case format in your answers.
+""")
+
 if not st.session_state.quiz_started:
-    st.title("🚀 SQL Mentor - Interactive SQL Practice")
-    st.markdown("### Apne SQL Skills Ko Test Aur Improve Karein!")
-    st.markdown("""
-        **📌 Important Note:**
-        - This quiz assumes standard **SQL syntax** (similar to MySQL/PostgreSQL).
-        - Your queries will be evaluated by an AI for correctness and logic.
-        - Query simulation is powered by DuckDB to show results based on sample data.
-        """)
-    col1, col2 = st.columns([2, 1])
+    st.write("This quiz will test your SQL knowledge with questions ranging from basic to intermediate difficulty.")
+    st.write("You'll get instant feedback on your answers and see the results of your queries.")
+    
+    if st.button("Start Quiz"):
+        st.session_state.quiz_started = True
+        st.experimental_rerun()
+
+# --- Quiz Interface ---
+elif not st.session_state.quiz_completed:
+    # Display progress
+    progress_text = f"Question {st.session_state.current_question + 1} of {len(sql_questions)}"
+    st.progress((st.session_state.current_question) / len(sql_questions))
+    st.write(progress_text)
+    
+    # Display current question
+    current_q = sql_questions[st.session_state.current_question]
+    st.subheader(current_q["question"])
+    
+    # Display relevant table schemas
+    for table_name in current_q["relevant_tables"]:
+        if table_name in original_tables:
+            st.write(f"**Table: {table_name}**")
+            st.dataframe(original_tables[table_name].head(), use_container_width=True)
+    
+    # User input
+    user_answer = st.text_area("Your SQL Query:", height=100, key=f"answer_{st.session_state.current_question}")
+    
+    col1, col2 = st.columns(2)
     with col1:
-        st.write("""
-        Is interactive quiz mein, aap do sample tables ke saath kaam karenge:
-        - **Users Table**: User details jaise ID, naam, email, umar, aur sheher.
-        - **Orders Table**: Order details jaise ID, user ID, amount, order date, aur status.
-        """)
+        if st.button("Submit Answer"):
+            if not user_answer.strip():
+                st.warning("Please enter a SQL query before submitting.")
+            else:
+                # Evaluate answer
+                feedback, is_correct, expected_result, actual_result, _, case_fix_applied = evaluate_answer_with_llm(
+                    current_q, user_answer, original_tables
+                )
+                
+                # Store answer
+                st.session_state.user_answers.append({
+                    "question": current_q["question"],
+                    "student_answer": user_answer,
+                    "feedback": feedback,
+                    "is_correct": is_correct,
+                    "expected_result": expected_result,
+                    "actual_result": actual_result,
+                    "case_fix_applied": case_fix_applied
+                })
+                
+                # Move to next question or complete quiz
+                if st.session_state.current_question < len(sql_questions) - 1:
+                    st.session_state.current_question += 1
+                    st.experimental_rerun()
+                else:
+                    st.session_state.quiz_completed = True
+                    st.experimental_rerun()
+    
     with col2:
-        st.markdown("#### Tables Overview")
-        table_overview_data = {"Table": list(original_tables.keys()), "Rows": [len(df) for df in original_tables.values()], "Columns": [len(df.columns) for df in original_tables.values()]}
-        st.dataframe(pd.DataFrame(table_overview_data), hide_index=True)
-    st.write("### 🔍 Table Previews"); tab1, tab2 = st.tabs(["Users Table", "Orders Table"])
-    with tab1: st.dataframe(users_table, hide_index=True, use_container_width=True) # Added use_container_width
-    with tab2: st.dataframe(orders_table, hide_index=True, use_container_width=True) # Added use_container_width
-    with st.expander("📝 Quiz Ke Baare Mein"):
-        st.write(f"""
-        - Aapko {len(sql_questions)} SQL query challenges solve karne honge...
-        - Har jawaab ke baad AI Mentor se immediate feedback milega...
-        - **SQL Dialect Focus:** Standard SQL (MySQL/PostgreSQL like)
-        """)
-    if st.button("🚀 Start SQL Challenge!"):
-        st.session_state.quiz_started = True; st.session_state.user_answers = []; st.session_state.current_question = 0; st.session_state.quiz_completed = False; st.session_state.show_detailed_feedback = False; st.rerun()
+        if st.button("Skip Question"):
+            if st.session_state.current_question < len(sql_questions) - 1:
+                st.session_state.current_question += 1
+                st.experimental_rerun()
+            else:
+                st.session_state.quiz_completed = True
+                st.experimental_rerun()
 
-# --- Quiz In Progress ---
-elif st.session_state.quiz_started and not st.session_state.quiz_completed:
-    st.title("✍️ SQL Query Challenge")
-    if st.session_state.user_answers:
-        st.markdown("---"); st.subheader("📖 Ab Tak Ke Jawaab Aur Feedback")
-        for i, ans_data in enumerate(reversed(st.session_state.user_answers)):
-            q_num = len(st.session_state.user_answers) - i;
-            with st.expander(f"Question {q_num}: {ans_data['question']} {get_emoji(ans_data.get('is_correct', False))}", expanded=False):
-                st.write(f"**Aapka Jawaab:**"); st.code(ans_data.get('student_answer', '(No answer)'), language='sql'); st.write(f"**SQL Mentor Feedback:**");
-                if ans_data.get("is_correct", False): st.success(ans_data.get('feedback', 'N/A'))
-                else: st.error(ans_data.get('feedback', 'N/A'));
-
-                # --- CORRECTED: Display tables vertically ---
-                st.markdown("---") # Separator before tables
-                display_simulation("Simulated Result (User Output)", ans_data.get("actual_result"))
-                st.divider() # Optional: Add a visual divider between the two tables
-                display_simulation("Simulated Result (Expected Output)", ans_data.get("expected_result"))
-                # --- END CORRECTION ---
-        st.markdown("---")
-    # --- Current Question ---
-    current_q_index = st.session_state.current_question
-    if current_q_index < len(sql_questions):
-        question_data = sql_questions[current_q_index]; st.subheader(f"Question {current_q_index + 1} / {len(sql_questions)}"); st.markdown(f"**{question_data['question']}**"); st.write("****");
-        rel_tables = question_data.get("relevant_tables", []);
-        if rel_tables:
-            tabs = st.tabs([f"{name.capitalize()} Table" for name in rel_tables]);
-            for i, table_name in enumerate(rel_tables):
-                with tabs[i]:
-                    if table_name in original_tables: st.dataframe(original_tables[table_name], hide_index=True, use_container_width=True) # Added use_container_width
-                    else: st.warning(f"Schema/Preview error '{table_name}'.")
-        else: st.info("No specific tables for preview.")
-        student_answer = st.text_area("Apna SQL Query Yahaan Likhein:", key=f"answer_{current_q_index}", height=150)
-        if st.button("✅ Submit Answer", key=f"submit_{current_q_index}"):
-            if student_answer.strip():
-                with st.spinner("AI Mentor aapka jawaab check kar raha hai..."): feedback, is_correct, expected_sim, actual_sim, llm_raw = evaluate_answer_with_llm(question_data, student_answer, original_tables)
-                st.session_state.user_answers.append({"question": question_data["question"], "student_answer": student_answer, "feedback": feedback, "is_correct": is_correct, "expected_result": expected_sim, "actual_result": actual_sim, "llm_raw_output": llm_raw})
-                if current_q_index < len(sql_questions) - 1: st.session_state.current_question += 1
-                else: st.session_state.quiz_completed = True
-                st.rerun()
-            else: st.warning("Please enter your SQL query.")
-        progress = (current_q_index) / len(sql_questions); st.progress(progress); st.caption(f"Question {current_q_index + 1} of {len(sql_questions)}")
-    else: st.warning("Quiz state error."); st.session_state.quiz_completed = True; st.rerun()
-
-# --- Quiz Completed Screen ---
-elif st.session_state.quiz_completed:
-    st.balloons(); st.title("🎉 Quiz Complete!")
-    score = calculate_score(st.session_state.user_answers)
-    st.metric(label="Your Final Score (%)", value=score)
-    st.subheader("📝 Final Review: Aapke Jawaab Aur Feedback")
-    for i, ans_data in enumerate(st.session_state.user_answers):
-        with st.expander(f"Question {i + 1}: {ans_data['question']} {get_emoji(ans_data.get('is_correct', False))}", expanded=False):
-             st.write(f"**Aapka Jawaab:**"); st.code(ans_data.get('student_answer', '(No answer)'), language='sql'); st.write(f"**SQL Mentor Feedback:**");
-             if ans_data.get("is_correct", False): st.success(ans_data.get('feedback', 'N/A'))
-             else: st.error(ans_data.get('feedback', 'N/A'));
-
-             # --- CORRECTED: Display tables vertically ---
-             st.markdown("---") # Separator before tables
-             display_simulation("Simulated Result (Aapka Query)", ans_data.get("actual_result"))
-             st.divider() # Optional: Add a visual divider between the two tables
-             display_simulation("Simulated Result (Example Query)", ans_data.get("expected_result"))
-             # --- END CORRECTION ---
-    st.markdown("---")
-    col_cta_1, col_cta_2 = st.columns(2)
-    with col_cta_1:
-        if st.button("📊 Detailed Performance Analysis"): st.session_state.show_detailed_feedback = not st.session_state.show_detailed_feedback; st.rerun()
-    with col_cta_2:
-        if score < 60: st.error("Score thoda kam hai..."); st.link_button("Need Help? Connect with a Mentor", "https://www.corporatebhaiya.com/", use_container_width=True)
-        else: st.success("Bahut badhiya score! 👍"); st.link_button("Next Steps? Mock Interview Practice", "https://www.corporatebhaiya.com/mock-interview", use_container_width=True)
-
-    # --- Detailed Feedback Section --- # CORRECTED LOOPS
-    if st.session_state.show_detailed_feedback:
-        st.markdown("---"); st.subheader("📈 Detailed Performance Analysis (AI Generated)")
-        with st.spinner("AI performance summary generate kar raha hai..."):
-            performance_feedback = analyze_performance(st.session_state.user_answers)
-        st.write("**Overall Feedback:**"); st.info(performance_feedback.get("overall_feedback", "Summary N/A."))
-        st.write("**Strengths (Questions answered correctly):**");
-        strengths = performance_feedback.get("strengths", []);
-        if strengths:
-            for i, q in enumerate(strengths): st.success(f"{i + 1}. {q} ✅") # Use standard loop
-        else: st.write("_(None correct this time.)_")
-        st.write("**Areas for Improvement (Questions answered incorrectly):**");
-        weaknesses = performance_feedback.get("weaknesses", []);
-        if weaknesses:
-            for i, q in enumerate(weaknesses): st.error(f"{i + 1}. {q} ❌") # Use standard loop
-        else: st.write("_(No incorrect answers!)_")
-    st.markdown("---")
-    if st.button("🔄 Restart Quiz"):
-        keys_to_reset = ["user_answers", "current_question", "quiz_started","quiz_completed", "show_detailed_feedback"]
-        for key in keys_to_reset:
-            if key in st.session_state: del st.session_state[key]
-        st.session_state.current_question = 0; st.session_state.quiz_started = False; st.rerun()
-
-# Fallback if state is somehow invalid
+# --- Results Screen ---
 else:
-    st.error("An unexpected error occurred with the application state. Please restart.")
-    if st.button("Force Restart App State"):
-         keys_to_reset = ["user_answers", "current_question", "quiz_started","quiz_completed", "show_detailed_feedback"]
-         for key in keys_to_reset:
-             if key in st.session_state: del st.session_state[key]
-         st.session_state.current_question = 0; st.session_state.quiz_started = False; st.rerun()
-
-
-
+    st.subheader("Quiz Results")
+    
+    # Calculate and display score
+    score = calculate_score(st.session_state.user_answers)
+    st.write(f"Your score: {score:.2f}%")
+    
+    # Display answers and feedback
+    st.subheader("Your Answers")
+    
+    for i, answer in enumerate(st.session_state.user_answers):
+        with st.expander(f"{get_emoji(answer.get('is_correct', False))} Question {i+1}: {answer['question']}"):
+            st.write("**Your Query:**")
+            st.code(answer["student_answer"], language="sql")
+            
+            st.write("**SQL Mentor Feedback:**")
+            st.write(answer.get("feedback", "No feedback available."))
+            
+            # Display simulation results with case sensitivity information
+            display_simulation("Simulated Result (Aapka Query Output)", 
+                              answer.get("actual_result", "N/A"), 
+                              answer.get("case_fix_applied", False))
+            
+            display_simulation("Simulated Result (Expected Example Output)", 
+                              answer.get("expected_result", "N/A"))
+    
+    # Option to show detailed performance analysis
+    if st.button("Show Detailed Performance Analysis" if not st.session_state.show_detailed_feedback else "Hide Detailed Analysis"):
+        st.session_state.show_detailed_feedback = not st.session_state.show_detailed_feedback
+    
+    if st.session_state.show_detailed_feedback:
+        st.subheader("Performance Analysis")
+        performance = analyze_performance(st.session_state.user_answers)
+        
+        st.write("**Overall Feedback:**")
+        st.write(performance["overall_feedback"])
+        
+        st.write("**Strengths:**")
+        if performance["strengths"]:
+            for strength in performance["strengths"]:
+                st.write(f"- {strength}")
+        else:
+            st.write("No specific strengths identified.")
+        
+        st.write("**Areas for Improvement:**")
+        if performance["weaknesses"]:
+            for weakness in performance["weaknesses"]:
+                st.write(f"- {weakness}")
+        else:
+            st.write("No specific areas for improvement identified.")
+    
+    # Restart quiz option
+    if st.button("Restart Quiz"):
+        st.session_state.user_answers = []
+        st.session_state.current_question = 0
+        st.session_state.quiz_started = False
+        st.session_state.quiz_completed = False
+        st.session_state.show_detailed_feedback = False
+        st.experimental_rerun()
