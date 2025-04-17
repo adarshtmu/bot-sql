@@ -2,7 +2,7 @@ import streamlit as st
 import google.generativeai as genai
 import pandas as pd
 import re
-import duckdb # Import DuckDB
+import duckdb  # Import DuckDB
 
 # --- Custom CSS ---
 hide_streamlit_style = """
@@ -23,9 +23,9 @@ st.markdown(hide_streamlit_style, unsafe_allow_html=True)
 
 # --- Set up Gemini API ---
 # WARNING: Hardcoding API keys is insecure. Consider environment variables or secrets for deployment.
-gemini_api_key = "AIzaSyAfzl_66GZsgaYjAM7cT2djVCBCAr86t2k" # Your specific API Key
+gemini_api_key = "AIzaSyAfzl_66GZsgaYjAM7cT2djVCBCAr86t2k"  # Your specific API Key
 
-if not gemini_api_key: # Basic check if the key is empty
+if not gemini_api_key:  # Basic check if the key is empty
     st.error("🚨 Gemini API Key is missing in the code.")
     st.stop()
 
@@ -35,7 +35,6 @@ try:
 except Exception as e:
     st.error(f"🚨 Failed to configure Gemini API or access the model: {e}")
     st.stop()
-
 
 # --- Sample Data ---
 users_table = pd.DataFrame({
@@ -59,24 +58,29 @@ original_tables = {
 
 # --- SQL Questions List ---
 sql_questions = [
-    { "question": "Write a SQL query to get all details about users from the 'users' table.", "correct_answer_example": "SELECT * FROM users;", "sample_table": users_table, "relevant_tables": ["users"] },
-    { "question": "Write a SQL query to count the total number of users in the 'users' table.", "correct_answer_example": "SELECT COUNT(*) AS user_count FROM users;", "sample_table": users_table, "relevant_tables": ["users"] },
-    { "question": "Write a SQL query to get all users older than 30 from the 'users' table.", "correct_answer_example": "SELECT * FROM users WHERE age > 30;", "sample_table": users_table, "relevant_tables": ["users"] },
-    { "question": "Write a SQL query to find all orders with a status of 'Pending' from the 'orders' table.", "correct_answer_example": "SELECT * FROM orders WHERE LOWER(status) = 'pending';", "sample_table": orders_table, "relevant_tables": ["orders"] },
-    { "question": "Write a SQL query to find the most recent order from the 'orders' table by order date.", "correct_answer_example": "SELECT * FROM orders ORDER BY order_date DESC LIMIT 1;", "sample_table": orders_table, "relevant_tables": ["orders"] },
-    { "question": "Write a SQL query to find the average order amount from the 'orders' table.", "correct_answer_example": "SELECT AVG(amount) AS average_amount FROM orders;", "sample_table": orders_table, "relevant_tables": ["orders"] },
-    { "question": "Write a SQL query to find users from 'New York' or 'Chicago' in the 'users' table.", "correct_answer_example": "SELECT * FROM users WHERE LOWER(city) IN (LOWER('New York'), LOWER('Chicago'));", "sample_table": users_table, "relevant_tables": ["users"] },
-    { "question": "Write a SQL query to find users who have not placed any orders. Use the 'users' and 'orders' tables.", "correct_answer_example": "SELECT u.* FROM users u LEFT JOIN orders o ON u.user_id = o.user_id WHERE o.order_id IS NULL;", "sample_table": users_table, "relevant_tables": ["users", "orders"] },
-    { "question": "Write a SQL query to calculate the total amount spent by each user by joining the 'users' and 'orders' tables.", "correct_answer_example": "SELECT u.name, SUM(o.amount) AS total_spent FROM users u JOIN orders o ON u.user_id = o.user_id GROUP BY u.name ORDER BY u.name;", "sample_table": users_table, "relevant_tables": ["users", "orders"] },
-    { "question": "Write a SQL query to count how many orders each user has placed using a LEFT JOIN between 'users' and 'orders'. Include users with zero orders.", "correct_answer_example": "SELECT u.name, COUNT(o.order_id) AS order_count FROM users u LEFT JOIN orders o ON u.user_id = o.user_id GROUP BY u.name ORDER BY u.name;", "sample_table": users_table, "relevant_tables": ["users", "orders"] }
+    {"question": "Write a SQL query to get all details about users from the 'users' table.", "correct_answer_example": "SELECT * FROM users;", "sample_table": users_table, "relevant_tables": ["users"]},
+    {"question": "Write a SQL query to count the total number of users in the 'users' table.", "correct_answer_example": "SELECT COUNT(*) AS user_count FROM users;", "sample_table": users_table, "relevant_tables": ["users"]},
+    {"question": "Write a SQL query to get all users older than 30 from the 'users' table.", "correct_answer_example": "SELECT * FROM users WHERE age > 30;", "sample_table": users_table, "relevant_tables": ["users"]},
+    {"question": "Write a SQL query to find all orders with a status of 'Pending' from the 'orders' table.", "correct_answer_example": "SELECT * FROM orders WHERE LOWER(status) = 'pending';", "sample_table": orders_table, "relevant_tables": ["orders"]},
+    {"question": "Write a SQL query to find the most recent order from the 'orders' table by order date.", "correct_answer_example": "SELECT * FROM orders ORDER BY order_date DESC LIMIT 1;", "sample_table": orders_table, "relevant_tables": ["orders"]},
+    {"question": "Write a SQL query to find the average order amount from the 'orders' table.", "correct_answer_example": "SELECT AVG(amount) AS average_amount FROM orders;", "sample_table": orders_table, "relevant_tables": ["orders"]},
+    {"question": "Write a SQL query to find users from 'New York' or 'Chicago' in the 'users' table.", "correct_answer_example": "SELECT * FROM users WHERE LOWER(city) IN (LOWER('New York'), LOWER('Chicago'));", "sample_table": users_table, "relevant_tables": ["users"]},
+    {"question": "Write a SQL query to find users who have not placed any orders. Use the 'users' and 'orders' tables.", "correct_answer_example": "SELECT u.* FROM users u LEFT JOIN orders o ON u.user_id = o.user_id WHERE o.order_id IS NULL;", "sample_table": users_table, "relevant_tables": ["users", "orders"]},
+    {"question": "Write a SQL query to calculate the total amount spent by each user by joining the 'users' and 'orders' tables.", "correct_answer_example": "SELECT u.name, SUM(o.amount) AS total_spent FROM users u JOIN orders o ON u.user_id = o.user_id GROUP BY u.name ORDER BY u.name;", "sample_table": users_table, "relevant_tables": ["users", "orders"]},
+    {"question": "Write a SQL query to count how many orders each user has placed using a LEFT JOIN between 'users' and 'orders'. Include users with zero orders.", "correct_answer_example": "SELECT u.name, COUNT(o.order_id) AS order_count FROM users u LEFT JOIN orders o ON u.user_id = o.user_id GROUP BY u.name ORDER BY u.name;", "sample_table": users_table, "relevant_tables": ["users", "orders"]}
 ]
 
 # --- Session State Initialization ---
-if "user_answers" not in st.session_state: st.session_state.user_answers = []
-if "current_question" not in st.session_state: st.session_state.current_question = 0
-if "quiz_started" not in st.session_state: st.session_state.quiz_started = False
-if "quiz_completed" not in st.session_state: st.session_state.quiz_completed = False
-if "show_detailed_feedback" not in st.session_state: st.session_state.show_detailed_feedback = False
+if "user_answers" not in st.session_state:
+    st.session_state.user_answers = []
+if "current_question" not in st.session_state:
+    st.session_state.current_question = 0
+if "quiz_started" not in st.session_state:
+    st.session_state.quiz_started = False
+if "quiz_completed" not in st.session_state:
+    st.session_state.quiz_completed = False
+if "show_detailed_feedback" not in st.session_state:
+    st.session_state.show_detailed_feedback = False
 
 # --- Helper Functions ---
 
@@ -109,8 +113,10 @@ def simulate_query_duckdb(sql_query, tables_dict):
     try:
         con = duckdb.connect(database=':memory:', read_only=False)
         for table_name, df in tables_dict.items():
-            if isinstance(df, pd.DataFrame): con.register(str(table_name), df)
-            else: print(f"Warning [simulate_query]: Item '{table_name}' not a DataFrame.")
+            if isinstance(df, pd.DataFrame):
+                con.register(str(table_name), df)
+            else:
+                print(f"Warning [simulate_query]: Item '{table_name}' not a DataFrame.")
         
         # Try the modified query first
         try:
@@ -127,13 +133,18 @@ def simulate_query_duckdb(sql_query, tables_dict):
             e_str = str(e).lower()
             binder_match = re.search(r'(binder error|catalog error|parser error).*referenced column "([^"]+)" not found', e_str)
             syntax_match = re.search(r'syntax error.*at or near ""([^"]+)""', e_str)
-            if binder_match: error_message += f"\n\n**Hint:** Use single quotes (') for text values like `'{binder_match.group(2)}'` instead of double quotes (\")."
-            elif syntax_match: error_message += f"\n\n**Hint:** Use single quotes (') for text values like `'{syntax_match.group(1)}'` instead of double quotes (\")."
-        except Exception as e_hint: print(f"Error generating hint: {e_hint}")
+            if binder_match:
+                error_message += f"\n\n**Hint:** Use single quotes (') for text values like `'{binder_match.group(2)}'` instead of double quotes (\")."
+            elif syntax_match:
+                error_message += f"\n\n**Hint:** Use single quotes (') for text values like `'{syntax_match.group(1)}'` instead of double quotes (\")."
+        except Exception as e_hint:
+            print(f"Error generating hint: {e_hint}")
         print(f"ERROR [simulate_query_duckdb]: {error_message}\nQuery: {sql_query}")
         if con:
-            try: con.close()
-            except: pass
+            try:
+                con.close()
+            except:
+                pass
         return error_message
 
 def get_table_schema(table_name, tables_dict):
@@ -144,17 +155,26 @@ def get_table_schema(table_name, tables_dict):
 
 def evaluate_answer_with_llm(question_data, student_answer, original_tables_dict):
     """Evaluate the user's answer using Gemini API and simulate using DuckDB."""
-    if not student_answer.strip(): return "Please provide an answer.", False, "N/A", "N/A", "No input."
-    question = question_data["question"]; relevant_table_names = question_data["relevant_tables"]; correct_answer_example = question_data["correct_answer_example"]
+    if not student_answer.strip():
+        return "Please provide an answer.", False, "N/A", "N/A", "No input."
+    question = question_data["question"]
+    relevant_table_names = question_data["relevant_tables"]
+    correct_answer_example = question_data["correct_answer_example"]
     schema_info = ""
-    if not relevant_table_names: schema_info = "No table schema context.\n"
+    if not relevant_table_names:
+        schema_info = "No table schema context.\n"
     else:
         for name in relevant_table_names:
             columns = get_table_schema(name, original_tables_dict)
             if columns:
-                try: df = original_tables_dict[name]; dtypes = df.dtypes.to_string() if isinstance(df, pd.DataFrame) else "N/A"; schema_info += f"Table '{name}': Columns {columns}\n DataTypes:\n{dtypes}\n\n"
-                except Exception as e_schema: schema_info += f"Table '{name}': Columns {columns} (Schema Error: {e_schema})\n\n"
-            else: schema_info += f"Table '{name}': Schema not found.\n"
+                try:
+                    df = original_tables_dict[name]
+                    dtypes = df.dtypes.to_string() if isinstance(df, pd.DataFrame) else "N/A"
+                    schema_info += f"Table '{name}': Columns {columns}\n DataTypes:\n{dtypes}\n\n"
+                except Exception as e_schema:
+                    schema_info += f"Table '{name}': Columns {columns} (Schema Error: {e_schema})\n\n"
+            else:
+                schema_info += f"Table '{name}': Schema not found.\n"
 
     # When checking if the answer is correct, consider case-insensitive variations
     modified_student_answer = student_answer
@@ -180,7 +200,6 @@ def evaluate_answer_with_llm(question_data, student_answer, original_tables_dict
     3.  **Student's SQL Query:**
         ```sql
         {student_answer}
-        ```
 
     **Analysis Instructions:**
 
