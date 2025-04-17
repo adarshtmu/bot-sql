@@ -50,7 +50,7 @@ orders_table = pd.DataFrame({
     "user_id": [1, 2, 3, 1, 4],
     "amount": [50.00, 75.50, 120.00, 200.00, 35.00],
     "order_date": pd.to_datetime(["2024-02-01", "2024-02-05", "2024-02-10", "2024-02-15", "2024-02-20"]),
-    "status": ["Completed", "pending", "Completed", "Shipped", "Cancelled"]  # Using lowercase "pending" for consistency
+    "status": ["Completed", "pending", "Completed", "Shipped", "Cancelled"]  # Changed "Pending" to "pending" for consistency
 })
 original_tables = {
     "users": users_table,
@@ -62,10 +62,10 @@ sql_questions = [
     { "question": "Write a SQL query to get all details about users from the 'users' table.", "correct_answer_example": "SELECT * FROM users;", "sample_table": users_table, "relevant_tables": ["users"] },
     { "question": "Write a SQL query to count the total number of users in the 'users' table.", "correct_answer_example": "SELECT COUNT(*) AS user_count FROM users;", "sample_table": users_table, "relevant_tables": ["users"] },
     { "question": "Write a SQL query to get all users older than 30 from the 'users' table.", "correct_answer_example": "SELECT * FROM users WHERE age > 30;", "sample_table": users_table, "relevant_tables": ["users"] },
-    { "question": "Write a SQL query to find all orders with a status of 'pending' from the 'orders' table.", "correct_answer_example": "SELECT * FROM orders WHERE status = 'pending';", "sample_table": orders_table, "relevant_tables": ["orders"] },  # Using LOWER() for case insensitivity
+    { "question": "Write a SQL query to find all orders with a status of 'Pending' from the 'orders' table.", "correct_answer_example": "SELECT * FROM orders WHERE LOWER(status) = 'pending';", "sample_table": orders_table, "relevant_tables": ["orders"] },  # Updated to use LOWER()
     { "question": "Write a SQL query to find the most recent order from the 'orders' table by order date.", "correct_answer_example": "SELECT * FROM orders ORDER BY order_date DESC LIMIT 1;", "sample_table": orders_table, "relevant_tables": ["orders"] },
     { "question": "Write a SQL query to find the average order amount from the 'orders' table.", "correct_answer_example": "SELECT AVG(amount) AS average_amount FROM orders;", "sample_table": orders_table, "relevant_tables": ["orders"] },
-    { "question": "Write a SQL query to find users from 'New York' or 'Chicago' in the 'users' table.", "correct_answer_example": "SELECT * FROM users WHERE LOWER(city) IN (LOWER('New York'), LOWER('Chicago'));", "sample_table": users_table, "relevant_tables": ["users"] },  # Using LOWER() for case insensitivity
+    { "question": "Write a SQL query to find users from 'New York' or 'Chicago' in the 'users' table.", "correct_answer_example": "SELECT * FROM users WHERE LOWER(city) IN (LOWER('New York'), LOWER('Chicago'));", "sample_table": users_table, "relevant_tables": ["users"] },  # Updated to use LOWER()
     { "question": "Write a SQL query to find users who have not placed any orders. Use the 'users' and 'orders' tables.", "correct_answer_example": "SELECT u.* FROM users u LEFT JOIN orders o ON u.user_id = o.user_id WHERE o.order_id IS NULL;", "sample_table": users_table, "relevant_tables": ["users", "orders"] },
     { "question": "Write a SQL query to calculate the total amount spent by each user by joining the 'users' and 'orders' tables.", "correct_answer_example": "SELECT u.name, SUM(o.amount) AS total_spent FROM users u JOIN orders o ON u.user_id = o.user_id GROUP BY u.name ORDER BY u.name;", "sample_table": users_table, "relevant_tables": ["users", "orders"] },
     { "question": "Write a SQL query to count how many orders each user has placed using a LEFT JOIN between 'users' and 'orders'. Include users with zero orders.", "correct_answer_example": "SELECT u.name, COUNT(o.order_id) AS order_count FROM users u LEFT JOIN orders o ON u.user_id = o.user_id GROUP BY u.name ORDER BY u.name;", "sample_table": users_table, "relevant_tables": ["users", "orders"] }
@@ -159,12 +159,26 @@ def smart_query_evaluator(sql_query, tables_dict):
                 return result_df, False
             except Exception as e2:
                 error_message = f"Simulation Error: Failed to execute query. Reason: {str(e2)}"
+                try:
+                    e_str = str(e2).lower()
+                    binder_match = re.search(r'(binder error|catalog error|parser error).*referenced column "([^"]+)" not found', e_str)
+                    syntax_match = re.search(r'syntax error.*at or near ""([^"]+)""', e_str)
+                    if binder_match: error_message += f"\n\n**Hint:** Use single quotes (') for text values like `'{binder_match.group(2)}'` instead of double quotes (\")."
+                    elif syntax_match: error_message += f"\n\n**Hint:** Use single quotes (') for text values like `'{syntax_match.group(1)}'` instead of double quotes (\")."
+                except Exception as e_hint: print(f"Error generating hint: {e_hint}")
                 if con:
                     try: con.close()
                     except: pass
                 return error_message, False
     except Exception as e:
         error_message = f"Simulation Error: Failed to execute query. Reason: {str(e)}"
+        try:
+            e_str = str(e).lower()
+            binder_match = re.search(r'(binder error|catalog error|parser error).*referenced column "([^"]+)" not found', e_str)
+            syntax_match = re.search(r'syntax error.*at or near ""([^"]+)""', e_str)
+            if binder_match: error_message += f"\n\n**Hint:** Use single quotes (') for text values like `'{binder_match.group(2)}'` instead of double quotes (\")."
+            elif syntax_match: error_message += f"\n\n**Hint:** Use single quotes (') for text values like `'{syntax_match.group(1)}'` instead of double quotes (\")."
+        except Exception as e_hint: print(f"Error generating hint: {e_hint}")
         if con:
             try: con.close()
             except: pass
@@ -244,8 +258,8 @@ def evaluate_answer_with_llm(question_data, student_answer, original_tables_dict
     except Exception as e: st.error(f"🚨 AI Error: {e}"); print(f"ERROR: Gemini call: {e}"); feedback_llm = f"AI feedback error: {e}"; is_correct_llm = False; llm_output = f"Error: {e}"
 
     # Use smart query evaluator for both student answer and correct example
-    actual_result_sim, case_fix_applied = smart_query_evaluator(student_answer, original_tables)
-    expected_result_sim, _ = smart_query_evaluator(correct_answer_example, original_tables)
+    actual_result_sim, case_fix_applied = smart_query_evaluator(student_answer, original_tables_dict)
+    expected_result_sim, _ = smart_query_evaluator(correct_answer_example, original_tables_dict)
     
     return feedback_llm, is_correct_llm, expected_result_sim, actual_result_sim, llm_output, case_fix_applied
 
@@ -314,7 +328,7 @@ if inconsistencies:
     st.write("These issues may cause unexpected query results.")
 
 # Debug Information Toggle
-if st.checkbox("Show Debug Information", value=st.session_state.show_debug_info):
+if st.checkbox("Show Debug Information", value=st.session_state.get("show_debug_info", False)):
     st.session_state.show_debug_info = True
     with st.expander("Database Content Inspection", expanded=True):
         st.subheader("Database Content")
