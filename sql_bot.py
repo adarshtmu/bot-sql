@@ -50,7 +50,7 @@ orders_table = pd.DataFrame({
     "user_id": [1, 2, 3, 1, 4],
     "amount": [50.00, 75.50, 120.00, 200.00, 35.00],
     "order_date": pd.to_datetime(["2024-02-01", "2024-02-05", "2024-02-10", "2024-02-15", "2024-02-20"]),
-    "status": ["Completed", "pending", "Completed", "Shipped", "Cancelled"]  # Changed "Pending" to "pending" for consistency
+    "status": ["Completed", "pending", "Completed", "Shipped", "Cancelled"]  # Using lowercase "pending" for consistency
 })
 original_tables = {
     "users": users_table,
@@ -62,10 +62,10 @@ sql_questions = [
     { "question": "Write a SQL query to get all details about users from the 'users' table.", "correct_answer_example": "SELECT * FROM users;", "sample_table": users_table, "relevant_tables": ["users"] },
     { "question": "Write a SQL query to count the total number of users in the 'users' table.", "correct_answer_example": "SELECT COUNT(*) AS user_count FROM users;", "sample_table": users_table, "relevant_tables": ["users"] },
     { "question": "Write a SQL query to get all users older than 30 from the 'users' table.", "correct_answer_example": "SELECT * FROM users WHERE age > 30;", "sample_table": users_table, "relevant_tables": ["users"] },
-    { "question": "Write a SQL query to find all orders with a status of 'pending' from the 'orders' table.", "correct_answer_example": "SELECT * FROM orders WHERE LOWER(status) = 'pending';", "sample_table": orders_table, "relevant_tables": ["orders"] },  # Updated to use LOWER() for case insensitivity
+    { "question": "Write a SQL query to find all orders with a status of 'pending' from the 'orders' table.", "correct_answer_example": "SELECT * FROM orders WHERE LOWER(status) = 'pending';", "sample_table": orders_table, "relevant_tables": ["orders"] },  # Using LOWER() for case insensitivity
     { "question": "Write a SQL query to find the most recent order from the 'orders' table by order date.", "correct_answer_example": "SELECT * FROM orders ORDER BY order_date DESC LIMIT 1;", "sample_table": orders_table, "relevant_tables": ["orders"] },
     { "question": "Write a SQL query to find the average order amount from the 'orders' table.", "correct_answer_example": "SELECT AVG(amount) AS average_amount FROM orders;", "sample_table": orders_table, "relevant_tables": ["orders"] },
-    { "question": "Write a SQL query to find users from 'New York' or 'Chicago' in the 'users' table.", "correct_answer_example": "SELECT * FROM users WHERE city IN ('New York', 'Chicago');", "sample_table": users_table, "relevant_tables": ["users"] },
+    { "question": "Write a SQL query to find users from 'New York' or 'Chicago' in the 'users' table.", "correct_answer_example": "SELECT * FROM users WHERE LOWER(city) IN (LOWER('New York'), LOWER('Chicago'));", "sample_table": users_table, "relevant_tables": ["users"] },  # Using LOWER() for case insensitivity
     { "question": "Write a SQL query to find users who have not placed any orders. Use the 'users' and 'orders' tables.", "correct_answer_example": "SELECT u.* FROM users u LEFT JOIN orders o ON u.user_id = o.user_id WHERE o.order_id IS NULL;", "sample_table": users_table, "relevant_tables": ["users", "orders"] },
     { "question": "Write a SQL query to calculate the total amount spent by each user by joining the 'users' and 'orders' tables.", "correct_answer_example": "SELECT u.name, SUM(o.amount) AS total_spent FROM users u JOIN orders o ON u.user_id = o.user_id GROUP BY u.name ORDER BY u.name;", "sample_table": users_table, "relevant_tables": ["users", "orders"] },
     { "question": "Write a SQL query to count how many orders each user has placed using a LEFT JOIN between 'users' and 'orders'. Include users with zero orders.", "correct_answer_example": "SELECT u.name, COUNT(o.order_id) AS order_count FROM users u LEFT JOIN orders o ON u.user_id = o.user_id GROUP BY u.name ORDER BY u.name;", "sample_table": users_table, "relevant_tables": ["users", "orders"] }
@@ -95,61 +95,85 @@ def ensure_data_consistency():
     if 'Pending' in status_values and 'pending' in status_values:
         inconsistencies.append("Both 'Pending' and 'pending' exist in the database (inconsistent data)")
     
+    # Check city values for case consistency
+    city_values = original_tables["users"]["city"].unique().tolist()
+    city_lowercase = [city.lower() for city in city_values]
+    if len(set(city_lowercase)) != len(set(city_values)):
+        inconsistencies.append("Cities have inconsistent case in the database")
+    
     return inconsistencies, status_values
 
 # --- Helper Functions ---
 
-def smart_query_evaluator(query, tables_dict):
-    """Evaluates SQL query with automatic case sensitivity handling"""
-    # Try original query first
-    result = simulate_query_duckdb(query, tables_dict)
+def make_query_case_insensitive(sql_query):
+    """Makes string comparisons in SQL queries case-insensitive by adding LOWER() function"""
+    # Common patterns for string comparisons in SQL
+    patterns = [
+        # status = 'value' pattern
+        (r"status\s*=\s*'([^']*)'", r"LOWER(status) = LOWER('\1')"),
+        # city = 'value' pattern
+        (r"city\s*=\s*'([^']*)'", r"LOWER(city) = LOWER('\1')"),
+        # name = 'value' pattern
+        (r"name\s*=\s*'([^']*)'", r"LOWER(name) = LOWER('\1')"),
+        # email = 'value' pattern
+        (r"email\s*=\s*'([^']*)'", r"LOWER(email) = LOWER('\1')"),
+        # status IN ('value1', 'value2') pattern
+        (r"status\s+IN\s*\(([^)]*)\)", lambda m: f"LOWER(status) IN ({','.join([f'LOWER({x.strip()})' for x in m.group(1).split(',')])})")
+    ]
     
-    # If result is empty DataFrame, try case-insensitive alternatives
-    if isinstance(result, pd.DataFrame) and result.empty:
-        # Check if query contains status comparison with 'Pending'
-        if "status = 'Pending'" in query:
-            case_insensitive_query = query.replace("status = 'Pending'", "LOWER(status) = 'pending'")
-            alt_result = simulate_query_duckdb(case_insensitive_query, tables_dict)
-            if isinstance(alt_result, pd.DataFrame) and not alt_result.empty:
-                return alt_result, True  # Return result and flag indicating case sensitivity fix
-        
-        # Check if query contains status comparison with 'PENDING'
-        if "status = 'PENDING'" in query:
-            alt_query = query.replace("status = 'PENDING'", "LOWER(status) = 'pending'")
-            alt_result = simulate_query_duckdb(alt_query, tables_dict)
-            if isinstance(alt_result, pd.DataFrame) and not alt_result.empty:
-                return alt_result, True  # Return result and flag indicating case sensitivity fix
+    modified_query = sql_query
+    for pattern, replacement in patterns:
+        modified_query = re.sub(pattern, replacement, modified_query, flags=re.IGNORECASE)
     
-    return result, False  # Return original result and flag indicating no case sensitivity fix
+    return modified_query
 
-def simulate_query_duckdb(sql_query, tables_dict):
-    """Simulates an SQL query using DuckDB on in-memory pandas DataFrames."""
+def smart_query_evaluator(sql_query, tables_dict):
+    """Evaluates SQL query with automatic case sensitivity handling"""
     if not sql_query or not sql_query.strip():
-        return "Simulation Error: No query provided."
+        return "Simulation Error: No query provided.", False
     if not tables_dict:
-        return "Simulation Error: No tables provided for context."
+        return "Simulation Error: No tables provided for context.", False
+    
+    # Try to make the query case-insensitive
+    case_insensitive_query = make_query_case_insensitive(sql_query)
+    case_fix_applied = (case_insensitive_query != sql_query)
+    
+    # Try the case-insensitive query first
     con = None
     try:
         con = duckdb.connect(database=':memory:', read_only=False)
         for table_name, df in tables_dict.items():
             if isinstance(df, pd.DataFrame): con.register(str(table_name), df)
             else: print(f"Warning [simulate_query]: Item '{table_name}' not a DataFrame.")
-        result_df = con.execute(sql_query).df()
-        con.close(); return result_df
+        
+        # Try the case-insensitive query first
+        try:
+            result_df = con.execute(case_insensitive_query).df()
+            con.close()
+            return result_df, case_fix_applied
+        except Exception as e:
+            # If case-insensitive query fails, try the original query
+            try:
+                result_df = con.execute(sql_query).df()
+                con.close()
+                return result_df, False
+            except Exception as e2:
+                error_message = f"Simulation Error: Failed to execute query. Reason: {str(e2)}"
+                if con:
+                    try: con.close()
+                    except: pass
+                return error_message, False
     except Exception as e:
         error_message = f"Simulation Error: Failed to execute query. Reason: {str(e)}"
-        try:
-            e_str = str(e).lower()
-            binder_match = re.search(r'(binder error|catalog error|parser error).*referenced column "([^"]+)" not found', e_str)
-            syntax_match = re.search(r'syntax error.*at or near ""([^"]+)""', e_str)
-            if binder_match: error_message += f"\n\n**Hint:** Use single quotes (') for text values like `'{binder_match.group(2)}'` instead of double quotes (\")."
-            elif syntax_match: error_message += f"\n\n**Hint:** Use single quotes (') for text values like `'{syntax_match.group(1)}'` instead of double quotes (\")."
-        except Exception as e_hint: print(f"Error generating hint: {e_hint}")
-        print(f"ERROR [simulate_query_duckdb]: {error_message}\nQuery: {sql_query}")
         if con:
             try: con.close()
             except: pass
-        return error_message
+        return error_message, False
+
+def simulate_query_duckdb(sql_query, tables_dict):
+    """Legacy simulation function that calls the smart evaluator"""
+    result, _ = smart_query_evaluator(sql_query, tables_dict)
+    return result
 
 def get_table_schema(table_name, tables_dict):
     """Gets column names for a given table name."""
@@ -171,6 +195,14 @@ def evaluate_answer_with_llm(question_data, student_answer, original_tables_dict
                 except Exception as e_schema: schema_info += f"Table '{name}': Columns {columns} (Schema Error: {e_schema})\n\n"
             else: schema_info += f"Table '{name}': Schema not found.\n"
 
+    # Add note about case-insensitivity to the prompt
+    case_insensitivity_note = """
+    Note: This SQL quiz accepts case-insensitive string comparisons. For example, both of these are considered correct:
+    - WHERE status = 'pending'
+    - WHERE status = 'Pending'
+    - WHERE LOWER(status) = 'pending'
+    """
+
     prompt = f"""
     You are an expert SQL evaluator acting as a friendly SQL mentor. Analyze the student's SQL query based on the question asked and the provided table schemas (including data types). Assume standard SQL syntax (like MySQL/PostgreSQL).
 
@@ -183,6 +215,8 @@ def evaluate_answer_with_llm(question_data, student_answer, original_tables_dict
         ```sql
         {student_answer}
         ```
+    
+    {case_insensitivity_note}
 
     **Analysis Instructions:**
 
@@ -304,8 +338,30 @@ if st.checkbox("Show Debug Information", value=st.session_state.show_debug_info)
         st.write("Test query with LOWER function:")
         test3 = simulate_query_duckdb("SELECT * FROM orders WHERE LOWER(status) = 'pending'", original_tables)
         st.dataframe(test3)
+        
+        # Test case-insensitive query transformation
+        st.write("Case-insensitive query transformation examples:")
+        test_queries = [
+            "SELECT * FROM orders WHERE status = 'Pending'",
+            "SELECT * FROM users WHERE city = 'NEW YORK'",
+            "SELECT * FROM orders WHERE status IN ('Pending', 'Shipped')"
+        ]
+        for query in test_queries:
+            transformed = make_query_case_insensitive(query)
+            st.code(f"Original: {query}\nTransformed: {transformed}")
 else:
     st.session_state.show_debug_info = False
+
+# Note about case-insensitivity
+st.info("""
+**Note about case sensitivity:** This SQL quiz accepts case-insensitive string comparisons. 
+For example, all of these are considered correct:
+- `WHERE status = 'pending'`
+- `WHERE status = 'Pending'`
+- `WHERE LOWER(status) = 'pending'`
+
+Feel free to use any case format in your answers.
+""")
 
 if not st.session_state.quiz_started:
     st.write("This quiz will test your SQL knowledge with questions ranging from basic to intermediate difficulty.")
