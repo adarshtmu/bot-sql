@@ -62,7 +62,7 @@ sql_questions = [
     { "question": "Write a SQL query to get all details about users from the 'users' table.", "correct_answer_example": "SELECT * FROM users;", "sample_table": users_table, "relevant_tables": ["users"] },
     { "question": "Write a SQL query to count the total number of users in the 'users' table.", "correct_answer_example": "SELECT COUNT(*) AS user_count FROM users;", "sample_table": users_table, "relevant_tables": ["users"] },
     { "question": "Write a SQL query to get all users older than 30 from the 'users' table.", "correct_answer_example": "SELECT * FROM users WHERE age > 30;", "sample_table": users_table, "relevant_tables": ["users"] },
-    { "question": "Write a SQL query to find all orders with a status of 'pending' from the 'orders' table.", "correct_answer_example": "SELECT * FROM orders WHERE status = 'pending';", "sample_table": orders_table, "relevant_tables": ["orders"] },  # Changed to lowercase 'pending' to match data
+    { "question": "Write a SQL query to find all orders with a status of 'pending' from the 'orders' table.", "correct_answer_example": "SELECT * FROM orders WHERE LOWER(status) = 'pending';", "sample_table": orders_table, "relevant_tables": ["orders"] },  # Updated to use LOWER() for case insensitivity
     { "question": "Write a SQL query to find the most recent order from the 'orders' table by order date.", "correct_answer_example": "SELECT * FROM orders ORDER BY order_date DESC LIMIT 1;", "sample_table": orders_table, "relevant_tables": ["orders"] },
     { "question": "Write a SQL query to find the average order amount from the 'orders' table.", "correct_answer_example": "SELECT AVG(amount) AS average_amount FROM orders;", "sample_table": orders_table, "relevant_tables": ["orders"] },
     { "question": "Write a SQL query to find users from 'New York' or 'Chicago' in the 'users' table.", "correct_answer_example": "SELECT * FROM users WHERE city IN ('New York', 'Chicago');", "sample_table": users_table, "relevant_tables": ["users"] },
@@ -77,8 +77,50 @@ if "current_question" not in st.session_state: st.session_state.current_question
 if "quiz_started" not in st.session_state: st.session_state.quiz_started = False
 if "quiz_completed" not in st.session_state: st.session_state.quiz_completed = False
 if "show_detailed_feedback" not in st.session_state: st.session_state.show_detailed_feedback = False
+if "show_debug_info" not in st.session_state: st.session_state.show_debug_info = False
+
+# --- Data Consistency Check ---
+def ensure_data_consistency():
+    """Ensures data consistency in tables and returns any issues found"""
+    inconsistencies = []
+    
+    # Check orders table status values
+    status_values = original_tables["orders"]["status"].unique().tolist()
+    
+    # Check if 'Pending' exists but 'pending' doesn't
+    if 'Pending' in status_values and 'pending' not in status_values:
+        inconsistencies.append("'Pending' is capitalized in database but query examples use lowercase 'pending'")
+    
+    # Check if both 'Pending' and 'pending' exist (inconsistent data)
+    if 'Pending' in status_values and 'pending' in status_values:
+        inconsistencies.append("Both 'Pending' and 'pending' exist in the database (inconsistent data)")
+    
+    return inconsistencies, status_values
 
 # --- Helper Functions ---
+
+def smart_query_evaluator(query, tables_dict):
+    """Evaluates SQL query with automatic case sensitivity handling"""
+    # Try original query first
+    result = simulate_query_duckdb(query, tables_dict)
+    
+    # If result is empty DataFrame, try case-insensitive alternatives
+    if isinstance(result, pd.DataFrame) and result.empty:
+        # Check if query contains status comparison with 'Pending'
+        if "status = 'Pending'" in query:
+            case_insensitive_query = query.replace("status = 'Pending'", "LOWER(status) = 'pending'")
+            alt_result = simulate_query_duckdb(case_insensitive_query, tables_dict)
+            if isinstance(alt_result, pd.DataFrame) and not alt_result.empty:
+                return alt_result, True  # Return result and flag indicating case sensitivity fix
+        
+        # Check if query contains status comparison with 'PENDING'
+        if "status = 'PENDING'" in query:
+            alt_query = query.replace("status = 'PENDING'", "LOWER(status) = 'pending'")
+            alt_result = simulate_query_duckdb(alt_query, tables_dict)
+            if isinstance(alt_result, pd.DataFrame) and not alt_result.empty:
+                return alt_result, True  # Return result and flag indicating case sensitivity fix
+    
+    return result, False  # Return original result and flag indicating no case sensitivity fix
 
 def simulate_query_duckdb(sql_query, tables_dict):
     """Simulates an SQL query using DuckDB on in-memory pandas DataFrames."""
@@ -117,7 +159,7 @@ def get_table_schema(table_name, tables_dict):
 
 def evaluate_answer_with_llm(question_data, student_answer, original_tables_dict):
     """Evaluate the user's answer using Gemini API and simulate using DuckDB."""
-    if not student_answer.strip(): return "Please provide an answer.", False, "N/A", "N/A", "No input."
+    if not student_answer.strip(): return "Please provide an answer.", False, "N/A", "N/A", "No input.", False
     question = question_data["question"]; relevant_table_names = question_data["relevant_tables"]; correct_answer_example = question_data["correct_answer_example"]
     schema_info = ""
     if not relevant_table_names: schema_info = "No table schema context.\n"
@@ -167,17 +209,11 @@ def evaluate_answer_with_llm(question_data, student_answer, original_tables_dict
         feedback_llm = feedback_llm.replace("student", "aap")
     except Exception as e: st.error(f"🚨 AI Error: {e}"); print(f"ERROR: Gemini call: {e}"); feedback_llm = f"AI feedback error: {e}"; is_correct_llm = False; llm_output = f"Error: {e}"
 
-    # Simulate both queries and store results
-    actual_result_sim = simulate_query_duckdb(student_answer, original_tables)
-    expected_result_sim = simulate_query_duckdb(correct_answer_example, original_tables)
+    # Use smart query evaluator for both student answer and correct example
+    actual_result_sim, case_fix_applied = smart_query_evaluator(student_answer, original_tables)
+    expected_result_sim, _ = smart_query_evaluator(correct_answer_example, original_tables)
     
-    # Debug information to help troubleshoot display issues
-    print(f"DEBUG - Actual result type: {type(actual_result_sim)}")
-    print(f"DEBUG - Actual result empty: {actual_result_sim.empty if isinstance(actual_result_sim, pd.DataFrame) else 'Not a DataFrame'}")
-    print(f"DEBUG - Expected result type: {type(expected_result_sim)}")
-    print(f"DEBUG - Expected result empty: {expected_result_sim.empty if isinstance(expected_result_sim, pd.DataFrame) else 'Not a DataFrame'}")
-    
-    return feedback_llm, is_correct_llm, expected_result_sim, actual_result_sim, llm_output
+    return feedback_llm, is_correct_llm, expected_result_sim, actual_result_sim, llm_output, case_fix_applied
 
 def calculate_score(user_answers):
     """Calculate the score based on correct answers."""
@@ -210,9 +246,12 @@ def analyze_performance(user_answers):
 def get_emoji(is_correct):
     return "✅" if is_correct else "❌"
 
-def display_simulation(title, result_data):
+def display_simulation(title, result_data, case_fix_applied=False):
     """Helper function to display simulation results (DataFrame or error)."""
     st.write(f"**{title}:**")
+    if case_fix_applied:
+        st.info("Note: Case-insensitive query was automatically applied to show results.")
+        
     if isinstance(result_data, pd.DataFrame):
         if result_data.empty:
             st.info("_(Simulation resulted in an empty table)_")
@@ -231,6 +270,42 @@ def display_simulation(title, result_data):
 # --- Start Screen ---
 st.title("SQL Practice Quiz")
 st.write("Test your SQL knowledge with interactive questions!")
+
+# Run data consistency check
+inconsistencies, status_values = ensure_data_consistency()
+if inconsistencies:
+    st.warning("⚠️ Data Consistency Issues Detected:")
+    for issue in inconsistencies:
+        st.write(f"- {issue}")
+    st.write("These issues may cause unexpected query results.")
+
+# Debug Information Toggle
+if st.checkbox("Show Debug Information", value=st.session_state.show_debug_info):
+    st.session_state.show_debug_info = True
+    with st.expander("Database Content Inspection", expanded=True):
+        st.subheader("Database Content")
+        
+        # Show all distinct status values
+        st.write("Status values in database:", status_values)
+        
+        # Show full orders table
+        st.write("Full orders table data:")
+        st.dataframe(original_tables["orders"])
+        
+        # Test specific queries
+        st.write("Test query with 'Pending':")
+        test1 = simulate_query_duckdb("SELECT * FROM orders WHERE status = 'Pending'", original_tables)
+        st.dataframe(test1)
+        
+        st.write("Test query with 'pending':")
+        test2 = simulate_query_duckdb("SELECT * FROM orders WHERE status = 'pending'", original_tables)
+        st.dataframe(test2)
+        
+        st.write("Test query with LOWER function:")
+        test3 = simulate_query_duckdb("SELECT * FROM orders WHERE LOWER(status) = 'pending'", original_tables)
+        st.dataframe(test3)
+else:
+    st.session_state.show_debug_info = False
 
 if not st.session_state.quiz_started:
     st.write("This quiz will test your SQL knowledge with questions ranging from basic to intermediate difficulty.")
@@ -267,7 +342,7 @@ elif not st.session_state.quiz_completed:
                 st.warning("Please enter a SQL query before submitting.")
             else:
                 # Evaluate answer
-                feedback, is_correct, expected_result, actual_result, _ = evaluate_answer_with_llm(
+                feedback, is_correct, expected_result, actual_result, _, case_fix_applied = evaluate_answer_with_llm(
                     current_q, user_answer, original_tables
                 )
                 
@@ -278,7 +353,8 @@ elif not st.session_state.quiz_completed:
                     "feedback": feedback,
                     "is_correct": is_correct,
                     "expected_result": expected_result,
-                    "actual_result": actual_result
+                    "actual_result": actual_result,
+                    "case_fix_applied": case_fix_applied
                 })
                 
                 # Move to next question or complete quiz
@@ -317,9 +393,13 @@ else:
             st.write("**SQL Mentor Feedback:**")
             st.write(answer.get("feedback", "No feedback available."))
             
-            # Display simulation results - this is the key part for fixing the UI issue
-            display_simulation("Simulated Result (Aapka Query Output)", answer.get("actual_result", "N/A"))
-            display_simulation("Simulated Result (Expected Example Output)", answer.get("expected_result", "N/A"))
+            # Display simulation results with case sensitivity information
+            display_simulation("Simulated Result (Aapka Query Output)", 
+                              answer.get("actual_result", "N/A"), 
+                              answer.get("case_fix_applied", False))
+            
+            display_simulation("Simulated Result (Expected Example Output)", 
+                              answer.get("expected_result", "N/A"))
     
     # Option to show detailed performance analysis
     if st.button("Show Detailed Performance Analysis" if not st.session_state.show_detailed_feedback else "Hide Detailed Analysis"):
