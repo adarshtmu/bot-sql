@@ -35,13 +35,13 @@ except Exception as e:
     st.error(f"🚨 Failed to configure Gemini API or access the model: {e}")
     st.stop()
 
-# --- Sample Data (Case-Insensitive Version) ---
+# --- Sample Data (All Lowercase) ---
 users_table = pd.DataFrame({
     "user_id": [1, 2, 3, 4],
-    "name": ["Alice", "Bob", "Charlie", "David"],
+    "name": ["alice", "bob", "charlie", "david"],  # Lowercase
     "email": ["alice@example.com", "bob@example.com", "charlie@example.com", "david@example.com"],
     "age": [25, 30, 35, 40],
-    "city": ["new york", "los angeles", "chicago", "houston"]  # Lowercase cities
+    "city": ["new york", "los angeles", "chicago", "houston"]
 })
 
 orders_table = pd.DataFrame({
@@ -49,7 +49,7 @@ orders_table = pd.DataFrame({
     "user_id": [1, 2, 3, 1, 4],
     "amount": [50.00, 75.50, 120.00, 200.00, 35.00],
     "order_date": pd.to_datetime(["2024-02-01", "2024-02-05", "2024-02-10", "2024-02-15", "2024-02-20"]),
-    "status": ["completed", "pending", "completed", "shipped", "cancelled"]  # Lowercase statuses
+    "status": ["completed", "pending", "completed", "shipped", "cancelled"]
 })
 
 original_tables = {
@@ -57,20 +57,22 @@ original_tables = {
     "orders": orders_table
 }
 
-# --- SQL Questions List (Updated with Lowercase Examples) ---
+# --- SQL Questions List ---
+# --- SQL Questions List ---
 sql_questions = [
     { "question": "Write a SQL query to get all details about users from the 'users' table.", "correct_answer_example": "SELECT * FROM users;", "sample_table": users_table, "relevant_tables": ["users"] },
     { "question": "Write a SQL query to count the total number of users in the 'users' table.", "correct_answer_example": "SELECT COUNT(*) AS user_count FROM users;", "sample_table": users_table, "relevant_tables": ["users"] },
     { "question": "Write a SQL query to get all users older than 30 from the 'users' table.", "correct_answer_example": "SELECT * FROM users WHERE age > 30;", "sample_table": users_table, "relevant_tables": ["users"] },
-    { "question": "Write a SQL query to find all orders with a status of 'Pending' from the 'orders' table.", "correct_answer_example": "SELECT * FROM orders WHERE status = 'pending';", "sample_table": orders_table, "relevant_tables": ["orders"] },
+    { "question": "Write a SQL query to find all orders with a status of 'Pending' from the 'orders' table.", "correct_answer_example": "SELECT * FROM orders WHERE status = 'Pending';", "sample_table": orders_table, "relevant_tables": ["orders"] },
     { "question": "Write a SQL query to find the most recent order from the 'orders' table by order date.", "correct_answer_example": "SELECT * FROM orders ORDER BY order_date DESC LIMIT 1;", "sample_table": orders_table, "relevant_tables": ["orders"] },
     { "question": "Write a SQL query to find the average order amount from the 'orders' table.", "correct_answer_example": "SELECT AVG(amount) AS average_amount FROM orders;", "sample_table": orders_table, "relevant_tables": ["orders"] },
-    { "question": "Write a SQL query to find users from 'New York' or 'Chicago' in the 'users' table.", "correct_answer_example": "SELECT * FROM users WHERE city IN ('new york', 'chicago');", "sample_table": users_table, "relevant_tables": ["users"] },
+    { "question": "Write a SQL query to find users from 'New York' or 'Chicago' in the 'users' table.", "correct_answer_example": "SELECT * FROM users WHERE city IN ('New York', 'Chicago');", "sample_table": users_table, "relevant_tables": ["users"] },
+
     { "question": "Write a SQL query to find users who have not placed any orders. Use the 'users' and 'orders' tables.", "correct_answer_example": "SELECT u.* FROM users u LEFT JOIN orders o ON u.user_id = o.user_id WHERE o.order_id IS NULL;", "sample_table": users_table, "relevant_tables": ["users", "orders"] },
     { "question": "Write a SQL query to calculate the total amount spent by each user by joining the 'users' and 'orders' tables.", "correct_answer_example": "SELECT u.name, SUM(o.amount) AS total_spent FROM users u JOIN orders o ON u.user_id = o.user_id GROUP BY u.name ORDER BY u.name;", "sample_table": users_table, "relevant_tables": ["users", "orders"] },
     { "question": "Write a SQL query to count how many orders each user has placed using a LEFT JOIN between 'users' and 'orders'. Include users with zero orders.", "correct_answer_example": "SELECT u.name, COUNT(o.order_id) AS order_count FROM users u LEFT JOIN orders o ON u.user_id = o.user_id GROUP BY u.name ORDER BY u.name;", "sample_table": users_table, "relevant_tables": ["users", "orders"] }
-]
 
+]
 # --- Session State Initialization ---
 if "user_answers" not in st.session_state: st.session_state.user_answers = []
 if "current_question" not in st.session_state: st.session_state.current_question = 0
@@ -78,33 +80,52 @@ if "quiz_started" not in st.session_state: st.session_state.quiz_started = False
 if "quiz_completed" not in st.session_state: st.session_state.quiz_completed = False
 if "show_detailed_feedback" not in st.session_state: st.session_state.show_detailed_feedback = False
 
-# --- Helper Functions (Updated for Case Insensitivity) ---
-def lowercase_string_literals(sql_query):
-    """Convert all string literals in SQL query to lowercase"""
-    pattern = r"'((?:[^']|'')*)'"
-    def replace_match(match):
-        return f"'{match.group(1).lower()}'"
-    return re.sub(pattern, replace_match, sql_query, flags=re.IGNORECASE)
+
+
+
+# --- Helper Functions (Updated) ---
+def normalize_sql_case(sql_query):
+    """Normalize SQL case for case-insensitive execution"""
+    # Convert string literals to lowercase
+    sql_query = re.sub(r"'((?:[^']|'')*)'", 
+                     lambda m: f"'{m.group(1).lower()}'", 
+                     sql_query, 
+                     flags=re.IGNORECASE)
+    
+    # Convert column/table names to lowercase (basic handling)
+    sql_query = re.sub(r'\b([A-Z_]+)\b(?=(?:[^"]*"[^"]*")*[^"]*$)', 
+                     lambda m: m.group(1).lower(), 
+                     sql_query, 
+                     flags=re.IGNORECASE)
+    
+    return sql_query
+
+def prepare_case_insensitive_data(tables_dict):
+    """Prepare lowercase version of all data"""
+    lower_tables = {}
+    for name, df in tables_dict.items():
+        if isinstance(df, pd.DataFrame):
+            # Lowercase column names
+            df_lower = df.rename(columns=str.lower)
+            # Lowercase string columns
+            for col in df_lower.select_dtypes(include=['object']).columns:
+                df_lower[col] = df_lower[col].str.lower()
+            lower_tables[name] = df_lower
+    return lower_tables
 
 def simulate_query_duckdb(sql_query, tables_dict):
-    """Case-insensitive SQL query simulation using DuckDB"""
-    if not sql_query or not sql_query.strip():
-        return "Simulation Error: No query provided."
+    """Case-insensitive SQL execution with proper data handling"""
+    if not sql_query.strip():
+        return "Simulation Error: Empty query"
     
     try:
-        # Preprocess query and data for case insensitivity
-        modified_query = lowercase_string_literals(sql_query)
+        # Normalize query case
+        modified_query = normalize_sql_case(sql_query)
         
-        # Create lowercase version of string columns
-        lower_tables = {}
-        for name, df in tables_dict.items():
-            if isinstance(df, pd.DataFrame):
-                df_lower = df.copy()
-                for col in df_lower.select_dtypes(include=['object']).columns:
-                    df_lower[col] = df_lower[col].str.lower()
-                lower_tables[name] = df_lower
+        # Prepare case-insensitive data
+        lower_tables = prepare_case_insensitive_data(tables_dict)
         
-        # Execute with modified query and data
+        # Execute query
         con = duckdb.connect(database=':memory:')
         for table_name, df in lower_tables.items():
             con.register(table_name, df)
@@ -114,8 +135,14 @@ def simulate_query_duckdb(sql_query, tables_dict):
         return result_df
         
     except Exception as e:
-        error_message = f"Simulation Error: {str(e)}"
-        return error_message
+        return f"Simulation Error: {str(e)}"
+
+# --- Rest of the Functions ---
+# ... (keep evaluate_answer_with_llm, analyze_performance, 
+#      display_simulation etc. same as previous version)
+
+# --- Streamlit UI Components ---
+# ... (keep all UI code the same as before)
 
 def get_table_schema(table_name, tables_dict):
     """Gets column names for a given table name."""
