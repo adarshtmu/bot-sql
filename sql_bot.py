@@ -171,8 +171,17 @@ def evaluate_answer_with_llm(question_data, student_answer, original_tables_dict
         else: 
             schema_info += f"Table '{name}': Schema not found.\n"
 
+    """Evaluate the user's answer with case-insensitive validation"""
+    # ... [previous code until prompt creation] ...
+
     prompt = f"""
-    You are an expert SQL evaluator acting as a friendly SQL mentor. Analyze the student's SQL query based on the question asked and the provided table schemas. Assume standard SQL syntax.
+    You are an expert SQL evaluator acting as a friendly SQL mentor. Analyze the student's SQL query based on the question asked and the provided table schemas. Assume standard SQL syntax (like MySQL/PostgreSQL).
+
+    **Modified Evaluation Guidelines:**
+    1. Consider case-insensitive string comparisons as valid (e.g., 'Pending' vs 'pending')
+    2. Mark answers as correct if they produce the same logical result
+    3. Provide improvement suggestions as feedback, not errors
+    4. Final verdict should reflect logical correctness
 
     **Evaluation Task:**
     1. **Question:** {question}
@@ -180,12 +189,14 @@ def evaluate_answer_with_llm(question_data, student_answer, original_tables_dict
     3. **Student's SQL Query:**\n```sql\n{student_answer}\n```
 
     **Analysis Instructions:**
-    * Consider case-insensitive string comparisons as valid
-    * Allow different but equivalent syntax (e.g., JOIN vs WHERE clause joins)
-    * Focus on logical correctness rather than exact syntax matching
-    * Provide feedback in casual Hindi
-    * End with "Verdict: Correct" or "Verdict: Incorrect"
+    - If query uses direct comparison (e.g., status = 'pending'), mark correct but suggest LOWER()
+    - If query uses case-insensitive methods, praise as best practice
+    - Focus on whether the query logic solves the problem
+    - Provide feedback in casual Hindi
+    - End with "Verdict: Correct" or "Verdict: Incorrect"
     """
+
+    # ... [rest of the function remains same] ...
 
     feedback_llm = "AI feedback failed."
     is_correct_llm = False
