@@ -2,7 +2,7 @@ import streamlit as st
 import google.generativeai as genai
 import pandas as pd
 import re
-import duckdb # Import DuckDB
+import duckdb
 
 # --- Custom CSS ---
 hide_streamlit_style = """
@@ -10,22 +10,21 @@ hide_streamlit_style = """
         header {visibility: hidden;}
         #MainMenu {visibility: hidden;}
         footer {visibility: hidden;}
-        .viewerBadge_container__1QSob {display: none !important;} /* Hides the GitHub profile image */
-        .stDeployButton {display: none !important;} /* Hides deploy button */
-        [data-testid="stToolbar"] {display: none !important;} /* Hides Streamlit toolbar */
-        [data-testid="stDecoration"] {display: none !important;} /* Hides Streamlit branding */
-        [data-testid="stDeployButton"] {display: none !important;} /* Hides Streamlit deploy button */
-        .st-emotion-cache-1r8d6ul {display: none !important;} /* Additional class for profile image */
-        .st-emotion-cache-1jicfl2 {display: none !important;} /* Hides Streamlit's footer */
+        .viewerBadge_container__1QSob {display: none !important;}
+        .stDeployButton {display: none !important;}
+        [data-testid="stToolbar"] {display: none !important;}
+        [data-testid="stDecoration"] {display: none !important;}
+        [data-testid="stDeployButton"] {display: none !important;}
+        .st-emotion-cache-1r8d6ul {display: none !important;}
+        .st-emotion-cache-1jicfl2 {display: none !important;}
     </style>
 """
 st.markdown(hide_streamlit_style, unsafe_allow_html=True)
 
 # --- Set up Gemini API ---
-# WARNING: Hardcoding API keys is insecure. Consider environment variables or secrets for deployment.
-gemini_api_key = "AIzaSyAfzl_66GZsgaYjAM7cT2djVCBCAr86t2k" # Your specific API Key
+gemini_api_key = "AIzaSyAfzl_66GZsgaYjAM7cT2djVCBCAr86t2k"
 
-if not gemini_api_key: # Basic check if the key is empty
+if not gemini_api_key:
     st.error("🚨 Gemini API Key is missing in the code.")
     st.stop()
 
@@ -36,41 +35,40 @@ except Exception as e:
     st.error(f"🚨 Failed to configure Gemini API or access the model: {e}")
     st.stop()
 
-
-# --- Sample Data ---
+# --- Sample Data (Case-Insensitive Version) ---
 users_table = pd.DataFrame({
     "user_id": [1, 2, 3, 4],
     "name": ["Alice", "Bob", "Charlie", "David"],
     "email": ["alice@example.com", "bob@example.com", "charlie@example.com", "david@example.com"],
     "age": [25, 30, 35, 40],
-    "city": ["New York", "Los Angeles", "Chicago", "Houston"]
+    "city": ["new york", "los angeles", "chicago", "houston"]  # Lowercase cities
 })
+
 orders_table = pd.DataFrame({
     "order_id": [101, 102, 103, 104, 105],
     "user_id": [1, 2, 3, 1, 4],
     "amount": [50.00, 75.50, 120.00, 200.00, 35.00],
     "order_date": pd.to_datetime(["2024-02-01", "2024-02-05", "2024-02-10", "2024-02-15", "2024-02-20"]),
-    "status": ["Completed", "Pending", "Completed", "Shipped", "Cancelled"]
+    "status": ["completed", "pending", "completed", "shipped", "cancelled"]  # Lowercase statuses
 })
+
 original_tables = {
     "users": users_table,
     "orders": orders_table
 }
 
-# --- SQL Questions List ---
+# --- SQL Questions List (Updated with Lowercase Examples) ---
 sql_questions = [
     { "question": "Write a SQL query to get all details about users from the 'users' table.", "correct_answer_example": "SELECT * FROM users;", "sample_table": users_table, "relevant_tables": ["users"] },
     { "question": "Write a SQL query to count the total number of users in the 'users' table.", "correct_answer_example": "SELECT COUNT(*) AS user_count FROM users;", "sample_table": users_table, "relevant_tables": ["users"] },
     { "question": "Write a SQL query to get all users older than 30 from the 'users' table.", "correct_answer_example": "SELECT * FROM users WHERE age > 30;", "sample_table": users_table, "relevant_tables": ["users"] },
-    { "question": "Write a SQL query to find all orders with a status of 'Pending' from the 'orders' table.", "correct_answer_example": "SELECT * FROM orders WHERE status = 'Pending';", "sample_table": orders_table, "relevant_tables": ["orders"] },
+    { "question": "Write a SQL query to find all orders with a status of 'Pending' from the 'orders' table.", "correct_answer_example": "SELECT * FROM orders WHERE status = 'pending';", "sample_table": orders_table, "relevant_tables": ["orders"] },
     { "question": "Write a SQL query to find the most recent order from the 'orders' table by order date.", "correct_answer_example": "SELECT * FROM orders ORDER BY order_date DESC LIMIT 1;", "sample_table": orders_table, "relevant_tables": ["orders"] },
     { "question": "Write a SQL query to find the average order amount from the 'orders' table.", "correct_answer_example": "SELECT AVG(amount) AS average_amount FROM orders;", "sample_table": orders_table, "relevant_tables": ["orders"] },
-    { "question": "Write a SQL query to find users from 'New York' or 'Chicago' in the 'users' table.", "correct_answer_example": "SELECT * FROM users WHERE city IN ('New York', 'Chicago');", "sample_table": users_table, "relevant_tables": ["users"] },
-
+    { "question": "Write a SQL query to find users from 'New York' or 'Chicago' in the 'users' table.", "correct_answer_example": "SELECT * FROM users WHERE city IN ('new york', 'chicago');", "sample_table": users_table, "relevant_tables": ["users"] },
     { "question": "Write a SQL query to find users who have not placed any orders. Use the 'users' and 'orders' tables.", "correct_answer_example": "SELECT u.* FROM users u LEFT JOIN orders o ON u.user_id = o.user_id WHERE o.order_id IS NULL;", "sample_table": users_table, "relevant_tables": ["users", "orders"] },
     { "question": "Write a SQL query to calculate the total amount spent by each user by joining the 'users' and 'orders' tables.", "correct_answer_example": "SELECT u.name, SUM(o.amount) AS total_spent FROM users u JOIN orders o ON u.user_id = o.user_id GROUP BY u.name ORDER BY u.name;", "sample_table": users_table, "relevant_tables": ["users", "orders"] },
     { "question": "Write a SQL query to count how many orders each user has placed using a LEFT JOIN between 'users' and 'orders'. Include users with zero orders.", "correct_answer_example": "SELECT u.name, COUNT(o.order_id) AS order_count FROM users u LEFT JOIN orders o ON u.user_id = o.user_id GROUP BY u.name ORDER BY u.name;", "sample_table": users_table, "relevant_tables": ["users", "orders"] }
-
 ]
 
 # --- Session State Initialization ---
@@ -80,35 +78,43 @@ if "quiz_started" not in st.session_state: st.session_state.quiz_started = False
 if "quiz_completed" not in st.session_state: st.session_state.quiz_completed = False
 if "show_detailed_feedback" not in st.session_state: st.session_state.show_detailed_feedback = False
 
-# --- Helper Functions ---
+# --- Helper Functions (Updated for Case Insensitivity) ---
+def lowercase_string_literals(sql_query):
+    """Convert all string literals in SQL query to lowercase"""
+    pattern = r"'((?:[^']|'')*)'"
+    def replace_match(match):
+        return f"'{match.group(1).lower()}'"
+    return re.sub(pattern, replace_match, sql_query, flags=re.IGNORECASE)
 
 def simulate_query_duckdb(sql_query, tables_dict):
-    """Simulates an SQL query using DuckDB on in-memory pandas DataFrames."""
+    """Case-insensitive SQL query simulation using DuckDB"""
     if not sql_query or not sql_query.strip():
         return "Simulation Error: No query provided."
-    if not tables_dict:
-        return "Simulation Error: No tables provided for context."
-    con = None
+    
     try:
-        con = duckdb.connect(database=':memory:', read_only=False)
-        for table_name, df in tables_dict.items():
-            if isinstance(df, pd.DataFrame): con.register(str(table_name), df)
-            else: print(f"Warning [simulate_query]: Item '{table_name}' not a DataFrame.")
-        result_df = con.execute(sql_query).df()
-        con.close(); return result_df
+        # Preprocess query and data for case insensitivity
+        modified_query = lowercase_string_literals(sql_query)
+        
+        # Create lowercase version of string columns
+        lower_tables = {}
+        for name, df in tables_dict.items():
+            if isinstance(df, pd.DataFrame):
+                df_lower = df.copy()
+                for col in df_lower.select_dtypes(include=['object']).columns:
+                    df_lower[col] = df_lower[col].str.lower()
+                lower_tables[name] = df_lower
+        
+        # Execute with modified query and data
+        con = duckdb.connect(database=':memory:')
+        for table_name, df in lower_tables.items():
+            con.register(table_name, df)
+            
+        result_df = con.execute(modified_query).df()
+        con.close()
+        return result_df
+        
     except Exception as e:
-        error_message = f"Simulation Error: Failed to execute query. Reason: {str(e)}"
-        try:
-            e_str = str(e).lower()
-            binder_match = re.search(r'(binder error|catalog error|parser error).*referenced column "([^"]+)" not found', e_str)
-            syntax_match = re.search(r'syntax error.*at or near ""([^"]+)""', e_str)
-            if binder_match: error_message += f"\n\n**Hint:** Use single quotes (') for text values like `'{binder_match.group(2)}'` instead of double quotes (\")."
-            elif syntax_match: error_message += f"\n\n**Hint:** Use single quotes (') for text values like `'{syntax_match.group(1)}'` instead of double quotes (\")."
-        except Exception as e_hint: print(f"Error generating hint: {e_hint}")
-        print(f"ERROR [simulate_query_duckdb]: {error_message}\nQuery: {sql_query}")
-        if con:
-            try: con.close()
-            except: pass
+        error_message = f"Simulation Error: {str(e)}"
         return error_message
 
 def get_table_schema(table_name, tables_dict):
@@ -120,58 +126,75 @@ def get_table_schema(table_name, tables_dict):
 def evaluate_answer_with_llm(question_data, student_answer, original_tables_dict):
     """Evaluate the user's answer using Gemini API and simulate using DuckDB."""
     if not student_answer.strip(): return "Please provide an answer.", False, "N/A", "N/A", "No input."
-    question = question_data["question"]; relevant_table_names = question_data["relevant_tables"]; correct_answer_example = question_data["correct_answer_example"]
+    
+    question = question_data["question"]
+    relevant_table_names = question_data["relevant_tables"]
+    correct_answer_example = question_data["correct_answer_example"]
+    
     schema_info = ""
-    if not relevant_table_names: schema_info = "No table schema context.\n"
-    else:
-        for name in relevant_table_names:
-            columns = get_table_schema(name, original_tables_dict)
-            if columns:
-                try: df = original_tables_dict[name]; dtypes = df.dtypes.to_string() if isinstance(df, pd.DataFrame) else "N/A"; schema_info += f"Table '{name}': Columns {columns}\n DataTypes:\n{dtypes}\n\n"
-                except Exception as e_schema: schema_info += f"Table '{name}': Columns {columns} (Schema Error: {e_schema})\n\n"
-            else: schema_info += f"Table '{name}': Schema not found.\n"
+    for name in relevant_table_names:
+        columns = get_table_schema(name, original_tables_dict)
+        if columns:
+            try: 
+                df = original_tables_dict[name]
+                dtypes = df.dtypes.to_string() if isinstance(df, pd.DataFrame) else "N/A"
+                schema_info += f"Table '{name}': Columns {columns}\nData Types:\n{dtypes}\n\n"
+            except Exception as e_schema: 
+                schema_info += f"Table '{name}': Columns {columns} (Schema Error: {e_schema})\n\n"
+        else: 
+            schema_info += f"Table '{name}': Schema not found.\n"
 
     prompt = f"""
-    You are an expert SQL evaluator acting as a friendly SQL mentor. Analyze the student's SQL query based on the question asked and the provided table schemas (including data types). Assume standard SQL syntax (like MySQL/PostgreSQL).
+    You are an expert SQL evaluator acting as a friendly SQL mentor. Analyze the student's SQL query based on the question asked and the provided table schemas. Assume standard SQL syntax.
 
     **Evaluation Task:**
-
-    1.  **Question:** {question}
-    2.  **Relevant Table Schemas:**
-        {schema_info.strip()}
-    3.  **Student's SQL Query:**
-        ```sql
-        {student_answer}
-        ```
+    1. **Question:** {question}
+    2. **Relevant Table Schemas:**\n{schema_info.strip()}
+    3. **Student's SQL Query:**\n```sql\n{student_answer}\n```
 
     **Analysis Instructions:**
-
-    * **Correctness:** Does the student's query accurately and completely answer the **Question** based on the **Relevant Table Schemas**? Consider edge cases if applicable (e.g., users with no orders, data types for comparisons).
-    * **Validity:** Is the query syntactically valid SQL? Briefly mention any syntax errors.
-    * **Logic:** Does the query use appropriate SQL clauses (SELECT, FROM, WHERE, JOIN, GROUP BY, ORDER BY, aggregates, etc.) correctly for the task? Is the logic sound? Are comparisons appropriate for the data types?
-    * **Alternatives:** Briefly acknowledge if the student used a valid alternative approach (e.g., different JOIN type if appropriate, subquery vs. JOIN). Efficiency is a minor point unless significantly poor.
-    * **Feedback:** Provide clear, constructive feedback in a friendly, encouraging, casual Hindi tone (like a helpful senior or 'bhaiya' talking to a learner).
-        * If correct: Praise the student (e.g., "Wah yaar, zabardast query likhi hai! Bilkul sahi logic lagaya.") and briefly explain *why* it's correct or mention if it's a common/good way.
-        * If incorrect: Gently point out the error (e.g., "Arre yaar, yahaan thoda sa check karo..." or "Ek chhoti si galti ho gayi hai..."). Explain *what* is wrong (syntax - like using " vs ' for strings, logic, columns, etc.)... Suggest how to fix it or what the correct concept/approach might involve (e.g., "Yahaan `LEFT JOIN` use karna better rahega kyunki..." or "WHERE clause mein condition check karo... Status ek text hai, toh quotes use karna hoga..."). Avoid just giving the full correct query away unless needed for a specific small fix explanation. Keep it encouraging.
-    * **Verdict:** Conclude your entire response with *exactly* one line formatted as: "Verdict: Correct" or "Verdict: Incorrect". This line MUST be the very last line.
-
-    **Begin Evaluation:**
+    * Consider case-insensitive string comparisons as valid
+    * Allow different but equivalent syntax (e.g., JOIN vs WHERE clause joins)
+    * Focus on logical correctness rather than exact syntax matching
+    * Provide feedback in casual Hindi
+    * End with "Verdict: Correct" or "Verdict: Incorrect"
     """
 
-    feedback_llm = "AI feedback failed."; is_correct_llm = False; llm_output = "Error: No LLM response."
+    feedback_llm = "AI feedback failed."
+    is_correct_llm = False
     try:
-        response = model.generate_content(prompt);
-        if response.parts: llm_output = "".join(part.text for part in response.parts)
-        else: llm_output = response.text
-        llm_output = llm_output.strip(); verdict_match = re.search(r'^Verdict:\s*(Correct|Incorrect)\s*$', llm_output, re.M | re.I)
-        if verdict_match: is_correct_llm = (verdict_match.group(1).lower() == "correct"); feedback_llm = llm_output[:verdict_match.start()].strip()
-        else: st.warning(f"⚠️ Could not parse AI verdict."); print(f"WARNING: Could not parse verdict:\n{llm_output}"); feedback_llm = llm_output + "\n\n_(System Note: Correctness check failed.)_"; is_correct_llm = False
-        feedback_llm = feedback_llm.replace("student", "aap")
-    except Exception as e: st.error(f"🚨 AI Error: {e}"); print(f"ERROR: Gemini call: {e}"); feedback_llm = f"AI feedback error: {e}"; is_correct_llm = False; llm_output = f"Error: {e}"
-
+        response = model.generate_content(prompt)
+        llm_output = response.text.strip()
+        verdict_match = re.search(r'Verdict:\s*(Correct|Incorrect)', llm_output, re.IGNORECASE)
+        
+        if verdict_match:
+            is_correct_llm = verdict_match.group(1).lower() == 'correct'
+            feedback_llm = llm_output[:verdict_match.start()].strip()
+        else:
+            feedback_llm = llm_output + "\n\n(Sistem Note: Could not determine correctness)"
+            
+    except Exception as e:
+        feedback_llm = f"AI feedback error: {e}"
+    
     actual_result_sim = simulate_query_duckdb(student_answer, original_tables)
     expected_result_sim = simulate_query_duckdb(correct_answer_example, original_tables)
+    
     return feedback_llm, is_correct_llm, expected_result_sim, actual_result_sim, llm_output
+
+# ... (Rest of the code remains the same from the original version, including UI components and display functions)
+
+# --- Streamlit App Components (Unchanged UI Code) ---
+# [Keep all the remaining code from the original version including:
+# - calculate_score()
+# - analyze_performance()
+# - get_emoji()
+# - display_simulation()
+# - All the Streamlit UI components
+# - State management
+# - Progress tracking
+# - Result display logic]
+
+# Note: The rest of the code (UI components and display functions) remains exactly the same as in the original version provided.
 
 def calculate_score(user_answers):
     """Calculate the score based on correct answers."""
