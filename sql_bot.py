@@ -1,8 +1,9 @@
 import streamlit as st
 import google.generativeai as genai
 import pandas as pd
-import re
-import duckdb
+import re # Needed for regex query modification
+import duckdb # Import DuckDB
+# import copy # No longer needed as we don't modify data copies this way
 
 # --- Custom CSS ---
 hide_streamlit_style = """
@@ -10,20 +11,22 @@ hide_streamlit_style = """
         header {visibility: hidden;}
         #MainMenu {visibility: hidden;}
         footer {visibility: hidden;}
-        .viewerBadge_container__1QSob {display: none !important;}
-        .stDeployButton {display: none !important;}
-        [data-testid="stToolbar"] {display: none !important;}
-        [data-testid="stDecoration"] {display: none !important;}
-        [data-testid="stDeployButton"] {display: none !important;}
-        .st-emotion-cache-1r8d6ul {display: none !important;}
-        .st-emotion-cache-1jicfl2 {display: none !important;}
+        .viewerBadge_container__1QSob {display: none !important;} /* Hides the GitHub profile image */
+        .stDeployButton {display: none !important;} /* Hides deploy button */
+        [data-testid="stToolbar"] {display: none !important;} /* Hides Streamlit toolbar */
+        [data-testid="stDecoration"] {display: none !important;} /* Hides Streamlit branding */
+        [data-testid="stDeployButton"] {display: none !important;} /* Hides Streamlit deploy button */
+        .st-emotion-cache-1r8d6ul {display: none !important;} /* Additional class for profile image */
+        .st-emotion-cache-1jicfl2 {display: none !important;} /* Hides Streamlit's footer */
     </style>
 """
 st.markdown(hide_streamlit_style, unsafe_allow_html=True)
 
 # --- Set up Gemini API ---
-gemini_api_key = "AIzaSyAfzl_66GZsgaYjAM7cT2djVCBCAr86t2k"
-if not gemini_api_key or gemini_api_key == "YOUR_API_KEY_HERE":
+# WARNING: Hardcoding API keys is insecure. Consider environment variables or secrets for deployment.
+# Replace "YOUR_API_KEY_HERE" with your actual Gemini API Key
+gemini_api_key = "AIzaSyAfzl_66GZsgaYjAM7cT2djVCBCAr86t2k" # Your specific API Key
+if not gemini_api_key or gemini_api_key == "YOUR_API_KEY_HERE": # Basic check
     st.error("🚨 Gemini API Key is missing or hasn't been replaced. Please add your key in the code.")
     st.stop()
 
@@ -34,20 +37,21 @@ except Exception as e:
     st.error(f"🚨 Failed to configure Gemini API or access the model: {e}")
     st.stop()
 
+
 # --- Sample Data ---
 users_table = pd.DataFrame({
     "user_id": [1, 2, 3, 4],
     "name": ["Alice", "Bob", "Charlie", "David"],
     "email": ["alice@example.com", "bob@example.com", "charlie@example.com", "david@example.com"],
     "age": [25, 30, 35, 40],
-    "city": ["New York", "Los Angeles", "Chicago", "Houston"]
+    "city": ["New York", "Los Angeles", "Chicago", "Houston"] # Mixed case cities
 })
 orders_table = pd.DataFrame({
     "order_id": [101, 102, 103, 104, 105],
     "user_id": [1, 2, 3, 1, 4],
     "amount": [50.00, 75.50, 120.00, 200.00, 35.00],
     "order_date": pd.to_datetime(["2024-02-01", "2024-02-05", "2024-02-10", "2024-02-15", "2024-02-20"]),
-    "status": ["Completed", "Pending", "Completed", "Shipped", "Cancelled"]
+    "status": ["Completed", "Pending", "Completed", "Shipped", "Cancelled"] # Original case data
 })
 original_tables = {
     "users": users_table,
@@ -56,180 +60,144 @@ original_tables = {
 
 # --- SQL Questions List ---
 sql_questions = [
-    {"question": "Write a SQL query to get all details about users from the 'users' table.", "correct_answer_example": "SELECT * FROM `users`;", "sample_table": users_table, "relevant_tables": ["users"]},
-    {"question": "Write a SQL query to count the total number of users in the 'users' table.", "correct_answer_example": "SELECT COUNT(*) AS user_count FROM `users`;", "sample_table": users_table, "relevant_tables": ["users"]},
-    {"question": "Write a SQL query to get all users older than 30 from the 'users' table.", "correct_answer_example": "SELECT * FROM `users` WHERE `age` > 30;", "sample_table": users_table, "relevant_tables": ["users"]},
-    {"question": "Write a SQL query to find all orders with a status of 'Pending' from the 'orders' table.", "correct_answer_example": "SELECT * FROM `orders` WHERE `status` = 'Pending';", "sample_table": orders_table, "relevant_tables": ["orders"]},
-    {"question": "Write a SQL query to find users from 'chicago' in the 'users' table (test case-insensitivity).", "correct_answer_example": "SELECT * FROM `users` WHERE `city` = 'Chicago';", "sample_table": users_table, "relevant_tables": ["users"]},
-    {"question": "Write a SQL query to find the most recent order from the 'orders' table by order date.", "correct_answer_example": "SELECT * FROM `orders` ORDER BY `order_date` DESC LIMIT 1;", "sample_table": orders_table, "relevant_tables": ["orders"]},
-    {"question": "Write a SQL query to find the average order amount from the 'orders' table.", "correct_answer_example": "SELECT AVG(`amount`) AS average_amount FROM `orders`;", "sample_table": orders_table, "relevant_tables": ["orders"]},
-    {"question": "Write a SQL query to find users from 'New York' or 'Chicago' in the 'users' table.", "correct_answer_example": "SELECT * FROM `users` WHERE `city` IN ('New York', 'Chicago');", "sample_table": users_table, "relevant_tables": ["users"]},
-    {"question": "Write a SQL query to find users who have not placed any orders. Use the 'users' and 'orders' tables.", "correct_answer_example": "SELECT u.* FROM `users` u LEFT JOIN `orders` o ON u.`user_id` = o.`user_id` WHERE o.`order_id` IS NULL;", "sample_table": users_table, "relevant_tables": ["users", "orders"]},
-    {"question": "Write a SQL query to calculate the total amount spent by each user by joining the 'users' and 'orders' tables.", "correct_answer_example": "SELECT u.`name`, SUM(o.`amount`) AS total_spent FROM `users` u JOIN `orders` o ON u.`user_id` = o.`user_id` GROUP BY u.`name` ORDER BY u.`name`;", "sample_table": users_table, "relevant_tables": ["users", "orders"]},
-    {"question": "Write a SQL query to count how many orders each user has placed using a LEFT JOIN between 'users' and 'orders'. Include users with zero orders.", "correct_answer_example": "SELECT u.`name`, COUNT(o.`order_id`) AS order_count FROM `users` u LEFT JOIN `orders` o ON u.`user_id` = o.`user_id` GROUP BY u.`name` ORDER BY u.`name`;", "sample_table": users_table, "relevant_tables": ["users", "orders"]}
+    { "question": "Write a SQL query to get all details about users from the 'users' table.", "correct_answer_example": "SELECT * FROM users;", "sample_table": users_table, "relevant_tables": ["users"] },
+    { "question": "Write a SQL query to count the total number of users in the 'users' table.", "correct_answer_example": "SELECT COUNT(*) AS user_count FROM users;", "sample_table": users_table, "relevant_tables": ["users"] },
+    { "question": "Write a SQL query to get all users older than 30 from the 'users' table.", "correct_answer_example": "SELECT * FROM users WHERE age > 30;", "sample_table": users_table, "relevant_tables": ["users"] },
+    { "question": "Write a SQL query to find all orders with a status of 'Pending' from the 'orders' table.", "correct_answer_example": "SELECT * FROM orders WHERE status = 'Pending';", "sample_table": orders_table, "relevant_tables": ["orders"] }, # Test case-insensitivity here
+    { "question": "Write a SQL query to find users from 'chicago' in the 'users' table (test case-insensitivity).", "correct_answer_example": "SELECT * FROM users WHERE city = 'Chicago';", "sample_table": users_table, "relevant_tables": ["users"] }, # Test case-insensitivity here
+    { "question": "Write a SQL query to find the most recent order from the 'orders' table by order date.", "correct_answer_example": "SELECT * FROM orders ORDER BY order_date DESC LIMIT 1;", "sample_table": orders_table, "relevant_tables": ["orders"] },
+    { "question": "Write a SQL query to find the average order amount from the 'orders' table.", "correct_answer_example": "SELECT AVG(amount) AS average_amount FROM orders;", "sample_table": orders_table, "relevant_tables": ["orders"] },
+    { "question": "Write a SQL query to find users from 'New York' or 'Chicago' in the 'users' table.", "correct_answer_example": "SELECT * FROM users WHERE city IN ('New York', 'Chicago');", "sample_table": users_table, "relevant_tables": ["users"] },
+
+    { "question": "Write a SQL query to find users who have not placed any orders. Use the 'users' and 'orders' tables.", "correct_answer_example": "SELECT u.* FROM users u LEFT JOIN orders o ON u.user_id = o.user_id WHERE o.order_id IS NULL;", "sample_table": users_table, "relevant_tables": ["users", "orders"] },
+    { "question": "Write a SQL query to calculate the total amount spent by each user by joining the 'users' and 'orders' tables.", "correct_answer_example": "SELECT u.name, SUM(o.amount) AS total_spent FROM users u JOIN orders o ON u.user_id = o.user_id GROUP BY u.name ORDER BY u.name;", "sample_table": users_table, "relevant_tables": ["users", "orders"] },
+    { "question": "Write a SQL query to count how many orders each user has placed using a LEFT JOIN between 'users' and 'orders'. Include users with zero orders.", "correct_answer_example": "SELECT u.name, COUNT(o.order_id) AS order_count FROM users u LEFT JOIN orders o ON u.user_id = o.user_id GROUP BY u.name ORDER BY u.name;", "sample_table": users_table, "relevant_tables": ["users", "orders"] }
+
 ]
 
 # --- Session State Initialization ---
-if "user_answers" not in st.session_state:
-    st.session_state.user_answers = []
-if "current_question" not in st.session_state:
-    st.session_state.current_question = 0
-if "quiz_started" not in st.session_state:
-    st.session_state.quiz_started = False
-if "quiz_completed" not in st.session_state:
-    st.session_state.quiz_completed = False
-if "show_detailed_feedback" not in st.session_state:
-    st.session_state.show_detailed_feedback = False
+if "user_answers" not in st.session_state: st.session_state.user_answers = []
+if "current_question" not in st.session_state: st.session_state.current_question = 0
+if "quiz_started" not in st.session_state: st.session_state.quiz_started = False
+if "quiz_completed" not in st.session_state: st.session_state.quiz_completed = False
+if "show_detailed_feedback" not in st.session_state: st.session_state.show_detailed_feedback = False
 
 # --- Helper Functions ---
 
-def preprocess_query(sql_query):
-    """
-    Preprocess the SQL query to normalize backticks and prevent double-quoting.
-    """
-    cleaned_query = re.sub(r'`{2,}', '`', sql_query)
-    parts = []
-    in_backtick = False
-    for char in cleaned_query:
-        if char == '`':
-            in_backtick = not in_backtick
-            parts.append(char)
-        elif not in_backtick or char != '`':
-            parts.append(char)
-    cleaned_query = ''.join(parts)
-    return cleaned_query
-
+# ******************************************************************************
+# ***** MODIFIED simulate_query_duckdb function starts here *****
+# ******************************************************************************
 def simulate_query_duckdb(sql_query, tables_dict):
     """
     Simulates an SQL query using DuckDB on in-memory pandas DataFrames,
-    rewriting '=' to 'ILIKE' for case-insensitive comparisons on specific columns,
-    supporting both single and double quotes, and applying MySQL-compatible backtick quoting.
+    attempting case-insensitive comparison for specific columns by rewriting
+    '=' to 'ILIKE' before execution.
     """
-    sql_query = preprocess_query(sql_query)
     if not sql_query or not sql_query.strip():
         return "Simulation Error: No query provided."
     if not tables_dict:
         return "Simulation Error: No tables provided for context."
 
     con = None
-    modified_sql_query = sql_query
+    modified_sql_query = sql_query # Start with the original query
+    # Define columns for which '=' should be treated as case-insensitive (ILIKE)
+    # Add more columns as needed: e.g., "users": ["name", "email", "city"]
     case_insensitive_columns = {
         "orders": ["status"],
         "users": ["city"]
     }
+    # Flatten the list of column names for easier regex matching
     flat_insensitive_columns = [col for cols in case_insensitive_columns.values() for col in cols]
 
     try:
-        # --- Query Modification for Case-Insensitivity ---
-        if flat_insensitive_columns:
+        # --- Query Modification Attempt (using ILIKE) ---
+        if flat_insensitive_columns: # Only attempt if there are columns to modify
             try:
+                # Regex pattern: finds patterns like `col_name = 'value'` or `col_name='value'` etc.
+                # where col_name is one of our target columns. Handles spaces and single/double quotes.
+                # It captures the part before the operator, the operator itself (=), and the literal.
+                # Using word boundaries (\b) around column names to avoid matching substrings.
                 col_pattern_part = "|".join([r"\b" + re.escape(col) + r"\b" for col in flat_insensitive_columns])
-                pattern = rf"(.*?)({col_pattern_part})(\s*=\s*)((?:'[^']+'|\"[^\"]+\"))"
+                # Updated pattern to capture pre-column context (like table alias), column name, operator, and literal
+                # Pattern Breakdown:
+                # (.*?)                     # Capture group 1: Anything before the column name (non-greedy)
+                # (\b(?:{col_pattern_part})\b) # Capture group 2: The specific column name (e.g., status, city) with word boundaries
+                # (\s*=\s*)                 # Capture group 3: The equals sign, potentially surrounded by spaces
+                # ('[^']+'|\"[^\"]+\")       # Capture group 4: The string literal in single or double quotes
+                pattern = rf"(.*?)({col_pattern_part})(\s*=\s*)('[^']+'|\"[^\"]+\")"
 
                 def replace_with_ilike(match):
+                    # Reconstruct the matched string replacing '=' with ' ILIKE '
+                    # Ensure spaces around ILIKE for valid syntax
                     pre_context = match.group(1)
                     col_name = match.group(2)
                     operator = match.group(3)
                     literal = match.group(4)
                     print(f"Rewriting query part: Replacing '=' with 'ILIKE' for column '{col_name}'")
+                    # Add space before ILIKE if pre_context doesn't end with space
                     space_prefix = "" if pre_context.endswith(" ") else " "
-                    return f"{pre_context}{space_prefix}{col_name} ILIKE {literal}"
+                    return f"{pre_context}{space_prefix}{col_name} ILIKE {literal}" # Replace = with ILIKE
 
-                modified_sql_query = re.sub(pattern, replace_with_ilike, modified_sql_query, flags=re.IGNORECASE)
+                # Apply the replacement using re.sub with IGNORECASE flag
+                modified_sql_query = re.sub(pattern, replace_with_ilike, sql_query, flags=re.IGNORECASE)
 
                 if modified_sql_query != sql_query:
-                    print(f"Original query: {sql_query}")
-                    print(f"Modified query (after ILIKE): {modified_sql_query}")
+                     print(f"Original query: {sql_query}")
+                     print(f"Modified query for simulation: {modified_sql_query}")
 
             except Exception as e_rewrite:
                 print(f"Warning: Failed to rewrite query for case-insensitivity, using original. Error: {e_rewrite}")
-                modified_sql_query = sql_query
+                modified_sql_query = sql_query # Fallback to original if rewrite fails
 
-        # --- Handle MySQL Identifier Quoting (Backticks) ---
-        try:
-            def is_quoted_or_string(text, match_start, match_end):
-                substring = text[:match_start]
-                single_quote_count = substring.count("'") - substring.count("\\'")
-                double_quote_count = substring.count('"') - substring.count('\\"')
-                backtick_count = substring.count('`') - substring.count('\\`')
-                return (single_quote_count % 2 == 1 or double_quote_count % 2 == 1 or backtick_count % 2 == 1)
-
-            for table_name in tables_dict.keys():
-                pattern = rf"(?<!`)(\b{re.escape(table_name)}\b)(?![\s]*\(|`)"
-
-                def replace_table(match):
-                    if is_quoted_or_string(modified_sql_query, match.start(1), match.end(1)):
-                        return match.group(1)
-                    return f"`{match.group(1)}`"
-
-                modified_sql_query = re.sub(pattern, replace_table, modified_sql_query)
-
-            for table_name in tables_dict.keys():
-                if table_name in tables_dict and isinstance(tables_dict[table_name], pd.DataFrame):
-                    for col in tables_dict[table_name].columns:
-                        pattern = rf"(?<!`)(\b{re.escape(col)}\b)(?![\s]*\(|`)"
-
-                        def replace_column(match):
-                            if is_quoted_or_string(modified_sql_query, match.start(1), match.end(1)):
-                                return match.group(1)
-                            return f"`{match.group(1)}`"
-
-                        modified_sql_query = re.sub(pattern, replace_column, modified_sql_query)
-
-            backtick_count = modified_sql_query.count('`')
-            if backtick_count % 2 != 0:
-                print(f"Warning: Unbalanced backticks detected in modified query: {modified_sql_query}")
-                modified_sql_query = sql_query
-            elif re.search(r'``+', modified_sql_query):
-                print(f"Warning: Consecutive backticks detected in modified query: {modified_sql_query}")
-                modified_sql_query = sql_query
-
-            if modified_sql_query != sql_query:
-                print(f"Modified query (after backtick quoting): {modified_sql_query}")
-
-        except Exception as e_quote:
-            print(f"Warning: Failed to apply MySQL-style identifier quoting, using original query. Error: {e_quote}")
-            modified_sql_query = sql_query
-
-        # --- Connect and Register Data ---
+        # --- Connect and Register ORIGINAL Data ---
         con = duckdb.connect(database=':memory:', read_only=False)
         for table_name, df in tables_dict.items():
-            if isinstance(df, pd.DataFrame):
-                con.register(str(table_name), df)
-            else:
-                print(f"Warning: Item '{table_name}' not a DataFrame during registration.")
+             if isinstance(df, pd.DataFrame):
+                 # Register the original DataFrame
+                 con.register(str(table_name), df)
+             else:
+                 # This condition should ideally not be hit if input is validated
+                 print(f"Warning [simulate_query]: Item '{table_name}' not a DataFrame during registration.")
 
-        # Execute the modified query
+        # Execute the potentially modified query (using ILIKE) against the ORIGINAL data
         result_df = con.execute(modified_sql_query).df()
         con.close()
         return result_df
 
     except Exception as e:
         error_message = f"Simulation Error: Failed to execute query. Reason: {str(e)}"
-        e_str = str(e).lower()
-        catalog_match = re.search(r'catalog error:.*table with name "([^"]+)" does not exist', e_str)
-        binder_match = re.search(r'(?:binder error|catalog error):.*column "([^"]+)" not found', e_str)
-        syntax_match = re.search(r'parser error: syntax error at or near "([^"]+)"', e_str)
-        type_match = re.search(r'conversion error:.*try cast\("([^"]+)"', e_str)
-
-        if catalog_match:
-            error_message += f"\n\n**Hint:** Table '{catalog_match.group(1)}' might be misspelled or doesn't exist. Use backticks (e.g., `{catalog_match.group(1)}`). Available tables: {list(tables_dict.keys())}."
-        elif binder_match:
-            error_message += f"\n\n**Hint:** Column '{binder_match.group(1)}' might be misspelled or doesn't exist. Use backticks (e.g., `{binder_match.group(1)}`)."
-        elif syntax_match:
-            error_message += f"\n\n**Hint:** Check syntax near `{syntax_match.group(1)}`. In MySQL, use single ('') or double quotes (\"\") for strings, backticks (``) for table/column names."
-        elif type_match:
-            error_message += f"\n\n**Hint:** Type mismatch with '{type_match.group(1)}'. Ensure data types match (e.g., strings in quotes, numbers without)."
+        # Add specific hint for ILIKE related errors if they occur
+        if "ILIKE" in str(e).upper() or (modified_sql_query != sql_query and "syntax error" in str(e).lower()):
+             error_message += "\n\n**Hint:** The simulation tried using case-insensitive matching (ILIKE). Check your SQL syntax near the comparison, especially if using complex conditions."
         else:
-            error_message += "\n\n**Hint:** Check MySQL syntax. Use single ('') or double quotes (\"\") for strings, backticks (``) for identifiers, and correct table/column names."
+            # Your existing hint generation logic
+            try:
+                e_str = str(e).lower()
+                # Enhanced error parsing for common DuckDB errors
+                catalog_match = re.search(r'catalog error:.*table with name "([^"]+)" does not exist', e_str)
+                binder_match = re.search(r'(?:binder error|catalog error):.*column "([^"]+)" not found', e_str)
+                syntax_match = re.search(r'parser error: syntax error at or near "([^"]+)"', e_str) # DuckDB Parser error format
+                type_match = re.search(r'conversion error:.*try cast\("([^"]+)"', e_str) # Type mismatch errors
+
+                if catalog_match: error_message += f"\n\n**Hint:** Table '{catalog_match.group(1)}' might be misspelled or doesn't exist. Available tables: {list(tables_dict.keys())}."
+                elif binder_match: error_message += f"\n\n**Hint:** Column '{binder_match.group(1)}' might be misspelled or doesn't exist in the referenced table(s)."
+                elif syntax_match: error_message += f"\n\n**Hint:** Check your SQL syntax, especially around `{syntax_match.group(1)}`. Remember to use single quotes (') for text values like `'example text'`."
+                elif type_match: error_message += f"\n\n**Hint:** There might be a type mismatch. You tried using '{type_match.group(1)}' in a way that's incompatible with its data type (e.g., comparing text to a number)."
+                # Generic hint for unparsed errors
+                elif not any([catalog_match, binder_match, syntax_match, type_match]): error_message += "\n\n**Hint:** Double-check your syntax, table/column names, and use single quotes (') for string values."
+
+            except Exception as e_hint: print(f"Error generating hint: {e_hint}")
 
         print(f"ERROR [simulate_query_duckdb]: {error_message}\nOriginal Query: {sql_query}\nAttempted Query: {modified_sql_query}")
         if con:
-            try:
-                con.close()
-            except:
-                pass
+            try: con.close()
+            except: pass
         return error_message
+
+# ******************************************************************************
+# ***** MODIFIED simulate_query_duckdb function ends here *****
+# ******************************************************************************
+
 
 def get_table_schema(table_name, tables_dict):
     """Gets column names for a given table name."""
@@ -237,41 +205,39 @@ def get_table_schema(table_name, tables_dict):
         return tables_dict[table_name].columns.astype(str).tolist()
     return []
 
+# Keep all other imports and functions the same as the previous complete code block
+# ... (imports: streamlit, genai, pandas, re, duckdb) ...
+# ... (CSS, API Key setup, Sample Data, SQL Questions List, Session State) ...
+# ... (simulate_query_duckdb - use the one from the previous answer with ILIKE rewrite) ...
+# ... (get_table_schema) ...
+
 def evaluate_answer_with_llm(question_data, student_answer, original_tables_dict):
     """Evaluate the user's answer using Gemini API and simulate using DuckDB."""
-    student_answer = preprocess_query(student_answer)
-    if not student_answer.strip():
-        return "Please provide an answer.", False, "N/A", "N/A", "No input."
-    question = question_data["question"]
-    relevant_table_names = question_data["relevant_tables"]
-    correct_answer_example = question_data["correct_answer_example"]
+    if not student_answer.strip(): return "Please provide an answer.", False, "N/A", "N/A", "No input."
+    question = question_data["question"]; relevant_table_names = question_data["relevant_tables"]; correct_answer_example = question_data["correct_answer_example"]
     schema_info = ""
-    if not relevant_table_names:
-        schema_info = "No table schema context.\n"
+    if not relevant_table_names: schema_info = "No table schema context.\n"
     else:
         for name in relevant_table_names:
             columns = get_table_schema(name, original_tables_dict)
             if columns:
-                try:
-                    df = original_tables_dict[name]
-                    dtypes = df.dtypes.to_string() if isinstance(df, pd.DataFrame) else "N/A"
-                    schema_info += f"Table '{name}': Columns {columns}\n DataTypes:\n{dtypes}\n\n"
-                except Exception as e_schema:
-                    schema_info += f"Table '{name}': Columns {columns} (Schema Error: {e_schema})\n\n"
-            else:
-                schema_info += f"Table '{name}': Schema not found.\n"
+                try: df = original_tables_dict[name]; dtypes = df.dtypes.to_string() if isinstance(df, pd.DataFrame) else "N/A"; schema_info += f"Table '{name}': Columns {columns}\n DataTypes:\n{dtypes}\n\n"
+                except Exception as e_schema: schema_info += f"Table '{name}': Columns {columns} (Schema Error: {e_schema})\n\n"
+            else: schema_info += f"Table '{name}': Schema not found.\n"
 
+    # ***** MODIFIED PROMPT START *****
     prompt = f"""
-    You are an expert SQL evaluator acting as a friendly SQL mentor. Analyze the student's SQL query based on the question asked and the provided table schemas (including data types). Assume **MySQL syntax** for evaluation.
+    You are an expert SQL evaluator acting as a friendly SQL mentor. Analyze the student's SQL query based on the question asked and the provided table schemas (including data types). Assume standard SQL syntax (like MySQL/PostgreSQL).
 
     **Evaluation Task:**
 
-    1. **Question:** {question}
-    2. **Relevant Table Schemas:**
-       {schema_info.strip()}
-    3. **Student's SQL Query:**
-       ```sql
-       {student_answer}
+    1.  **Question:** {question}
+    2.  **Relevant Table Schemas:**
+        {schema_info.strip()}
+    3.  **Student's SQL Query:**
+        ```sql
+        {student_answer}
+        ```
 
     **Analysis Instructions:**
 
