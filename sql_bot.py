@@ -24,8 +24,8 @@ st.markdown(hide_streamlit_style, unsafe_allow_html=True)
 # --- Set up Gemini API ---
 # WARNING: Hardcoding API keys is insecure. Consider environment variables or secrets for deployment.
 # Replace "YOUR_API_KEY_HERE" with your actual Gemini API Key
-gemini_api_key = "YOUR_API_KEY_HERE"  # Replace with your actual Gemini API Key
-if not gemini_api_key or gemini_api_key == "YOUR_API_KEY_HERE":  # Basic check
+gemini_api_key = "AIzaSyAfzl_66GZsgaYjAM7cT2djVCBCAr86t2k"  # Replace with your actual Gemini API Key
+if not gemini_api_key or gemini_api_key == "AIzaSyAfzl_66GZsgaYjAM7cT2djVCBCAr86t2k":  # Basic check
     st.error("🚨 Gemini API Key is missing or hasn't been replaced. Please add your key in the code.")
     st.stop()
 
