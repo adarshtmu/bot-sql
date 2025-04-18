@@ -88,52 +88,111 @@ if "show_detailed_feedback" not in st.session_state: st.session_state.show_detai
 # ***** MODIFIED simulate_query_duckdb function starts here *****
 # ******************************************************************************
 def simulate_query_duckdb(sql_query, tables_dict):
-    # Preprocess: Standardize quotes to single quotes
-    sql_query = re.sub(r'"([^"]+)"', r"'\1'", sql_query)
-    
+    """
+    Simulates an SQL query using DuckDB on in-memory pandas DataFrames,
+    attempting case-insensitive comparison for specific columns by rewriting
+    '=' to 'ILIKE' before execution.
+    """
     if not sql_query or not sql_query.strip():
         return "Simulation Error: No query provided."
-    
+    if not tables_dict:
+        return "Simulation Error: No tables provided for context."
+
+    con = None
+    modified_sql_query = sql_query # Start with the original query
+    # Define columns for which '=' should be treated as case-insensitive (ILIKE)
+    # Add more columns as needed: e.g., "users": ["name", "email", "city"]
     case_insensitive_columns = {
         "orders": ["status"],
         "users": ["city"]
     }
-    
+    # Flatten the list of column names for easier regex matching
     flat_insensitive_columns = [col for cols in case_insensitive_columns.values() for col in cols]
-    
+
     try:
-        modified_sql_query = sql_query
-        if flat_insensitive_columns:
-            col_pattern_part = "|".join([r"\b" + re.escape(col) + r"\b" for col in flat_insensitive_columns])
-            pattern = rf"(.*?)({col_pattern_part})(\s*=\s*)('[^']+')"
-            
-            def replace_with_like(match):
-                pre_context = match.group(1)
-                col_name = match.group(2)
-                operator = match.group(3)
-                literal = match.group(4)
-                space_prefix = "" if pre_context.endswith(" ") else " "
-                return f"{pre_context}{space_prefix}{col_name} LIKE {literal}"
-            
-            modified_sql_query = re.sub(pattern, replace_with_like, sql_query, flags=re.IGNORECASE)
-        
+        # --- Query Modification Attempt (using ILIKE) ---
+        if flat_insensitive_columns: # Only attempt if there are columns to modify
+            try:
+                # Regex pattern: finds patterns like `col_name = 'value'` or `col_name='value'` etc.
+                # where col_name is one of our target columns. Handles spaces and single/double quotes.
+                # It captures the part before the operator, the operator itself (=), and the literal.
+                # Using word boundaries (\b) around column names to avoid matching substrings.
+                col_pattern_part = "|".join([r"\b" + re.escape(col) + r"\b" for col in flat_insensitive_columns])
+                # Updated pattern to capture pre-column context (like table alias), column name, operator, and literal
+                # Pattern Breakdown:
+                # (.*?)                     # Capture group 1: Anything before the column name (non-greedy)
+                # (\b(?:{col_pattern_part})\b) # Capture group 2: The specific column name (e.g., status, city) with word boundaries
+                # (\s*=\s*)                 # Capture group 3: The equals sign, potentially surrounded by spaces
+                # ('[^']+'|\"[^\"]+\")       # Capture group 4: The string literal in single or double quotes
+                pattern = rf"(.*?)({col_pattern_part})(\s*=\s*)('[^']+'|\"[^\"]+\")"
+
+                def replace_with_ilike(match):
+                    # Reconstruct the matched string replacing '=' with ' ILIKE '
+                    # Ensure spaces around ILIKE for valid syntax
+                    pre_context = match.group(1)
+                    col_name = match.group(2)
+                    operator = match.group(3)
+                    literal = match.group(4)
+                    print(f"Rewriting query part: Replacing '=' with 'ILIKE' for column '{col_name}'")
+                    # Add space before ILIKE if pre_context doesn't end with space
+                    space_prefix = "" if pre_context.endswith(" ") else " "
+                    return f"{pre_context}{space_prefix}{col_name} ILIKE {literal}" # Replace = with ILIKE
+
+                # Apply the replacement using re.sub with IGNORECASE flag
+                modified_sql_query = re.sub(pattern, replace_with_ilike, sql_query, flags=re.IGNORECASE)
+
+                if modified_sql_query != sql_query:
+                     print(f"Original query: {sql_query}")
+                     print(f"Modified query for simulation: {modified_sql_query}")
+
+            except Exception as e_rewrite:
+                print(f"Warning: Failed to rewrite query for case-insensitivity, using original. Error: {e_rewrite}")
+                modified_sql_query = sql_query # Fallback to original if rewrite fails
+
+        # --- Connect and Register ORIGINAL Data ---
         con = duckdb.connect(database=':memory:', read_only=False)
         for table_name, df in tables_dict.items():
-            if isinstance(df, pd.DataFrame):
-                con.register(str(table_name), df)
-        
+             if isinstance(df, pd.DataFrame):
+                 # Register the original DataFrame
+                 con.register(str(table_name), df)
+             else:
+                 # This condition should ideally not be hit if input is validated
+                 print(f"Warning [simulate_query]: Item '{table_name}' not a DataFrame during registration.")
+
+        # Execute the potentially modified query (using ILIKE) against the ORIGINAL data
         result_df = con.execute(modified_sql_query).df()
         con.close()
         return result_df
 
     except Exception as e:
-        # Error handling remains same but with MySQL-specific messages
-        error_message = f"Simulation Error: {str(e)}"
-        if "LIKE" in str(e).upper():
-            error_message += "\n**Hint:** MySQL uses LIKE for pattern matching. Check your syntax near comparisons."
-        # ... [rest of error handling remains same] ...
-        return error_message
+        error_message = f"Simulation Error: Failed to execute query. Reason: {str(e)}"
+        # Add specific hint for ILIKE related errors if they occur
+        if "ILIKE" in str(e).upper() or (modified_sql_query != sql_query and "syntax error" in str(e).lower()):
+             error_message += "\n\n**Hint:** The simulation tried using case-insensitive matching (ILIKE). Check your SQL syntax near the comparison, especially if using complex conditions."
+        else:
+            # Your existing hint generation logic
+            try:
+                e_str = str(e).lower()
+                # Enhanced error parsing for common DuckDB errors
+                catalog_match = re.search(r'catalog error:.*table with name "([^"]+)" does not exist', e_str)
+                binder_match = re.search(r'(?:binder error|catalog error):.*column "([^"]+)" not found', e_str)
+                syntax_match = re.search(r'parser error: syntax error at or near "([^"]+)"', e_str) # DuckDB Parser error format
+                type_match = re.search(r'conversion error:.*try cast\("([^"]+)"', e_str) # Type mismatch errors
 
+                if catalog_match: error_message += f"\n\n**Hint:** Table '{catalog_match.group(1)}' might be misspelled or doesn't exist. Available tables: {list(tables_dict.keys())}."
+                elif binder_match: error_message += f"\n\n**Hint:** Column '{binder_match.group(1)}' might be misspelled or doesn't exist in the referenced table(s)."
+                elif syntax_match: error_message += f"\n\n**Hint:** Check your SQL syntax, especially around `{syntax_match.group(1)}`. Remember to use single quotes (') for text values like `'example text'`."
+                elif type_match: error_message += f"\n\n**Hint:** There might be a type mismatch. You tried using '{type_match.group(1)}' in a way that's incompatible with its data type (e.g., comparing text to a number)."
+                # Generic hint for unparsed errors
+                elif not any([catalog_match, binder_match, syntax_match, type_match]): error_message += "\n\n**Hint:** Double-check your syntax, table/column names, and use single quotes (') for string values."
+
+            except Exception as e_hint: print(f"Error generating hint: {e_hint}")
+
+        print(f"ERROR [simulate_query_duckdb]: {error_message}\nOriginal Query: {sql_query}\nAttempted Query: {modified_sql_query}")
+        if con:
+            try: con.close()
+            except: pass
+        return error_message
 
 # ******************************************************************************
 # ***** MODIFIED simulate_query_duckdb function ends here *****
@@ -168,15 +227,35 @@ def evaluate_answer_with_llm(question_data, student_answer, original_tables_dict
 
     # ***** MODIFIED PROMPT START *****
     prompt = f"""
+    You are an expert SQL evaluator acting as a friendly SQL mentor. Analyze the student's SQL query based on the question asked and the provided table schemas (including data types). Assume standard SQL syntax (like MySQL/PostgreSQL).
+
     **Evaluation Task:**
-    1. **Question:** {question}
-    2. **Relevant Table Schemas:** {schema_info.strip()}
-    3. **Student's SQL Query:** ```sql\n{student_answer}\n```
+
+    1.  **Question:** {question}
+    2.  **Relevant Table Schemas:**
+        {schema_info.strip()}
+    3.  **Student's SQL Query:**
+        ```sql
+        {student_answer}
+        ```
 
     **Analysis Instructions:**
-    * **Correctness:** Assume MySQL syntax. Equality comparisons (`=`) for `status`/`city` are case-insensitive (simulated via `LIKE`).
-    * **Validity:** Check for MySQL-specific syntax (backticks for identifiers, `LIKE` instead of `ILIKE`).
-    * **Feedback:** Mention use of `LIKE` for case-insensitive comparisons in MySQL.
+
+    * **Correctness:** Does the student's query accurately and completely answer the **Question** based on the **Relevant Table Schemas**? Consider edge cases if applicable (e.g., users with no orders, data types for comparisons).
+        **>>> IMPORTANT QUIZ CONTEXT FOR CORRECTNESS <<<**
+        For *this specific quiz*, assume that simple equality comparisons (`=`) involving the text columns `'status'` (in `orders`) and `'city'` (in `users`) are effectively **CASE-INSENSITIVE**. The quiz environment simulates this behavior.
+        Therefore, a query like `WHERE status = 'pending'` **should be considered CORRECT** if the question asks for 'Pending' status, even if the student did not use explicit `LOWER()` or `UPPER()` functions.
+        Evaluate the *logic* of the query based on this assumed case-insensitivity for these specific columns (`status`, `city`). Penalize only if the core logic (joins, other conditions, selected columns etc.) is wrong.
+
+    * **Validity:** Is the query syntactically valid SQL? Briefly mention any syntax errors unrelated to the case-insensitivity rule above.
+    * **Logic:** Does the query use appropriate SQL clauses (SELECT, FROM, WHERE, JOIN, GROUP BY, ORDER BY, aggregates, etc.) correctly for the task? Is the logic sound? Are comparisons appropriate for the data types (keeping the case-insensitivity rule for `status`/`city` in mind)?
+    * **Alternatives:** Briefly acknowledge if the student used a valid alternative approach (e.g., different JOIN type if appropriate, subquery vs. JOIN). Mentioning `LOWER`/`UPPER` as a *generally good practice* is okay, but don't imply it was *required* for correctness *here*.
+    * **Feedback:** Provide clear, constructive feedback in a friendly, encouraging, casual Hindi tone (like a helpful senior or 'bhaiya' talking to a learner).
+        * If correct (considering the case-insensitivity rule): Praise the student (e.g., "Wah yaar, zabardast query likhi hai! Bilkul sahi logic lagaya.") and briefly explain *why* it's correct. You can optionally add a small note like "Aur haan, yaad rakhna ki asal databases mein kabhi kabhi case ka dhyaan rakhna padta hai, par yahaan is quiz ke liye yeh bilkul sahi hai!".
+        * If incorrect (due to reasons *other* than case-sensitivity on `status`/`city`): Gently point out the error (e.g., "Arre yaar, yahaan thoda sa check karo..." or "Ek chhoti si galti ho gayi hai..."). Explain *what* is wrong (syntax, logic, columns, joins, other conditions etc.). Suggest how to fix it. **Do NOT mark the query incorrect or suggest using LOWER()/UPPER() *solely* because of case differences in the `status` or `city` columns if the rest of the logic is correct.**
+    * **Verdict:** Conclude your entire response with *exactly* one line formatted as: "Verdict: Correct" or "Verdict: Incorrect". This line MUST be the very last line.
+
+    **Begin Evaluation:**
     """
     # ***** MODIFIED PROMPT END *****
 
