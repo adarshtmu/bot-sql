@@ -205,6 +205,12 @@ def get_table_schema(table_name, tables_dict):
         return tables_dict[table_name].columns.astype(str).tolist()
     return []
 
+# Keep all other imports and functions the same as the previous complete code block
+# ... (imports: streamlit, genai, pandas, re, duckdb) ...
+# ... (CSS, API Key setup, Sample Data, SQL Questions List, Session State) ...
+# ... (simulate_query_duckdb - use the one from the previous answer with ILIKE rewrite) ...
+# ... (get_table_schema) ...
+
 def evaluate_answer_with_llm(question_data, student_answer, original_tables_dict):
     """Evaluate the user's answer using Gemini API and simulate using DuckDB."""
     if not student_answer.strip(): return "Please provide an answer.", False, "N/A", "N/A", "No input."
@@ -219,6 +225,7 @@ def evaluate_answer_with_llm(question_data, student_answer, original_tables_dict
                 except Exception as e_schema: schema_info += f"Table '{name}': Columns {columns} (Schema Error: {e_schema})\n\n"
             else: schema_info += f"Table '{name}': Schema not found.\n"
 
+    # ***** MODIFIED PROMPT START *****
     prompt = f"""
     You are an expert SQL evaluator acting as a friendly SQL mentor. Analyze the student's SQL query based on the question asked and the provided table schemas (including data types). Assume standard SQL syntax (like MySQL/PostgreSQL).
 
@@ -234,17 +241,24 @@ def evaluate_answer_with_llm(question_data, student_answer, original_tables_dict
 
     **Analysis Instructions:**
 
-    * **Correctness:** Does the student's query accurately and completely answer the **Question** based on the **Relevant Table Schemas**? Consider edge cases if applicable (e.g., users with no orders, data types for comparisons). Note: Assume string comparisons like '=' should ideally work case-insensitively, similar to standard SQL behavior, even if the underlying simulation engine might be strict by default (we try to simulate this behavior).
-    * **Validity:** Is the query syntactically valid SQL? Briefly mention any syntax errors.
-    * **Logic:** Does the query use appropriate SQL clauses (SELECT, FROM, WHERE, JOIN, GROUP BY, ORDER BY, aggregates, etc.) correctly for the task? Is the logic sound? Are comparisons appropriate for the data types?
-    * **Alternatives:** Briefly acknowledge if the student used a valid alternative approach (e.g., different JOIN type if appropriate, subquery vs. JOIN). Efficiency is a minor point unless significantly poor.
+    * **Correctness:** Does the student's query accurately and completely answer the **Question** based on the **Relevant Table Schemas**? Consider edge cases if applicable (e.g., users with no orders, data types for comparisons).
+        **>>> IMPORTANT QUIZ CONTEXT FOR CORRECTNESS <<<**
+        For *this specific quiz*, assume that simple equality comparisons (`=`) involving the text columns `'status'` (in `orders`) and `'city'` (in `users`) are effectively **CASE-INSENSITIVE**. The quiz environment simulates this behavior.
+        Therefore, a query like `WHERE status = 'pending'` **should be considered CORRECT** if the question asks for 'Pending' status, even if the student did not use explicit `LOWER()` or `UPPER()` functions.
+        Evaluate the *logic* of the query based on this assumed case-insensitivity for these specific columns (`status`, `city`). Penalize only if the core logic (joins, other conditions, selected columns etc.) is wrong.
+
+    * **Validity:** Is the query syntactically valid SQL? Briefly mention any syntax errors unrelated to the case-insensitivity rule above.
+    * **Logic:** Does the query use appropriate SQL clauses (SELECT, FROM, WHERE, JOIN, GROUP BY, ORDER BY, aggregates, etc.) correctly for the task? Is the logic sound? Are comparisons appropriate for the data types (keeping the case-insensitivity rule for `status`/`city` in mind)?
+    * **Alternatives:** Briefly acknowledge if the student used a valid alternative approach (e.g., different JOIN type if appropriate, subquery vs. JOIN). Mentioning `LOWER`/`UPPER` as a *generally good practice* is okay, but don't imply it was *required* for correctness *here*.
     * **Feedback:** Provide clear, constructive feedback in a friendly, encouraging, casual Hindi tone (like a helpful senior or 'bhaiya' talking to a learner).
-        * If correct: Praise the student (e.g., "Wah yaar, zabardast query likhi hai! Bilkul sahi logic lagaya.") and briefly explain *why* it's correct or mention if it's a common/good way.
-        * If incorrect: Gently point out the error (e.g., "Arre yaar, yahaan thoda sa check karo..." or "Ek chhoti si galti ho gayi hai..."). Explain *what* is wrong (syntax - like using " vs ' for strings, logic, columns, etc.). Suggest how to fix it or what the correct concept/approach might involve (e.g., "Yahaan `LEFT JOIN` use karna better rahega kyunki..." or "WHERE clause mein condition check karo... Status ek text hai, toh quotes use karna hoga... "). Avoid just giving the full correct query away unless needed for a specific small fix explanation. Keep it encouraging.
+        * If correct (considering the case-insensitivity rule): Praise the student (e.g., "Wah yaar, zabardast query likhi hai! Bilkul sahi logic lagaya.") and briefly explain *why* it's correct. You can optionally add a small note like "Aur haan, yaad rakhna ki asal databases mein kabhi kabhi case ka dhyaan rakhna padta hai, par yahaan is quiz ke liye yeh bilkul sahi hai!".
+        * If incorrect (due to reasons *other* than case-sensitivity on `status`/`city`): Gently point out the error (e.g., "Arre yaar, yahaan thoda sa check karo..." or "Ek chhoti si galti ho gayi hai..."). Explain *what* is wrong (syntax, logic, columns, joins, other conditions etc.). Suggest how to fix it. **Do NOT mark the query incorrect or suggest using LOWER()/UPPER() *solely* because of case differences in the `status` or `city` columns if the rest of the logic is correct.**
     * **Verdict:** Conclude your entire response with *exactly* one line formatted as: "Verdict: Correct" or "Verdict: Incorrect". This line MUST be the very last line.
 
     **Begin Evaluation:**
     """
+    # ***** MODIFIED PROMPT END *****
+
 
     feedback_llm = "AI feedback failed."; is_correct_llm = False; llm_output = "Error: No LLM response."
     try:
@@ -255,20 +269,16 @@ def evaluate_answer_with_llm(question_data, student_answer, original_tables_dict
         elif hasattr(response, 'parts') and response.parts:
              llm_output = "".join(part.text for part in response.parts)
         else:
-             # Attempt to handle potential blocking or safety issues
              try:
                  llm_output = f"AI Response Blocked or Empty. Prompt Feedback: {response.prompt_feedback}"
              except Exception:
                  llm_output = "Error: Received unexpected or empty response from AI."
 
         llm_output = llm_output.strip()
-        # Use regex to find the verdict line, allowing for flexibility
         verdict_match = re.search(r'^Verdict:\s*(Correct|Incorrect)\s*$', llm_output, re.M | re.I)
         if verdict_match:
             is_correct_llm = (verdict_match.group(1).lower() == "correct")
-            # Extract feedback text before the verdict line
             feedback_llm = llm_output[:verdict_match.start()].strip()
-            # Remove any trailing "Verdict:" lines if accidentally included
             feedback_llm = re.sub(r'\s*Verdict:\s*(Correct|Incorrect)?\s*$', '', feedback_llm, flags=re.M | re.I).strip()
         else:
             st.warning(f"⚠️ Could not parse AI verdict from response.")
@@ -276,7 +286,7 @@ def evaluate_answer_with_llm(question_data, student_answer, original_tables_dict
             feedback_llm = llm_output + "\n\n_(System Note: AI correctness check might be unreliable as verdict wasn't found.)_"
             is_correct_llm = False # Default to incorrect if verdict unclear
 
-        feedback_llm = feedback_llm.replace("student", "aap") # Simple substitution
+        feedback_llm = feedback_llm.replace("student", "aap")
     except Exception as e:
         st.error(f"🚨 AI Error during evaluation: {e}")
         print(f"ERROR: Gemini call failed: {e}")
@@ -289,13 +299,10 @@ def evaluate_answer_with_llm(question_data, student_answer, original_tables_dict
     # Simulate correct query (using the modified function for consistency)
     expected_result_sim = simulate_query_duckdb(correct_answer_example, original_tables_dict)
 
-    # Simple comparison: Check if simulation results match (optional refinement)
-    # Note: Comparing DataFrames directly can be tricky due to types, order etc.
-    # The LLM's verdict is the primary source of correctness evaluation.
-    # You could add a basic check here if needed, e.g., compare shapes or a hash.
-
     return feedback_llm, is_correct_llm, expected_result_sim, actual_result_sim, llm_output
 
+# ... (Keep calculate_score, analyze_performance, get_emoji, display_simulation the same) ...
+# ... (Keep Streamlit UI code: Start Screen, Quiz In Progress, Quiz Completed Screen, Fallback) ...
 
 def calculate_score(user_answers):
     """Calculate the score based on correct answers."""
