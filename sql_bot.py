@@ -1,41 +1,47 @@
 import streamlit as st
 import google.generativeai as genai
 import pandas as pd
-import re  # Needed for regex query modification
-import mysql.connector  # Import mysql connector
+import re
+import mysql.connector
+from mysql.connector import Error
 
 # --- Custom CSS ---
 hide_streamlit_style = """
-    <style>
-        header {visibility: hidden;}
-        #MainMenu {visibility: hidden;}
-        footer {visibility: hidden;}
-        .viewerBadge_container__1QSob {display: none !important;} /* Hides the GitHub profile image */
-        .stDeployButton {display: none !important;} /* Hides deploy button */
-        [data-testid="stToolbar"] {display: none !important;} /* Hides Streamlit toolbar */
-        [data-testid="stDecoration"] {display: none !important;} /* Hides Streamlit branding */
-        [data-testid="stDeployButton"] {display: none !important;} /* Hides Streamlit deploy button */
-        .st-emotion-cache-1r8d6ul {display: none !important;} /* Additional class for profile image */
-        .st-emotion-cache-1jicfl2 {display: none !important;} /* Hides Streamlit's footer */
-    </style>
+<style>
+header {visibility: hidden;}
+#MainMenu {visibility: hidden;}
+footer {visibility: hidden;}
+.viewerBadge_container__1QSob {display: none !important;}
+.stDeployButton {display: none !important;}
+[data-testid="stToolbar"] {display: none !important;}
+[data-testid="stDecoration"] {display: none !important;}
+[data-testid="stDeployButton"] {display: none !important;}
+.st-emotion-cache-1r8d6ul {display: none !important;}
+.st-emotion-cache-1jicfl2 {display: none !important;}
+</style>
 """
 st.markdown(hide_streamlit_style, unsafe_allow_html=True)
 
 # --- Set up Gemini API ---
-# WARNING: Hardcoding API keys is insecure. Consider environment variables or secrets for deployment.
-# Replace "YOUR_API_KEY_HERE" with your actual Gemini API Key
 gemini_api_key = "AIzaSyAfzl_66GZsgaYjAM7cT2djVCBCAr86t2k"  # Replace with your actual Gemini API Key
-if not gemini_api_key or gemini_api_key == "AIzaSyAfzl_66GZsgaYjAM7cT2djVCBCAr86t2k":  # Basic check
-    st.error("🚨 Gemini API Key is missing or hasn't been replaced. Please add your key in the code.")
+if not gemini_api_key or gemini_api_key == "AIzaSyAfzl_66GZsgaYjAM7cT2djVCBCAr86t2k":
+    st.error("🚨 Gemini API Key is missing. Please add your key in the code.")
     st.stop()
 
 try:
     genai.configure(api_key=gemini_api_key)
     model = genai.GenerativeModel('gemini-1.5-flash')
 except Exception as e:
-    st.error(f"🚨 Failed to configure Gemini API or access the model: {e}")
+    st.error(f"🚨 Failed to configure Gemini API: {e}")
     st.stop()
 
+# --- MySQL Configuration ---
+mysql_config = {
+    'host': 'localhost',  # Update with your MySQL host
+    'user': 'your_username',  # Update with your MySQL user
+    'password': 'your_password',  # Update with your MySQL password
+    'database': 'sql_quiz_db'  # Update with your MySQL database
+}
 
 # --- Sample Data ---
 users_table = pd.DataFrame({
@@ -43,15 +49,17 @@ users_table = pd.DataFrame({
     "name": ["Alice", "Bob", "Charlie", "David"],
     "email": ["alice@example.com", "bob@example.com", "charlie@example.com", "david@example.com"],
     "age": [25, 30, 35, 40],
-    "city": ["New York", "Los Angeles", "Chicago", "Houston"]  # Mixed case cities
+    "city": ["New York", "Los Angeles", "Chicago", "Houston"]
 })
+
 orders_table = pd.DataFrame({
     "order_id": [101, 102, 103, 104, 105],
     "user_id": [1, 2, 3, 1, 4],
     "amount": [50.00, 75.50, 120.00, 200.00, 35.00],
     "order_date": pd.to_datetime(["2024-02-01", "2024-02-05", "2024-02-10", "2024-02-15", "2024-02-20"]),
-    "status": ["Completed", "Pending", "Completed", "Shipped", "Cancelled"]  # Original case data
+    "status": ["Completed", "Pending", "Completed", "Shipped", "Cancelled"]
 })
+
 original_tables = {
     "users": users_table,
     "orders": orders_table
@@ -62,16 +70,14 @@ sql_questions = [
     {"question": "Write a SQL query to get all details about users from the 'users' table.", "correct_answer_example": "SELECT * FROM users;", "sample_table": users_table, "relevant_tables": ["users"]},
     {"question": "Write a SQL query to count the total number of users in the 'users' table.", "correct_answer_example": "SELECT COUNT(*) AS user_count FROM users;", "sample_table": users_table, "relevant_tables": ["users"]},
     {"question": "Write a SQL query to get all users older than 30 from the 'users' table.", "correct_answer_example": "SELECT * FROM users WHERE age > 30;", "sample_table": users_table, "relevant_tables": ["users"]},
-    {"question": "Write a SQL query to find all orders with a status of 'Pending' from the 'orders' table.", "correct_answer_example": "SELECT * FROM orders WHERE status = 'Pending';", "sample_table": orders_table, "relevant_tables": ["orders"]},  # Test case-insensitivity here
-    {"question": "Write a SQL query to find users from 'chicago' in the 'users' table (test case-insensitivity).", "correct_answer_example": "SELECT * FROM users WHERE city = 'Chicago';", "sample_table": users_table, "relevant_tables": ["users"]},  # Test case-insensitivity here
+    {"question": "Write a SQL query to find all orders with a status of 'Pending' from the 'orders' table.", "correct_answer_example": "SELECT * FROM orders WHERE status = 'Pending';", "sample_table": orders_table, "relevant_tables": ["orders"]},
+    {"question": "Write a SQL query to find users from 'chicago' in the 'users' table (test case-insensitivity).", "correct_answer_example": "SELECT * FROM users WHERE city = 'Chicago';", "sample_table": users_table, "relevant_tables": ["users"]},
     {"question": "Write a SQL query to find the most recent order from the 'orders' table by order date.", "correct_answer_example": "SELECT * FROM orders ORDER BY order_date DESC LIMIT 1;", "sample_table": orders_table, "relevant_tables": ["orders"]},
     {"question": "Write a SQL query to find the average order amount from the 'orders' table.", "correct_answer_example": "SELECT AVG(amount) AS average_amount FROM orders;", "sample_table": orders_table, "relevant_tables": ["orders"]},
     {"question": "Write a SQL query to find users from 'New York' or 'Chicago' in the 'users' table.", "correct_answer_example": "SELECT * FROM users WHERE city IN ('New York', 'Chicago');", "sample_table": users_table, "relevant_tables": ["users"]},
-
     {"question": "Write a SQL query to find users who have not placed any orders. Use the 'users' and 'orders' tables.", "correct_answer_example": "SELECT u.* FROM users u LEFT JOIN orders o ON u.user_id = o.user_id WHERE o.order_id IS NULL;", "sample_table": users_table, "relevant_tables": ["users", "orders"]},
     {"question": "Write a SQL query to calculate the total amount spent by each user by joining the 'users' and 'orders' tables.", "correct_answer_example": "SELECT u.name, SUM(o.amount) AS total_spent FROM users u JOIN orders o ON u.user_id = o.user_id GROUP BY u.name ORDER BY u.name;", "sample_table": users_table, "relevant_tables": ["users", "orders"]},
     {"question": "Write a SQL query to count how many orders each user has placed using a LEFT JOIN between 'users' and 'orders'. Include users with zero orders.", "correct_answer_example": "SELECT u.name, COUNT(o.order_id) AS order_count FROM users u LEFT JOIN orders o ON u.user_id = o.user_id GROUP BY u.name ORDER BY u.name;", "sample_table": users_table, "relevant_tables": ["users", "orders"]}
-
 ]
 
 # --- Session State Initialization ---
@@ -88,87 +94,106 @@ if "show_detailed_feedback" not in st.session_state:
 
 # --- Helper Functions ---
 
-# ******************************************************************************
-# ***** MODIFIED simulate_query_mysql function starts here *****
-# ******************************************************************************
+def get_mysql_data_type(dtype):
+    """Map pandas data types to MySQL data types."""
+    dtype_str = str(dtype).lower()
+    if 'int' in dtype_str:
+        return 'INT'
+    elif 'float' in dtype_str:
+        return 'DECIMAL(10,2)'
+    elif 'datetime' in dtype_str:
+        return 'DATETIME'
+    else:
+        return 'VARCHAR(255)'
+
+def create_mysql_tables(tables_dict, conn):
+    """Create MySQL tables from pandas DataFrames."""
+    cursor = conn.cursor()
+    for table_name, df in tables_dict.items():
+        if not isinstance(df, pd.DataFrame):
+            continue
+        # Define columns with appropriate MySQL data types
+        columns = []
+        for col, dtype in df.dtypes.items():
+            mysql_type = get_mysql_data_type(dtype)
+            columns.append(f"`{col}` {mysql_type}")
+        create_table_query = f"CREATE TABLE IF NOT EXISTS `{table_name}` ({', '.join(columns)})"
+        cursor.execute(create_table_query)
+        # Insert data
+        for _, row in df.iterrows():
+            placeholders = ', '.join(['%s'] * len(row))
+            insert_query = f"INSERT INTO `{table_name}` VALUES ({placeholders})"
+            cursor.execute(insert_query, tuple(row))
+    conn.commit()
+    cursor.close()
+
+def standardize_quotes(sql_query):
+    """Convert double quotes to single quotes for string literals, preserving double quotes for identifiers."""
+    # Replace double-quoted string literals with single quotes
+    # Matches "text" but not "table_name" as identifier
+    pattern = r'(\b\w+\b\s*=\s*|IN\s*\()\"([^"]+)\"'
+    standardized_query = re.sub(pattern, r"\1'\2'", sql_query)
+    return standardized_query
+
 def simulate_query_mysql(sql_query, tables_dict):
-    """
-    Simulates an SQL query using in-memory DataFrames, mimicking MySQL behavior
-    including case-insensitive comparisons for specific columns.
-    """
+    """Simulates an SQL query using MySQL on in-memory pandas DataFrames."""
     if not sql_query or not sql_query.strip():
         return "Simulation Error: No query provided."
     if not tables_dict:
         return "Simulation Error: No tables provided for context."
 
-    modified_sql_query = sql_query  # Start with the original query
-    # Define columns for which '=' should be treated as case-insensitive
-    case_insensitive_columns = {
-        "orders": ["status"],
-        "users": ["city"]
-    }
-    flat_insensitive_columns = [col for cols in case_insensitive_columns.values() for col in cols]
-
-    results = {}  # Store results for each table
-
+    conn = None
     try:
-        # --- Query Modification Attempt (using LOWER()) ---
-        if flat_insensitive_columns:
-            try:
-                for table_name, columns in case_insensitive_columns.items():
-                    for col in columns:
-                        # Regex pattern: finds patterns like `col_name` = 'value' (case-insensitive)
-                        pattern = rf"(\b{re.escape(col)}\b)\s*=\s*('[^']+'|\"[^\"]+\")"
+        # Connect to MySQL
+        conn = mysql.connector.connect(**mysql_config)
+        # Create tables
+        create_mysql_tables(tables_dict, conn)
+        cursor = conn.cursor()
 
-                        def replace_with_lower(match):
-                            col_name = match.group(1)
-                            literal = match.group(2)
-                            print(f"Rewriting query part: Applying LOWER() to column '{col_name}'")
-                            return f"LOWER({col_name}) = LOWER({literal})"
+        # Standardize quotes (convert double to single for string literals)
+        modified_sql_query = standardize_quotes(sql_query)
 
-                        modified_sql_query = re.sub(pattern, replace_with_lower, modified_sql_query, flags=re.IGNORECASE)
+        # Execute the query
+        cursor.execute(modified_sql_query)
+        if cursor.description:
+            # Fetch results for SELECT queries
+            results = cursor.fetchall()
+            columns = [desc[0] for desc in cursor.description]
+            result_df = pd.DataFrame(results, columns=columns)
+            cursor.close()
+            conn.close()
+            return result_df
+        else:
+            # For non-SELECT queries (unlikely in this quiz)
+            conn.commit()
+            cursor.close()
+            conn.close()
+            return pd.DataFrame()  # Return empty DataFrame for non-SELECT
 
-                if modified_sql_query != sql_query:
-                    print(f"Original query: {sql_query}")
-                    print(f"Modified query for simulation: {modified_sql_query}")
+    except Error as e:
+        error_message = f"Simulation Error: Failed to execute query. Reason: {str(e)}"
+        # Parse MySQL-specific errors
+        e_str = str(e).lower()
+        table_match = re.search(r"table '.*\.([^']+)' doesn't exist", e_str)
+        column_match = re.search(r"unknown column '([^']+)'", e_str)
+        syntax_match = re.search(r"you have an error in your sql syntax.*near '([^']+)'", e_str)
 
-            except Exception as e_rewrite:
-                print(f"Warning: Failed to rewrite query for case-insensitivity, using original. Error: {e_rewrite}")
-                modified_sql_query = sql_query  # Fallback to original if rewrite fails
+        if table_match:
+            error_message += f"\n\n**Hint:** Table '{table_match.group(1)}' might be misspelled. Available tables: {list(tables_dict.keys())}."
+        elif column_match:
+            error_message += f"\n\n**Hint:** Column '{column_match.group(1)}' might be misspelled or doesn't exist."
+        elif syntax_match:
+            error_message += f"\n\n**Hint:** Check syntax near '{syntax_match.group(1)}'. Use single quotes (') for strings."
+        else:
+            error_message += "\n\n**Hint:** Check your syntax, table/column names, and use single quotes (') for strings."
 
-        # --- Simulate Query Execution ---
-        try:
-            from pandas.io import sql
-            #  Use a context manager to ensure the connection is properly closed.
-            with mysql.connector.connect(host='localhost',  # Or your specific host
-                                         user='your_user',       # Replace with your MySQL user
-                                         password='your_password',  # Replace with your MySQL password
-                                         database='your_database') as db_conn: # Replace with your database name
-                for table_name, df in tables_dict.items():
-                    df.to_sql(table_name, db_conn, if_exists='replace', index=False) # Load DataFrames into temporary MySQL tables
-
-                simulated_result = pd.read_sql_query(modified_sql_query, db_conn)
-                return simulated_result
-        except mysql.connector.Error as e_exec:
-            error_message = f"Simulation Error: Failed to execute query against simulated MySQL environment. Reason: {str(e_exec)}"
-            print(f"ERROR [simulate_query_mysql]: {error_message}\nOriginal Query: {sql_query}\nAttempted Query: {modified_sql_query}")
-            return error_message
-        except Exception as e:
-            error_message = f"Simulation Error:  An unexpected error occurred: {e}"
-            print(f"ERROR [simulate_query_mysql]: {error_message}\nOriginal Query: {sql_query}\nAttempted Query: {modified_sql_query}")
-            return error_message
-
-    except Exception as e:
-        error_message = f"Simulation Error: General simulation failure. Reason: {str(e)}"
         print(f"ERROR [simulate_query_mysql]: {error_message}\nOriginal Query: {sql_query}\nAttempted Query: {modified_sql_query}")
+        if conn:
+            try:
+                conn.close()
+            except:
+                pass
         return error_message
-
-
-
-# ******************************************************************************
-# ***** MODIFIED simulate_query_mysql function ends here *****
-# ******************************************************************************
-
 
 def get_table_schema(table_name, tables_dict):
     """Gets column names for a given table name."""
@@ -176,14 +201,15 @@ def get_table_schema(table_name, tables_dict):
         return tables_dict[table_name].columns.astype(str).tolist()
     return []
 
-
 def evaluate_answer_with_llm(question_data, student_answer, original_tables_dict):
     """Evaluate the user's answer using Gemini API and simulate using MySQL."""
     if not student_answer.strip():
         return "Please provide an answer.", False, "N/A", "N/A", "No input."
-    question = question_data["question"];
-    relevant_table_names = question_data["relevant_tables"];
+
+    question = question_data["question"]
+    relevant_table_names = question_data["relevant_tables"]
     correct_answer_example = question_data["correct_answer_example"]
+
     schema_info = ""
     if not relevant_table_names:
         schema_info = "No table schema context.\n"
@@ -192,27 +218,25 @@ def evaluate_answer_with_llm(question_data, student_answer, original_tables_dict
             columns = get_table_schema(name, original_tables_dict)
             if columns:
                 try:
-                    df = original_tables_dict[name];
-                    dtypes = df.dtypes.to_string() if isinstance(df, pd.DataFrame) else "N/A";
+                    df = original_tables_dict[name]
+                    dtypes = df.dtypes.to_string() if isinstance(df, pd.DataFrame) else "N/A"
                     schema_info += f"Table '{name}': Columns {columns}\n DataTypes:\n{dtypes}\n\n"
                 except Exception as e_schema:
                     schema_info += f"Table '{name}': Columns {columns} (Schema Error: {e_schema})\n\n"
             else:
                 schema_info += f"Table '{name}': Schema not found.\n"
 
-    # ***** MODIFIED PROMPT START *****
     prompt = f"""
-    You are an expert SQL evaluator acting as a friendly SQL mentor. Analyze the student's SQL query based on the question asked and the provided table schemas (including data types). Assume standard MySQL syntax.
+You are an expert SQL evaluator acting as a friendly SQL mentor. Analyze the student's SQL query based on the question asked and the provided table schemas (including data types). Assume **MySQL** syntax.
 
-    **Evaluation Task:**
+**Evaluation Task:**
 
-    1.  **Question:** {question}
-    2.  **Relevant Table Schemas:**
-        {schema_info.strip()}
-    3.  **Student's SQL Query:**
-        ```sql
-        {student_answer}
-        ```
+1. **Question:** {question}
+2. **Relevant Table Schemas:**
+{schema_info.strip()}
+3. **Student's SQL Query:**
+```sql
+{student_answer}
 
     **Analysis Instructions:**
 
