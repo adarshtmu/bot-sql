@@ -83,12 +83,29 @@ if "show_detailed_feedback" not in st.session_state:
 
 # --- Helper Functions ---
 
+def preprocess_query(sql_query):
+    """
+    Preprocess the SQL query to normalize backticks and prevent double-quoting.
+    """
+    cleaned_query = re.sub(r'`{2,}', '`', sql_query)
+    parts = []
+    in_backtick = False
+    for char in cleaned_query:
+        if char == '`':
+            in_backtick = not in_backtick
+            parts.append(char)
+        elif not in_backtick or char != '`':
+            parts.append(char)
+    cleaned_query = ''.join(parts)
+    return cleaned_query
+
 def simulate_query_duckdb(sql_query, tables_dict):
     """
     Simulates an SQL query using DuckDB on in-memory pandas DataFrames,
     rewriting '=' to 'ILIKE' for case-insensitive comparisons on specific columns,
-    supporting both single and double quotes, and aligning with MySQL syntax.
+    supporting both single and double quotes, and applying MySQL-compatible backtick quoting.
     """
+    sql_query = preprocess_query(sql_query)
     if not sql_query or not sql_query.strip():
         return "Simulation Error: No query provided."
     if not tables_dict:
@@ -103,6 +120,7 @@ def simulate_query_duckdb(sql_query, tables_dict):
     flat_insensitive_columns = [col for cols in case_insensitive_columns.values() for col in cols]
 
     try:
+        # --- Query Modification for Case-Insensitivity ---
         if flat_insensitive_columns:
             try:
                 col_pattern_part = "|".join([r"\b" + re.escape(col) + r"\b" for col in flat_insensitive_columns])
@@ -117,35 +135,63 @@ def simulate_query_duckdb(sql_query, tables_dict):
                     space_prefix = "" if pre_context.endswith(" ") else " "
                     return f"{pre_context}{space_prefix}{col_name} ILIKE {literal}"
 
-                modified_sql_query = re.sub(pattern, replace_with_ilike, sql_query, flags=re.IGNORECASE)
+                modified_sql_query = re.sub(pattern, replace_with_ilike, modified_sql_query, flags=re.IGNORECASE)
 
                 if modified_sql_query != sql_query:
                     print(f"Original query: {sql_query}")
-                    print(f"Modified query for simulation: {modified_sql_query}")
+                    print(f"Modified query (after ILIKE): {modified_sql_query}")
 
             except Exception as e_rewrite:
                 print(f"Warning: Failed to rewrite query for case-insensitivity, using original. Error: {e_rewrite}")
                 modified_sql_query = sql_query
 
+        # --- Handle MySQL Identifier Quoting (Backticks) ---
         try:
+            def is_quoted_or_string(text, match_start, match_end):
+                substring = text[:match_start]
+                single_quote_count = substring.count("'") - substring.count("\\'")
+                double_quote_count = substring.count('"') - substring.count('\\"')
+                backtick_count = substring.count('`') - substring.count('\\`')
+                return (single_quote_count % 2 == 1 or double_quote_count % 2 == 1 or backtick_count % 2 == 1)
+
             for table_name in tables_dict.keys():
-                modified_sql_query = re.sub(
-                    rf"\b{re.escape(table_name)}\b(?!\s*\()",
-                    f"`{table_name}`",
-                    modified_sql_query,
-                    flags=re.IGNORECASE
-                )
+                pattern = rf"(?<!`)(\b{re.escape(table_name)}\b)(?![\s]*\(|`)"
+
+                def replace_table(match):
+                    if is_quoted_or_string(modified_sql_query, match.start(1), match.end(1)):
+                        return match.group(1)
+                    return f"`{match.group(1)}`"
+
+                modified_sql_query = re.sub(pattern, replace_table, modified_sql_query)
+
+            for table_name in tables_dict.keys():
                 if table_name in tables_dict and isinstance(tables_dict[table_name], pd.DataFrame):
                     for col in tables_dict[table_name].columns:
-                        modified_sql_query = re.sub(
-                            rf"\b{re.escape(col)}\b(?!\s*\()",
-                            f"`{col}`",
-                            modified_sql_query,
-                            flags=re.IGNORECASE
-                        )
-        except Exception as e_quote:
-            print(f"Warning: Failed to apply MySQL-style identifier quoting. Error: {e_quote}")
+                        pattern = rf"(?<!`)(\b{re.escape(col)}\b)(?![\s]*\(|`)"
 
+                        def replace_column(match):
+                            if is_quoted_or_string(modified_sql_query, match.start(1), match.end(1)):
+                                return match.group(1)
+                            return f"`{match.group(1)}`"
+
+                        modified_sql_query = re.sub(pattern, replace_column, modified_sql_query)
+
+            backtick_count = modified_sql_query.count('`')
+            if backtick_count % 2 != 0:
+                print(f"Warning: Unbalanced backticks detected in modified query: {modified_sql_query}")
+                modified_sql_query = sql_query
+            elif re.search(r'``+', modified_sql_query):
+                print(f"Warning: Consecutive backticks detected in modified query: {modified_sql_query}")
+                modified_sql_query = sql_query
+
+            if modified_sql_query != sql_query:
+                print(f"Modified query (after backtick quoting): {modified_sql_query}")
+
+        except Exception as e_quote:
+            print(f"Warning: Failed to apply MySQL-style identifier quoting, using original query. Error: {e_quote}")
+            modified_sql_query = sql_query
+
+        # --- Connect and Register Data ---
         con = duckdb.connect(database=':memory:', read_only=False)
         for table_name, df in tables_dict.items():
             if isinstance(df, pd.DataFrame):
@@ -153,6 +199,7 @@ def simulate_query_duckdb(sql_query, tables_dict):
             else:
                 print(f"Warning: Item '{table_name}' not a DataFrame during registration.")
 
+        # Execute the modified query
         result_df = con.execute(modified_sql_query).df()
         con.close()
         return result_df
@@ -170,11 +217,11 @@ def simulate_query_duckdb(sql_query, tables_dict):
         elif binder_match:
             error_message += f"\n\n**Hint:** Column '{binder_match.group(1)}' might be misspelled or doesn't exist. Use backticks (e.g., `{binder_match.group(1)}`)."
         elif syntax_match:
-            error_message += f"\n\n**Hint:** Check syntax near `{syntax_match.group(1)}`. In MySQL, use single ('') or double quotes ("") for strings, backticks (``) for table/column names."
+            error_message += f"\n\n**Hint:** Check syntax near `{syntax_match.group(1)}`. In MySQL, use single ('') or double quotes (\"\") for strings, backticks (``) for table/column names."
         elif type_match:
             error_message += f"\n\n**Hint:** Type mismatch with '{type_match.group(1)}'. Ensure data types match (e.g., strings in quotes, numbers without)."
         else:
-            error_message += "\n\n**Hint:** Check MySQL syntax. Use single ('') or double quotes ("") for strings, backticks (``) for identifiers, and correct table/column names."
+            error_message += "\n\n**Hint:** Check MySQL syntax. Use single ('') or double quotes (\"\") for strings, backticks (``) for identifiers, and correct table/column names."
 
         print(f"ERROR [simulate_query_duckdb]: {error_message}\nOriginal Query: {sql_query}\nAttempted Query: {modified_sql_query}")
         if con:
@@ -192,6 +239,7 @@ def get_table_schema(table_name, tables_dict):
 
 def evaluate_answer_with_llm(question_data, student_answer, original_tables_dict):
     """Evaluate the user's answer using Gemini API and simulate using DuckDB."""
+    student_answer = preprocess_query(student_answer)
     if not student_answer.strip():
         return "Please provide an answer.", False, "N/A", "N/A", "No input."
     question = question_data["question"]
