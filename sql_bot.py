@@ -22,10 +22,12 @@ hide_streamlit_style = """
 st.markdown(hide_streamlit_style, unsafe_allow_html=True)
 
 # --- Set up Gemini API (Unchanged) ---
-gemini_api_key = "AIzaSyAfzl_66GZsgaYjAM7cT2djVCBCAr86t2k" # Replace with your actual key
-if not gemini_api_key or gemini_api_key == "AIzaSyAfzl_66GZsgaYjAM7cT2djVCBCAr86t2k":
-    st.error("🚨 Gemini API Key is missing. Please add your key in the code.")
+gemini_api_key = "AIzaSyAfzl_66GZsgaYjAM7cT2djVCBCAr86t2k" # Your specific API Key
+
+if not gemini_api_key: # Basic check if the key is empty
+    st.error("🚨 Gemini API Key is missing in the code.")
     st.stop()
+
 
 try:
     genai.configure(api_key=gemini_api_key)
