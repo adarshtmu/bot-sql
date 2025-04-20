@@ -7,6 +7,8 @@ import duckdb # Import DuckDB
 
 # --- Custom CSS ---
 # Hides Streamlit's default header, footer, menu, deploy button, etc.
+# --- Custom CSS ---
+# Hides Streamlit's default header, footer, menu, deploy button, etc.
 hide_streamlit_style = """
     <style>
         header {visibility: hidden;}
@@ -19,6 +21,10 @@ hide_streamlit_style = """
         [data-testid="stDeployButton"] {display: none !important;} /* Hides Streamlit deploy button */
         .st-emotion-cache-1r8d6ul {display: none !important;} /* Additional class for profile image */
         .st-emotion-cache-1jicfl2 {display: none !important;} /* Hides Streamlit's footer */
+        /* Increase font size for Start SQL Challenge! button */
+        button[kind="primary"] {
+            font-size: 24px !important; /* Adjust font size as needed */
+        }
     </style>
 """
 st.markdown(hide_streamlit_style, unsafe_allow_html=True)
