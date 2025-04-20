@@ -567,17 +567,17 @@ elif st.session_state.quiz_started and not st.session_state.quiz_completed:
 
     # Display relevant schemas for the current question
     relevant_tables = question_data["relevant_tables"]
-    if relevant_tables==False:
-        st.markdown("**Relevant Table Schema(s):**")
-        schema_cols = st.columns(len(relevant_tables))
-        for i, table_name in enumerate(relevant_tables):
-            cols = get_table_schema(table_name, original_tables)
-            if cols:
-                 with schema_cols[i]:
-                     st.code(f"Table: {table_name}\nColumns: {', '.join(cols)}", language='text')
-            else:
-                 with schema_cols[i]:
-                     st.warning(f"Schema for '{table_name}' not found.")
+    if relevant_tables:
+        # st.markdown("**Relevant Table Schema(s):**")
+        # schema_cols = st.columns(len(relevant_tables))
+        # for i, table_name in enumerate(relevant_tables):
+        #     cols = get_table_schema(table_name, original_tables)
+        #     if cols:
+        #          with schema_cols[i]:
+        #              st.code(f"Table: {table_name}\nColumns: {', '.join(cols)}", language='text')
+        #     else:
+        #          with schema_cols[i]:
+        #              st.warning(f"Schema for '{table_name}' not found.")
 
         # --- Display Sample Table Preview(s) --- <--- THIS BLOCK IS ADDED/MODIFIED
         st.markdown("**Sample Table Preview(s):**")
