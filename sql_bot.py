@@ -23,8 +23,9 @@ hide_streamlit_style = """
         .st-emotion-cache-1jicfl2 {display: none !important;} /* Hides Streamlit's footer */
         /* Increase font size for Start SQL Challenge! button */
         button[kind="primary"] {
-            font-size: 40px !important; /* Adjust font size as needed */
+            font-size: 50px !important; /* Adjust as needed */
         }
+
     </style>
 """
 st.markdown(hide_streamlit_style, unsafe_allow_html=True)
@@ -517,7 +518,7 @@ if not st.session_state.quiz_started:
         - String literals can be enclosed in single quotes (`'...'`) or double quotes (`"..."`).
         """)
 
-    if st.button("🚀 Start SQL Challenge!"):
+    if st.button("🚀 Start SQL Challenge!", type="primary"):
         st.session_state.quiz_started = True
         st.session_state.user_answers = []
         st.session_state.current_question = 0
