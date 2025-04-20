@@ -24,7 +24,7 @@ hide_streamlit_style = """
         /* Increase font size for Start SQL Challenge! button */
         button[kind="primary"] {
             font-size: 50px !important; /* Larger text */
-            padding: 20px 300px !important; /* Increase button height/width */
+            padding: 20px 30px !important; /* Increase button height/width */
             color: white !important; /* Text color */
             background-color: red; /* Background color (optional) */
             border-radius: 10px; /* Rounded corners (optional) */
