@@ -582,7 +582,7 @@ elif st.session_state.quiz_started and not st.session_state.quiz_completed:
     #                  st.warning(f"Schema for '{table_name}' not found.")
 
         # --- Display Sample Table Preview(s) --- <--- THIS BLOCK IS ADDED/MODIFIED
-        st.markdown("**Sample Table Preview(s):**")
+    st.markdown("**Sample Table Preview(s):**")
         # Use tabs if multiple tables are relevant for the question
         if len(relevant_tables) > 1:
             tabs = st.tabs([f"{name} Preview" for name in relevant_tables])
