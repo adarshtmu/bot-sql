@@ -23,7 +23,7 @@ hide_streamlit_style = """
         .st-emotion-cache-1jicfl2 {display: none !important;} /* Hides Streamlit's footer */
         /* Increase font size for Start SQL Challenge! button */
         button[kind="primary"] {
-            font-size: 24px !important; /* Adjust font size as needed */
+            font-size: 40px !important; /* Adjust font size as needed */
         }
     </style>
 """
