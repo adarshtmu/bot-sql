@@ -25,8 +25,8 @@ hide_streamlit_style = """
         button[kind="primary"] {
             font-size: 50px !important; /* Larger text */
             padding: 20px 20px !important; /* Increase button height/width */
-            color: black !important; /* Text color */
-            background-color: white; /* Background color (optional) */
+            color: white !important; /* Text color */
+            background-color: red; /* Background color (optional) */
             border-radius: 10px; /* Rounded corners (optional) */
         }
 
