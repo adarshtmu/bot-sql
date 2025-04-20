@@ -26,18 +26,11 @@ st.markdown(hide_streamlit_style, unsafe_allow_html=True)
 # --- Set up Gemini API ---
 # WARNING: Hardcoding API keys is insecure.
 # For production, use Streamlit Secrets or environment variables.
-
-# Replace "YOUR_API_KEY_HERE" with your actual Gemini API Key
-# Replace "YOUR_API_KEY_HERE" with your actual Gemini API Key
+# Replace "YOUR_API_KEY_HERE" with your actual Gemini API Key below.
 gemini_api_key = "AIzaSyAfzl_66GZsgaYjAM7cT2djVCBCAr86t2k" # Your specific API Key
 if not gemini_api_key or gemini_api_key == "YOUR_API_KEY_HERE": # Basic check
     st.error("🚨 Gemini API Key is missing or hasn't been replaced. Please add your key in the code.")
     st.stop()
-
-
-
-
-
 
 try:
     genai.configure(api_key=gemini_api_key)
