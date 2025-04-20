@@ -23,9 +23,11 @@ hide_streamlit_style = """
         .st-emotion-cache-1jicfl2 {display: none !important;} /* Hides Streamlit's footer */
         /* Increase font size for Start SQL Challenge! button */
         button[kind="primary"] {
-            font-size: 70px !important; /* Increase size */
-            color: white !important;      /* Ensure color is applied */
-            background-color: red;    /* Optional: Reset background if needed */
+            font-size: 50px !important; /* Larger text */
+            padding: 20px 40px !important; /* Increase button height/width */
+            color: red !important; /* Text color */
+            background-color: white; /* Background color (optional) */
+            border-radius: 10px; /* Rounded corners (optional) */
         }
 
     </style>
