@@ -567,7 +567,7 @@ elif st.session_state.quiz_started and not st.session_state.quiz_completed:
 
     # Display relevant schemas for the current question
     relevant_tables = question_data["relevant_tables"]
-    if relevant_tables=False:
+    if relevant_tables==False:
         st.markdown("**Relevant Table Schema(s):**")
         schema_cols = st.columns(len(relevant_tables))
         for i, table_name in enumerate(relevant_tables):
