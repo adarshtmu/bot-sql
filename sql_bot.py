@@ -29,7 +29,7 @@ st.markdown(hide_streamlit_style, unsafe_allow_html=True)
 
 gemini_api_key = "AIzaSyAfzl_66GZsgaYjAM7cT2djVCBCAr86t2k" # Your specific API Key
 
-if not gemini_api_key or gemini_api_key == "YOUR_API_KEY_HERE": # Basic check
+if not gemini_api_key or gemini_api_key == "AIzaSyAfzl_66GZsgaYjAM7cT2djVCBCAr86t2k": # Basic check
 
 st.error("🚨 Gemini API Key is missing or hasn't been replaced. Please add your key in the code.")
 
