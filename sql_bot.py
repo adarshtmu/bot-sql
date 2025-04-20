@@ -324,7 +324,7 @@ def evaluate_answer_with_llm(question_data, student_answer, original_tables_dict
     actual_result_sim = simulate_query_duckdb(student_answer, original_tables_dict)
     expected_result_sim = simulate_query_duckdb(correct_answer_example, original_tables_dict)
 
-    return feedback_llm, is_correct_llm, expected_result_sim, actual_result_sim, llm_output
+    return feedback_llm, is_correct_llm, expected_result_sim, actual_result_sim, llm_raw_output
 
 
 def calculate_score(user_answers):
@@ -517,7 +517,7 @@ if not st.session_state.quiz_started:
         st.session_state.current_question = 0
         st.session_state.user_answers = []
         st.session_state.quiz_completed = False
-        st.experimental_rerun() # Rerun to switch to the quiz view
+        st.rerun() # Replaced experimental_rerun() with rerun()
 
 # --- Quiz Questions Display ---
 elif st.session_state.quiz_started and not st.session_state.quiz_completed:
@@ -580,11 +580,11 @@ elif st.session_state.quiz_started and not st.session_state.quiz_completed:
             if st.session_state.current_question < len(sql_questions) - 1:
                 if st.button("Next Question ➡️", key=f"next_btn_{current_q_index}"):
                     st.session_state.current_question += 1
-                    st.experimental_rerun()
+                    st.rerun() # Replaced experimental_rerun() with rerun()
             else:
                 st.success("🎉 You've completed all the questions!")
                 st.session_state.quiz_completed = True
-                st.experimental_rerun() # Rerun to show completion screen
+                st.rerun() # Replaced experimental_rerun() with rerun()
 
 # --- Quiz Completion Screen ---
 elif st.session_state.quiz_completed:
@@ -627,4 +627,4 @@ elif st.session_state.quiz_completed:
         st.session_state.user_answers = []
         st.session_state.quiz_completed = False
         st.session_state.show_detailed_feedback = False # Reset this too
-        st.experimental_rerun()
+        st.rerun() # Replaced experimental_rerun() with rerun()
