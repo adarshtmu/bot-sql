@@ -567,22 +567,22 @@ elif st.session_state.quiz_started and not st.session_state.quiz_completed:
     st.subheader(f"Sawaal {current_q_index + 1} of {len(sql_questions)}")
     st.markdown(f"**{question_data['question']}**")
 
-    # Display relevant schemas for the current question
-    # relevant_tables = question_data["relevant_tables"]
-    # if relevant_tables:
-    #     st.markdown("**Relevant Table Schema(s):**")
-    #     schema_cols = st.columns(len(relevant_tables))
-    #     for i, table_name in enumerate(relevant_tables):
-    #         cols = get_table_schema(table_name, original_tables)
-    #         if cols:
-    #              with schema_cols[i]:
-    #                  st.code(f"Table: {table_name}\nColumns: {', '.join(cols)}", language='text')
-    #         else:
-    #              with schema_cols[i]:
-    #                  st.warning(f"Schema for '{table_name}' not found.")
+    Display relevant schemas for the current question
+    relevant_tables = None
+    if relevant_tables:
+        st.markdown("**Relevant Table Schema(s):**")
+        schema_cols = st.columns(len(relevant_tables))
+        for i, table_name in enumerate(relevant_tables):
+            cols = get_table_schema(table_name, original_tables)
+            if cols:
+                 with schema_cols[i]:
+                     st.code(f"Table: {table_name}\nColumns: {', '.join(cols)}", language='text')
+            else:
+                 with schema_cols[i]:
+                     st.warning(f"Schema for '{table_name}' not found.")
 
         # --- Display Sample Table Preview(s) --- <--- THIS BLOCK IS ADDED/MODIFIED
-    st.markdown("**Sample Table Preview(s):**")
+        st.markdown("**Sample Table Preview(s):**")
         # Use tabs if multiple tables are relevant for the question
         if len(relevant_tables) > 1:
             tabs = st.tabs([f"{name} Preview" for name in relevant_tables])
