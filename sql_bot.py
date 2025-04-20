@@ -23,9 +23,9 @@ hide_streamlit_style = """
         .st-emotion-cache-1jicfl2 {display: none !important;} /* Hides Streamlit's footer */
         /* Increase font size for Start SQL Challenge! button */
         button[kind="primary"] {
-            font-size: 50px !important; /* Increase size */
-            color: red !important;      /* Ensure color is applied */
-            background-color: white;    /* Optional: Reset background if needed */
+            font-size: 70px !important; /* Increase size */
+            color: white !important;      /* Ensure color is applied */
+            background-color: red;    /* Optional: Reset background if needed */
         }
 
     </style>
