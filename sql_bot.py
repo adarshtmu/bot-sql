@@ -514,191 +514,117 @@ if not st.session_state.quiz_started:
 
     if st.button("🚀 Start SQL Challenge!"):
         st.session_state.quiz_started = True
-        st.session_state.user_answers = []
         st.session_state.current_question = 0
+        st.session_state.user_answers = []
         st.session_state.quiz_completed = False
-        st.session_state.show_detailed_feedback = False
-        st.rerun()
+        st.experimental_rerun() # Rerun to switch to the quiz view
 
-# --- Quiz In Progress Screen ---
+# --- Quiz Questions Display ---
 elif st.session_state.quiz_started and not st.session_state.quiz_completed:
-    st.title("✍️ SQL Query Challenge")
-
-    # --- Display Previous Answers and Feedback ---
-    if st.session_state.user_answers:
-        st.markdown("---")
-        st.subheader("📖 Ab Tak Ke Jawaab Aur Feedback")
-        for i, ans_data in enumerate(reversed(st.session_state.user_answers)):
-            q_num = len(st.session_state.user_answers) - i
-            is_correct = ans_data.get('is_correct', False)
-            with st.expander(f"Question {q_num}: {ans_data['question']} {get_emoji(is_correct)}", expanded=False):
-                st.write(f"**Aapka Jawaab:**")
-                st.code(ans_data.get('student_answer', '(No answer provided)'), language='sql')
-                st.write(f"**SQL Mentor Feedback:**")
-                feedback_text = ans_data.get("feedback", "_Feedback not available._")
-                st.markdown(feedback_text)
-
-                st.markdown("---")
-                display_simulation("Simulated Result (Your Query Output)", ans_data.get("actual_result", "N/A"))
-
-                show_expected = False
-                if not is_correct:
-                    show_expected = True
-                elif isinstance(ans_data.get("actual_result"), pd.DataFrame) and \
-                     isinstance(ans_data.get("expected_result"), pd.DataFrame) and \
-                     not ans_data["actual_result"].equals(ans_data["expected_result"]):
-                     show_expected = True
-                elif isinstance(ans_data.get("actual_result"), str) and \
-                     ans_data.get("actual_result") != ans_data.get("expected_result"):
-                     show_expected = True
-
-                if show_expected:
-                     display_simulation("Simulated Result (Correct Query Output)", ans_data.get("expected_result", "N/A"))
-
-    st.markdown("---")
-
-    # --- Current Question ---
     current_q_index = st.session_state.current_question
-    question_data = sql_questions[current_q_index]
+    current_q_data = sql_questions[current_q_index]
 
-    st.subheader(f"Sawaal {current_q_index + 1} of {len(sql_questions)}")
-    st.markdown(f"**{question_data['question']}**")
+    st.title(f"SQL Challenge {current_q_index + 1}/{len(sql_questions)}")
+    st.markdown(f"#### {current_q_data['question']}")
 
-    # Display relevant schemas for the current question
-    relevant_tables = question_data["relevant_tables"]
-    if relevant_tables:
-        st.markdown("**Relevant Table Schema(s):**")
-        schema_cols = st.columns(len(relevant_tables))
-        for i, table_name in enumerate(relevant_tables):
-            cols = get_table_schema(table_name, original_tables)
-            if cols:
-                 with schema_cols[i]:
-                     st.code(f"Table: {table_name}\nColumns: {', '.join(cols)}", language='text')
-            else:
-                 with schema_cols[i]:
-                     st.warning(f"Schema for '{table_name}' not found.")
+    # --- Lines to comment out start here ---
+    # st.markdown("#### Relevant Table Schemas:")
+    # if "users" in current_q_data["relevant_tables"]:
+    #      st.markdown(f"Table: `users` | Columns: `{', '.join(get_table_schema('users', original_tables))}`")
+    # if "orders" in current_q_data["relevant_tables"]:
+    #      st.markdown(f"Table: `orders` | Columns: `{', '.join(get_table_schema('orders', original_tables))}`")
+    # --- Lines to comment out end here ---
 
-        # --- Display Sample Table Preview(s) --- <--- THIS BLOCK IS ADDED/MODIFIED
-        st.markdown("**Sample Table Preview(s):**")
-        # Use tabs if multiple tables are relevant for the question
-        if len(relevant_tables) > 1:
-            tabs = st.tabs([f"{name} Preview" for name in relevant_tables])
-            for i, table_name in enumerate(relevant_tables):
-                with tabs[i]:
-                    if table_name in original_tables:
-                        # Display dataframe preview inside the tab
-                        st.dataframe(original_tables[table_name], hide_index=True, use_container_width=True)
-                    else:
-                        st.warning(f"Data for table '{table_name}' not found.")
-        # If only one table is relevant, display it directly
-        elif len(relevant_tables) == 1:
-            table_name = relevant_tables[0]
-            if table_name in original_tables:
-                 # Display dataframe preview directly
-                 st.dataframe(original_tables[table_name], hide_index=True, use_container_width=True)
-            else:
-                 st.warning(f"Data for table '{table_name}' not found.")
-        # --- End of Added/Modified Block for Table Preview ---
 
-    else:
-         st.info("No specific table context provided for this question.")
+    student_answer = st.text_area("Apni SQL Query Yahaan Likhein:", height=150, key=f"query_input_{current_q_index}")
 
-    # Text area for user query input
-    user_query = st.text_area("Apna SQL Query Yahan Likhein:", height=150, key=f"query_input_{current_q_index}")
+    # Use a unique key for the submit button for each question
+    submit_button_key = f"submit_btn_{current_q_index}"
 
-    # Submit Button Logic
-    if st.button("✅ Submit Query", key=f"submit_{current_q_index}"):
-        if user_query and user_query.strip():
-            with st.spinner("🔄 Query ko check kiya ja raha hai... AI Mentor se feedback aur simulation results generate ho rahe hain..."):
-                feedback, is_correct, expected_res, actual_res, raw_llm = evaluate_answer_with_llm(
-                    question_data,
-                    user_query,
-                    original_tables
-                )
-
-                st.session_state.user_answers.append({
-                    "question_number": current_q_index + 1,
-                    "question": question_data["question"],
-                    "student_answer": user_query,
-                    "feedback": feedback,
-                    "is_correct": is_correct,
-                    "expected_result": expected_res,
-                    "actual_result": actual_res,
-                    "raw_llm_output": raw_llm
-                })
-
-                if current_q_index + 1 < len(sql_questions):
-                    st.session_state.current_question += 1
-                else:
-                    st.session_state.quiz_completed = True
-
-                st.rerun()
+    if st.button("Submit Answer", key=submit_button_key):
+        if not student_answer.strip():
+            st.warning("🚨 Please enter a SQL query before submitting.")
         else:
-            st.warning("⚠️ Please enter your SQL query before submitting.")
+            with st.spinner("Evaluating your query..."):
+                (feedback, is_correct, expected_sim_result, actual_sim_result, llm_raw_output) = \
+                    evaluate_answer_with_llm(current_q_data, student_answer, original_tables)
 
+            # Store the answer result in session state
+            st.session_state.user_answers.append({
+                "question": current_q_data["question"],
+                "student_answer": student_answer,
+                "is_correct": is_correct,
+                "feedback": feedback,
+                "expected_result_sim": expected_sim_result,
+                "actual_result_sim": actual_sim_result,
+                "llm_raw_output": llm_raw_output
+            })
 
-# --- Quiz Completed Screen ---
+            # Display immediate feedback
+            feedback_emoji = get_emoji(is_correct)
+            st.markdown(f"### {feedback_emoji} Feedback")
+            st.markdown(feedback)
+
+            # Display simulation results (always show after submission)
+            st.markdown("#### Query Simulation Results:")
+            col_exp, col_act = st.columns(2)
+            with col_exp:
+                 display_simulation("Expected Output", expected_sim_result)
+            with col_act:
+                 display_simulation("Your Query Output", actual_sim_result)
+
+            # Show Raw LLM Output expander
+            # st.markdown(f"<br><details><summary>Raw LLM Output (For Debugging)</summary><pre>{llm_raw_output}</pre></details>", unsafe_allow_html=True) # Keeping this commented by default
+
+            # Button to move to the next question or finish
+            if st.session_state.current_question < len(sql_questions) - 1:
+                if st.button("Next Question ➡️", key=f"next_btn_{current_q_index}"):
+                    st.session_state.current_question += 1
+                    st.experimental_rerun()
+            else:
+                st.success("🎉 You've completed all the questions!")
+                st.session_state.quiz_completed = True
+                st.experimental_rerun() # Rerun to show completion screen
+
+# --- Quiz Completion Screen ---
 elif st.session_state.quiz_completed:
-    st.balloons()
-    st.title("🎉 Badhai Ho! Aapne SQL Challenge Poora Kar Liya!")
+    st.title("🏆 Quiz Completed!")
     final_score = calculate_score(st.session_state.user_answers)
-    st.metric("Aapka Final Score:", f"{final_score:.2f}%")
+    st.balloons()
+    st.markdown(f"### Your Final Score: {final_score:.2f}%")
 
-    st.markdown("---")
-    st.subheader("📝 Aapke Jawaab Aur Feedback Ka Summary")
-
-    for i, ans_data in enumerate(st.session_state.user_answers):
-        q_num = i + 1
-        is_correct = ans_data.get('is_correct', False)
-        with st.expander(f"Question {q_num}: {ans_data['question']} {get_emoji(is_correct)}", expanded=False):
-            st.write(f"**Aapka Jawaab:**"); st.code(ans_data.get('student_answer', '(No answer provided)'), language='sql');
-            st.write(f"**SQL Mentor Feedback:**");
-            feedback_text = ans_data.get("feedback", "_Feedback not available._")
-            st.markdown(feedback_text)
-            st.markdown("---")
-            display_simulation("Simulated Result (Your Query Output)", ans_data.get("actual_result", "N/A"))
-
-            show_expected_final = False
-            if not is_correct:
-                show_expected_final = True
-            elif isinstance(ans_data.get("actual_result"), pd.DataFrame) and \
-                 isinstance(ans_data.get("expected_result"), pd.DataFrame) and \
-                 not ans_data["actual_result"].equals(ans_data["expected_result"]):
-                 show_expected_final = True
-            elif isinstance(ans_data.get("actual_result"), str) and \
-                 ans_data.get("actual_result") != ans_data.get("expected_result"):
-                 show_expected_final = True
-
-            if show_expected_final:
-                 display_simulation("Simulated Result (Correct Query Output)", ans_data.get("expected_result", "N/A"))
+    performance_summary_data = analyze_performance(st.session_state.user_answers)
+    st.markdown("#### Performance Analysis by AI Mentor:")
+    st.markdown(performance_summary_data["overall_feedback"])
 
 
-    st.markdown("---")
-    st.subheader("💡 AI Mentor Se Detailed Performance Analysis")
-
-    if st.button("Show Detailed Analysis", key="show_analysis"):
+    st.markdown("### Detailed Results:")
+    # Add a button to toggle detailed feedback visibility
+    if st.button("Toggle Detailed Feedback & Answers"):
         st.session_state.show_detailed_feedback = not st.session_state.show_detailed_feedback
 
     if st.session_state.show_detailed_feedback:
-        with st.spinner("🧠 Performance analysis generate ho raha hai..."):
-            performance_summary = analyze_performance(st.session_state.user_answers)
-            st.markdown(performance_summary.get("overall_feedback", "Analysis available nahi hai."))
+        for i, answer_data in enumerate(st.session_state.user_answers):
+            is_correct = answer_data.get("is_correct", False)
+            feedback_emoji = get_emoji(is_correct)
+            with st.expander(f"Question {i+1}: {answer_data['question']} {feedback_emoji}", expanded=False):
+                 st.markdown(f"**Your Answer:** `{answer_data['student_answer']}`")
+                 st.markdown(f"**Feedback:** {answer_data['feedback']}")
+                 st.markdown("---")
+                 st.markdown("#### Simulation Results:")
+                 col_exp, col_act = st.columns(2)
+                 with col_exp:
+                      display_simulation("Expected Output", answer_data['expected_result_sim'])
+                 with col_act:
+                      display_simulation("Your Query Output", answer_data['actual_result_sim'])
+                 # Optionally show raw LLM output here too if needed for debugging completion screen
+                 # st.markdown(f"<br><details><summary>Raw LLM Output</summary><pre>{answer_data.get('llm_raw_output', 'N/A')}</pre></details>", unsafe_allow_html=True)
 
 
-    st.markdown("---")
-    if st.button("🔄 Dobara Try Karein?"):
-        st.session_state.user_answers = []
-        st.session_state.current_question = 0
+    if st.button("Restart Quiz"):
         st.session_state.quiz_started = False
+        st.session_state.current_question = 0
+        st.session_state.user_answers = []
         st.session_state.quiz_completed = False
-        st.session_state.show_detailed_feedback = False
-        st.rerun()
-
-# --- Fallback ---
-else:
-    st.error("🚨 Kuch unexpected state issue hai. Application ko restart karne ki koshish karein.")
-    if st.button("Reset App State"):
-         for key in list(st.session_state.keys()):
-              if key in ["user_answers", "current_question", "quiz_started", "quiz_completed", "show_detailed_feedback"]:
-                   del st.session_state[key]
-         st.rerun()
+        st.session_state.show_detailed_feedback = False # Reset this too
+        st.experimental_rerun()
