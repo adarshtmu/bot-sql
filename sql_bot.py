@@ -1,5 +1,3 @@
-
-
 import streamlit as st
 import google.generativeai as genai
 import pandas as pd
@@ -29,7 +27,7 @@ st.markdown(hide_streamlit_style, unsafe_allow_html=True)
 # WARNING: Hardcoding API keys is insecure.
 # For production, use Streamlit Secrets or environment variables.
 # Replace "YOUR_API_KEY_HERE" with your actual Gemini API Key below.
-gemini_api_key = "AIzaSyAfzl_66GZsgaYjAM7cT2djVCBCAr86t2k" # <--- IMPORTANT: PASTE YOUR GEMINI API KEY HERE
+gemini_api_key = "YOUR_API_KEY_HERE" # <--- IMPORTANT: PASTE YOUR GEMINI API KEY HERE
 
 if not gemini_api_key or gemini_api_key == "YOUR_API_KEY_HERE": # Basic check
     st.error("🚨 Gemini API Key is missing or hasn't been replaced. Please add your key in the code.")
@@ -567,9 +565,9 @@ elif st.session_state.quiz_started and not st.session_state.quiz_completed:
     st.subheader(f"Sawaal {current_q_index + 1} of {len(sql_questions)}")
     st.markdown(f"**{question_data['question']}**")
 
-    Display relevant schemas for the current question
-    relevant_tables = None
-    if relevant_tables:
+    # Display relevant schemas for the current question
+    relevant_tables = question_data["relevant_tables"]
+    if relevant_tables=10:
         st.markdown("**Relevant Table Schema(s):**")
         schema_cols = st.columns(len(relevant_tables))
         for i, table_name in enumerate(relevant_tables):
