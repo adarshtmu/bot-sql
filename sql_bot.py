@@ -517,7 +517,6 @@ if not st.session_state.quiz_started:
         - String literals can be enclosed in single quotes (`'...'`) or double quotes (`"..."`).
         """)
 
-    st.markdown('<div class="start-button">', unsafe_allow_html=True)
     if st.button("🚀 Start SQL Challenge!"):
         st.session_state.quiz_started = True
         st.session_state.user_answers = []
@@ -525,7 +524,6 @@ if not st.session_state.quiz_started:
         st.session_state.quiz_completed = False
         st.session_state.show_detailed_feedback = False
         st.rerun()
-    st.markdown('</div>', unsafe_allow_html=True)
 
 # --- Quiz In Progress Screen ---
 elif st.session_state.quiz_started and not st.session_state.quiz_completed:
