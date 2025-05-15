@@ -571,7 +571,7 @@ elif st.session_state.quiz_started and not st.session_state.quiz_completed:
     current_q_index = st.session_state.current_question
     question_data = sql_questions[current_q_index]
 
-    st.subheader(f"Sawaal {current_q_index + 1} of {len(sql_questions)}")
+    st.subheader(f"Question {current_q_index + 1} of {len(sql_questions)}")
     st.markdown(f"**{question_data['question']}**")
 
     # Display relevant schemas for the current question
