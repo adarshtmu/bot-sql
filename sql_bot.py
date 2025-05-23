@@ -4,21 +4,21 @@ import pandas as pd
 import re
 import duckdb
 
-# --- Custom CSS for ChatGPT-like UI ---
+# --- Custom CSS for Professional UI ---
 st.markdown("""
     <style>
         /* General Styling */
         body, .stApp {
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif !important;
-            background-color: #f5f7fa !important;
-            color: #1a202c !important;
+            background-color: #fafafa !important;
+            color: #1f2937 !important;
         }
         .stMarkdown, .stText, .stTextArea, .stButton button, .stLinkButton a {
             font-size: 18px !important;
         }
-        h1 {font-size: 36px !important; color: #2d3748 !important;}
-        h2 {font-size: 28px !important; color: #2d3748 !important;}
-        h3 {font-size: 24px !important; color: #2d3748 !important;}
+        h1 {font-size: 36px !important; color: #1f2937 !important;}
+        h2 {font-size: 28px !important; color: #1f2937 !important;}
+        h3 {font-size: 24px !important; color: #1f2937 !important;}
         
         /* Hide Streamlit elements */
         header {visibility: hidden;}
@@ -34,83 +34,99 @@ st.markdown("""
         
         /* Button Styling */
         button[kind="primary"] {
-            font-size: 20px !important;
-            padding: 12px 24px !important;
-            background-color: #10b981 !important;
-            color: white !important;
-            border-radius: 8px !important;
-            border: none !important;
-            transition: all 0.2s ease !important;
-        }
-        button[kind="primary"]:hover {
-            background-color: #059669 !important;
-            transform: translateY(-2px) !important;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.15) !important;
-        }
-        .stButton button:not([kind="primary"]), .stLinkButton a {
             font-size: 18px !important;
             padding: 10px 20px !important;
-            background-color: #e2e8f0 !important;
-            color: #2d3748 !important;
-            border-radius: 8px !important;
-            transition: all 0.2s ease !important;
+            background-color: #1e40af !important;
+            color: white !important;
+            border-radius: 6px !important;
+            border: none !important;
+            transition: all 0.3s ease !important;
+        }
+        button[kind="primary"]:hover {
+            background-color: #1e3a8a !important;
+            transform: translateY(-1px) !important;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1) !important;
+        }
+        .stButton button:not([kind="primary"]), .stLinkButton a {
+            font-size: 16px !important;
+            padding: 8px 16px !important;
+            background-color: #e5e7eb !important;
+            color: #1f2937 !important;
+            border-radius: 6px !important;
+            border: 1px solid #d1d5db !important;
+            transition: all 0.3s ease !important;
         }
         .stButton button:not([kind="primary"]):hover, .stLinkButton a:hover {
-            background-color: #cbd5e1 !important;
-            transform: translateY(-1px) !important;
+            background-color: #d1d5db !important;
+            border-color: #9ca3af !important;
         }
         
         /* Container Styling */
         .stContainer {
             background: white !important;
-            padding: 20px !important;
-            border-radius: 12px !important;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1) !important;
-            margin-bottom: 20px !important;
+            padding: 16px !important;
+            border-radius: 8px !important;
+            border: 1px solid #e5e7eb !important;
+            margin-bottom: 16px !important;
         }
         
         /* Feedback Container */
         .feedback-container {
-            background-color: #edf2f7 !important;
-            padding: 20px !important;
-            border-radius: 12px !important;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.1) !important;
+            background-color: #f9fafb !important;
+            padding: 16px !important;
+            border-radius: 8px !important;
+            border: 1px solid #e5e7eb !important;
             font-size: 18px !important;
         }
         .feedback-header {
-            font-size: 24px !important;
-            color: #2d3748 !important;
-            margin-bottom: 15px !important;
+            font-size: 22px !important;
+            color: #1f2937 !important;
+            margin-bottom: 12px !important;
         }
         .strength-item, .weakness-item {
-            font-size: 18px !important;
-            margin: 8px 0 !important;
+            font-size: 16px !important;
+            margin: 6px 0 !important;
         }
         
         /* Text Area */
         .stTextArea textarea {
-            border-radius: 8px !important;
-            border: 1px solid #e2e8f0 !important;
-            padding: 12px !important;
+            border-radius: 6px !important;
+            border: 1px solid #d1d5db !important;
+            padding: 10px !important;
+            background-color: #ffffff !important;
+        }
+        .stTextArea textarea:focus {
+            border-color: #1e40af !important;
+            box-shadow: 0 0 0 2px rgba(30, 64, 175, 0.2) !important;
         }
         
         /* Sidebar */
         .stSidebar {
             background-color: #ffffff !important;
-            padding: 20px !important;
-            border-right: 1px solid #e2e8f0 !important;
+            padding: 16px !important;
+            border-right: 1px solid #e5e7eb !important;
         }
         
         /* Progress Bar */
         .stProgress .st-bo {
-            background-color: #10b981 !important;
+            background-color: #0d9488 !important;
         }
         
         /* Expander */
         .stExpander {
-            border: 1px solid #e2e8f0 !important;
-            border-radius: 8px !important;
-            margin-bottom: 10px !important;
+            border: 1px solid #e5e7eb !important;
+            border-radius: 6px !important;
+            margin-bottom: 8px !important;
+        }
+        .stExpander summary {
+            padding: 8px !important;
+            background-color: #f9fafb !important;
+        }
+        
+        /* Dataframe */
+        .stDataFrame {
+            border: 1px solid #e5e7eb !important;
+            border-radius: 6px !important;
         }
     </style>
 """, unsafe_allow_html=True)
@@ -499,20 +515,20 @@ def display_simulation(title, result_data):
 # --- Sidebar Navigation ---
 with st.sidebar:
     st.markdown("### 🧠 SQL Mentor")
-    st.markdown("Master SQL with this interactive quiz!")
+    st.markdown("Enhance your SQL expertise with this interactive quiz.")
     if st.session_state.quiz_started and not st.session_state.quiz_completed:
         st.markdown("---")
-        st.markdown("#### 📈 Progress")
+        st.markdown("#### 📈 Quiz Progress")
         progress = (st.session_state.current_question / len(sql_questions)) * 100
         st.progress(progress / 100)
-        st.markdown(f"**Question {st.session_state.current_question + 1} of {len(sql_questions)}**")
+        st.markdown(f"**Question {st.session_state.current_question + 1}/{len(sql_questions)}**")
         st.markdown(f"**Answered:** {len(st.session_state.user_answers)}")
     elif st.session_state.quiz_completed:
         st.markdown("---")
-        st.markdown("#### 🎉 Quiz Completed!")
+        st.markdown("#### 🎉 Quiz Completed")
         final_score = calculate_score(st.session_state.user_answers)
-        st.metric("Your Score", f"{final_score:.2f}%")
-    if st.button("🏠 Home / Restart"):
+        st.metric("Final Score", f"{final_score:.2f}%")
+    if st.button("🏠 Restart Quiz"):
         st.session_state.user_answers = []
         st.session_state.current_question = 0
         st.session_state.quiz_started = False
@@ -524,29 +540,29 @@ with st.sidebar:
 if not st.session_state.quiz_started:
     with st.container():
         st.title("🚀 SQL Mentor - Interactive SQL Practice")
-        st.markdown("### Sharpen Your SQL Skills! 🎯")
+        st.markdown("### Elevate Your SQL Skills")
         st.markdown("""
-            Welcome to an engaging SQL quiz experience! Test your skills with real-world queries, get instant AI feedback, and see your results in action.  
+            Welcome to a professional SQL learning experience. Test your skills with practical queries, receive instant AI feedback, and view real-time results.  
             **Key Features:**
-            - 📚 Practice with sample `users` and `orders` tables.
-            - 🤖 AI-powered feedback in a friendly, casual Hindi tone.
-            - 🖥️ Query results simulated using DuckDB.
-            - 🔤 Case-insensitive comparisons for `status` and `city` columns.
-            - ✍️ Use single (`'`) or double (`"`) quotes for strings.
+            - 📚 Work with `users` and `orders` tables.
+            - 🤖 AI-driven feedback in a friendly Hindi tone.
+            - 🖥️ Query simulation via DuckDB.
+            - 🔤 Case-insensitive `status` and `city` comparisons.
+            - ✍️ Supports single (`'`) or double (`"`) quotes for strings.
         """)
     
         col1, col2 = st.columns([2, 1])
         with col1:
             st.markdown("""
-                **What You'll Do:**
+                **What to Expect:**
                 - Solve {len(sql_questions)} SQL query challenges.
-                - Work with two sample tables:
-                  - **Users**: Details like ID, name, email, age, and city.
-                  - **Orders**: Order details like ID, user ID, amount, date, and status.
-                - Get immediate feedback and see query results.
+                - Use two tables:
+                  - **Users**: ID, name, email, age, city.
+                  - **Orders**: ID, user ID, amount, date, status.
+                - Get immediate feedback and query results.
             """.format(len=sql_questions))
         with col2:
-            st.markdown("#### 📋 Tables Overview")
+            st.markdown("#### 📋 Table Summary")
             try:
                 table_overview_data = {
                     "Table": list(original_tables.keys()),
@@ -555,7 +571,7 @@ if not st.session_state.quiz_started:
                 }
                 st.dataframe(pd.DataFrame(table_overview_data), hide_index=True, use_container_width=True)
             except Exception as e:
-                st.error(f"❌ Error displaying table overview: {e}")
+                st.error(f"❌ Error displaying table summary: {e}")
     
         st.markdown("### 📊 Table Previews")
         try:
@@ -565,17 +581,17 @@ if not st.session_state.quiz_started:
         except Exception as e:
             st.error(f"❌ Error displaying table previews: {e}")
     
-        with st.expander("ℹ️ About the Quiz"):
+        with st.expander("ℹ️ Quiz Details"):
             st.markdown(f"""
-                - **Challenges**: {len(sql_questions)} SQL queries to solve.
-                - **Feedback**: Instant AI feedback after each answer.
+                - **Challenges**: {len(sql_questions)} SQL queries.
+                - **Feedback**: Instant AI evaluations.
                 - **SQL Dialect**: Standard SQL (MySQL/PostgreSQL-like).
-                - **Case-Insensitivity**: Simulated for `status` (orders) and `city` (users) columns.
-                - **Quotes**: Both single (`'`) and double (`"`) quotes work for strings.
-                - **Goal**: Learn, practice, and master SQL in a fun way!
+                - **Case-Insensitivity**: For `status` (orders) and `city` (users).
+                - **Quotes**: Single (`'`) or double (`"`) quotes accepted.
+                - **Objective**: Build and refine SQL proficiency.
             """)
     
-        if st.button("🚀 Start SQL Challenge!", type="primary"):
+        if st.button("🚀 Begin SQL Challenge", type="primary"):
             st.session_state.quiz_started = True
             st.session_state.user_answers = []
             st.session_state.current_question = 0
@@ -590,7 +606,7 @@ elif st.session_state.quiz_started and not st.session_state.quiz_completed:
         
         if st.session_state.user_answers:
             st.markdown("---")
-            st.subheader("📖 Your Previous Answers")
+            st.subheader("📖 Previous Answers")
             for i, ans_data in enumerate(reversed(st.session_state.user_answers)):
                 q_num = len(st.session_state.user_answers) - i
                 is_correct = ans_data.get('is_correct', False)
@@ -628,7 +644,7 @@ elif st.session_state.quiz_started and not st.session_state.quiz_completed:
         
         relevant_tables = question_data["relevant_tables"]
         if relevant_tables:
-            st.markdown("**📊 Table Preview(s):**")
+            st.markdown("**📊 Relevant Tables:**")
             if len(relevant_tables) > 1:
                 tabs = st.tabs([f"{name}" for name in relevant_tables])
                 for i, table_name in enumerate(relevant_tables):
@@ -644,13 +660,13 @@ elif st.session_state.quiz_started and not st.session_state.quiz_completed:
                 else:
                     st.warning(f"❌ Data for table '{table_name}' not found.")
         else:
-            st.info("ℹ️ No specific table context provided for this question.")
+            st.info("ℹ️ No specific table context provided.")
         
-        user_query = st.text_area("Write Your SQL Query Here:", height=150, key=f"query_input_{current_q_index}", placeholder="Enter your SQL query...")
+        user_query = st.text_area("Enter Your SQL Query:", height=150, key=f"query_input_{current_q_index}", placeholder="Type your SQL query here...")
         
-        if st.button("✅ Submit Query", key=f"submit_{current_q_index}"):
+        if st.button("✅ Submit Query", key=f"submit_{current_q_index}", type="primary"):
             if user_query and user_query.strip():
-                with st.spinner("🔄 Checking your query... Generating AI feedback and results..."):
+                with st.spinner("🔄 Evaluating query... Generating feedback and results..."):
                     feedback, is_correct, expected_res, actual_res, raw_llm = evaluate_answer_with_llm(
                         question_data,
                         user_query,
@@ -675,43 +691,43 @@ elif st.session_state.quiz_started and not st.session_state.quiz_completed:
                     
                     st.rerun()
             else:
-                st.warning("⚠️ Please enter a valid SQL query before submitting.")
+                st.warning("⚠️ Please enter a valid SQL query.")
 
 # --- Quiz Completed Screen ---
 elif st.session_state.quiz_completed:
     with st.container():
         st.balloons()
-        st.title("🎉 Congratulations! You Completed the SQL Challenge!")
+        st.title("🎉 SQL Challenge Completed!")
         final_score = calculate_score(st.session_state.user_answers)
         
-        st.markdown("### Your Final Score")
-        st.metric("Score", f"{final_score:.2f}%", delta=f"{final_score-50:.2f}% from average")
+        st.markdown("### Your Performance")
+        st.metric("Final Score", f"{final_score:.2f}%", delta=f"{final_score-50:.2f}% from average")
         st.progress(final_score / 100)
         
         # Conditional Button Logic
         if final_score >= 80:
             st.markdown("---")
-            st.markdown("#### 🏆 Awesome Job! You Scored 80% or Higher!")
-            st.markdown("You're ready to claim your SQL certificate! Click below to generate it.")
+            st.markdown("#### 🏆 Excellent Work!")
+            st.markdown("Your score of 80% or higher qualifies you for a certificate. Generate it below.")
             st.link_button(
-                "🎓 Generate Your Certificate",
+                "🎓 Generate Certificate",
                 "https://superprofile.bio/vp/corporate-bhaiya-sql-page",
                 type="primary"
             )
         else:
             st.markdown("---")
-            st.markdown("#### 📚 Need a Boost? Learn with a Mentor!")
+            st.markdown("#### 📚 Ready to Improve?")
             st.markdown(
-                "Great effort! Your score is a bit below 80%, but don't worry! Book a session with **Corporate Bhaiya** to level up your SQL skills."
+                "Solid effort! Your score is below 80%, but a mentor session with **Corporate Bhaiya** can help you excel."
             )
             st.link_button(
-                "🚀 Book a Mentor Session with Corporate Bhaiya",
+                "🚀 Book Mentor Session",
                 "https://www.corporatebhaiya.com/",
                 type="primary"
             )
         
         st.markdown("---")
-        st.subheader("📝 Your Answers & Feedback")
+        st.subheader("📝 Answer Summary")
         
         for i, ans_data in enumerate(st.session_state.user_answers):
             q_num = i + 1
@@ -740,19 +756,19 @@ elif st.session_state.quiz_completed:
                     display_simulation("Expected Query Output", ans_data.get("expected_result", "N/A"))
         
         st.markdown("---")
-        st.subheader("💡 Detailed Performance Analysis")
+        st.subheader("💡 Performance Analysis")
         
-        if st.button("📊 View Detailed Analysis"):
+        if st.button("📊 View Analysis"):
             st.session_state.show_detailed_feedback = not st.session_state.show_detailed_feedback
         
         if st.session_state.show_detailed_feedback:
-            with st.spinner("🧠 Generating performance analysis..."):
+            with st.spinner("🧠 Generating analysis..."):
                 performance_summary = analyze_performance(st.session_state.user_answers)
                 feedback_text = performance_summary.get("overall_feedback", "Analysis not available.")
                 
                 with st.container():
                     st.markdown('<div class="feedback-container">', unsafe_allow_html=True)
-                    st.markdown('<div class="feedback-header">📈 Your Performance Analysis</div>', unsafe_allow_html=True)
+                    st.markdown('<div class="feedback-header">📈 Performance Insights</div>', unsafe_allow_html=True)
                     
                     try:
                         sections = re.split(r'(Overall Impression:|Strengths:|Areas for Improvement:|Next Steps / Encouragement:)', feedback_text)
@@ -791,7 +807,7 @@ elif st.session_state.quiz_completed:
                         for weakness in performance_summary["weaknesses"]:
                             st.markdown(f'<div class="weakness-item">➡ {weakness}</div>', unsafe_allow_html=True)
                     else:
-                        st.markdown("No major weaknesses! Just keep practicing.")
+                        st.markdown("No major weaknesses! Continue refining your skills.")
                     st.markdown('</div>', unsafe_allow_html=True)
                     
                     if "Next Steps / Encouragement" in section_dict:
@@ -805,7 +821,7 @@ elif st.session_state.quiz_completed:
                     st.markdown('</div>', unsafe_allow_html=True)
         
         st.markdown("---")
-        if st.button("🔄 Try Again?"):
+        if st.button("🔄 Restart Quiz"):
             st.session_state.user_answers = []
             st.session_state.current_question = 0
             st.session_state.quiz_started = False
