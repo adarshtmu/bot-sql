@@ -1,117 +1,102 @@
 import streamlit as st
 import google.generativeai as genai
 import pandas as pd
-import re
-import duckdb
+import re # Needed for regex query modification
+import duckdb # Import DuckDB
+# import copy # No longer needed
 
 # --- Custom CSS ---
-# Updated to increase font sizes globally and for specific elements
+# Hides Streamlit's default header, footer, menu, deploy button, etc.
+# --- Custom CSS ---
+# Hides Streamlit's default header, footer, menu, deploy button, etc.
 hide_streamlit_style = """
     <style>
         header {visibility: hidden;}
         #MainMenu {visibility: hidden;}
         footer {visibility: hidden;}
-        .viewerBadge_container__1QSob {display: none !important;}
-        .stDeployButton {display: none !important;}
-        [data-testid="stToolbar"] {display: none !important;}
-        [data-testid="stDecoration"] {display: none !important;}
-        [data-testid="stDeployButton"] {display: none !important;}
-        .st-emotion-cache-1r8d6ul {display: none !important;}
-        .st-emotion-cache-1jicfl2 {display: none !important;}
-        /* Increase global font size */
-        body, .stMarkdown, .stText, .stTextArea, .stButton button, .stLinkButton a {
-            font-size: 18px !important;
-        }
-        h1 {font-size: 36px !important;}
-        h2 {font-size: 28px !important;}
-        h3 {font-size: 24px !important;}
-        /* Style for Start SQL Challenge! button */
+        .viewerBadge_container__1QSob {display: none !important;} /* Hides the GitHub profile image */
+        .stDeployButton {display: none !important;} /* Hides deploy button */
+        [data-testid="stToolbar"] {display: none !important;} /* Hides Streamlit toolbar */
+        [data-testid="stDecoration"] {display: none !important;} /* Hides Streamlit branding */
+        [data-testid="stDeployButton"] {display: none !important;} /* Hides Streamlit deploy button */
+        .st-emotion-cache-1r8d6ul {display: none !important;} /* Additional class for profile image */
+        .st-emotion-cache-1jicfl2 {display: none !important;} /* Hides Streamlit's footer */
+        /* Increase font size for Start SQL Challenge! button */
         button[kind="primary"] {
-            font-size: 24px !important;
-            padding: 15px 30px !important;
-            color: white !important;
-            background-color: red;
-            border-radius: 10px;
+            font-size: 50px !important; /* Larger text */
+            padding: 20px 20px !important; /* Increase button height/width */
+            color: white !important; /* Text color */
+            background-color: red; /* Background color (optional) */
+            border-radius: 10px; /* Rounded corners (optional) */
         }
-        /* Style for other buttons (Submit, Analysis, Retry) */
-        .stButton button:not([kind="primary"]), .stLinkButton a {
-            font-size: 20px !important;
-            padding: 12px 24px !important;
-            border-radius: 8px;
-        }
-        /* Feedback container styling */
-        .feedback-container {
-            background-color: #f9f9f9;
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-            font-size: 18px !important;
-        }
-        .feedback-header {
-            font-size: 24px !important;
-            color: #1f77b4;
-            margin-bottom: 10px;
-        }
-        .feedback-section {
-            margin-top: 15px;
-        }
-        .strength-item, .weakness-item {
-            font-size: 18px !important;
-            margin: 5px 0;
-        }
+
     </style>
 """
 st.markdown(hide_streamlit_style, unsafe_allow_html=True)
 
 # --- Set up Gemini API ---
-gemini_api_key = "AIzaSyAfzl_66GZsgaYjAM7cT2djVCBCAr86t2k"  # Replace with your Gemini API Key
+# WARNING: Hardcoding API keys is insecure.
+# For production, use Streamlit Secrets or environment variables.
+# Replace "YOUR_API_KEY_HERE" with your actual Gemini API Key below.
+gemini_api_key = "AIzaSyAfzl_66GZsgaYjAM7cT2djVCBCAr86t2k" # <--- IMPORTANT: PASTE YOUR GEMINI API KEY HERE
 
-if not gemini_api_key or gemini_api_key == "YOUR_API_KEY_HERE":
+if not gemini_api_key or gemini_api_key == "YOUR_API_KEY_HERE": # Basic check
     st.error("🚨 Gemini API Key is missing or hasn't been replaced. Please add your key in the code.")
     st.stop()
 
 try:
     genai.configure(api_key=gemini_api_key)
+    # Using the 'gemini-1.5-flash' model for potentially faster responses
     model = genai.GenerativeModel('gemini-1.5-flash')
 except Exception as e:
     st.error(f"🚨 Failed to configure Gemini API or access the model: {e}")
     st.stop()
 
+
 # --- Sample Data ---
+# These pandas DataFrames simulate our database tables.
 users_table = pd.DataFrame({
     "user_id": [1, 2, 3, 4],
     "name": ["Alice", "Bob", "Charlie", "David"],
     "email": ["alice@example.com", "bob@example.com", "charlie@example.com", "david@example.com"],
     "age": [25, 30, 35, 40],
-    "city": ["New York", "Los Angeles", "Chicago", "Houston"]
+    "city": ["New York", "Los Angeles", "Chicago", "Houston"] # Note mixed case cities
 })
 orders_table = pd.DataFrame({
     "order_id": [101, 102, 103, 104, 105],
     "user_id": [1, 2, 3, 1, 4],
     "amount": [50.00, 75.50, 120.00, 200.00, 35.00],
     "order_date": pd.to_datetime(["2024-02-01", "2024-02-05", "2024-02-10", "2024-02-15", "2024-02-20"]),
-    "status": ["Completed", "Pending", "Completed", "Shipped", "Cancelled"]
+    "status": ["Completed", "Pending", "Completed", "Shipped", "Cancelled"] # Note mixed case statuses
 })
+# Dictionary holding the original tables for easy access
 original_tables = {
     "users": users_table,
     "orders": orders_table
 }
 
 # --- SQL Questions List ---
+# Each dictionary contains the question, a correct SQL example, the sample table for display,
+# and the names of tables relevant for schema display and simulation context.
 sql_questions = [
-    {"question": "Write a SQL query to get all details about users from the 'users' table.", "correct_answer_example": "SELECT * FROM users;", "sample_table": users_table, "relevant_tables": ["users"]},
-    {"question": "Write a SQL query to count the total number of users in the 'users' table.", "correct_answer_example": "SELECT COUNT(*) AS user_count FROM users;", "sample_table": users_table, "relevant_tables": ["users"]},
-    {"question": "Write a SQL query to get all users older than 30 from the 'users' table.", "correct_answer_example": "SELECT * FROM users WHERE age > 30;", "sample_table": users_table, "relevant_tables": ["users"]},
-    {"question": "Write a SQL query to find all orders with a status of 'Pending' from the 'orders' table.", "correct_answer_example": "SELECT * FROM orders WHERE status = 'Pending';", "sample_table": orders_table, "relevant_tables": ["orders"]},
-    {"question": "Write a SQL query to find users from 'chicago' in the 'users' table (test case-insensitivity).", "correct_answer_example": "SELECT * FROM users WHERE city = 'Chicago';", "sample_table": users_table, "relevant_tables": ["users"]},
-    {"question": "Write a SQL query to find the most recent order from the 'orders' table by order date.", "correct_answer_example": "SELECT * FROM orders ORDER BY order_date DESC LIMIT 1;", "sample_table": orders_table, "relevant_tables": ["orders"]},
-    {"question": "Write a SQL query to find the average order amount from the 'orders' table.", "correct_answer_example": "SELECT AVG(amount) AS average_amount FROM orders;", "sample_table": orders_table, "relevant_tables": ["orders"]},
-    {"question": "Write a SQL query to find users from 'New York' or 'Chicago' in the 'users' table.", "correct_answer_example": "SELECT * FROM users WHERE city IN ('New York', 'Chicago');", "sample_table": users_table, "relevant_tables": ["users"]},
-    {"question": "Write a SQL query to find users who have not placed any orders. Use the 'users' and 'orders' tables.", "correct_answer_example": "SELECT u.* FROM users u LEFT JOIN orders o ON u.user_id = o.user_id WHERE o.order_id IS NULL;", "sample_table": users_table, "relevant_tables": ["users", "orders"]},
-    {"question": "Write a SQL query to calculate the total amount spent by each user by joining the 'users' and 'orders' tables.", "correct_answer_example": "SELECT u.name, SUM(o.amount) AS total_spent FROM users u JOIN orders o ON u.user_id = o.user_id GROUP BY u.name ORDER BY u.name;", "sample_table": users_table, "relevant_tables": ["users", "orders"]}
+    { "question": "Write a SQL query to get all details about users from the 'users' table.", "correct_answer_example": "SELECT * FROM users;", "sample_table": users_table, "relevant_tables": ["users"] },
+    { "question": "Write a SQL query to count the total number of users in the 'users' table.", "correct_answer_example": "SELECT COUNT(*) AS user_count FROM users;", "sample_table": users_table, "relevant_tables": ["users"] },
+    { "question": "Write a SQL query to get all users older than 30 from the 'users' table.", "correct_answer_example": "SELECT * FROM users WHERE age > 30;", "sample_table": users_table, "relevant_tables": ["users"] },
+    # Testing case-insensitivity for 'status'
+    { "question": "Write a SQL query to find all orders with a status of 'Pending' from the 'orders' table.", "correct_answer_example": "SELECT * FROM orders WHERE status = 'Pending';", "sample_table": orders_table, "relevant_tables": ["orders"] },
+    # Testing case-insensitivity for 'city'
+    { "question": "Write a SQL query to find users from 'chicago' in the 'users' table (test case-insensitivity).", "correct_answer_example": "SELECT * FROM users WHERE city = 'Chicago';", "sample_table": users_table, "relevant_tables": ["users"] },
+    { "question": "Write a SQL query to find the most recent order from the 'orders' table by order date.", "correct_answer_example": "SELECT * FROM orders ORDER BY order_date DESC LIMIT 1;", "sample_table": orders_table, "relevant_tables": ["orders"] },
+    { "question": "Write a SQL query to find the average order amount from the 'orders' table.", "correct_answer_example": "SELECT AVG(amount) AS average_amount FROM orders;", "sample_table": orders_table, "relevant_tables": ["orders"] },
+    { "question": "Write a SQL query to find users from 'New York' or 'Chicago' in the 'users' table.", "correct_answer_example": "SELECT * FROM users WHERE city IN ('New York', 'Chicago');", "sample_table": users_table, "relevant_tables": ["users"] },
+    # JOIN questions
+    { "question": "Write a SQL query to find users who have not placed any orders. Use the 'users' and 'orders' tables.", "correct_answer_example": "SELECT u.* FROM users u LEFT JOIN orders o ON u.user_id = o.user_id WHERE o.order_id IS NULL;", "sample_table": users_table, "relevant_tables": ["users", "orders"] },
+    { "question": "Write a SQL query to calculate the total amount spent by each user by joining the 'users' and 'orders' tables.", "correct_answer_example": "SELECT u.name, SUM(o.amount) AS total_spent FROM users u JOIN orders o ON u.user_id = o.user_id GROUP BY u.name ORDER BY u.name;", "sample_table": users_table, "relevant_tables": ["users", "orders"] },
 ]
 
 # --- Session State Initialization ---
+# Using Streamlit's session state to keep track of the quiz progress and user answers
+# across reruns.
 if "user_answers" not in st.session_state: st.session_state.user_answers = []
 if "current_question" not in st.session_state: st.session_state.current_question = 0
 if "quiz_started" not in st.session_state: st.session_state.quiz_started = False
@@ -119,36 +104,47 @@ if "quiz_completed" not in st.session_state: st.session_state.quiz_completed = F
 if "show_detailed_feedback" not in st.session_state: st.session_state.show_detailed_feedback = False
 
 # --- Helper Functions ---
+
+# ******************************************************************************
+# ***** simulate_query_duckdb function (handles quotes, ILIKE, execution) ****
+# ******************************************************************************
 def simulate_query_duckdb(sql_query, tables_dict):
+    """
+    Simulates an SQL query using DuckDB on in-memory pandas DataFrames.
+    1. Pre-processes the query to replace double-quoted string literals with single-quoted ones.
+    2. Attempts case-insensitive comparison for specific columns by rewriting '=' to 'ILIKE'.
+    """
     if not sql_query or not sql_query.strip():
         return "Simulation Error: No query provided."
     if not tables_dict:
         return "Simulation Error: No tables provided for context."
-    
+
     con = None
-    processed_query_for_ilike = sql_query
-    
-    # Replace double-quoted strings with single-quoted strings
+    processed_query_for_ilike = sql_query # Start with original
+
+    # --- Step 1: Pre-process to replace double-quoted strings with standard single-quoted strings ---
     try:
         double_quote_pattern = r'"([^"]*)"'
         processed_query_for_ilike = re.sub(double_quote_pattern, r"'\1'", sql_query)
         if processed_query_for_ilike != sql_query:
-            print(f"DEBUG: Original query: {sql_query}")
-            print(f"DEBUG: Query after double->single quote conversion: {processed_query_for_ilike}")
+             print(f"DEBUG: Original query: {sql_query}")
+             print(f"DEBUG: Query after double->single quote conversion: {processed_query_for_ilike}")
     except Exception as e_quotes:
         print(f"Warning: Failed during double quote replacement: {e_quotes}. Proceeding with original query structure for ILIKE.")
         processed_query_for_ilike = sql_query
-    
-    # Query Modification for case-insensitive comparison
+
+    # --- Step 2: Query Modification Attempt (using ILIKE on the potentially quote-corrected query) ---
     modified_sql_query = processed_query_for_ilike
     final_executed_query = modified_sql_query
-    case_insensitive_columns = {"orders": ["status"], "users": ["city"]}
+
+    case_insensitive_columns = { "orders": ["status"], "users": ["city"] }
     flat_insensitive_columns = [col for cols in case_insensitive_columns.values() for col in cols]
-    
+
     if flat_insensitive_columns:
         try:
             col_pattern_part = "|".join([r"\b" + re.escape(col) + r"\b" for col in flat_insensitive_columns])
             pattern = rf"(.*?)({col_pattern_part})(\s*=\s*)('[^']+')"
+
             def replace_with_ilike(match):
                 pre_context = match.group(1)
                 col_name = match.group(2)
@@ -156,33 +152,36 @@ def simulate_query_duckdb(sql_query, tables_dict):
                 print(f"DEBUG: Rewriting query part: Replacing '=' with 'ILIKE' for column '{col_name}'")
                 space_prefix = "" if not pre_context or pre_context.endswith(" ") or pre_context.endswith("(") else " "
                 return f"{pre_context}{space_prefix}{col_name} ILIKE {literal}"
-            
+
             modified_sql_query = re.sub(pattern, replace_with_ilike, processed_query_for_ilike, flags=re.IGNORECASE)
             final_executed_query = modified_sql_query
+
             if modified_sql_query != processed_query_for_ilike:
-                print(f"DEBUG: Query after ILIKE rewrite: {modified_sql_query}")
+                  print(f"DEBUG: Query after ILIKE rewrite: {modified_sql_query}")
+
         except Exception as e_rewrite:
             print(f"Warning: Failed to rewrite query for case-insensitivity (ILIKE), using quote-converted query. Error: {e_rewrite}")
             final_executed_query = processed_query_for_ilike
-    
-    # Execute with DuckDB
+
+    # --- Step 3: Connect and Execute with DuckDB ---
     try:
         con = duckdb.connect(database=':memory:', read_only=False)
         for table_name, df in tables_dict.items():
             if isinstance(df, pd.DataFrame):
                 con.register(str(table_name), df)
             else:
-                print(f"Warning [simulate_query]: Item '{table_name}' not a DataFrame during registration.")
-        
+                 print(f"Warning [simulate_query]: Item '{table_name}' not a DataFrame during registration.")
+
         print(f"DEBUG: Executing final query in DuckDB: {final_executed_query}")
         result_df = con.execute(final_executed_query).df()
         con.close()
         return result_df
+
     except Exception as e:
         error_message = f"Simulation Error: Failed to execute query. Reason: {str(e)}"
         e_str = str(e).lower()
         hint = ""
-        
+
         if "ILIKE" in str(e).upper() or (modified_sql_query != processed_query_for_ilike and "syntax error" in e_str):
             hint = "\n\n**Hint:** The simulation tried using case-insensitive matching (ILIKE). Check your SQL syntax near the comparison, especially if using complex conditions."
         else:
@@ -192,7 +191,7 @@ def simulate_query_duckdb(sql_query, tables_dict):
                         or re.search(r'parser error: syntax error at end of input', e_str) \
                         or re.search(r'parser error: syntax error at:', e_str)
             type_match = re.search(r'conversion error:.*try cast\("([^"]+)"', e_str)
-            
+
             if catalog_match: hint = f"\n\n**Hint:** Table '{catalog_match.group(1)}' might be misspelled or doesn't exist. Available tables: {list(tables_dict.keys())}."
             elif binder_match: hint = f"\n\n**Hint:** Column '{binder_match.group(1)}' might be misspelled or doesn't exist in the referenced table(s)."
             elif syntax_match:
@@ -200,31 +199,41 @@ def simulate_query_duckdb(sql_query, tables_dict):
                 hint = f"\n\n**Hint:** Check your SQL syntax, especially around `{problem_area}`. Remember standard SQL uses single quotes (') for text values like `'example text'` (though the tool tries to handle double quotes for you)."
             elif type_match: hint = f"\n\n**Hint:** There might be a type mismatch. You tried using '{type_match.group(1)}' in a way that's incompatible with its data type (e.g., comparing text to a number)."
             elif "syntax error" in e_str:
-                hint = "\n\n**Hint:** Double-check your SQL syntax. Ensure all clauses (SELECT, FROM, WHERE, etc.) are correct and in order. Use single quotes (') for string values."
-        
+                 hint = "\n\n**Hint:** Double-check your SQL syntax. Ensure all clauses (SELECT, FROM, WHERE, etc.) are correct and in order. Use single quotes (') for string values."
+
         if not hint:
-            hint = "\n\n**Hint:** Double-check your query syntax, table/column names, and data types. Ensure string values are correctly quoted (standard SQL uses single quotes '). Verify function names and usage."
-        
+             hint = "\n\n**Hint:** Double-check your query syntax, table/column names, and data types. Ensure string values are correctly quoted (standard SQL uses single quotes '). Verify function names and usage."
+
         error_message += hint
         print(f"ERROR [simulate_query_duckdb]: {error_message}\nOriginal Query: {sql_query}\nFinal Attempted Query: {final_executed_query}")
         if con:
             try: con.close()
             except: pass
         return error_message
+# ******************************************************************************
+# ***** End of simulate_query_duckdb function **********************************
+# ******************************************************************************
+
 
 def get_table_schema(table_name, tables_dict):
+    """Gets column names as a list for a given table name from the tables dictionary."""
     if table_name in tables_dict and isinstance(tables_dict[table_name], pd.DataFrame):
         return tables_dict[table_name].columns.astype(str).tolist()
     return []
 
+
 def evaluate_answer_with_llm(question_data, student_answer, original_tables_dict):
+    """
+    Evaluates the user's SQL query using the Gemini API for feedback and correctness,
+    and also simulates the query using DuckDB.
+    """
     if not student_answer or not student_answer.strip():
         return "Please provide an answer.", False, "N/A", "N/A", "No input."
-    
+
     question = question_data["question"]
     relevant_table_names = question_data["relevant_tables"]
     correct_answer_example = question_data["correct_answer_example"]
-    
+
     schema_info = ""
     if not relevant_table_names:
         schema_info = "No specific table schema context provided for this question.\n"
@@ -240,7 +249,7 @@ def evaluate_answer_with_llm(question_data, student_answer, original_tables_dict
                     schema_info += f"Table '{name}': Columns {columns} (Error getting schema details: {e_schema})\n\n"
             else:
                 schema_info += f"Table '{name}': Schema information not found.\n"
-    
+
     prompt = f"""
     You are an expert SQL evaluator acting as a friendly SQL mentor. Analyze the student's SQL query based on the question asked and the provided table schemas (including data types). Assume standard SQL syntax (like MySQL/PostgreSQL).
 
@@ -272,7 +281,7 @@ def evaluate_answer_with_llm(question_data, student_answer, original_tables_dict
 
     **Begin Evaluation:**
     """
-    
+
     feedback_llm = "AI feedback generation failed."; is_correct_llm = False; llm_output = "Error: No LLM response received."
     try:
         response = model.generate_content(prompt)
@@ -281,57 +290,67 @@ def evaluate_answer_with_llm(question_data, student_answer, original_tables_dict
             if hasattr(response, 'text'):
                 extracted_text = response.text
             elif hasattr(response, 'parts') and response.parts:
-                extracted_text = "".join(part.text for part in response.parts if hasattr(part, 'text'))
+                 extracted_text = "".join(part.text for part in response.parts if hasattr(part, 'text'))
             else:
-                try:
-                    extracted_text = f"AI Response Blocked or Empty. Prompt Feedback: {response.prompt_feedback}"
-                except Exception:
-                    extracted_text = "Error: Received unexpected or empty response structure from AI."
-            
+                 try:
+                     extracted_text = f"AI Response Blocked or Empty. Prompt Feedback: {response.prompt_feedback}"
+                 except Exception:
+                     extracted_text = "Error: Received unexpected or empty response structure from AI."
+
             if not extracted_text or not extracted_text.strip():
-                llm_output = "Error: Received empty response from AI."
+                 llm_output = "Error: Received empty response from AI."
             else:
-                llm_output = extracted_text.strip()
-                verdict_match = re.search(r'^Verdict:\s*(Correct|Incorrect)\s*$', llm_output, re.MULTILINE | re.IGNORECASE)
-                if verdict_match:
-                    is_correct_llm = (verdict_match.group(1).lower() == "correct")
-                    feedback_llm = llm_output[:verdict_match.start()].strip()
-                    feedback_llm = re.sub(r'\s*Verdict:\s*(Correct|Incorrect)?\s*$', '', feedback_llm, flags=re.MULTILINE | re.IGNORECASE).strip()
-                else:
-                    st.warning(f"⚠️ Could not parse AI verdict from response.")
-                    print(f"WARNING: Could not parse verdict from LLM output:\n---\n{llm_output}\n---")
-                    feedback_llm = llm_output + "\n\n_(System Note: AI correctness check might be unreliable as verdict wasn't found.)_"
-                    is_correct_llm = False
+                 llm_output = extracted_text.strip()
+                 verdict_match = re.search(r'^Verdict:\s*(Correct|Incorrect)\s*$', llm_output, re.MULTILINE | re.IGNORECASE)
+                 if verdict_match:
+                     is_correct_llm = (verdict_match.group(1).lower() == "correct")
+                     feedback_llm = llm_output[:verdict_match.start()].strip()
+                     feedback_llm = re.sub(r'\s*Verdict:\s*(Correct|Incorrect)?\s*$', '', feedback_llm, flags=re.MULTILINE | re.IGNORECASE).strip()
+                 else:
+                     st.warning(f"⚠️ Could not parse AI verdict from response.")
+                     print(f"WARNING: Could not parse verdict from LLM output:\n---\n{llm_output}\n---")
+                     feedback_llm = llm_output + "\n\n_(System Note: AI correctness check might be unreliable as verdict wasn't found.)_"
+                     is_correct_llm = False
+                 feedback_llm = feedback_llm.replace("student", "aap")
+
         except AttributeError as ae:
-            llm_output = f"Error: Unexpected response format from AI. Details: {ae}"
-            print(f"ERROR: Unexpected response format from AI: {response}")
-            feedback_llm = f"AI feedback format error: {ae}"
-            is_correct_llm = False
+             llm_output = f"Error: Unexpected response format from AI. Details: {ae}"
+             print(f"ERROR: Unexpected response format from AI: {response}")
+             feedback_llm = f"AI feedback format error: {ae}"
+             is_correct_llm = False
         except Exception as e_resp:
-            llm_output = f"Error processing AI response: {e_resp}"
-            print(f"ERROR: Processing AI response failed: {e_resp}")
-            feedback_llm = f"AI response processing error: {e_resp}"
-            is_correct_llm = False
+             llm_output = f"Error processing AI response: {e_resp}"
+             print(f"ERROR: Processing AI response failed: {e_resp}")
+             feedback_llm = f"AI response processing error: {e_resp}"
+             is_correct_llm = False
+
     except Exception as e_call:
         st.error(f"🚨 AI Error during evaluation: {e_call}")
         print(f"ERROR: Gemini API call failed: {e_call}")
         feedback_llm = f"AI feedback generation error: {e_call}"
         is_correct_llm = False
         llm_output = f"Error during AI call: {e_call}"
-    
+
     actual_result_sim = simulate_query_duckdb(student_answer, original_tables_dict)
     expected_result_sim = simulate_query_duckdb(correct_answer_example, original_tables_dict)
-    
+
     return feedback_llm, is_correct_llm, expected_result_sim, actual_result_sim, llm_output
 
+
 def calculate_score(user_answers):
+    """Calculates the percentage score based on the list of user answers."""
     if not user_answers: return 0.0
     correct_count = sum(1 for ans in user_answers if ans.get("is_correct", False))
     total_questions_answered = len(user_answers)
     score = (correct_count / total_questions_answered) * 100 if total_questions_answered > 0 else 0.0
     return score
 
+
 def analyze_performance(user_answers):
+    """
+    Analyzes the user's overall performance using the Gemini API based on all answers.
+    Provides strengths, weaknesses, and overall feedback.
+    """
     performance_data = {
         "strengths": [], "weaknesses": [],
         "overall_feedback": "Performance analysis could not be completed."
@@ -339,7 +358,7 @@ def analyze_performance(user_answers):
     if not user_answers:
         performance_data["overall_feedback"] = "Koi jawaab nahi diya gaya. Analysis possible nahi hai."
         return performance_data
-    
+
     try:
         correct_q = [ans["question"] for ans in user_answers if ans.get("is_correct")]
         incorrect_ans = [
@@ -350,7 +369,7 @@ def analyze_performance(user_answers):
         performance_data["strengths"] = correct_q
         performance_data["weaknesses"] = [item["question"] for item in incorrect_ans]
         total_q, correct_c, score = len(user_answers), len(correct_q), calculate_score(user_answers)
-        
+
         incorrect_summary = ""
         if incorrect_ans:
             incorrect_summary = "In sawaalon mein thodi galti hui:\n"
@@ -360,7 +379,7 @@ def analyze_performance(user_answers):
             incorrect_summary = incorrect_summary.strip()
         else:
             incorrect_summary = "Koi galat jawaab nahi! Bahut badhiya!"
-        
+
         correct_summary = ""
         if correct_q:
             correct_summary = "Yeh sawaal bilkul sahi kiye:\n"
@@ -369,7 +388,7 @@ def analyze_performance(user_answers):
             correct_summary = correct_summary.strip()
         else:
             correct_summary = "Is baar koi jawaab sahi nahi hua."
-        
+
         prompt = f"""
         Ek SQL learner ne ek practice quiz complete kiya hai. Unki performance ka analysis karke ek friendly, motivating summary feedback casual Hindi mein (jaise ek senior/mentor deta hai) provide karo.
 
@@ -401,20 +420,20 @@ def analyze_performance(user_answers):
         print(f"Error preparing data for performance analysis: {data_prep_error}")
         performance_data["overall_feedback"] = f"Analysis data preparation failed: {data_prep_error}"
         return performance_data
-    
+
     try:
         response = model.generate_content(prompt)
         generated_feedback = None
         if hasattr(response, 'text'):
             generated_feedback = response.text.strip()
         elif hasattr(response, 'parts') and response.parts:
-            generated_feedback = "".join(part.text for part in response.parts if hasattr(part, 'text')).strip()
+             generated_feedback = "".join(part.text for part in response.parts if hasattr(part, 'text')).strip()
         else:
-            try:
-                generated_feedback = f"AI Response Blocked or Empty. Prompt Feedback: {response.prompt_feedback}"
-            except Exception:
-                generated_feedback = "Error: Received unexpected or empty response from AI for summary."
-        
+             try:
+                 generated_feedback = f"AI Response Blocked or Empty. Prompt Feedback: {response.prompt_feedback}"
+             except Exception:
+                 generated_feedback = "Error: Received unexpected or empty response from AI for summary."
+
         if generated_feedback:
             performance_data["overall_feedback"] = generated_feedback
         else:
@@ -423,13 +442,20 @@ def analyze_performance(user_answers):
     except Exception as e:
         print(f"Error generating performance summary using LLM: {e}")
         performance_data["overall_feedback"] = f"Summary generation error from AI: {e}"
-    
+
     return performance_data
 
+
 def get_emoji(is_correct):
+    """Returns a check or cross emoji based on correctness."""
     return "✅" if is_correct else "❌"
 
+
 def display_simulation(title, result_data):
+    """
+    Helper function to display simulation results (DataFrame or error string)
+    in the Streamlit app.
+    """
     st.write(f"**{title}:**")
     if isinstance(result_data, pd.DataFrame):
         if result_data.empty:
@@ -441,10 +467,11 @@ def display_simulation(title, result_data):
     elif result_data == "N/A":
         st.info("_(Simulation not applicable or not run)_")
     elif isinstance(result_data, str):
-        st.info(f"_{result_data}_")
+         st.info(f"_{result_data}_")
     else:
         st.error(f"_(Unexpected simulation result type: {type(result_data)})_")
         print(f"DEBUG: Unexpected simulation data type: {type(result_data)}, value: {result_data}")
+
 
 # --- Streamlit App UI ---
 
@@ -460,7 +487,7 @@ if not st.session_state.quiz_started:
         - Your queries are evaluated by an AI for correctness and logic.
         - Query simulation is powered by DuckDB to show results on sample data.
         """)
-    
+
     col1, col2 = st.columns([2, 1])
     with col1:
         st.write("""
@@ -477,15 +504,15 @@ if not st.session_state.quiz_started:
             st.dataframe(pd.DataFrame(table_overview_data), hide_index=True)
         except Exception as e:
             st.error(f"Error displaying table overview: {e}")
-    
+
     st.write("### 🔍 Table Previews")
     try:
         tab1, tab2 = st.tabs(["Users Table", "Orders Table"])
         with tab1: st.dataframe(users_table, hide_index=True, use_container_width=True)
         with tab2: st.dataframe(orders_table, hide_index=True, use_container_width=True)
     except Exception as e:
-        st.error(f"Error displaying table previews: {e}")
-    
+         st.error(f"Error displaying table previews: {e}")
+
     with st.expander("📝 Quiz Ke Baare Mein"):
         st.write(f"""
         - Aapko {len(sql_questions)} SQL query challenges solve karne honge.
@@ -494,7 +521,7 @@ if not st.session_state.quiz_started:
         - Case-insensitivity for `status` and `city` columns in `WHERE =` clauses is simulated.
         - String literals can be enclosed in single quotes (`'...'`) or double quotes (`"..."`).
         """)
-    
+
     if st.button("🚀 Start SQL Challenge!", type="primary"):
         st.session_state.quiz_started = True
         st.session_state.user_answers = []
@@ -506,7 +533,8 @@ if not st.session_state.quiz_started:
 # --- Quiz In Progress Screen ---
 elif st.session_state.quiz_started and not st.session_state.quiz_completed:
     st.title("✍️ SQL Query Challenge")
-    
+
+    # --- Display Previous Answers and Feedback ---
     if st.session_state.user_answers:
         st.markdown("---")
         st.subheader("📖 Ab Tak Ke Jawaab Aur Feedback")
@@ -519,54 +547,76 @@ elif st.session_state.quiz_started and not st.session_state.quiz_completed:
                 st.write(f"**SQL Mentor Feedback:**")
                 feedback_text = ans_data.get("feedback", "_Feedback not available._")
                 st.markdown(feedback_text)
-                
+
                 st.markdown("---")
                 display_simulation("Simulated Result (Your Query Output)", ans_data.get("actual_result", "N/A"))
-                
+
                 show_expected = False
                 if not is_correct:
                     show_expected = True
                 elif isinstance(ans_data.get("actual_result"), pd.DataFrame) and \
                      isinstance(ans_data.get("expected_result"), pd.DataFrame) and \
                      not ans_data["actual_result"].equals(ans_data["expected_result"]):
-                    show_expected = True
+                     show_expected = True
                 elif isinstance(ans_data.get("actual_result"), str) and \
                      ans_data.get("actual_result") != ans_data.get("expected_result"):
-                    show_expected = True
-                
+                     show_expected = True
+
                 if show_expected:
-                    display_simulation("Simulated Result (Correct Query Output)", ans_data.get("expected_result", "N/A"))
-    
+                     display_simulation("Simulated Result (Correct Query Output)", ans_data.get("expected_result", "N/A"))
+
     st.markdown("---")
-    
+
+    # --- Current Question ---
     current_q_index = st.session_state.current_question
     question_data = sql_questions[current_q_index]
-    
+
     st.subheader(f"Question {current_q_index + 1} of {len(sql_questions)}")
     st.markdown(f"**{question_data['question']}**")
-    
+
+    # Display relevant schemas for the current question
     relevant_tables = question_data["relevant_tables"]
     if relevant_tables:
+        # st.markdown("**Relevant Table Schema(s):**")
+        # schema_cols = st.columns(len(relevant_tables))
+        # for i, table_name in enumerate(relevant_tables):
+        #     cols = get_table_schema(table_name, original_tables)
+        #     if cols:
+        #          with schema_cols[i]:
+        #              st.code(f"Table: {table_name}\nColumns: {', '.join(cols)}", language='text')
+        #     else:
+        #          with schema_cols[i]:
+        #              st.warning(f"Schema for '{table_name}' not found.")
+
+        # --- Display Sample Table Preview(s) --- <--- THIS BLOCK IS ADDED/MODIFIED
         st.markdown("**Sample Table Preview(s):**")
+        # Use tabs if multiple tables are relevant for the question
         if len(relevant_tables) > 1:
             tabs = st.tabs([f"{name} Preview" for name in relevant_tables])
             for i, table_name in enumerate(relevant_tables):
                 with tabs[i]:
                     if table_name in original_tables:
+                        # Display dataframe preview inside the tab
                         st.dataframe(original_tables[table_name], hide_index=True, use_container_width=True)
                     else:
                         st.warning(f"Data for table '{table_name}' not found.")
+        # If only one table is relevant, display it directly
         elif len(relevant_tables) == 1:
             table_name = relevant_tables[0]
             if table_name in original_tables:
-                st.dataframe(original_tables[table_name], hide_index=True, use_container_width=True)
+                 # Display dataframe preview directly
+                 st.dataframe(original_tables[table_name], hide_index=True, use_container_width=True)
             else:
-                st.warning(f"Data for table '{table_name}' not found.")
+                 st.warning(f"Data for table '{table_name}' not found.")
+        # --- End of Added/Modified Block for Table Preview ---
+
     else:
-        st.info("No specific table context provided for this question.")
-    
+         st.info("No specific table context provided for this question.")
+
+    # Text area for user query input
     user_query = st.text_area("Apna SQL Query Yahan Likhein:", height=150, key=f"query_input_{current_q_index}")
-    
+
+    # Submit Button Logic
     if st.button("✅ Submit Query", key=f"submit_{current_q_index}"):
         if user_query and user_query.strip():
             with st.spinner("🔄 Query ko check kiya ja raha hai... AI Mentor se feedback aur simulation results generate ho rahe hain..."):
@@ -575,7 +625,7 @@ elif st.session_state.quiz_started and not st.session_state.quiz_completed:
                     user_query,
                     original_tables
                 )
-                
+
                 st.session_state.user_answers.append({
                     "question_number": current_q_index + 1,
                     "question": question_data["question"],
@@ -586,41 +636,35 @@ elif st.session_state.quiz_started and not st.session_state.quiz_completed:
                     "actual_result": actual_res,
                     "raw_llm_output": raw_llm
                 })
-                
+
                 if current_q_index + 1 < len(sql_questions):
                     st.session_state.current_question += 1
                 else:
                     st.session_state.quiz_completed = True
-                
+
                 st.rerun()
         else:
             st.warning("⚠️ Please enter your SQL query before submitting.")
 
+
+# --- Quiz Completed Screen ---
 # --- Quiz Completed Screen ---
 elif st.session_state.quiz_completed:
     st.balloons()
     st.title("🎉 Badhai Ho! Aapne SQL Challenge Poora Kar Liya!")
     final_score = calculate_score(st.session_state.user_answers)
     
+    # --- Score Visualization ---
     st.markdown("### Aapka Final Score")
     st.metric("Score", f"{final_score:.2f}%")
     st.progress(final_score / 100)
     
-    # Conditional Button Logic
-    if final_score >= 80:
-        st.markdown("---")
-        st.markdown("#### 🏆 Shabaash! Aapne 80% ya usse zyada score kiya!")
-        st.markdown("Aap apna SQL certificate generate kar sakte hain. Niche button pe click karein!")
-        st.link_button(
-            "🎓 Generate Your Certificate",
-            "https://superprofile.bio/vp/corporate-bhaiya-sql-page",
-            type="primary"
-        )
-    else:
+    # --- Mentor Booking Button for Low Scores ---
+    if final_score < 50:
         st.markdown("---")
         st.markdown("#### 📚 Thodi Aur Practice Chahiye? Mentor Se Seekhein!")
         st.markdown(
-            "Arre yaar, score thoda kam hai, par tension mat lo! Ek expert mentor ke saath practice karo aur SQL master ban jao! "
+            "Arre yaar, score thoda low hai, par tension mat lo! Ek expert mentor ke saath practice karo aur SQL master ban jao! "
             "Niche button pe click karke **Corporate Bhaiya** ke saath mentorship book karo."
         )
         st.link_button(
@@ -628,42 +672,67 @@ elif st.session_state.quiz_completed:
             "https://www.corporatebhaiya.com/",
             type="primary"
         )
-    
+
     st.markdown("---")
     st.subheader("📝 Aapke Jawaab Aur Feedback Ka Summary")
-    
+
     for i, ans_data in enumerate(st.session_state.user_answers):
         q_num = i + 1
         is_correct = ans_data.get('is_correct', False)
         with st.expander(f"Question {q_num}: {ans_data['question']} {get_emoji(is_correct)}", expanded=False):
-            st.write(f"**Aapka Jawaab:**")
+            st.write(f"**Aapka Jawaab:**"); 
             st.code(ans_data.get('student_answer', '(No answer provided)'), language='sql')
             st.write(f"**SQL Mentor Feedback:**")
             feedback_text = ans_data.get("feedback", "_Feedback not available._")
             st.markdown(feedback_text)
             st.markdown("---")
             display_simulation("Simulated Result (Your Query Output)", ans_data.get("actual_result", "N/A"))
-            
+
             show_expected_final = False
             if not is_correct:
                 show_expected_final = True
             elif isinstance(ans_data.get("actual_result"), pd.DataFrame) and \
                  isinstance(ans_data.get("expected_result"), pd.DataFrame) and \
                  not ans_data["actual_result"].equals(ans_data["expected_result"]):
-                show_expected_final = True
+                 show_expected_final = True
             elif isinstance(ans_data.get("actual_result"), str) and \
                  ans_data.get("actual_result") != ans_data.get("expected_result"):
-                show_expected_final = True
-            
+                 show_expected_final = True
+
             if show_expected_final:
-                display_simulation("Simulated Result (Correct Query Output)", ans_data.get("expected_result", "N/A"))
-    
+                 display_simulation("Simulated Result (Correct Query Output)", ans_data.get("expected_result", "N/A"))
+
+    # --- Enhanced Detailed Feedback Section ---
     st.markdown("---")
     st.subheader("💡 AI Mentor Se Detailed Performance Analysis")
-    
+
+    # Custom CSS for better styling
+    st.markdown("""
+        <style>
+        .feedback-container {
+            background-color: #f9f9f9;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        .feedback-header {
+            font-size: 1.5em;
+            color: #1f77b4;
+            margin-bottom: 10px;
+        }
+        .feedback-section {
+            margin-top: 15px;
+        }
+        .strength-item, .weakness-item {
+            font-size: 1em;
+            margin: 5px 0;
+        }
+        </style>
+    """, unsafe_allow_html=True)
+
     if st.button("📊 Show Detailed Analysis", key="show_analysis"):
         st.session_state.show_detailed_feedback = not st.session_state.show_detailed_feedback
-    
+
     if st.session_state.show_detailed_feedback:
         with st.spinner("🧠 Performance analysis generate ho raha hai..."):
             performance_summary = analyze_performance(st.session_state.user_answers)
@@ -673,6 +742,7 @@ elif st.session_state.quiz_completed:
                 st.markdown('<div class="feedback-container">', unsafe_allow_html=True)
                 st.markdown('<div class="feedback-header">📈 Aapki Performance Ka Vistaar Se Analysis</div>', unsafe_allow_html=True)
                 
+                # Split feedback into sections if possible
                 try:
                     sections = re.split(r'(Overall Impression:|Strengths:|Areas for Improvement:|Next Steps / Encouragement:)', feedback_text)
                     section_dict = {}
@@ -680,11 +750,13 @@ elif st.session_state.quiz_completed:
                         section_dict[sections[i].strip(':')] = sections[i+1].strip()
                 except:
                     section_dict = {"Full Feedback": feedback_text}
-                
+
+                # Display Overall Impression
                 if "Overall Impression" in section_dict:
                     st.markdown("### 🌟 Overall Impression")
                     st.markdown(section_dict["Overall Impression"])
                 
+                # Display Strengths
                 st.markdown('<div class="feedback-section">', unsafe_allow_html=True)
                 st.markdown("### ✅ Strengths")
                 if "Strengths" in section_dict:
@@ -698,7 +770,8 @@ elif st.session_state.quiz_completed:
                 else:
                     st.markdown("Koi specific strengths identify nahi hue. Aur practice karo!")
                 st.markdown('</div>', unsafe_allow_html=True)
-                
+
+                # Display Areas for Improvement
                 st.markdown('<div class="feedback-section">', unsafe_allow_html=True)
                 st.markdown("### 📝 Areas for Improvement")
                 if "Areas for Improvement" in section_dict:
@@ -712,17 +785,19 @@ elif st.session_state.quiz_completed:
                 else:
                     st.markdown("Koi major weaknesses nahi! Bas practice jari rakho.")
                 st.markdown('</div>', unsafe_allow_html=True)
-                
+
+                # Display Next Steps
                 if "Next Steps / Encouragement" in section_dict:
                     st.markdown("### 🚀 Next Steps")
                     st.markdown(section_dict["Next Steps / Encouragement"])
                 
+                # Fallback for unparsed feedback
                 if "Full Feedback" in section_dict:
                     st.markdown("### 📋 Complete Feedback")
                     st.markdown(section_dict["Full Feedback"])
                 
                 st.markdown('</div>', unsafe_allow_html=True)
-    
+
     st.markdown("---")
     if st.button("🔄 Dobara Try Karein?"):
         st.session_state.user_answers = []
@@ -731,3 +806,5 @@ elif st.session_state.quiz_completed:
         st.session_state.quiz_completed = False
         st.session_state.show_detailed_feedback = False
         st.rerun()
+
+
