@@ -826,4 +826,3 @@ elif st.session_state.quiz_started:
 else:
     st.session_state.quiz_started = False # Fallback to reset to start screen
     st.rerun()
-    
