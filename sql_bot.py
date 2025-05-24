@@ -688,36 +688,36 @@ elif st.session_state.quiz_completed:
         st.rerun()
 
     
-    # st.markdown("---")
-    # st.subheader("📝 Aapke Jawaab Aur Feedback Ka Summary")
+    st.markdown("---")
+    st.subheader("📝 Aapke Jawaab Aur Feedback Ka Summary")
     
-    # for i, ans_data in enumerate(st.session_state.user_answers):
-    #     q_num = i + 1
-    #     is_correct = ans_data.get('is_correct', False)
-    #     with st.expander(f"Question {q_num}: {ans_data['question']} {get_emoji(is_correct)}", expanded=False):
-    #         st.write(f"**Aapka Jawaab:**")
-    #         st.code(ans_data.get('student_answer', '(No answer provided)'), language='sql')
-    #         st.write(f"**SQL Mentor Feedback:**")
-    #         feedback_text = ans_data.get("feedback", "_Feedback not available._")
-    #         st.markdown(feedback_text)
-    #         st.markdown("---")
-    #         display_simulation("Simulated Result (Your Query Output)", ans_data.get("actual_result", "N/A"))
+    for i, ans_data in enumerate(st.session_state.user_answers):
+        q_num = i + 1
+        is_correct = ans_data.get('is_correct', False)
+        with st.expander(f"Question {q_num}: {ans_data['question']} {get_emoji(is_correct)}", expanded=False):
+            st.write(f"**Aapka Jawaab:**")
+            st.code(ans_data.get('student_answer', '(No answer provided)'), language='sql')
+            st.write(f"**SQL Mentor Feedback:**")
+            feedback_text = ans_data.get("feedback", "_Feedback not available._")
+            st.markdown(feedback_text)
+            st.markdown("---")
+            display_simulation("Simulated Result (Your Query Output)", ans_data.get("actual_result", "N/A"))
             
-    #         show_expected_final = False
-    #         if not is_correct:
-    #             show_expected_final = True
-    #         elif isinstance(ans_data.get("actual_result"), pd.DataFrame) and \
-    #              isinstance(ans_data.get("expected_result"), pd.DataFrame) and \
-    #              not ans_data["actual_result"].equals(ans_data["expected_result"]):
-    #             show_expected_final = True
-    #         elif isinstance(ans_data.get("actual_result"), str) and \
-    #              ans_data.get("actual_result") != ans_data.get("expected_result"):
-    #             show_expected_final = True
+            show_expected_final = False
+            if not is_correct:
+                show_expected_final = True
+            elif isinstance(ans_data.get("actual_result"), pd.DataFrame) and \
+                 isinstance(ans_data.get("expected_result"), pd.DataFrame) and \
+                 not ans_data["actual_result"].equals(ans_data["expected_result"]):
+                show_expected_final = True
+            elif isinstance(ans_data.get("actual_result"), str) and \
+                 ans_data.get("actual_result") != ans_data.get("expected_result"):
+                show_expected_final = True
             
-    #         if show_expected_final:
-    #             display_simulation("Simulated Result (Correct Query Output)", ans_data.get("expected_result", "N/A"))
+            if show_expected_final:
+                display_simulation("Simulated Result (Correct Query Output)", ans_data.get("expected_result", "N/A"))
     
-    # st.markdown("---")
+    st.markdown("---")
     st.subheader("💡 AI Mentor Se Detailed Performance Analysis")
     
     if st.button("📊 Show Detailed Analysis", key="show_analysis"):
