@@ -510,8 +510,8 @@ elif st.session_state.quiz_started and not st.session_state.quiz_completed:
     if st.session_state.user_answers:
         st.markdown("---")
         st.subheader("📖 Ab Tak Ke Jawaab Aur Feedback")
-        for i, ans_data in enumerate(reversed(st.session_state.user_answers)):
-            q_num = len(st.session_state.user_answers) - i
+        for i, ans_data in enumerate(st.session_state.user_answers):
+            q_num = i + 1
             is_correct = ans_data.get('is_correct', False)
             with st.expander(f"Question {q_num}: {ans_data['question']} {get_emoji(is_correct)}", expanded=False):
                 st.write(f"**Aapka Jawaab:**")
