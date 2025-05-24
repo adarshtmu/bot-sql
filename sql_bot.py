@@ -450,17 +450,23 @@ def display_simulation(title, result_data):
 
 # --- Start Screen ---
 if not st.session_state.quiz_started:
-    st.title("🚀 SQL Mentor - Interactive SQL Practice")
-    st.markdown("### Finish the Quiz Successfully to Unlock Your SQL Certificate")
-    st.markdown("""
-        **📌 Important Notes:**
-        - This quiz uses standard **SQL syntax** (similar to MySQL/PostgreSQL).
-        - String comparisons (like `WHERE city = 'new york'` or `WHERE status = "pending"`) are simulated to be **case-insensitive** for common text columns (`status`, `city`).
-        - **Both single quotes (') and double quotes (") are accepted** for string literals in this simulation.
-        - Your queries are evaluated by an AI for correctness and logic.
-        - Query simulation is powered by DuckDB to show results on sample data.
-        """)
-    
+    st.markdown(
+        """
+        <div style='display:flex; flex-direction:column; align-items:center; margin-top:40px;'>
+            <h1 style='color:#2d6cdf; font-size:2.5rem; margin-bottom:0.3em;'>🎓 SQL Practice Mentor</h1>
+            <p style='font-size:1.2rem; color:#555; margin-bottom:1.5em;'>
+                Boost your SQL skills with bite-sized, interactive challenges. Get instant feedback and learn with real-world examples!
+            </p>
+            <div style='background:#f3f6fa; border-radius:12px; padding:32px 24px; box-shadow:0 4px 16px rgba(0,0,0,0.07); max-width:440px; text-align:center; margin-bottom:2em;'>
+                <ul style='list-style-type:none; padding:0; color:#3a3a3a; font-size:1.08rem;'>
+                    <li>✅ Simple instructions and table previews</li>
+                    <li>✅ Friendly feedback in Hinglish</li>
+                    <li>✅ Learn at your own pace</li>
+                </ul>
+            </div>
+        </div>
+        """, unsafe_allow_html=True
+    )
     col1, col2 = st.columns([2, 1])
     with col1:
         st.write("""
