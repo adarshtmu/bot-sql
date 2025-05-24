@@ -5,7 +5,7 @@ import re
 import duckdb
 
 # --- Custom CSS ---
-# Updated to include professional scoreboard styling
+# Updated to increase font sizes globally and for specific elements
 hide_streamlit_style = """
     <style>
         header {visibility: hidden;}
@@ -18,16 +18,14 @@ hide_streamlit_style = """
         [data-testid="stDeployButton"] {display: none !important;}
         .st-emotion-cache-1r8d6ul {display: none !important;}
         .st-emotion-cache-1jicfl2 {display: none !important;}
-        
-        /* Global font size */
+        /* Increase global font size */
         body, .stMarkdown, .stText, .stTextArea, .stButton button, .stLinkButton a {
             font-size: 18px !important;
         }
         h1 {font-size: 36px !important;}
         h2 {font-size: 28px !important;}
         h3 {font-size: 24px !important;}
-        
-        /* Start SQL Challenge button */
+        /* Style for Start SQL Challenge! button */
         button[kind="primary"] {
             font-size: 24px !important;
             padding: 15px 30px !important;
@@ -35,182 +33,12 @@ hide_streamlit_style = """
             background-color: red;
             border-radius: 10px;
         }
-        
-        /* Other buttons */
+        /* Style for other buttons (Submit, Analysis, Retry) */
         .stButton button:not([kind="primary"]), .stLinkButton a {
             font-size: 20px !important;
             padding: 12px 24px !important;
             border-radius: 8px;
         }
-        
-        /* Professional Scoreboard Styles */
-        .scoreboard-container {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            padding: 40px;
-            border-radius: 20px;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-            text-align: center;
-            margin: 30px 0;
-            color: white;
-        }
-        
-        .scoreboard-title {
-            font-size: 48px !important;
-            font-weight: bold;
-            margin-bottom: 20px;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
-        }
-        
-        .score-display {
-            font-size: 80px !important;
-            font-weight: bold;
-            margin: 30px 0;
-            text-shadow: 3px 3px 6px rgba(0,0,0,0.4);
-            background: linear-gradient(45deg, #FFD700, #FFA500);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            filter: drop-shadow(2px 2px 4px rgba(0,0,0,0.3));
-        }
-        
-        .performance-badge {
-            display: inline-block;
-            padding: 15px 30px;
-            border-radius: 50px;
-            font-size: 24px !important;
-            font-weight: bold;
-            margin: 20px 0;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-        
-        .badge-excellent {
-            background: linear-gradient(45deg, #4CAF50, #45a049);
-            box-shadow: 0 8px 20px rgba(76, 175, 80, 0.4);
-        }
-        
-        .badge-good {
-            background: linear-gradient(45deg, #2196F3, #1976D2);
-            box-shadow: 0 8px 20px rgba(33, 150, 243, 0.4);
-        }
-        
-        .badge-needs-improvement {
-            background: linear-gradient(45deg, #FF9800, #F57C00);
-            box-shadow: 0 8px 20px rgba(255, 152, 0, 0.4);
-        }
-        
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 20px;
-            margin: 30px 0;
-        }
-        
-        .stat-card {
-            background: rgba(255, 255, 255, 0.1);
-            padding: 20px;
-            border-radius: 15px;
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-        }
-        
-        .stat-number {
-            font-size: 36px !important;
-            font-weight: bold;
-            display: block;
-            margin-bottom: 10px;
-        }
-        
-        .stat-label {
-            font-size: 16px !important;
-            opacity: 0.8;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-        
-        /* Certificate Button */
-        .certificate-button {
-            background: linear-gradient(45deg, #FFD700, #FFA500) !important;
-            color: #000 !important;
-            font-size: 24px !important;
-            font-weight: bold !important;
-            padding: 20px 40px !important;
-            border-radius: 50px !important;
-            text-decoration: none !important;
-            display: inline-block !important;
-            margin: 20px 0 !important;
-            box-shadow: 0 10px 30px rgba(255, 215, 0, 0.4) !important;
-            transition: all 0.3s ease !important;
-            text-transform: uppercase !important;
-            letter-spacing: 1px !important;
-            border: none !important;
-        }
-        
-        .certificate-button:hover {
-            transform: translateY(-3px) !important;
-            box-shadow: 0 15px 40px rgba(255, 215, 0, 0.6) !important;
-        }
-        
-        /* Mentor Button */
-        .mentor-button {
-            background: linear-gradient(45deg, #6B73FF, #000DFF) !important;
-            color: white !important;
-            font-size: 22px !important;
-            font-weight: bold !important;
-            padding: 18px 36px !important;
-            border-radius: 50px !important;
-            text-decoration: none !important;
-            display: inline-block !important;
-            margin: 20px 0 !important;
-            box-shadow: 0 10px 30px rgba(107, 115, 255, 0.4) !important;
-            transition: all 0.3s ease !important;
-            text-transform: uppercase !important;
-            letter-spacing: 1px !important;
-            border: none !important;
-        }
-        
-        .mentor-button:hover {
-            transform: translateY(-3px) !important;
-            box-shadow: 0 15px 40px rgba(107, 115, 255, 0.6) !important;
-        }
-        
-        /* Achievement Icons */
-        .achievement-icon {
-            font-size: 60px;
-            margin: 20px 0;
-            display: block;
-        }
-        
-        /* Progress Ring */
-        .progress-ring {
-            width: 200px;
-            height: 200px;
-            margin: 20px auto;
-        }
-        
-        .progress-ring circle {
-            fill: none;
-            stroke-width: 8;
-            stroke-linecap: round;
-        }
-        
-        .progress-ring .background {
-            stroke: rgba(255, 255, 255, 0.2);
-        }
-        
-        .progress-ring .progress {
-            stroke: #FFD700;
-            stroke-dasharray: 628;
-            stroke-dashoffset: 628;
-            animation: progress-animation 2s ease-out forwards;
-        }
-        
-        @keyframes progress-animation {
-            to {
-                stroke-dashoffset: calc(628 - (628 * var(--progress)) / 100);
-            }
-        }
-        
         /* Feedback container styling */
         .feedback-container {
             background-color: #f9f9f9;
@@ -230,19 +58,6 @@ hide_streamlit_style = """
         .strength-item, .weakness-item {
             font-size: 18px !important;
             margin: 5px 0;
-        }
-        
-        /* Celebration animation */
-        @keyframes celebrate {
-            0% { transform: scale(1) rotate(0deg); }
-            25% { transform: scale(1.1) rotate(5deg); }
-            50% { transform: scale(1.2) rotate(-5deg); }
-            75% { transform: scale(1.1) rotate(3deg); }
-            100% { transform: scale(1) rotate(0deg); }
-        }
-        
-        .celebrate {
-            animation: celebrate 2s ease-in-out;
         }
     </style>
 """
@@ -289,6 +104,11 @@ sql_questions = [
     # {"question": "Write a SQL query to get all users older than 30 from the 'users' table.", "correct_answer_example": "SELECT * FROM users WHERE age > 30;", "sample_table": users_table, "relevant_tables": ["users"]},
     # {"question": "Write a SQL query to find all orders with a status of 'Pending' from the 'orders' table.", "correct_answer_example": "SELECT * FROM orders WHERE status = 'Pending';", "sample_table": orders_table, "relevant_tables": ["orders"]},
     # {"question": "Write a SQL query to find users from 'chicago' in the 'users' table (test case-insensitivity).", "correct_answer_example": "SELECT * FROM users WHERE city = 'Chicago';", "sample_table": users_table, "relevant_tables": ["users"]},
+    # {"question": "Write a SQL query to find the most recent order from the 'orders' table by order date.", "correct_answer_example": "SELECT * FROM orders ORDER BY order_date DESC LIMIT 1;", "sample_table": orders_table, "relevant_tables": ["orders"]},
+    # {"question": "Write a SQL query to find the average order amount from the 'orders' table.", "correct_answer_example": "SELECT AVG(amount) AS average_amount FROM orders;", "sample_table": orders_table, "relevant_tables": ["orders"]},
+    # {"question": "Write a SQL query to find users from 'New York' or 'Chicago' in the 'users' table.", "correct_answer_example": "SELECT * FROM users WHERE city IN ('New York', 'Chicago');", "sample_table": users_table, "relevant_tables": ["users"]},
+    # {"question": "Write a SQL query to find users whose orders are still pending. Use the 'users' and 'orders' tables.","correct_answer_example": "SELECT u.* FROM users u JOIN orders o ON u.user_id = o.user_id WHERE o.order_status = 'pending';","sample_table": users_table,"relevant_tables": ["users", "orders"]},
+    # {"question": "Write a SQL query to calculate the total amount spent by each user by joining the 'users' and 'orders' tables.", "correct_answer_example": "SELECT u.name, SUM(o.amount) AS total_spent FROM users u JOIN orders o ON u.user_id = o.user_id GROUP BY u.name ORDER BY u.name;", "sample_table": users_table, "relevant_tables": ["users", "orders"]}
 ]
 
 # --- Session State Initialization ---
@@ -511,18 +331,6 @@ def calculate_score(user_answers):
     score = (correct_count / total_questions_answered) * 100 if total_questions_answered > 0 else 0.0
     return score
 
-def get_performance_level(score):
-    if score >= 90:
-        return "excellent", "🏆", "OUTSTANDING PERFORMANCE"
-    elif score >= 80:
-        return "good", "🥇", "EXCELLENT PERFORMANCE"
-    elif score >= 70:
-        return "good", "🥈", "GOOD PERFORMANCE"
-    elif score >= 60:
-        return "needs-improvement", "🥉", "FAIR PERFORMANCE"
-    else:
-        return "needs-improvement", "📚", "NEEDS IMPROVEMENT"
-
 def analyze_performance(user_answers):
     performance_data = {
         "strengths": [], "weaknesses": [],
@@ -531,7 +339,7 @@ def analyze_performance(user_answers):
     if not user_answers:
         performance_data["overall_feedback"] = "Koi jawaab nahi diya gaya. Analysis possible nahi hai."
         return performance_data
-
+    
     try:
         correct_q = [ans["question"] for ans in user_answers if ans.get("is_correct")]
         incorrect_ans = [
@@ -542,7 +350,7 @@ def analyze_performance(user_answers):
         performance_data["strengths"] = correct_q
         performance_data["weaknesses"] = [item["question"] for item in incorrect_ans]
         total_q, correct_c, score = len(user_answers), len(correct_q), calculate_score(user_answers)
-
+        
         incorrect_summary = ""
         if incorrect_ans:
             incorrect_summary = "In sawaalon mein thodi galti hui:\n"
@@ -552,136 +360,376 @@ def analyze_performance(user_answers):
             incorrect_summary = incorrect_summary.strip()
         else:
             incorrect_summary = "Koi galat jawaab nahi! Bahut badhiya!"
-
+        
         correct_summary = ""
         if correct_q:
             correct_summary = "Yeh sawaal bilkul sahi kiye:\n"
             for idx, q_text in enumerate(correct_q):
-                correct_summary += f"  {idx+1}. {q_text}\n"
+                correct_summary += f"  - {q_text}\n"
+            correct_summary = correct_summary.strip()
         else:
-            correct_summary = "Koi sahi jawaab nahi mila is baar."
-
-        overall = f"{correct_summary}\n\n{incorrect_summary}\n\nTotal Questions: {total_q}\nSahi Jawaab: {correct_c}\nScore: {score:.2f}%"
-        performance_data["overall_feedback"] = overall
-    except Exception as e:
-        performance_data["overall_feedback"] = f"Analysis failed: {e}"
-    return performance_data
+            correct_summary = "Is baar koi jawaab sahi nahi hua."
         
-# --- Streamlit UI ---
-st.title("🔥 SQL Quiz Challenge")
-st.markdown("""
-Welcome to the **SQL Quiz Challenge**!  
-Test your SQL skills on real tables, get instant feedback, and see how you did on our pro-style scoreboard.
-""")
+        prompt = f"""
+        Ek SQL learner ne ek practice quiz complete kiya hai. Unki performance ka analysis karke ek friendly, motivating summary feedback casual Hindi mein (jaise ek senior/mentor deta hai) provide karo.
 
-if not st.session_state.quiz_started:
-    if st.button("🚦 Start SQL Challenge", type="primary"):
-        st.session_state.quiz_started = True
-        st.session_state.current_question = 0
-        st.session_state.user_answers = []
-        st.session_state.quiz_completed = False
-        st.experimental_rerun()
-    st.markdown("#### Sample Tables Available")
-    st.dataframe(users_table, use_container_width=True)
-    st.dataframe(orders_table, use_container_width=True)
-    st.stop()
+        **Quiz Performance Summary:**
+        - Total Questions Attempted: {total_q}
+        - Correct Answers: {correct_c}
+        - Final Score: {score:.2f}%
 
-if st.session_state.quiz_started and not st.session_state.quiz_completed:
-    q_idx = st.session_state.current_question
-    q_total = len(sql_questions)
-    question_data = sql_questions[q_idx]
-    st.markdown(f"### Question {q_idx+1} of {q_total}")
-    st.info(question_data["question"])
-    example_exp = st.expander("Show sample table(s)", expanded=False)
-    for tname in question_data["relevant_tables"]:
-        if tname in original_tables:
-            example_exp.dataframe(original_tables[tname], use_container_width=True)
-    st.markdown("Write your SQL answer below:")
-    user_sql = st.text_area("Enter your SQL query", value="", height=120, key=f"answer_{q_idx}")
+        **Correctly Answered Questions:**
+        {correct_summary if correct_q else '(Koi nahi)'}
 
-    if st.button("Submit Answer", key=f"submit_{q_idx}"):
-        feedback, is_correct, expected_result, actual_result, llm_output = evaluate_answer_with_llm(
-            question_data, user_sql, original_tables)
-        st.session_state.user_answers.append({
-            "question": question_data["question"],
-            "student_answer": user_sql,
-            "is_correct": is_correct,
-            "feedback": feedback,
-            "llm_output": llm_output,
-            "expected_result": expected_result,
-            "actual_result": actual_result
-        })
-        if q_idx + 1 >= q_total:
-            st.session_state.quiz_completed = True
+        **Incorrectly Answered Questions & Feedback Snippets:**
+        {incorrect_summary if incorrect_ans else '(Koi nahi)'}
+
+        **Quiz Context Reminder:**
+        - Case-insensitivity was assumed for '=' comparisons on 'status' and 'city' columns.
+        - Both single (') and double (") quotes were acceptable for string literals in this quiz simulation.
+
+        **Task:**
+        Ab, neeche diye gaye structure mein overall performance ka ek summary feedback do:
+        1.  **Overall Impression:** Score aur general performance pe ek positive ya encouraging comment (e.g., "Overall performance kaafi achhi rahi!", "Thodi aur practice lagegi, but potential hai!"). Be realistic but motivating.
+        2.  **Strengths:** Agar kuch specific concepts sahi kiye hain (jo correct answers se pata chale), unko highlight karo (e.g., "SELECT aur WHERE clause ka use aache se samajh aa gaya hai.", "JOINs wale sawaal sahi kiye, yeh achhi baat hai!"). General rakho agar specific pattern na dikhe.
+        3.  **Areas for Improvement:** Jo concepts galat hue (incorrect answers se related), unko gently point out karo. Focus on concepts, not just specific mistakes (e.g., "JOIN ka logic thoda aur clear karna hoga shayad.", "Aggregate functions (COUNT, AVG) pe dhyaan dena.", "Syntax ki chhoti-moti galtiyan ho rahi hain."). Briefly mention standard practices (like single quotes for strings in real DBs) as a learning point, without implying it was wrong *in this quiz*.
+        4.  **Next Steps / Encouragement:** Kuch encouraging words aur aage kya karna chahiye (e.g., "Keep practicing!", "Concept X ko revise kar lena.", "Aise hi lage raho, SQL aa jayega! Real-world ke liye standard SQL practices (jaise single quotes) seekhte rehna important hai.").
+
+        Bas plain text mein feedback generate karna hai. Casual tone rakhna. Sidhe feedback se shuru karo.
+        """
+    except Exception as data_prep_error:
+        print(f"Error preparing data for performance analysis: {data_prep_error}")
+        performance_data["overall_feedback"] = f"Analysis data preparation failed: {data_prep_error}"
+        return performance_data
+    
+    try:
+        response = model.generate_content(prompt)
+        generated_feedback = None
+        if hasattr(response, 'text'):
+            generated_feedback = response.text.strip()
+        elif hasattr(response, 'parts') and response.parts:
+            generated_feedback = "".join(part.text for part in response.parts if hasattr(part, 'text')).strip()
         else:
-            st.session_state.current_question += 1
-        st.experimental_rerun()
+            try:
+                generated_feedback = f"AI Response Blocked or Empty. Prompt Feedback: {response.prompt_feedback}"
+            except Exception:
+                generated_feedback = "Error: Received unexpected or empty response from AI for summary."
+        
+        if generated_feedback:
+            performance_data["overall_feedback"] = generated_feedback
+        else:
+            performance_data["overall_feedback"] = "AI response format unclear or empty for summary analysis."
+            print(f"Warning: Unexpected LLM response for performance summary.")
+    except Exception as e:
+        print(f"Error generating performance summary using LLM: {e}")
+        performance_data["overall_feedback"] = f"Summary generation error from AI: {e}"
+    
+    return performance_data
 
-    if q_idx > 0 and st.button("⬅️ Previous Question"):
-        st.session_state.current_question -= 1
-        st.experimental_rerun()
+def get_emoji(is_correct):
+    return "✅" if is_correct else "❌"
 
-if st.session_state.quiz_completed:
-    score = calculate_score(st.session_state.user_answers)
-    perf_key, trophy, perf_title = get_performance_level(score)
-    st.markdown(f"""
-    <div class="scoreboard-container">
-        <div class="scoreboard-title">{trophy} Your Scoreboard</div>
-        <div class="score-display">{score:.2f}%</div>
-        <span class="performance-badge badge-{perf_key}">{perf_title}</span>
-        <div class="stats-grid">
-            <div class="stat-card"><span class="stat-number">{len(st.session_state.user_answers)}</span><span class="stat-label">Total Questions</span></div>
-            <div class="stat-card"><span class="stat-number">{sum(1 for a in st.session_state.user_answers if a.get('is_correct'))}</span><span class="stat-label">Correct</span></div>
-            <div class="stat-card"><span class="stat-number">{sum(1 for a in st.session_state.user_answers if not a.get('is_correct'))}</span><span class="stat-label">Incorrect</span></div>
-        </div>
-    </div>
-    """, unsafe_allow_html=True)
-    st.success("Quiz complete! Dekhiye apna detailed feedback aur performance analysis niche.")
+def display_simulation(title, result_data):
+    st.write(f"**{title}:**")
+    if isinstance(result_data, pd.DataFrame):
+        if result_data.empty:
+            st.info("_(Simulation resulted in an empty table)_")
+        else:
+            st.dataframe(result_data.reset_index(drop=True), hide_index=True, use_container_width=True)
+    elif isinstance(result_data, str) and "Simulation Error" in result_data:
+        st.warning(result_data, icon="⚠️")
+    elif result_data == "N/A":
+        st.info("_(Simulation not applicable or not run)_")
+    elif isinstance(result_data, str):
+        st.info(f"_{result_data}_")
+    else:
+        st.error(f"_(Unexpected simulation result type: {type(result_data)})_")
+        print(f"DEBUG: Unexpected simulation data type: {type(result_data)}, value: {result_data}")
 
-    st.markdown("## 📝 Detailed Feedback")
-    for idx, ans in enumerate(st.session_state.user_answers):
-        with st.expander(f"Question {idx+1}: {ans['question']}", expanded=(idx == 0)):
-            st.markdown(f"**Your Answer:**\n```sql\n{ans['student_answer']}\n```")
-            st.markdown(f"**Feedback:**\n{ans['feedback']}")
-            if isinstance(ans["expected_result"], pd.DataFrame):
-                st.markdown("**Expected Result:**")
-                st.dataframe(ans["expected_result"], use_container_width=True)
-            else:
-                st.markdown(f"**Expected Result:** {ans['expected_result']}")
-            if isinstance(ans["actual_result"], pd.DataFrame):
-                st.markdown("**Your Query Result:**")
-                st.dataframe(ans["actual_result"], use_container_width=True)
-            else:
-                st.markdown(f"**Your Query Result:** {ans['actual_result']}")
-            with st.expander("Show Full AI Evaluation Output"):
-                st.markdown(f"```\n{ans['llm_output']}\n```")
-    # Performance Analysis
-    st.markdown("## 📊 Performance Analysis")
-    perf = analyze_performance(st.session_state.user_answers)
-    st.markdown(f"""
-    <div class="feedback-container">
-        <div class="feedback-header">Aapki Performance Summary</div>
-        <div class="feedback-section">
-            <strong>Strengths:</strong>
-            <ul>
-                {''.join(f"<li class='strength-item'>{q}</li>" for q in perf['strengths']) or "<li>Koi khas strength nahi dikh rahi hai abhi.</li>"}
-            </ul>
-        </div>
-        <div class="feedback-section">
-            <strong>Weaknesses:</strong>
-            <ul>
-                {''.join(f"<li class='weakness-item'>{q}</li>" for q in perf['weaknesses']) or "<li>Kamjori nahi dikh rahi abhi!</li>"}
-            </ul>
-        </div>
-        <div class="feedback-section">
-            <strong>Overall Feedback:</strong><br>
-            {perf['overall_feedback']}
-        </div>
-    </div>
-    """, unsafe_allow_html=True)
-    if st.button("🔁 Retake Quiz"):
-        st.session_state.quiz_started = False
-        st.session_state.current_question = 0
+# --- Streamlit App UI ---
+
+# --- Start Screen ---
+if not st.session_state.quiz_started:
+    st.title("🚀 SQL Mentor - Interactive SQL Practice")
+    st.markdown("### Apne SQL Skills Ko Test Aur Improve Karein!")
+    st.markdown("""
+        **📌 Important Notes:**
+        - This quiz uses standard **SQL syntax** (similar to MySQL/PostgreSQL).
+        - String comparisons (like `WHERE city = 'new york'` or `WHERE status = "pending"`) are simulated to be **case-insensitive** for common text columns (`status`, `city`).
+        - **Both single quotes (') and double quotes (") are accepted** for string literals in this simulation.
+        - Your queries are evaluated by an AI for correctness and logic.
+        - Query simulation is powered by DuckDB to show results on sample data.
+        """)
+    
+    col1, col2 = st.columns([2, 1])
+    with col1:
+        st.write("""
+        Is interactive quiz mein, aap do sample tables ke saath kaam karenge:
+        - **Users Table**: User details jaise ID, naam, email, umar, aur sheher.
+        - **Orders Table**: Order details jaise ID, user ID, amount, order date, aur status.
+        """)
+    with col2:
+        st.markdown("#### Tables Overview")
+        try:
+            table_overview_data = {"Table": list(original_tables.keys()),
+                                   "Rows": [len(df) for df in original_tables.values()],
+                                   "Columns": [len(df.columns) for df in original_tables.values()]}
+            st.dataframe(pd.DataFrame(table_overview_data), hide_index=True)
+        except Exception as e:
+            st.error(f"Error displaying table overview: {e}")
+    
+    st.write("### 🔍 Table Previews")
+    try:
+        tab1, tab2 = st.tabs(["Users Table", "Orders Table"])
+        with tab1: st.dataframe(users_table, hide_index=True, use_container_width=True)
+        with tab2: st.dataframe(orders_table, hide_index=True, use_container_width=True)
+    except Exception as e:
+        st.error(f"Error displaying table previews: {e}")
+    
+    with st.expander("📝 Quiz Ke Baare Mein"):
+        st.write(f"""
+        - Aapko {len(sql_questions)} SQL query challenges solve karne honge.
+        - Har jawaab ke baad AI Mentor se immediate feedback milega.
+        - **SQL Dialect Focus:** Standard SQL (MySQL/PostgreSQL like).
+        - Case-insensitivity for `status` and `city` columns in `WHERE =` clauses is simulated.
+        - String literals can be enclosed in single quotes (`'...'`) or double quotes (`"..."`).
+        """)
+    
+    if st.button("🚀 Start SQL Challenge!", type="primary"):
+        st.session_state.quiz_started = True
         st.session_state.user_answers = []
+        st.session_state.current_question = 0
         st.session_state.quiz_completed = False
-        st.experimental_rerun()       
+        st.session_state.show_detailed_feedback = False
+        st.rerun()
+
+# --- Quiz In Progress Screen ---
+elif st.session_state.quiz_started and not st.session_state.quiz_completed:
+    st.title("✍️ SQL Query Challenge")
+    
+    if st.session_state.user_answers:
+        st.markdown("---")
+        st.subheader("📖 Ab Tak Ke Jawaab Aur Feedback")
+        for i, ans_data in enumerate(reversed(st.session_state.user_answers)):
+            q_num = len(st.session_state.user_answers) - i
+            is_correct = ans_data.get('is_correct', False)
+            with st.expander(f"Question {q_num}: {ans_data['question']} {get_emoji(is_correct)}", expanded=False):
+                st.write(f"**Aapka Jawaab:**")
+                st.code(ans_data.get('student_answer', '(No answer provided)'), language='sql')
+                st.write(f"**SQL Mentor Feedback:**")
+                feedback_text = ans_data.get("feedback", "_Feedback not available._")
+                st.markdown(feedback_text)
+                
+                st.markdown("---")
+                display_simulation("Simulated Result (Your Query Output)", ans_data.get("actual_result", "N/A"))
+                
+                show_expected = False
+                if not is_correct:
+                    show_expected = True
+                elif isinstance(ans_data.get("actual_result"), pd.DataFrame) and \
+                     isinstance(ans_data.get("expected_result"), pd.DataFrame) and \
+                     not ans_data["actual_result"].equals(ans_data["expected_result"]):
+                    show_expected = True
+                elif isinstance(ans_data.get("actual_result"), str) and \
+                     ans_data.get("actual_result") != ans_data.get("expected_result"):
+                    show_expected = True
+                
+                if show_expected:
+                    display_simulation("Simulated Result (Correct Query Output)", ans_data.get("expected_result", "N/A"))
+    
+    st.markdown("---")
+    
+    current_q_index = st.session_state.current_question
+    question_data = sql_questions[current_q_index]
+    
+    st.subheader(f"Question {current_q_index + 1} of {len(sql_questions)}")
+    st.markdown(f"**{question_data['question']}**")
+    
+    relevant_tables = question_data["relevant_tables"]
+    if relevant_tables:
+        st.markdown("**Sample Table Preview(s):**")
+        if len(relevant_tables) > 1:
+            tabs = st.tabs([f"{name} Preview" for name in relevant_tables])
+            for i, table_name in enumerate(relevant_tables):
+                with tabs[i]:
+                    if table_name in original_tables:
+                        st.dataframe(original_tables[table_name], hide_index=True, use_container_width=True)
+                    else:
+                        st.warning(f"Data for table '{table_name}' not found.")
+        elif len(relevant_tables) == 1:
+            table_name = relevant_tables[0]
+            if table_name in original_tables:
+                st.dataframe(original_tables[table_name], hide_index=True, use_container_width=True)
+            else:
+                st.warning(f"Data for table '{table_name}' not found.")
+    else:
+        st.info("No specific table context provided for this question.")
+    
+    user_query = st.text_area("Apna SQL Query Yahan Likhein:", height=150, key=f"query_input_{current_q_index}")
+    
+    if st.button("✅ Submit Query", key=f"submit_{current_q_index}"):
+        if user_query and user_query.strip():
+            with st.spinner("🔄 Query ko check kiya ja raha hai... AI Mentor se feedback aur simulation results generate ho rahe hain..."):
+                feedback, is_correct, expected_res, actual_res, raw_llm = evaluate_answer_with_llm(
+                    question_data,
+                    user_query,
+                    original_tables
+                )
+                
+                st.session_state.user_answers.append({
+                    "question_number": current_q_index + 1,
+                    "question": question_data["question"],
+                    "student_answer": user_query,
+                    "feedback": feedback,
+                    "is_correct": is_correct,
+                    "expected_result": expected_res,
+                    "actual_result": actual_res,
+                    "raw_llm_output": raw_llm
+                })
+                
+                if current_q_index + 1 < len(sql_questions):
+                    st.session_state.current_question += 1
+                else:
+                    st.session_state.quiz_completed = True
+                
+                st.rerun()
+        else:
+            st.warning("⚠️ Please enter your SQL query before submitting.")
+
+# --- Quiz Completed Screen ---
+elif st.session_state.quiz_completed:
+    st.balloons()
+    st.title("🎉 Badhai Ho! Aapne SQL Challenge Poora Kar Liya!")
+    final_score = calculate_score(st.session_state.user_answers)
+    
+    st.markdown("### Aapka Final Score")
+    st.metric("Score", f"{final_score:.2f}%")
+    st.progress(final_score / 100)
+    
+    # Conditional Button Logic
+    if final_score >= 80:
+        st.markdown("---")
+        st.markdown("#### 🏆 Shabaash! Aapne 80% ya usse zyada score kiya!")
+        st.markdown("Aap apna SQL certificate generate kar sakte hain. Niche button pe click karein!")
+        st.link_button(
+            "🎓 Generate Your Certificate",
+            "https://superprofile.bio/vp/corporate-bhaiya-sql-page",
+            type="primary"
+        )
+    else:
+        st.markdown("---")
+        st.markdown("#### 📚 Thodi Aur Practice Chahiye? Mentor Se Seekhein!")
+        st.markdown(
+            "Arre yaar, score thoda kam hai, par tension mat lo! Ek expert mentor ke saath practice karo aur SQL master ban jao! "
+            "Niche button pe click karke **Corporate Bhaiya** ke saath mentorship book karo."
+        )
+        st.link_button(
+            "🚀 Book a Mentor Session with Corporate Bhaiya",
+            "https://www.corporatebhaiya.com/",
+            type="primary"
+        )
+    
+    st.markdown("---")
+    st.subheader("📝 Aapke Jawaab Aur Feedback Ka Summary")
+    
+    for i, ans_data in enumerate(st.session_state.user_answers):
+        q_num = i + 1
+        is_correct = ans_data.get('is_correct', False)
+        with st.expander(f"Question {q_num}: {ans_data['question']} {get_emoji(is_correct)}", expanded=False):
+            st.write(f"**Aapka Jawaab:**")
+            st.code(ans_data.get('student_answer', '(No answer provided)'), language='sql')
+            st.write(f"**SQL Mentor Feedback:**")
+            feedback_text = ans_data.get("feedback", "_Feedback not available._")
+            st.markdown(feedback_text)
+            st.markdown("---")
+            display_simulation("Simulated Result (Your Query Output)", ans_data.get("actual_result", "N/A"))
+            
+            show_expected_final = False
+            if not is_correct:
+                show_expected_final = True
+            elif isinstance(ans_data.get("actual_result"), pd.DataFrame) and \
+                 isinstance(ans_data.get("expected_result"), pd.DataFrame) and \
+                 not ans_data["actual_result"].equals(ans_data["expected_result"]):
+                show_expected_final = True
+            elif isinstance(ans_data.get("actual_result"), str) and \
+                 ans_data.get("actual_result") != ans_data.get("expected_result"):
+                show_expected_final = True
+            
+            if show_expected_final:
+                display_simulation("Simulated Result (Correct Query Output)", ans_data.get("expected_result", "N/A"))
+    
+    st.markdown("---")
+    st.subheader("💡 AI Mentor Se Detailed Performance Analysis")
+    
+    if st.button("📊 Show Detailed Analysis", key="show_analysis"):
+        st.session_state.show_detailed_feedback = not st.session_state.show_detailed_feedback
+    
+    if st.session_state.show_detailed_feedback:
+        with st.spinner("🧠 Performance analysis generate ho raha hai..."):
+            performance_summary = analyze_performance(st.session_state.user_answers)
+            feedback_text = performance_summary.get("overall_feedback", "Analysis available nahi hai.")
+            
+            with st.container():
+                st.markdown('<div class="feedback-container">', unsafe_allow_html=True)
+                st.markdown('<div class="feedback-header">📈 Aapki Performance Ka Vistaar Se Analysis</div>', unsafe_allow_html=True)
+                
+                try:
+                    sections = re.split(r'(Overall Impression:|Strengths:|Areas for Improvement:|Next Steps / Encouragement:)', feedback_text)
+                    section_dict = {}
+                    for i in range(1, len(sections), 2):
+                        section_dict[sections[i].strip(':')] = sections[i+1].strip()
+                except:
+                    section_dict = {"Full Feedback": feedback_text}
+                
+                if "Overall Impression" in section_dict:
+                    st.markdown("### 🌟 Overall Impression")
+                    st.markdown(section_dict["Overall Impression"])
+                
+                st.markdown('<div class="feedback-section">', unsafe_allow_html=True)
+                st.markdown("### ✅ Strengths")
+                if "Strengths" in section_dict:
+                    strengths = section_dict["Strengths"].split('\n')
+                    for strength in strengths:
+                        if strength.strip():
+                            st.markdown(f'<div class="strength-item">✔ {strength.strip()}</div>', unsafe_allow_html=True)
+                elif performance_summary.get("strengths"):
+                    for strength in performance_summary["strengths"]:
+                        st.markdown(f'<div class="strength-item">✔ {strength}</div>', unsafe_allow_html=True)
+                else:
+                    st.markdown("Koi specific strengths identify nahi hue. Aur practice karo!")
+                st.markdown('</div>', unsafe_allow_html=True)
+                
+                st.markdown('<div class="feedback-section">', unsafe_allow_html=True)
+                st.markdown("### 📝 Areas for Improvement")
+                if "Areas for Improvement" in section_dict:
+                    weaknesses = section_dict["Areas for Improvement"].split('\n')
+                    for weakness in weaknesses:
+                        if weakness.strip():
+                            st.markdown(f'<div class="weakness-item">➡ {weakness.strip()}</div>', unsafe_allow_html=True)
+                elif performance_summary.get("weaknesses"):
+                    for weakness in performance_summary["weaknesses"]:
+                        st.markdown(f'<div class="weakness-item">➡ {weakness}</div>', unsafe_allow_html=True)
+                else:
+                    st.markdown("Koi major weaknesses nahi! Bas practice jari rakho.")
+                st.markdown('</div>', unsafe_allow_html=True)
+                
+                if "Next Steps / Encouragement" in section_dict:
+                    st.markdown("### 🚀 Next Steps")
+                    st.markdown(section_dict["Next Steps / Encouragement"])
+                
+                if "Full Feedback" in section_dict:
+                    st.markdown("### 📋 Complete Feedback")
+                    st.markdown(section_dict["Full Feedback"])
+                
+                st.markdown('</div>', unsafe_allow_html=True)
+    
+    st.markdown("---")
+    if st.button("🔄 Dobara Try Karein?"):
+        st.session_state.user_answers = []
+        st.session_state.current_question = 0
+        st.session_state.quiz_started = False
+        st.session_state.quiz_completed = False
+        st.session_state.show_detailed_feedback = False
+        st.rerun()
+
+
