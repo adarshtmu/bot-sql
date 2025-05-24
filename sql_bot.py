@@ -599,35 +599,87 @@ elif st.session_state.quiz_started and not st.session_state.quiz_completed:
 # --- Quiz Completed Screen ---
 elif st.session_state.quiz_completed:
     st.balloons()
-    st.title("🎉 Badhai Ho! Aapne SQL Challenge Poora Kar Liya!")
+    st.markdown(
+        """
+        <div style='text-align:center; margin-top: 30px;'>
+            <h1 style='color:#28a745;'>🎉 Congratulations!</h1>
+            <h2 style='color:#1f77b4;'>You have completed the SQL Challenge</h2>
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
     final_score = calculate_score(st.session_state.user_answers)
-    
-    st.markdown("### Aapka Final Score")
-    st.metric("Score", f"{final_score:.2f}%")
+
+    # --- Scoreboard Card ---
+    st.markdown(
+        f"""
+        <div style='
+            background-color:#f8f9fa;
+            border-radius:15px;
+            box-shadow:0 4px 16px rgba(0,0,0,0.08);
+            padding:30px 0;
+            margin:30px 0;
+            text-align:center;
+        '>
+            <h2 style='color:#333;'>📊 Your Final Score</h2>
+            <div style='font-size:2.5rem; font-weight:bold; color:#28a745;'>{final_score:.2f}%</div>
+            <div style='font-size:1.2rem; color:#888;'>Scoreboard</div>
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
     st.progress(final_score / 100)
-    
-    # Conditional Button Logic
+
+    # --- Certificate Button Section ---
     if final_score >= 80:
-        st.markdown("---")
-        st.markdown("#### 🏆 Shabaash! Aapne 80% ya usse zyada score kiya!")
-        st.markdown("Aap apna SQL certificate generate kar sakte hain. Niche button pe click karein!")
-        st.link_button(
-            "🎓 Generate Your Certificate",
-            "https://superprofile.bio/vp/corporate-bhaiya-sql-page",
-            type="primary"
+        st.markdown(
+            """
+            <div style='text-align:center; margin-top: 20px;'>
+                <h3 style='color:#007bff;'>🏆 Great job! You're eligible for a certificate.</h3>
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
+        st.markdown(
+            """
+            <div style='display:flex; justify-content:center; margin-bottom: 30px;'>
+                <a href="https://superprofile.bio/vp/corporate-bhaiya-sql-page" target="_blank" style="
+                    background-color:#ffc107;
+                    color:#121212;
+                    font-size:1.5rem;
+                    font-weight:600;
+                    padding:18px 36px;
+                    border-radius:10px;
+                    text-decoration:none;
+                    box-shadow:0 2px 8px rgba(0,0,0,0.11);
+                    transition: background 0.2s;
+                ">🎓 Get Your Certificate</a>
+            </div>
+            """,
+            unsafe_allow_html=True
         )
     else:
-        st.markdown("---")
-        st.markdown("#### 📚 Thodi Aur Practice Chahiye? Mentor Se Seekhein!")
         st.markdown(
-            "Arre yaar, score thoda kam hai, par tension mat lo! Ek expert mentor ke saath practice karo aur SQL master ban jao! "
-            "Niche button pe click karke **Corporate Bhaiya** ke saath mentorship book karo."
+            """
+            <div style='text-align:center; margin-top: 20px;'>
+                <h3 style='color:#e74c3c;'>📚 Keep practicing to earn a certificate!</h3>
+                <a href="https://www.corporatebhaiya.com/" target="_blank" style="
+                    background-color:#6c757d;
+                    color:white;
+                    font-size:1.2rem;
+                    padding:12px 28px;
+                    border-radius:8px;
+                    text-decoration:none;
+                    margin-top:10px;
+                    display:inline-block;
+                ">🚀 Book a Mentor Session</a>
+            </div>
+            """,
+            unsafe_allow_html=True
         )
-        st.link_button(
-            "🚀 Book a Mentor Session with Corporate Bhaiya",
-            "https://www.corporatebhaiya.com/",
-            type="primary"
-        )
+
+    # --- (Rest of your summary/feedback code remains as is) ---
+    # ... (summary, feedback, analysis, etc.)
     
     st.markdown("---")
     st.subheader("📝 Aapke Jawaab Aur Feedback Ka Summary")
