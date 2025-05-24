@@ -119,7 +119,7 @@ st.markdown(hide_streamlit_style, unsafe_allow_html=True)
 gemini_api_key = "AIzaSyAfzl_66GZsgaYjAM7cT2djVCBCAr86t2k"
 
 if not gemini_api_key or gemini_api_key == "YOUR_GEMINI_API_KEY":
-    st.error("🚨 Gemini API Key is missing. Please add your key in the code (line 123). The app cannot function without it.")
+    st.error("🚨 Gemini API Key is missing. Please add your key in the code. The app cannot function without it.")
     st.stop()
 
 try:
@@ -168,7 +168,7 @@ if "quiz_started" not in st.session_state: st.session_state.quiz_started = False
 if "quiz_completed" not in st.session_state: st.session_state.quiz_completed = False
 
 
-# --- Helper Functions ---
+# --- Helper Functions (No changes here) ---
 def simulate_query_duckdb(sql_query, tables_dict):
     if not sql_query or not sql_query.strip():
         return "Simulation Error: No query provided."
@@ -176,14 +176,12 @@ def simulate_query_duckdb(sql_query, tables_dict):
         return "Simulation Error: No tables provided for context."
 
     con = None
-    # Attempt to normalize double quotes to single quotes for broader compatibility
     try:
         double_quote_pattern = r'"([^"]*)"'
         processed_query_for_ilike = re.sub(double_quote_pattern, r"'\1'", sql_query)
     except Exception:
-        processed_query_for_ilike = sql_query # Fallback if regex fails
+        processed_query_for_ilike = sql_query
 
-    # Logic for case-insensitive matching on specific columns
     final_executed_query = processed_query_for_ilike
     case_insensitive_columns = {"orders": ["status"], "users": ["city"]}
     flat_insensitive_columns = [col for cols in case_insensitive_columns.values() for col in cols]
@@ -210,7 +208,6 @@ def simulate_query_duckdb(sql_query, tables_dict):
         return result_df
     except Exception as e:
         error_message = f"Simulation Error: {str(e)}"
-        # Add hints for common errors
         e_str = str(e).lower()
         hint = ""
         if "ILIKE" in str(e).upper():
@@ -315,7 +312,7 @@ def display_simulation(title, result_data):
     else: st.error(f"_(Unexpected simulation result type: {type(result_data)})_")
 
 
-# --- Streamlit App UI ---
+# --- Streamlit App UI (No changes to Start or In-Progress screens) ---
 
 # --- Start Screen ---
 if not st.session_state.quiz_started:
@@ -326,9 +323,8 @@ if not st.session_state.quiz_started:
         - This quiz uses standard **SQL syntax**.
         - String comparisons for `'status'` and `'city'` columns are simulated to be **case-insensitive**.
         - **Both single quotes (') and double quotes (") are accepted** for string literals.
-        - Queries are evaluated by an AI for correctness and logic. DuckDB simulates query execution.
         """)
-
+    # ... (rest of the start screen code is unchanged)
     col1_intro, col2_overview = st.columns([2, 1])
     with col1_intro:
         st.write("""
@@ -422,37 +418,41 @@ elif st.session_state.quiz_started and not st.session_state.quiz_completed:
                 st.session_state.quiz_completed = True
                 st.rerun()
 
-# --- NEW: Quiz Completion / Simplified Results Screen ---
+# --- MODIFIED: Quiz Completion / Simplified Results Screen ---
 elif st.session_state.quiz_completed:
     st.balloons()
-    st.markdown("<h1 style='text-align: center; margin-bottom: 20px;'>🎉 Badhai Ho! Challenge Poora Hua!</h1>", unsafe_allow_html=True)
+    st.markdown("<h1 style='text-align: center; margin-bottom: 20px;'>🎉 Badhai Ho! Aapne SQL Challenge Poora Kar Liya!</h1>", unsafe_allow_html=True)
     st.markdown("---")
 
     score = calculate_score(st.session_state.user_answers)
 
-    st.subheader("📊 Aapka Final Score")
+    # --- Presentable Scoreboard UI ---
+    st.subheader("Aapka Final Score")
+    st.progress(int(score) / 100)
+    
     score_col, message_col = st.columns([1, 2])
-
     with score_col:
         st.markdown(
             f"<div class='score-box'>"
-            f"<p class='score-title'>Final Score</p>"
+            f"<p class='score-title'>Score</p>"
             f"<p class='score-value'>{score:.0f}%</p>"
             f"</div>", unsafe_allow_html=True
         )
-    st.progress(int(score) / 100)
     
     with message_col:
         if score >= 80:
-            st.success(f"🏆 **Shabaash! Aapne {score:.0f}% score kiya!** SQL concepts aapko achhe se samajh aa gaye hain.")
+            st.success(f"🏆 **Shabaash! Aapne {score:.0f}% ya usse zyada score kiya!**")
+            st.markdown("Aap apna SQL certificate generate kar sakte hain. Niche button pe click karein!")
+            if st.button("📄 Generate Your Certificate", type="primary"):
+                 st.info("📜 Certificate feature jald hi aa raha hai!")
         elif score >= 50:
-            st.info(f"👍 **Achhi Koshish!** Aapka score {score:.0f}% hai. Thodi aur practice se aap zaroor behtar karenge!")
+            st.info(f"👍 **Achhi Koshish!** Aapka score {score:.0f}% hai. Certificate ke liye 80% chahiye. Thodi aur mehnat se aap zaroor achieve kar lenge!")
         else:
             st.warning(f"😟 **Koi Baat Nahi!** Aapka score {score:.0f}% hai. Himmat mat haro, practice karte raho aur concepts ko revise karo!")
-
+    
     st.markdown("---")
 
-    # NEW: Simple, expandable review section
+    # --- NEW: Simple, expandable review section (Replaces the old summary) ---
     st.subheader("📋 Review Your Answers")
     for idx, answer in enumerate(st.session_state.user_answers):
         with st.expander(f"{get_emoji(answer['is_correct'])} **Question {idx + 1}:** {answer['question']}"):
