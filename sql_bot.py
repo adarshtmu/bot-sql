@@ -596,33 +596,140 @@ elif st.session_state.quiz_started and not st.session_state.quiz_completed:
         else:
             st.warning("⚠️ Please enter your SQL query before submitting.")
 
-
-
-
-
-else:
-    # --- Quiz Completed Screen ---
-    st.title("🎉 Quiz Complete!")
-    score = calculate_score(st.session_state.user_answers)
-    correct_count = sum(1 for ans in st.session_state.user_answers if ans.get("is_correct", False))
-    total_questions = len(st.session_state.user_answers)
-    performance = analyze_performance(st.session_state.user_answers)
-
-    st.markdown(f"**🎉 Badhai ho! Aapne quiz complete kar liya!**")
-    st.markdown(f"**Aapka Score:** {score:.0f}% ({correct_count}/{total_questions} questions correct)")
-
-    st.markdown("**Performance Summary:**")
-    if performance["overall_feedback"]:
-        st.markdown(performance["overall_feedback"])
+# --- Quiz Completed Screen ---
+elif st.session_state.quiz_completed:
+    st.balloons()
+    st.title("🎉 Badhai Ho! Aapne SQL Challenge Poora Kar Liya!")
+    final_score = calculate_score(st.session_state.user_answers)
+    
+    st.markdown("### Aapka Final Score")
+    st.metric("Score", f"{final_score:.2f}%")
+    st.progress(final_score / 100)
+    
+    # Conditional Button Logic
+    if final_score >= 80:
+        st.markdown("---")
+        st.markdown("#### 🏆 Shabaash! Aapne 80% ya usse zyada score kiya!")
+        st.markdown("Aap apna SQL certificate generate kar sakte hain. Niche button pe click karein!")
+        st.link_button(
+            "🎓 Generate Your Certificate",
+            "https://superprofile.bio/vp/corporate-bhaiya-sql-page",
+            type="primary"
+        )
     else:
-        st.markdown("Performance analysis could not be generated. Please review your answers and feedback for insights.")
-
+        st.markdown("---")
+        st.markdown("#### 📚 Thodi Aur Practice Chahiye? Mentor Se Seekhein!")
+        st.markdown(
+            "Arre yaar, score thoda kam hai, par tension mat lo! Ek expert mentor ke saath practice karo aur SQL master ban jao! "
+            "Niche button pe click karke **Corporate Bhaiya** ke saath mentorship book karo."
+        )
+        st.link_button(
+            "🚀 Book a Mentor Session with Corporate Bhaiya",
+            "https://www.corporatebhaiya.com/",
+            type="primary"
+        )
+    
     st.markdown("---")
-    st.markdown("**Tip:** You can review your answers and detailed feedback in the 'Ab Tak Ke Jawaab Aur Feedback' section above.")
-
-    if st.button("🏠 Restart Quiz"):
-        st.session_state.quiz_started = False
-        st.session_state.quiz_completed = False
+    st.subheader("📝 Aapke Jawaab Aur Feedback Ka Summary")
+    
+    for i, ans_data in enumerate(st.session_state.user_answers):
+        q_num = i + 1
+        is_correct = ans_data.get('is_correct', False)
+        with st.expander(f"Question {q_num}: {ans_data['question']} {get_emoji(is_correct)}", expanded=False):
+            st.write(f"**Aapka Jawaab:**")
+            st.code(ans_data.get('student_answer', '(No answer provided)'), language='sql')
+            st.write(f"**SQL Mentor Feedback:**")
+            feedback_text = ans_data.get("feedback", "_Feedback not available._")
+            st.markdown(feedback_text)
+            st.markdown("---")
+            display_simulation("Simulated Result (Your Query Output)", ans_data.get("actual_result", "N/A"))
+            
+            show_expected_final = False
+            if not is_correct:
+                show_expected_final = True
+            elif isinstance(ans_data.get("actual_result"), pd.DataFrame) and \
+                 isinstance(ans_data.get("expected_result"), pd.DataFrame) and \
+                 not ans_data["actual_result"].equals(ans_data["expected_result"]):
+                show_expected_final = True
+            elif isinstance(ans_data.get("actual_result"), str) and \
+                 ans_data.get("actual_result") != ans_data.get("expected_result"):
+                show_expected_final = True
+            
+            if show_expected_final:
+                display_simulation("Simulated Result (Correct Query Output)", ans_data.get("expected_result", "N/A"))
+    
+    st.markdown("---")
+    st.subheader("💡 AI Mentor Se Detailed Performance Analysis")
+    
+    if st.button("📊 Show Detailed Analysis", key="show_analysis"):
+        st.session_state.show_detailed_feedback = not st.session_state.show_detailed_feedback
+    
+    if st.session_state.show_detailed_feedback:
+        with st.spinner("🧠 Performance analysis generate ho raha hai..."):
+            performance_summary = analyze_performance(st.session_state.user_answers)
+            feedback_text = performance_summary.get("overall_feedback", "Analysis available nahi hai.")
+            
+            with st.container():
+                st.markdown('<div class="feedback-container">', unsafe_allow_html=True)
+                st.markdown('<div class="feedback-header">📈 Aapki Performance Ka Vistaar Se Analysis</div>', unsafe_allow_html=True)
+                
+                try:
+                    sections = re.split(r'(Overall Impression:|Strengths:|Areas for Improvement:|Next Steps / Encouragement:)', feedback_text)
+                    section_dict = {}
+                    for i in range(1, len(sections), 2):
+                        section_dict[sections[i].strip(':')] = sections[i+1].strip()
+                except:
+                    section_dict = {"Full Feedback": feedback_text}
+                
+                if "Overall Impression" in section_dict:
+                    st.markdown("### 🌟 Overall Impression")
+                    st.markdown(section_dict["Overall Impression"])
+                
+                st.markdown('<div class="feedback-section">', unsafe_allow_html=True)
+                st.markdown("### ✅ Strengths")
+                if "Strengths" in section_dict:
+                    strengths = section_dict["Strengths"].split('\n')
+                    for strength in strengths:
+                        if strength.strip():
+                            st.markdown(f'<div class="strength-item">✔ {strength.strip()}</div>', unsafe_allow_html=True)
+                elif performance_summary.get("strengths"):
+                    for strength in performance_summary["strengths"]:
+                        st.markdown(f'<div class="strength-item">✔ {strength}</div>', unsafe_allow_html=True)
+                else:
+                    st.markdown("Koi specific strengths identify nahi hue. Aur practice karo!")
+                st.markdown('</div>', unsafe_allow_html=True)
+                
+                st.markdown('<div class="feedback-section">', unsafe_allow_html=True)
+                st.markdown("### 📝 Areas for Improvement")
+                if "Areas for Improvement" in section_dict:
+                    weaknesses = section_dict["Areas for Improvement"].split('\n')
+                    for weakness in weaknesses:
+                        if weakness.strip():
+                            st.markdown(f'<div class="weakness-item">➡ {weakness.strip()}</div>', unsafe_allow_html=True)
+                elif performance_summary.get("weaknesses"):
+                    for weakness in performance_summary["weaknesses"]:
+                        st.markdown(f'<div class="weakness-item">➡ {weakness}</div>', unsafe_allow_html=True)
+                else:
+                    st.markdown("Koi major weaknesses nahi! Bas practice jari rakho.")
+                st.markdown('</div>', unsafe_allow_html=True)
+                
+                if "Next Steps / Encouragement" in section_dict:
+                    st.markdown("### 🚀 Next Steps")
+                    st.markdown(section_dict["Next Steps / Encouragement"])
+                
+                if "Full Feedback" in section_dict:
+                    st.markdown("### 📋 Complete Feedback")
+                    st.markdown(section_dict["Full Feedback"])
+                
+                st.markdown('</div>', unsafe_allow_html=True)
+    
+    st.markdown("---")
+    if st.button("🔄 Dobara Try Karein?"):
         st.session_state.user_answers = []
         st.session_state.current_question = 0
+        st.session_state.quiz_started = False
+        st.session_state.quiz_completed = False
+        st.session_state.show_detailed_feedback = False
         st.rerun()
+
+
