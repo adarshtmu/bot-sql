@@ -455,6 +455,7 @@ if not st.session_state.quiz_started:
     st.markdown("### Finish the Quiz Successfully to Unlock Your SQL Certificate")
     st.markdown("""
         **📌 Important Notes:**
+        - To be eligible for a certificate, you must achieve a score of at least 80%.
         - This quiz uses standard **SQL syntax** (similar to MySQL/PostgreSQL).
         - String comparisons (like `WHERE city = 'new york'` or `WHERE status = "pending"`) are simulated to be **case-insensitive** for common text columns (`status`, `city`).
         - **Both single quotes (') and double quotes (") are accepted** for string literals in this simulation.
