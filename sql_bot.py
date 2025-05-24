@@ -678,10 +678,15 @@ elif st.session_state.quiz_completed:
             unsafe_allow_html=True
         )
 
-    # --- Optionally, keep the analysis/retake button below, or remove for a cleaner finish ---
+    st.markdown("---")
+    if st.button("🔄 Try Again?"):
+        st.session_state.user_answers = []
+        st.session_state.current_question = 0
+        st.session_state.quiz_started = False
+        st.session_state.quiz_completed = False
+        st.session_state.show_detailed_feedback = False
+        st.rerun()
 
-    # --- (Rest of your summary/feedback code remains as is) ---
-    # ... (summary, feedback, analysis, etc.)
     
     st.markdown("---")
     st.subheader("📝 Aapke Jawaab Aur Feedback Ka Summary")
