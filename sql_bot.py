@@ -567,121 +567,121 @@ def analyze_performance(user_answers):
                 performance_data["overall_feedback"] = f"Analysis failed: {e}"
             return performance_data
         
-        # --- Streamlit UI ---
-        st.title("🔥 SQL Quiz Challenge")
-        st.markdown("""
-        Welcome to the **SQL Quiz Challenge**!  
-        Test your SQL skills on real tables, get instant feedback, and see how you did on our pro-style scoreboard.
-        """)
-        
-        if not st.session_state.quiz_started:
-            if st.button("🚦 Start SQL Challenge", type="primary"):
-                st.session_state.quiz_started = True
-                st.session_state.current_question = 0
-                st.session_state.user_answers = []
-                st.session_state.quiz_completed = False
-                st.experimental_rerun()
-            st.markdown("#### Sample Tables Available")
-            st.dataframe(users_table, use_container_width=True)
-            st.dataframe(orders_table, use_container_width=True)
-            st.stop()
-        
-        if st.session_state.quiz_started and not st.session_state.quiz_completed:
-            q_idx = st.session_state.current_question
-            q_total = len(sql_questions)
-            question_data = sql_questions[q_idx]
-            st.markdown(f"### Question {q_idx+1} of {q_total}")
-            st.info(question_data["question"])
-            example_exp = st.expander("Show sample table(s)", expanded=False)
-            for tname in question_data["relevant_tables"]:
-                if tname in original_tables:
-                    example_exp.dataframe(original_tables[tname], use_container_width=True)
-            st.markdown("Write your SQL answer below:")
-            user_sql = st.text_area("Enter your SQL query", value="", height=120, key=f"answer_{q_idx}")
-        
-            if st.button("Submit Answer", key=f"submit_{q_idx}"):
-                feedback, is_correct, expected_result, actual_result, llm_output = evaluate_answer_with_llm(
-                    question_data, user_sql, original_tables)
-                st.session_state.user_answers.append({
-                    "question": question_data["question"],
-                    "student_answer": user_sql,
-                    "is_correct": is_correct,
-                    "feedback": feedback,
-                    "llm_output": llm_output,
-                    "expected_result": expected_result,
-                    "actual_result": actual_result
-                })
-                if q_idx + 1 >= q_total:
-                    st.session_state.quiz_completed = True
-                else:
-                    st.session_state.current_question += 1
-                st.experimental_rerun()
-        
-            if q_idx > 0 and st.button("⬅️ Previous Question"):
-                st.session_state.current_question -= 1
-                st.experimental_rerun()
-        
-        if st.session_state.quiz_completed:
-            score = calculate_score(st.session_state.user_answers)
-            perf_key, trophy, perf_title = get_performance_level(score)
-            st.markdown(f"""
-            <div class="scoreboard-container">
-                <div class="scoreboard-title">{trophy} Your Scoreboard</div>
-                <div class="score-display">{score:.2f}%</div>
-                <span class="performance-badge badge-{perf_key}">{perf_title}</span>
-                <div class="stats-grid">
-                    <div class="stat-card"><span class="stat-number">{len(st.session_state.user_answers)}</span><span class="stat-label">Total Questions</span></div>
-                    <div class="stat-card"><span class="stat-number">{sum(1 for a in st.session_state.user_answers if a.get('is_correct'))}</span><span class="stat-label">Correct</span></div>
-                    <div class="stat-card"><span class="stat-number">{sum(1 for a in st.session_state.user_answers if not a.get('is_correct'))}</span><span class="stat-label">Incorrect</span></div>
-                </div>
-            </div>
-            """, unsafe_allow_html=True)
-            st.success("Quiz complete! Dekhiye apna detailed feedback aur performance analysis niche.")
-        
-            st.markdown("## 📝 Detailed Feedback")
-            for idx, ans in enumerate(st.session_state.user_answers):
-                with st.expander(f"Question {idx+1}: {ans['question']}", expanded=(idx == 0)):
-                    st.markdown(f"**Your Answer:**\n```sql\n{ans['student_answer']}\n```")
-                    st.markdown(f"**Feedback:**\n{ans['feedback']}")
-                    if isinstance(ans["expected_result"], pd.DataFrame):
-                        st.markdown("**Expected Result:**")
-                        st.dataframe(ans["expected_result"], use_container_width=True)
-                    else:
-                        st.markdown(f"**Expected Result:** {ans['expected_result']}")
-                    if isinstance(ans["actual_result"], pd.DataFrame):
-                        st.markdown("**Your Query Result:**")
-                        st.dataframe(ans["actual_result"], use_container_width=True)
-                    else:
-                        st.markdown(f"**Your Query Result:** {ans['actual_result']}")
-                    with st.expander("Show Full AI Evaluation Output"):
-                        st.markdown(f"```\n{ans['llm_output']}\n```")
-            # Performance Analysis
-            st.markdown("## 📊 Performance Analysis")
-            perf = analyze_performance(st.session_state.user_answers)
-            st.markdown(f"""
-            <div class="feedback-container">
-                <div class="feedback-header">Aapki Performance Summary</div>
-                <div class="feedback-section">
-                    <strong>Strengths:</strong>
-                    <ul>
-                        {''.join(f"<li class='strength-item'>{q}</li>" for q in perf['strengths']) or "<li>Koi khas strength nahi dikh rahi hai abhi.</li>"}
-                    </ul>
-                </div>
-                <div class="feedback-section">
-                    <strong>Weaknesses:</strong>
-                    <ul>
-                        {''.join(f"<li class='weakness-item'>{q}</li>" for q in perf['weaknesses']) or "<li>Kamjori nahi dikh rahi abhi!</li>"}
-                    </ul>
-                </div>
-                <div class="feedback-section">
-                    <strong>Overall Feedback:</strong><br>
-                    {perf['overall_feedback']}
-                </div>
-            </div>
-            """, unsafe_allow_html=True)
-            if st.button("🔁 Retake Quiz"):
-                st.session_state.quiz_started = False
-                st.session_state.current_question = 0
-                st.session_state.user_answers = []
-                st.session_state.quiz_completed = False
-                st.experimental_rerun()
+# --- Streamlit UI ---
+st.title("🔥 SQL Quiz Challenge")
+st.markdown("""
+Welcome to the **SQL Quiz Challenge**!  
+Test your SQL skills on real tables, get instant feedback, and see how you did on our pro-style scoreboard.
+""")
+
+if not st.session_state.quiz_started:
+    if st.button("🚦 Start SQL Challenge", type="primary"):
+        st.session_state.quiz_started = True
+        st.session_state.current_question = 0
+        st.session_state.user_answers = []
+        st.session_state.quiz_completed = False
+        st.experimental_rerun()
+    st.markdown("#### Sample Tables Available")
+    st.dataframe(users_table, use_container_width=True)
+    st.dataframe(orders_table, use_container_width=True)
+    st.stop()
+
+if st.session_state.quiz_started and not st.session_state.quiz_completed:
+    q_idx = st.session_state.current_question
+    q_total = len(sql_questions)
+    question_data = sql_questions[q_idx]
+    st.markdown(f"### Question {q_idx+1} of {q_total}")
+    st.info(question_data["question"])
+    example_exp = st.expander("Show sample table(s)", expanded=False)
+    for tname in question_data["relevant_tables"]:
+        if tname in original_tables:
+            example_exp.dataframe(original_tables[tname], use_container_width=True)
+    st.markdown("Write your SQL answer below:")
+    user_sql = st.text_area("Enter your SQL query", value="", height=120, key=f"answer_{q_idx}")
+
+    if st.button("Submit Answer", key=f"submit_{q_idx}"):
+        feedback, is_correct, expected_result, actual_result, llm_output = evaluate_answer_with_llm(
+            question_data, user_sql, original_tables)
+        st.session_state.user_answers.append({
+            "question": question_data["question"],
+            "student_answer": user_sql,
+            "is_correct": is_correct,
+            "feedback": feedback,
+            "llm_output": llm_output,
+            "expected_result": expected_result,
+            "actual_result": actual_result
+        })
+        if q_idx + 1 >= q_total:
+            st.session_state.quiz_completed = True
+        else:
+            st.session_state.current_question += 1
+        st.experimental_rerun()
+
+    if q_idx > 0 and st.button("⬅️ Previous Question"):
+        st.session_state.current_question -= 1
+        st.experimental_rerun()
+
+if st.session_state.quiz_completed:
+    score = calculate_score(st.session_state.user_answers)
+    perf_key, trophy, perf_title = get_performance_level(score)
+    st.markdown(f"""
+    <div class="scoreboard-container">
+        <div class="scoreboard-title">{trophy} Your Scoreboard</div>
+        <div class="score-display">{score:.2f}%</div>
+        <span class="performance-badge badge-{perf_key}">{perf_title}</span>
+        <div class="stats-grid">
+            <div class="stat-card"><span class="stat-number">{len(st.session_state.user_answers)}</span><span class="stat-label">Total Questions</span></div>
+            <div class="stat-card"><span class="stat-number">{sum(1 for a in st.session_state.user_answers if a.get('is_correct'))}</span><span class="stat-label">Correct</span></div>
+            <div class="stat-card"><span class="stat-number">{sum(1 for a in st.session_state.user_answers if not a.get('is_correct'))}</span><span class="stat-label">Incorrect</span></div>
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
+    st.success("Quiz complete! Dekhiye apna detailed feedback aur performance analysis niche.")
+
+    st.markdown("## 📝 Detailed Feedback")
+    for idx, ans in enumerate(st.session_state.user_answers):
+        with st.expander(f"Question {idx+1}: {ans['question']}", expanded=(idx == 0)):
+            st.markdown(f"**Your Answer:**\n```sql\n{ans['student_answer']}\n```")
+            st.markdown(f"**Feedback:**\n{ans['feedback']}")
+            if isinstance(ans["expected_result"], pd.DataFrame):
+                st.markdown("**Expected Result:**")
+                st.dataframe(ans["expected_result"], use_container_width=True)
+            else:
+                st.markdown(f"**Expected Result:** {ans['expected_result']}")
+            if isinstance(ans["actual_result"], pd.DataFrame):
+                st.markdown("**Your Query Result:**")
+                st.dataframe(ans["actual_result"], use_container_width=True)
+            else:
+                st.markdown(f"**Your Query Result:** {ans['actual_result']}")
+            with st.expander("Show Full AI Evaluation Output"):
+                st.markdown(f"```\n{ans['llm_output']}\n```")
+    # Performance Analysis
+    st.markdown("## 📊 Performance Analysis")
+    perf = analyze_performance(st.session_state.user_answers)
+    st.markdown(f"""
+    <div class="feedback-container">
+        <div class="feedback-header">Aapki Performance Summary</div>
+        <div class="feedback-section">
+            <strong>Strengths:</strong>
+            <ul>
+                {''.join(f"<li class='strength-item'>{q}</li>" for q in perf['strengths']) or "<li>Koi khas strength nahi dikh rahi hai abhi.</li>"}
+            </ul>
+        </div>
+        <div class="feedback-section">
+            <strong>Weaknesses:</strong>
+            <ul>
+                {''.join(f"<li class='weakness-item'>{q}</li>" for q in perf['weaknesses']) or "<li>Kamjori nahi dikh rahi abhi!</li>"}
+            </ul>
+        </div>
+        <div class="feedback-section">
+            <strong>Overall Feedback:</strong><br>
+            {perf['overall_feedback']}
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
+    if st.button("🔁 Retake Quiz"):
+        st.session_state.quiz_started = False
+        st.session_state.current_question = 0
+        st.session_state.user_answers = []
+        st.session_state.quiz_completed = False
+        st.experimental_rerun()       
