@@ -449,6 +449,7 @@ def display_simulation(title, result_data):
 # --- Streamlit App UI ---
 
 # --- Start Screen ---
+# --- Start Screen ---
 if not st.session_state.quiz_started:
     st.markdown("""
         <style>
@@ -495,7 +496,7 @@ if not st.session_state.quiz_started:
         .edtech-btn {
             display: block;
             width: 100%;
-            background: linear-gradient(90deg,#2d6cdf 70%, #47c8f7 100%);
+            background: linear-gradient(90deg, #2d6cdf 70%, #47c8f7 100%);
             color: #fff;
             font-size: 1.3rem;
             font-weight: 600;
@@ -508,13 +509,13 @@ if not st.session_state.quiz_started:
             transition: background 0.2s;
         }
         .edtech-btn:hover {
-            background: linear-gradient(90deg,#1b4e94 70%, #2fb4e9 100%);
+            background: linear-gradient(90deg, #1b4e94 70%, #2fb4e9 100%);
         }
         </style>
         <div class="edtech-card">
-            <div class="edtech-title">🎓 SQL Practice Mentor</div>
+            <div class="edtech-title">🎓 SQL Mentor</div>
             <div class="edtech-subtitle">
-                Boost your SQL skills with interactive challenges, instant AI feedback, and real-world data.<br>
+                Boost your SQL skills with interactive challenges,<br>instant AI feedback, and real-world data.<br>
                 <span style='color:#1976d2; font-weight:500;'>Learn. Practice. Improve.</span>
             </div>
             <ul class="edtech-list">
@@ -523,10 +524,11 @@ if not st.session_state.quiz_started:
                 <li>Track your progress and earn a certificate</li>
                 <li>Mobile responsive and distraction-free</li>
             </ul>
-            <form action="" method="post">
-                <button class="edtech-btn" type="submit">🚀 Start SQL Challenge!</button>
-            </form>
+            <button class="edtech-btn" onclick="document.getElementById('start-form').submit();">🚀 Start SQL Challenge!</button>
         </div>
+        <form id="start-form" action="" method="post" style="display: none;">
+            <input type="hidden" name="start_quiz" value="true">
+        </form>
     """, unsafe_allow_html=True)
 
     col1, col2 = st.columns([2, 1])
@@ -555,23 +557,23 @@ if not st.session_state.quiz_started:
         st.error(f"Error displaying table previews: {e}")
     
     with st.expander("📝 Quiz Ke Baare Mein"):
-        st.write(f"""
-        - Aapko {len(sql_questions)} SQL query challenges solve karne honge.
+        st.write("""
+        - Aapko SQL query challenges solve karne honge.
         - Har jawaab ke baad AI Mentor se immediate feedback milega.
         - **SQL Dialect Focus:** Standard SQL (MySQL/PostgreSQL like).
         - Case-insensitivity for `status` and `city` columns in `WHERE =` clauses is simulated.
         - String literals can be enclosed in single quotes (`'...'`) or double quotes (`"..."`).
         """)
     
-    start = st.button("Start", key="start-btn", help="Begin your SQL learning journey!")
-    if start:
+    # Handle form submission to start the quiz
+    if st.experimental_get_query_params().get("start_quiz", ["false"])[0] == "true":
         st.session_state.quiz_started = True
         st.session_state.user_answers = []
         st.session_state.current_question = 0
         st.session_state.quiz_completed = False
         st.session_state.show_detailed_feedback = False
+        st.experimental_set_query_params()  # Clear query params
         st.rerun()
-
 # --- Quiz In Progress Screen ---
 elif st.session_state.quiz_started and not st.session_state.quiz_completed:
     st.title("✍️ SQL Query Challenge")
