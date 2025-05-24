@@ -450,23 +450,85 @@ def display_simulation(title, result_data):
 
 # --- Start Screen ---
 if not st.session_state.quiz_started:
-    st.markdown(
-        """
-        <div style='display:flex; flex-direction:column; align-items:center; margin-top:40px;'>
-            <h1 style='color:#2d6cdf; font-size:2.5rem; margin-bottom:0.3em;'>🎓 SQL Practice Mentor</h1>
-            <p style='font-size:1.2rem; color:#555; margin-bottom:1.5em;'>
-                Boost your SQL skills with bite-sized, interactive challenges. Get instant feedback and learn with real-world examples!
-            </p>
-            <div style='background:#f3f6fa; border-radius:12px; padding:32px 24px; box-shadow:0 4px 16px rgba(0,0,0,0.07); max-width:440px; text-align:center; margin-bottom:2em;'>
-                <ul style='list-style-type:none; padding:0; color:#3a3a3a; font-size:1.08rem;'>
-                    <li>✅ Simple instructions and table previews</li>
-                    <li>✅ Friendly feedback in Hinglish</li>
-                    <li>✅ Learn at your own pace</li>
-                </ul>
+    st.markdown("""
+        <style>
+        .edtech-card {
+            background: #fff;
+            border-radius: 16px;
+            box-shadow: 0 6px 24px rgba(44, 62, 80, 0.07);
+            padding: 40px 32px 32px 32px;
+            max-width: 480px;
+            margin: 40px auto 0 auto;
+        }
+        .edtech-title {
+            color: #2d6cdf;
+            font-size: 2.5rem;
+            text-align: center;
+            font-weight: 700;
+            margin-bottom: 0.2em;
+        }
+        .edtech-subtitle {
+            color: #444;
+            font-size: 1.18rem;
+            text-align: center;
+            margin-bottom: 1.8em;
+        }
+        .edtech-list {
+            font-size: 1.09rem;
+            color: #2d5e6f;
+            margin-bottom: 1.7em;
+            list-style: none;
+            padding-left: 0;
+        }
+        .edtech-list li {
+            margin-bottom: 0.5em;
+            padding-left: 1.3em;
+            position: relative;
+        }
+        .edtech-list li:before {
+            content: "✓";
+            position: absolute;
+            left: 0;
+            color: #27ae60;
+            font-weight: bold;
+        }
+        .edtech-btn {
+            display: block;
+            width: 100%;
+            background: linear-gradient(90deg,#2d6cdf 70%, #47c8f7 100%);
+            color: #fff;
+            font-size: 1.3rem;
+            font-weight: 600;
+            border: none;
+            border-radius: 8px;
+            padding: 18px 0;
+            margin-top: 18px;
+            cursor: pointer;
+            box-shadow: 0 2px 8px rgba(44, 62, 80, 0.11);
+            transition: background 0.2s;
+        }
+        .edtech-btn:hover {
+            background: linear-gradient(90deg,#1b4e94 70%, #2fb4e9 100%);
+        }
+        </style>
+        <div class="edtech-card">
+            <div class="edtech-title">🎓 SQL Practice Mentor</div>
+            <div class="edtech-subtitle">
+                Boost your SQL skills with interactive challenges, instant AI feedback, and real-world data.<br>
+                <span style='color:#1976d2; font-weight:500;'>Learn. Practice. Improve.</span>
             </div>
+            <ul class="edtech-list">
+                <li>Simple, guided instructions and dataset previews</li>
+                <li>Instant, friendly feedback in Hinglish</li>
+                <li>Track your progress and earn a certificate</li>
+                <li>Mobile responsive and distraction-free</li>
+            </ul>
+            <form action="" method="post">
+                <button class="edtech-btn" type="submit">🚀 Start SQL Challenge!</button>
+            </form>
         </div>
-        """, unsafe_allow_html=True
-    )
+    """, unsafe_allow_html=True)
+
     col1, col2 = st.columns([2, 1])
     with col1:
         st.write("""
