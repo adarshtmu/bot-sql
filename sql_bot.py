@@ -115,10 +115,11 @@ st.set_page_config(page_title="SQL Mentor", layout="wide") # Use wide layout
 st.markdown(hide_streamlit_style, unsafe_allow_html=True)
 
 # --- Set up Gemini API ---
-gemini_api_key = "AIzaSyAfzl_66GZsgaYjAM7cT2djVCBCAr86t2k"  # ⚠️ REPLACE WITH YOUR ACTUAL GEMINI API KEY
+# ⚠️ IMPORTANT: Replace with your actual Gemini API Key
+gemini_api_key = "AIzaSyAfzl_66GZsgaYjAM7cT2djVCBCAr86t2k"
 
 if not gemini_api_key or gemini_api_key == "YOUR_GEMINI_API_KEY":
-    st.error("🚨 Gemini API Key is missing. Please add your key in the code (line 59). The app cannot function without it.")
+    st.error("🚨 Gemini API Key is missing. Please add your key in the code (line 123). The app cannot function without it.")
     st.stop()
 
 try:
@@ -165,8 +166,6 @@ if "user_answers" not in st.session_state: st.session_state.user_answers = []
 if "current_question" not in st.session_state: st.session_state.current_question = 0
 if "quiz_started" not in st.session_state: st.session_state.quiz_started = False
 if "quiz_completed" not in st.session_state: st.session_state.quiz_completed = False
-if "detailed_analysis_content" not in st.session_state: st.session_state.detailed_analysis_content = None
-if "force_regenerate_analysis" not in st.session_state: st.session_state.force_regenerate_analysis = True
 
 
 # --- Helper Functions ---
@@ -177,16 +176,15 @@ def simulate_query_duckdb(sql_query, tables_dict):
         return "Simulation Error: No tables provided for context."
 
     con = None
-    processed_query_for_ilike = sql_query
-
+    # Attempt to normalize double quotes to single quotes for broader compatibility
     try:
         double_quote_pattern = r'"([^"]*)"'
         processed_query_for_ilike = re.sub(double_quote_pattern, r"'\1'", sql_query)
     except Exception:
-        processed_query_for_ilike = sql_query
+        processed_query_for_ilike = sql_query # Fallback if regex fails
 
-    modified_sql_query = processed_query_for_ilike
-    final_executed_query = modified_sql_query
+    # Logic for case-insensitive matching on specific columns
+    final_executed_query = processed_query_for_ilike
     case_insensitive_columns = {"orders": ["status"], "users": ["city"]}
     flat_insensitive_columns = [col for cols in case_insensitive_columns.values() for col in cols]
 
@@ -202,6 +200,7 @@ def simulate_query_duckdb(sql_query, tables_dict):
             final_executed_query = modified_sql_query
         except Exception:
             final_executed_query = processed_query_for_ilike
+
     try:
         con = duckdb.connect(database=':memory:', read_only=False)
         for table_name, df in tables_dict.items():
@@ -211,26 +210,17 @@ def simulate_query_duckdb(sql_query, tables_dict):
         return result_df
     except Exception as e:
         error_message = f"Simulation Error: {str(e)}"
+        # Add hints for common errors
         e_str = str(e).lower()
         hint = ""
-        if "ILIKE" in str(e).upper() or (modified_sql_query != processed_query_for_ilike and "syntax error" in e_str):
-            hint = "\n\n**Hint:** The simulation tried using case-insensitive matching (ILIKE). Check your SQL syntax."
-        else:
-            catalog_match = re.search(r'table with name "([^"]+)" does not exist', e_str)
-            binder_match = re.search(r'column "([^"]+)" not found', e_str)
-            syntax_match = re.search(r'syntax error at or near "([^"]+)"', e_str) or \
-                           re.search(r'syntax error at end of input', e_str) or \
-                           re.search(r'syntax error at:', e_str)
-            type_match = re.search(r'conversion error:.*try cast\("([^"]+)"', e_str)
-
-            if catalog_match: hint = f"\n\n**Hint:** Table '{catalog_match.group(1)}' might be misspelled. Available: {list(tables_dict.keys())}."
-            elif binder_match: hint = f"\n\n**Hint:** Column '{binder_match.group(1)}' might be misspelled."
-            elif syntax_match:
-                problem_area = syntax_match.group(1) if syntax_match.groups() and syntax_match.lastindex == 1 else "indicated location"
-                hint = f"\n\n**Hint:** Check SQL syntax near `{problem_area}`. Use single quotes for text (e.g., `'example'`)."
-            elif type_match: hint = f"\n\n**Hint:** Type mismatch with '{type_match.group(1)}'."
-            elif "syntax error" in e_str: hint = "\n\n**Hint:** Double-check SQL syntax. Use single quotes for strings."
-        if not hint: hint = "\n\n**Hint:** Check query syntax, table/column names, and data types. Use single quotes for strings."
+        if "ILIKE" in str(e).upper():
+            hint = "\n\n**Hint:** The simulation tried using case-insensitive matching (ILIKE), which might have caused a syntax issue. Please check your SQL syntax."
+        elif 'table with name' in e_str:
+            hint = f"\n\n**Hint:** A table name might be misspelled. Available tables are: {list(tables_dict.keys())}."
+        elif 'column' in e_str and 'not found' in e_str:
+             hint = "\n\n**Hint:** A column name might be misspelled. Check the table schemas."
+        elif 'syntax error' in e_str:
+            hint = "\n\n**Hint:** There's a syntax error in your query. Remember to use single quotes for text (e.g., `'Completed'`)."
         error_message += hint
         return error_message
     finally:
@@ -250,26 +240,16 @@ def evaluate_answer_with_llm(question_data, student_answer, original_tables_dict
     question = question_data["question"]
     relevant_table_names = question_data["relevant_tables"]
     correct_answer_example = question_data["correct_answer_example"]
-
+    
     schema_info = ""
-    if not relevant_table_names:
-        schema_info = "No specific table schema context provided.\n"
-    else:
-        for name in relevant_table_names:
-            columns = get_table_schema(name, original_tables_dict)
-            if columns:
-                try:
-                    df = original_tables_dict[name]
-                    dtypes_str = df.dtypes.to_string() if isinstance(df, pd.DataFrame) else "N/A"
-                    schema_info += f"Table '{name}':\n  Columns: {columns}\n  DataTypes:\n{dtypes_str}\n\n"
-                except Exception as e_schema:
-                    schema_info += f"Table '{name}': Columns {columns} (Error getting schema details: {e_schema})\n\n"
-            else:
-                schema_info += f"Table '{name}': Schema information not found.\n"
+    for name in relevant_table_names:
+        columns = get_table_schema(name, original_tables_dict)
+        if columns:
+            schema_info += f"Table '{name}': Columns {columns}\n"
 
     prompt = f"""
     You are an expert SQL evaluator acting as a friendly SQL mentor. Analyze the student's SQL query.
-    Assume standard SQL syntax (MySQL/PostgreSQL).
+    Assume standard SQL syntax.
 
     **Evaluation Task:**
     1.  **Question:** {question}
@@ -281,14 +261,10 @@ def evaluate_answer_with_llm(question_data, student_answer, original_tables_dict
         ```
 
     **Analysis Instructions:**
-    * **Correctness:** Does the query accurately answer the **Question** based on the **Schemas**?
-      * **QUIZ CONTEXT:** For *this quiz*, equality comparisons (`=`) on text columns `'status'` (in `orders`) and `'city'` (in `users`) are **CASE-INSENSITIVE**.  A query like `WHERE status = 'pending'` is CORRECT if the question implies 'Pending'. Evaluate logic based on this.
-      * **QUIZ CONTEXT:** Both single (') and double (") quotes for string literals are acceptable.
-    * **Validity:** Is the query syntactically valid (ignoring quote style if logic is okay)?
-    * **Logic:** Are SQL clauses (SELECT, FROM, WHERE, JOIN, GROUP BY, etc.) used correctly?
-    * **Feedback:** Provide clear, constructive feedback in a friendly, encouraging, casual Hindi tone.
-        * If incorrect (for reasons *other* than case on `status`/`city` or double quotes): Gently point out errors. Explain what's wrong. Suggest fixes. **Do NOT mark incorrect or suggest `LOWER()`/`UPPER()` or single quotes *solely* for these quiz-specific allowances if logic is fine.**
-    * **Verdict:** Conclude with *exactly* one line: "Verdict: Correct" or "Verdict: Incorrect". This MUST be the last line.
+    * **Correctness:** Does the query accurately answer the question based on the schemas?
+    * **Case-Insensitivity & Quotes:** For this quiz, equality checks on 'status' and 'city' are case-insensitive. Both single (') and double (") quotes are acceptable. Do NOT mark the query as incorrect for these specific reasons if the logic is sound.
+    * **Feedback:** Provide clear, constructive feedback in a friendly, encouraging, casual Hindi tone. If incorrect, gently explain the error and suggest a fix.
+    * **Verdict:** Conclude with *exactly* one line: "Verdict: Correct" or "Verdict: Incorrect". This MUST be the last line of your response.
 
     **Begin Evaluation:**
     """
@@ -296,24 +272,19 @@ def evaluate_answer_with_llm(question_data, student_answer, original_tables_dict
     feedback_llm = "AI feedback generation failed."; is_correct_llm = False; llm_output = "Error: No LLM response."
     try:
         response = model.generate_content(prompt)
-        extracted_text = None
-        if hasattr(response, 'text'): extracted_text = response.text
-        elif hasattr(response, 'parts') and response.parts:
-            extracted_text = "".join(part.text for part in response.parts if hasattr(part, 'text'))
-        else: extracted_text = f"AI Response Blocked/Empty. Prompt Feedback: {response.prompt_feedback if hasattr(response, 'prompt_feedback') else 'N/A'}"
-
-        if not extracted_text or not extracted_text.strip():
+        extracted_text = response.text.strip()
+        
+        if not extracted_text:
             llm_output = "Error: Received empty response from AI."
         else:
-            llm_output = extracted_text.strip()
+            llm_output = extracted_text
             verdict_match = re.search(r'^Verdict:\s*(Correct|Incorrect)\s*$', llm_output, re.MULTILINE | re.IGNORECASE)
             if verdict_match:
                 is_correct_llm = (verdict_match.group(1).lower() == "correct")
                 feedback_llm = llm_output[:verdict_match.start()].strip()
-                feedback_llm = re.sub(r'\s*Verdict:\s*(Correct|Incorrect)?\s*$', '', feedback_llm, flags=re.MULTILINE | re.IGNORECASE).strip()
             else:
                 feedback_llm = llm_output + "\n\n_(System Note: AI verdict parsing failed.)_"
-                is_correct_llm = False # Default to incorrect if verdict not found
+                is_correct_llm = False
     except Exception as e_resp:
         llm_output = f"Error processing AI response: {e_resp}"
         feedback_llm = f"AI response processing error: {e_resp}"
@@ -329,70 +300,6 @@ def calculate_score(user_answers):
     correct_count = sum(1 for ans in user_answers if ans.get("is_correct", False))
     return (correct_count / len(user_answers)) * 100 if user_answers else 0.0
 
-def analyze_performance(user_answers):
-    performance_data = {
-        "overall_feedback": "Performance analysis could not be completed."
-    }
-    if not user_answers:
-        performance_data["overall_feedback"] = "Koi jawaab nahi diya gaya. Analysis possible nahi hai."
-        return performance_data
-
-    correct_q_texts = [ans["question"] for ans in user_answers if ans.get("is_correct")]
-    incorrect_ans_details = [
-        {"question": ans["question"], "your_answer": ans["student_answer"],
-         "feedback_received": ans.get("feedback", "N/A")}
-        for ans in user_answers if not ans.get("is_correct")
-    ]
-    total_q, correct_c = len(user_answers), len(correct_q_texts)
-    score = calculate_score(user_answers)
-
-    incorrect_summary = "Koi galat jawaab nahi! Bahut badhiya!"
-    if incorrect_ans_details:
-        incorrect_summary = "In sawaalon mein thodi galti hui:\n"
-        for idx, item in enumerate(incorrect_ans_details):
-            feedback_snippet = item['feedback_received'][:150].strip() + ('...' if len(item['feedback_received']) > 150 else '')
-            incorrect_summary += f"  {idx+1}. Sawaal: {item['question']}\n     Aapka Jawaab: `{item['your_answer']}`\n     Feedback Mila: {feedback_snippet}\n"
-
-    correct_summary = "Is baar koi jawaab sahi nahi hua."
-    if correct_q_texts:
-        correct_summary = "Yeh sawaal bilkul sahi kiye:\n" + "\n".join([f"  - {q_text}" for q_text in correct_q_texts])
-
-    prompt = f"""
-    Ek SQL learner ne quiz complete kiya hai. Unki performance ka analysis karke friendly, motivating summary feedback casual Hindi mein do.
-
-    **Quiz Performance:**
-    - Total Questions: {total_q}, Correct: {correct_c}, Score: {score:.2f}%
-    - Correctly Answered:
-    {correct_summary}
-    - Incorrectly Answered & Feedback Snippets:
-    {incorrect_summary}
-
-    **Quiz Context:** Case-insensitivity for `status`/`city` and flexible quotes were allowed.
-
-    **Task:** Generate overall performance feedback:
-    1.  **Overall Impression:** Score/performance pe comment (e.g., "Overall performance kaafi achhi rahi!").
-    2.  **Strengths:** Agar kuch concepts sahi kiye hain, unko highlight karo.
-    3.  **Areas for Improvement:** Jo concepts galat hue, unko gently point out. Focus on concepts.
-    4.  **Next Steps / Encouragement:** Aage kya karna chahiye (e.g., "Keep practicing!").
-
-    Bas plain text mein feedback generate karna hai. Sidhe feedback se shuru karo.
-    """
-    try:
-        response = model.generate_content(prompt)
-        generated_feedback = None
-        if hasattr(response, 'text'): generated_feedback = response.text.strip()
-        elif hasattr(response, 'parts') and response.parts:
-            generated_feedback = "".join(part.text for part in response.parts if hasattr(part, 'text')).strip()
-        else: generated_feedback = f"AI Response Blocked/Empty for summary. Prompt Feedback: {response.prompt_feedback if hasattr(response, 'prompt_feedback') else 'N/A'}"
-
-        if generated_feedback:
-            performance_data["overall_feedback"] = generated_feedback
-        else:
-            performance_data["overall_feedback"] = "AI response format unclear or empty for summary analysis."
-    except Exception as e:
-        performance_data["overall_feedback"] = f"Summary generation error from AI: {e}"
-    return performance_data
-
 def get_emoji(is_correct):
     return "✅" if is_correct else "❌"
 
@@ -404,7 +311,7 @@ def display_simulation(title, result_data):
     elif isinstance(result_data, str) and "Simulation Error" in result_data:
         st.warning(result_data, icon="⚠️")
     elif result_data == "N/A": st.info("_(Simulation not applicable or not run)_")
-    elif isinstance(result_data, str): st.info(f"_{result_data}_")
+    elif isinstance(result_data, str): st.code(result_data, language='text')
     else: st.error(f"_(Unexpected simulation result type: {type(result_data)})_")
 
 
@@ -416,8 +323,8 @@ if not st.session_state.quiz_started:
     st.markdown("### Apne SQL Skills Ko Test Aur Improve Karein!")
     st.markdown("""
         **📌 Important Notes:**
-        - This quiz uses standard **SQL syntax** (similar to MySQL/PostgreSQL).
-        - String comparisons (e.g., `WHERE city = 'new york'`) for `'status'` (in `orders`) and `'city'` (in `users`) columns are simulated to be **case-insensitive**.
+        - This quiz uses standard **SQL syntax**.
+        - String comparisons for `'status'` and `'city'` columns are simulated to be **case-insensitive**.
         - **Both single quotes (') and double quotes (") are accepted** for string literals.
         - Queries are evaluated by an AI for correctness and logic. DuckDB simulates query execution.
         """)
@@ -431,12 +338,10 @@ if not st.session_state.quiz_started:
         """)
     with col2_overview:
         st.markdown("#### Tables Overview")
-        try:
-            table_overview_data = {"Table": list(original_tables.keys()),
-                                   "Rows": [len(df) for df in original_tables.values()],
-                                   "Columns": [len(df.columns) for df in original_tables.values()]}
-            st.dataframe(pd.DataFrame(table_overview_data).set_index("Table"), use_container_width=True)
-        except Exception as e: st.error(f"Error displaying table overview: {e}")
+        table_overview_data = {"Table": list(original_tables.keys()),
+                               "Rows": [len(df) for df in original_tables.values()],
+                               "Columns": [len(df.columns) for df in original_tables.values()]}
+        st.dataframe(pd.DataFrame(table_overview_data).set_index("Table"), use_container_width=True)
 
     st.markdown("### 🔍 Table Previews & Schemas")
     tab_users, tab_orders = st.tabs([f"📄 Users ({len(users_table)} rows)", f"📄 Orders ({len(orders_table)} rows)"])
@@ -447,21 +352,11 @@ if not st.session_state.quiz_started:
         st.dataframe(orders_table, hide_index=True, use_container_width=True)
         st.caption(f"Columns: {', '.join(orders_table.columns.tolist())}")
 
-    with st.expander("📝 Quiz Ke Baare Mein Aur Tips"):
-        st.write(f"""
-        - Aapko **{len(sql_questions)} SQL query challenges** solve karne honge.
-        - Har jawaab ke baad AI Mentor se **immediate feedback** milega.
-        - **Focus:** Standard SQL. Case-insensitivity and flexible quotes are for this quiz only.
-        - **Tip:** Carefully check column names and table names before submitting!
-        """)
-
     if st.button("🚀 Start SQL Challenge!", type="primary", use_container_width=True):
         st.session_state.quiz_started = True
         st.session_state.user_answers = []
         st.session_state.current_question = 0
         st.session_state.quiz_completed = False
-        if 'detailed_analysis_content' in st.session_state: del st.session_state.detailed_analysis_content
-        st.session_state.force_regenerate_analysis = True
         st.rerun()
 
 # --- Quiz In Progress Screen ---
@@ -470,8 +365,9 @@ elif st.session_state.quiz_started and not st.session_state.quiz_completed:
     current_q_data = sql_questions[current_q_index]
 
     st.markdown(f"<h1>✍️ SQL Challenge: Question {current_q_index + 1} / {len(sql_questions)}</h1>", unsafe_allow_html=True)
+    st.progress((current_q_index) / len(sql_questions))
     st.markdown(f"### {current_q_data['question']}")
-
+    
     st.markdown("---")
     st.markdown("#### Relevant Table Information:")
     for table_name in current_q_data["relevant_tables"]:
@@ -480,13 +376,11 @@ elif st.session_state.quiz_started and not st.session_state.quiz_completed:
                 st.dataframe(original_tables[table_name].head(3), hide_index=True, use_container_width=True)
                 st.caption(f"Columns: {', '.join(original_tables[table_name].columns.tolist())}")
     st.markdown("---")
-
-    user_query_key = f"query_input_{current_q_index}"
-    user_query = st.text_area("Aapka SQL Query Yahaan Likhein:", height=150, key=user_query_key,
+    
+    user_query = st.text_area("Aapka SQL Query Yahaan Likhein:", height=150, key=f"query_input_{current_q_index}",
                               placeholder="Jaise ki: SELECT * FROM users WHERE age > 25;")
 
-    submit_button_key = f"submit_{current_q_index}"
-    if st.button("✅ Submit Query", key=submit_button_key, type="primary", use_container_width=True):
+    if st.button("✅ Submit Query", key=f"submit_{current_q_index}", type="primary", use_container_width=True):
         if user_query and user_query.strip():
             with st.spinner("🧠 AI Mentor aapki query evaluate kar raha hai..."):
                 feedback, is_correct, expected_res, actual_res, llm_log = evaluate_answer_with_llm(
@@ -500,30 +394,25 @@ elif st.session_state.quiz_started and not st.session_state.quiz_completed:
                 "is_correct": is_correct,
                 "expected_result": expected_res,
                 "actual_result": actual_res,
-                "llm_log": llm_log # For debugging if needed
             })
-            # Force rerun to display feedback and next/finish button correctly
             st.rerun()
         else:
             st.warning("💡 Query likhna bhool gaye? Kripya apna SQL query enter karein.")
 
-    # Display feedback for the *last submitted* answer if available
     if st.session_state.user_answers and st.session_state.user_answers[-1]["question_number"] == current_q_index + 1:
         last_answer = st.session_state.user_answers[-1]
         st.markdown("---")
         st.subheader(f"📝 Feedback for Question {last_answer['question_number']} {get_emoji(last_answer['is_correct'])}")
+        
         st.markdown("<div class='feedback-container'>", unsafe_allow_html=True)
         st.markdown(last_answer["feedback"])
         st.markdown("</div>", unsafe_allow_html=True)
 
         display_simulation("Simulated Result (Aapki Query ka Output)", last_answer.get("actual_result", "N/A"))
-        if not last_answer['is_correct'] or \
-           (isinstance(last_answer.get("actual_result"), pd.DataFrame) and \
-            isinstance(last_answer.get("expected_result"), pd.DataFrame) and \
-            not last_answer["actual_result"].equals(last_answer["expected_result"])):
-            display_simulation("Simulated Result (Expected Output for reference)", last_answer.get("expected_result", "N/A"))
+        if not last_answer['is_correct']:
+            display_simulation("Simulated Result (Expected Output)", last_answer.get("expected_result", "N/A"))
+        
         st.markdown("---")
-
         if current_q_index < len(sql_questions) - 1:
             if st.button("➡️ Agla Sawaal", use_container_width=True):
                 st.session_state.current_question += 1
@@ -531,10 +420,9 @@ elif st.session_state.quiz_started and not st.session_state.quiz_completed:
         else:
             if st.button("🏁 Finish Quiz & View Results", use_container_width=True, type="primary"):
                 st.session_state.quiz_completed = True
-                st.session_state.force_regenerate_analysis = True
                 st.rerun()
 
-# --- Quiz Completion / Results Screen ---
+# --- NEW: Quiz Completion / Simplified Results Screen ---
 elif st.session_state.quiz_completed:
     st.balloons()
     st.markdown("<h1 style='text-align: center; margin-bottom: 20px;'>🎉 Badhai Ho! Challenge Poora Hua!</h1>", unsafe_allow_html=True)
@@ -548,51 +436,40 @@ elif st.session_state.quiz_completed:
     with score_col:
         st.markdown(
             f"<div class='score-box'>"
-            f"<p class='score-title'>SCORE</p>"
-            f"<p class='score-value'>{score:.0f}%</p>" # Display score without decimal for cleaner look
+            f"<p class='score-title'>Final Score</p>"
+            f"<p class='score-value'>{score:.0f}%</p>"
             f"</div>", unsafe_allow_html=True
         )
     st.progress(int(score) / 100)
-
+    
     with message_col:
         if score >= 80:
-            st.success(f"🏆 **Shabaash! Aapne {score:.0f}% ya usse zyada score kiya!**")
-            st.markdown("Aap apna SQL certificate generate kar sakte hain (feature jald hi aa raha hai!).")
-            # if st.button("📄 Generate Your Certificate", type="primary", key="generate_cert_final", use_container_width=True):
-            #     st.success("📜 Certificate generated! (Yeh abhi ek placeholder hai.)")
+            st.success(f"🏆 **Shabaash! Aapne {score:.0f}% score kiya!** SQL concepts aapko achhe se samajh aa gaye hain.")
         elif score >= 50:
-            st.info(f"👍 **Achhi Koshish!** Aapka score {score:.0f}% hai. Certificate ke liye 80% chahiye. Thodi aur mehnat se aap zaroor achieve kar lenge!")
+            st.info(f"👍 **Achhi Koshish!** Aapka score {score:.0f}% hai. Thodi aur practice se aap zaroor behtar karenge!")
         else:
             st.warning(f"😟 **Koi Baat Nahi!** Aapka score {score:.0f}% hai. Himmat mat haro, practice karte raho aur concepts ko revise karo!")
+
     st.markdown("---")
 
-    st.subheader("💡 AI Mentor Se Detailed Performance Analysis")
-    with st.expander("🔍 Dekhein Detailed Analysis", expanded=True): # Expanded by default on results page
-        if st.session_state.get('force_regenerate_analysis', True) or \
-           st.session_state.detailed_analysis_content is None:
-            with st.spinner("🤖 AI Mentor aapka performance analyze kar raha hai... Intezaar kijiye..."):
-                analysis_result = analyze_performance(st.session_state.user_answers)
-                st.session_state.detailed_analysis_content = analysis_result
-                st.session_state.force_regenerate_analysis = False
+    # NEW: Simple, expandable review section
+    st.subheader("📋 Review Your Answers")
+    for idx, answer in enumerate(st.session_state.user_answers):
+        with st.expander(f"{get_emoji(answer['is_correct'])} **Question {idx + 1}:** {answer['question']}"):
+            st.markdown("**Aapka Jawaab:**")
+            st.code(answer['student_answer'], language='sql')
+            
+            st.markdown("**AI Mentor ka Feedback:**")
+            st.info(answer['feedback'])
 
-        if st.session_state.detailed_analysis_content:
-            analysis_data = st.session_state.detailed_analysis_content
-            st.markdown("<div class='feedback-container'>", unsafe_allow_html=True)
-            st.markdown(f"<p class='feedback-header'>AI Mentor Ki Raay:</p>", unsafe_allow_html=True)
-            if analysis_data and "overall_feedback" in analysis_data:
-                st.markdown(analysis_data["overall_feedback"])
-            else:
-                st.warning("Analysis abhi available nahi hai ya generate nahi ho paya.")
-            st.markdown("</div>", unsafe_allow_html=True)
-        else:
-            st.info("Analysis generate nahi hua. Refresh karke dekhein.")
+            if not answer['is_correct']:
+                display_simulation("Your Query's Output", answer.get("actual_result", "N/A"))
+                display_simulation("Expected Output", answer.get("expected_result", "N/A"))
 
     st.markdown("---")
     if st.button("🔁 Dobara Try Karein?", key="retry_final", use_container_width=True):
-        st.session_state.user_answers = []
-        st.session_state.current_question = 0
         st.session_state.quiz_started = True
         st.session_state.quiz_completed = False
-        if 'detailed_analysis_content' in st.session_state: del st.session_state.detailed_analysis_content
-        st.session_state.force_regenerate_analysis = True
+        st.session_state.user_answers = []
+        st.session_state.current_question = 0
         st.rerun()
