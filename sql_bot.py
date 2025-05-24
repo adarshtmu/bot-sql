@@ -531,7 +531,7 @@ def analyze_performance(user_answers):
     if not user_answers:
         performance_data["overall_feedback"] = "Koi jawaab nahi diya gaya. Analysis possible nahi hai."
         return performance_data
-    
+
     try:
         correct_q = [ans["question"] for ans in user_answers if ans.get("is_correct")]
         incorrect_ans = [
@@ -542,7 +542,7 @@ def analyze_performance(user_answers):
         performance_data["strengths"] = correct_q
         performance_data["weaknesses"] = [item["question"] for item in incorrect_ans]
         total_q, correct_c, score = len(user_answers), len(correct_q), calculate_score(user_answers)
-        
+
         incorrect_summary = ""
         if incorrect_ans:
             incorrect_summary = "In sawaalon mein thodi galti hui:\n"
@@ -552,20 +552,20 @@ def analyze_performance(user_answers):
             incorrect_summary = incorrect_summary.strip()
         else:
             incorrect_summary = "Koi galat jawaab nahi! Bahut badhiya!"
-        
+
         correct_summary = ""
         if correct_q:
-                    correct_summary = "Yeh sawaal bilkul sahi kiye:\n"
-                    for idx, q_text in enumerate(correct_q):
-                        correct_summary += f"  {idx+1}. {q_text}\n"
+            correct_summary = "Yeh sawaal bilkul sahi kiye:\n"
+            for idx, q_text in enumerate(correct_q):
+                correct_summary += f"  {idx+1}. {q_text}\n"
         else:
-                    correct_summary = "Koi sahi jawaab nahi mila is baar."
-        
-                overall = f"{correct_summary}\n\n{incorrect_summary}\n\nTotal Questions: {total_q}\nSahi Jawaab: {correct_c}\nScore: {score:.2f}%"
-                performance_data["overall_feedback"] = overall
-        except Exception as e:
-                performance_data["overall_feedback"] = f"Analysis failed: {e}"
-        return performance_data
+            correct_summary = "Koi sahi jawaab nahi mila is baar."
+
+        overall = f"{correct_summary}\n\n{incorrect_summary}\n\nTotal Questions: {total_q}\nSahi Jawaab: {correct_c}\nScore: {score:.2f}%"
+        performance_data["overall_feedback"] = overall
+    except Exception as e:
+        performance_data["overall_feedback"] = f"Analysis failed: {e}"
+    return performance_data
         
 # --- Streamlit UI ---
 st.title("🔥 SQL Quiz Challenge")
