@@ -451,86 +451,17 @@ def display_simulation(title, result_data):
 # --- Start Screen ---
 # --- Start Screen ---
 if not st.session_state.quiz_started:
+    st.title("🚀 SQL Mentor - Interactive SQL Practice")
+    st.markdown("### Apne SQL Skills Ko Test Aur Improve Karein!")
     st.markdown("""
-        <style>
-        .edtech-card {
-            background: #fff;
-            border-radius: 16px;
-            box-shadow: 0 6px 24px rgba(44, 62, 80, 0.07);
-            padding: 40px 32px 32px 32px;
-            max-width: 480px;
-            margin: 40px auto 0 auto;
-        }
-        .edtech-title {
-            color: #2d6cdf;
-            font-size: 2.5rem;
-            text-align: center;
-            font-weight: 700;
-            margin-bottom: 0.2em;
-        }
-        .edtech-subtitle {
-            color: #444;
-            font-size: 1.18rem;
-            text-align: center;
-            margin-bottom: 1.8em;
-        }
-        .edtech-list {
-            font-size: 1.09rem;
-            color: #2d5e6f;
-            margin-bottom: 1.7em;
-            list-style: none;
-            padding-left: 0;
-        }
-        .edtech-list li {
-            margin-bottom: 0.5em;
-            padding-left: 1.3em;
-            position: relative;
-        }
-        .edtech-list li:before {
-            content: "✓";
-            position: absolute;
-            left: 0;
-            color: #27ae60;
-            font-weight: bold;
-        }
-        .edtech-btn {
-            display: block;
-            width: 100%;
-            background: linear-gradient(90deg, #2d6cdf 70%, #47c8f7 100%);
-            color: #fff;
-            font-size: 1.3rem;
-            font-weight: 600;
-            border: none;
-            border-radius: 8px;
-            padding: 18px 0;
-            margin-top: 18px;
-            cursor: pointer;
-            box-shadow: 0 2px 8px rgba(44, 62, 80, 0.11);
-            transition: background 0.2s;
-        }
-        .edtech-btn:hover {
-            background: linear-gradient(90deg, #1b4e94 70%, #2fb4e9 100%);
-        }
-        </style>
-        <div class="edtech-card">
-            <div class="edtech-title">🎓 SQL Mentor</div>
-            <div class="edtech-subtitle">
-                Boost your SQL skills with interactive challenges,<br>instant AI feedback, and real-world data.<br>
-                <span style='color:#1976d2; font-weight:500;'>Learn. Practice. Improve.</span>
-            </div>
-            <ul class="edtech-list">
-                <li>Simple, guided instructions and dataset previews</li>
-                <li>Instant, friendly feedback in Hinglish</li>
-                <li>Track your progress and earn a certificate</li>
-                <li>Mobile responsive and distraction-free</li>
-            </ul>
-            <button class="edtech-btn" onclick="document.getElementById('start-form').submit();">🚀 Start SQL Challenge!</button>
-        </div>
-        <form id="start-form" action="" method="post" style="display: none;">
-            <input type="hidden" name="start_quiz" value="true">
-        </form>
-    """, unsafe_allow_html=True)
-
+        **📌 Important Notes:**
+        - This quiz uses standard **SQL syntax** (similar to MySQL/PostgreSQL).
+        - String comparisons (like `WHERE city = 'new york'` or `WHERE status = "pending"`) are simulated to be **case-insensitive** for common text columns (`status`, `city`).
+        - **Both single quotes (') and double quotes (") are accepted** for string literals in this simulation.
+        - Your queries are evaluated by an AI for correctness and logic.
+        - Query simulation is powered by DuckDB to show results on sample data.
+        """)
+    
     col1, col2 = st.columns([2, 1])
     with col1:
         st.write("""
@@ -557,23 +488,20 @@ if not st.session_state.quiz_started:
         st.error(f"Error displaying table previews: {e}")
     
     with st.expander("📝 Quiz Ke Baare Mein"):
-        st.write("""
-        - Aapko SQL query challenges solve karne honge.
+        st.write(f"""
+        - Aapko {len(sql_questions)} SQL query challenges solve karne honge.
         - Har jawaab ke baad AI Mentor se immediate feedback milega.
         - **SQL Dialect Focus:** Standard SQL (MySQL/PostgreSQL like).
         - Case-insensitivity for `status` and `city` columns in `WHERE =` clauses is simulated.
         - String literals can be enclosed in single quotes (`'...'`) or double quotes (`"..."`).
         """)
     
-    # Handle form submission to start the quiz
-    if st.experimental_get_query_params().get("start_quiz", ["false"])[0] == "true":
+    if st.button("🚀 Start SQL Challenge!", type="primary"):
         st.session_state.quiz_started = True
         st.session_state.user_answers = []
         st.session_state.current_question = 0
         st.session_state.quiz_completed = False
-        st.session_state.show_detailed_feedback = False
-        st.experimental_set_query_params()  # Clear query params
-        st.rerun()
+
 # --- Quiz In Progress Screen ---
 elif st.session_state.quiz_started and not st.session_state.quiz_completed:
     st.title("✍️ SQL Query Challenge")
