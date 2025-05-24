@@ -451,7 +451,7 @@ def display_simulation(title, result_data):
 # --- Start Screen ---
 if not st.session_state.quiz_started:
     st.title("🚀 SQL Mentor - Interactive SQL Practice")
-    st.markdown("### Apne SQL Skills Ko Test Aur Improve Karein!")
+    st.markdown("### Finish the Quiz Successfully to Unlock Your SQL Certificate")
     st.markdown("""
         **📌 Important Notes:**
         - This quiz uses standard **SQL syntax** (similar to MySQL/PostgreSQL).
