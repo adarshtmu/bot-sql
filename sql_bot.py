@@ -111,7 +111,7 @@ hide_streamlit_style = """
         }
     </style>
 """
-st.set_page_config(page_title="SQL Mentor", layout="wide") # Use wide layout
+st.set_page_config(page_title="SQL Mentor", layout="centered") # Use wide layout
 st.markdown(hide_streamlit_style, unsafe_allow_html=True)
 
 # --- Set up Gemini API ---
