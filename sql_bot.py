@@ -600,57 +600,28 @@ elif st.session_state.quiz_started and not st.session_state.quiz_completed:
 
 
 
-# --- MODIFIED: Quiz Completion / Simplified Results Screen ---
-elif st.session_state.quiz_completed:
-    st.balloons()
-    st.markdown("<h1 style='text-align: center; margin-bottom: 20px;'>🎉 Badhai Ho! Aapne SQL Challenge Poora Kar Liya!</h1>", unsafe_allow_html=True)
-    st.markdown("---")
-
+else:
+    # --- Quiz Completed Screen ---
+    st.title("🎉 Quiz Complete!")
     score = calculate_score(st.session_state.user_answers)
+    correct_count = sum(1 for ans in st.session_state.user_answers if ans.get("is_correct", False))
+    total_questions = len(st.session_state.user_answers)
+    performance = analyze_performance(st.session_state.user_answers)
 
-    # --- Presentable Scoreboard UI ---
-    st.subheader("Aapka Final Score")
-    st.progress(int(score) / 100)
-    
-    score_col, message_col = st.columns([1, 2])
-    with score_col:
-        st.markdown(
-            f"<div class='score-box'>"
-            f"<p class='score-title'>Score</p>"
-            f"<p class='score-value'>{score:.0f}%</p>"
-            f"</div>", unsafe_allow_html=True
-        )
-    
-    with message_col:
-        if score >= 80:
-            st.success(f"🏆 **Shabaash! Aapne {score:.0f}% ya usse zyada score kiya!**")
-            st.markdown("Aap apna SQL certificate generate kar sakte hain. Niche button pe click karein!")
-            if st.button("📄 Generate Your Certificate", type="primary"):
-                 st.info("📜 Certificate feature jald hi aa raha hai!")
-        elif score >= 50:
-            st.info(f"👍 **Achhi Koshish!** Aapka score {score:.0f}% hai. Certificate ke liye 80% chahiye. Thodi aur mehnat se aap zaroor achieve kar lenge!")
-        else:
-            st.warning(f"😟 **Koi Baat Nahi!** Aapka score {score:.0f}% hai. Himmat mat haro, practice karte raho aur concepts ko revise karo!")
-    
-    st.markdown("---")
+    st.markdown(f"**🎉 Badhai ho! Aapne quiz complete kar liya!**")
+    st.markdown(f"**Aapka Score:** {score:.0f}% ({correct_count}/{total_questions} questions correct)")
 
-    # --- NEW: Simple, expandable review section (Replaces the old summary) ---
-    st.subheader("📋 Review Your Answers")
-    for idx, answer in enumerate(st.session_state.user_answers):
-        with st.expander(f"{get_emoji(answer['is_correct'])} **Question {idx + 1}:** {answer['question']}"):
-            st.markdown("**Aapka Jawaab:**")
-            st.code(answer['student_answer'], language='sql')
-            
-            st.markdown("**AI Mentor ka Feedback:**")
-            st.info(answer['feedback'])
-
-            if not answer['is_correct']:
-                display_simulation("Your Query's Output", answer.get("actual_result", "N/A"))
-                display_simulation("Expected Output", answer.get("expected_result", "N/A"))
+    st.markdown("**Performance Summary:**")
+    if performance["overall_feedback"]:
+        st.markdown(performance["overall_feedback"])
+    else:
+        st.markdown("Performance analysis could not be generated. Please review your answers and feedback for insights.")
 
     st.markdown("---")
-    if st.button("🔁 Dobara Try Karein?", key="retry_final", use_container_width=True):
-        st.session_state.quiz_started = True
+    st.markdown("**Tip:** You can review your answers and detailed feedback in the 'Ab Tak Ke Jawaab Aur Feedback' section above.")
+
+    if st.button("🏠 Restart Quiz"):
+        st.session_state.quiz_started = False
         st.session_state.quiz_completed = False
         st.session_state.user_answers = []
         st.session_state.current_question = 0
