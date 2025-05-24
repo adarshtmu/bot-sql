@@ -678,6 +678,8 @@ elif st.session_state.quiz_completed:
             unsafe_allow_html=True
         )
 
+    # --- Optionally, keep the analysis/retake button below, or remove for a cleaner finish ---
+
     # --- (Rest of your summary/feedback code remains as is) ---
     # ... (summary, feedback, analysis, etc.)
     
