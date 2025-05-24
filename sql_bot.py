@@ -563,7 +563,8 @@ if not st.session_state.quiz_started:
         - String literals can be enclosed in single quotes (`'...'`) or double quotes (`"..."`).
         """)
     
-    if st.button("🚀 Start SQL Challenge!", type="primary"):
+    start = st.button("Start", key="start-btn", help="Begin your SQL learning journey!")
+    if start:
         st.session_state.quiz_started = True
         st.session_state.user_answers = []
         st.session_state.current_question = 0
