@@ -1254,4 +1254,4 @@ def display_advanced_results_page(final_score, user_answers, analyze_performance
     """, unsafe_allow_html=True)
 
 # Usage example:
-# display_advanced_results_page(85.5, st.session_state.user_answers, analyze_performance)
+display_advanced_results_page(85.5, st.session_state.user_answers, analyze_performance)
