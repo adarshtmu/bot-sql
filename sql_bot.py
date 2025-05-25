@@ -714,178 +714,129 @@ elif st.session_state.quiz_completed:
                     st.markdown(section_dict["Full Feedback"])
                 st.markdown('</div>', unsafe_allow_html=True)
 
-    # --- 3. Advanced Scorecard & Buttons LAST ---
-    st.markdown("---")
-    final_score = calculate_score(st.session_state.user_answers)
+   # --- 3. Advanced & Clean Scorecard UI ---
 
-    # Determine dynamic colors and messages based on score
-    score_color = "#28a745" if final_score >= 80 else "#ff9800" if final_score >= 50 else "#e74c3c"
-    score_message = "Outstanding Performance! 🌟" if final_score >= 80 else "Good Effort! Keep Going! 💪" if final_score >= 50 else "Needs Improvement! 📚"
-    border_gradient = "linear-gradient(45deg, #28a745, #1f77b4)" if final_score >= 80 else "linear-gradient(45deg, #ff9800, #e74c3c)"
+final_score = calculate_score(st.session_state.user_answers)
 
-    # Advanced Scorecard with animations, gradient border, and progress circle
-    st.markdown(
-        f"""
-        <style>
-            @keyframes fadeIn {{
-                0% {{ opacity: 0; transform: scale(0.95); }}
-                100% {{ opacity: 1; transform: scale(1); }}
-            }}
-            @keyframes progressCircle {{
-                0% {{ stroke-dasharray: 0 100; }}
-            }}
-            .scorecard-container {{
-                background: linear-gradient(135deg, #ffffff, #f1f5f9);
-                border: 4px solid transparent;
-                border-radius: 20px;
-                padding: 30px;
-                margin: 30px 0;
-                text-align: center;
-                position: relative;
-                box-shadow: 0 8px 24px rgba(0,0,0,0.1);
-                animation: fadeIn 0.8s ease-in-out;
-                background-clip: padding-box;
-                border-image: {border_gradient} 1;
-            }}
-            .scorecard-container::before {{
-                content: '';
-                position: absolute;
-                top: -4px; bottom: -4px; left: -4px; right: -4px;
-                background: {border_gradient};
-                z-index: -1;
-                border-radius: 24px;
-            }}
-            .scorecard-header {{
-                font-size: 2rem;
-                font-weight: 700;
-                color: #1f77b4;
-                margin-bottom: 10px;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                gap: 10px;
-            }}
-            .score-value {{
-                font-size: 3rem;
-                font-weight: 900;
-                color: {score_color};
-                margin: 15px 0;
-                letter-spacing: 2px;
-            }}
-            .score-message {{
-                font-size: 1.3rem;
-                color: #555;
-                margin-bottom: 20px;
-            }}
-            .progress-circle {{
-                position: relative;
-                width: 120px;
-                height: 120px;
-                margin: 0 auto 20px;
-            }}
-            .progress-circle svg {{
-                transform: rotate(-90deg);
-            }}
-            .progress-circle circle {{
-                fill: none;
-                stroke-width: 10;
-                stroke-linecap: round;
-            }}
-            .progress-circle .bg-circle {{
-                stroke: #e0e0e0;
-            }}
-            .progress-circle .progress-ring {{
-                stroke: {score_color};
-                stroke-dasharray: {final_score} 100;
-                animation: progressCircle 1.5s ease-in-out;
-            }}
-            .progress-circle .percent-text {{
-                position: absolute;
-                top: 50%;
-                left: 50%;
-                transform: translate(-50%, -50%);
-                font-size: 1.5rem;
-                font-weight: bold;
-                color: {score_color};
-            }}
-            .scoreboard-label {{
-                font-size: 1.1rem;
-                color: #888;
-                margin-top: 10px;
-            }}
-        </style>
-        <div class="scorecard-container">
-            <div class="scorecard-header">
-                <span>📊 Your Final Score</span>
-                <span style="font-size: 1.5rem;">🏆</span>
-            </div>
-            <div class="progress-circle">
-                <svg width="120" height="120">
-                    <circle class="bg-circle" cx="60" cy="60" r="50"/>
-                    <circle class="progress-ring" cx="60" cy="60" r="50"/>
-                </svg>
-                <div class="percent-text">{final_score:.1f}%</div>
-            </div>
-            <div class="score-value">{final_score:.2f}%</div>
-            <div class="score-message">{score_message}</div>
-            <div class="scoreboard-label">Scoreboard</div>
-        </div>
-        """,
-        unsafe_allow_html=True
+# Determine message and help text based on score
+if final_score >= 80:
+    score_message = "Outstanding! 🌟"
+    help_text = "You've demonstrated a strong understanding of SQL."
+elif final_score >= 50:
+    score_message = "Good Effort! 💪"
+    help_text = "You're on the right track. Keep practicing!"
+else:
+    score_message = "Keep Going! 📚"
+    help_text = "Every master was once a beginner. Don't give up!"
+
+# --- Modern UI Styling (CSS) ---
+st.markdown(
+    """
+    <style>
+        /* Card container for the score */
+        .score-card {
+            background-color: #FFFFFF;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.05);
+            text-align: center;
+            border-top: 5px solid #007bff;
+        }
+        
+        /* Style for the main metric value */
+        .score-card [data-testid="stMetricValue"] {
+            font-size: 4rem;
+            font-weight: 700;
+            color: #007bff;
+        }
+        
+        /* Style for the metric label */
+        .score-card [data-testid="stMetricLabel"] {
+            font-size: 1.2rem;
+            font-weight: 500;
+            color: #555;
+        }
+
+        /* Style for the action buttons */
+        .stButton button {
+            border-radius: 10px;
+            padding: 12px 25px;
+            font-weight: 600;
+            width: 100%;
+            transition: all 0.2s ease;
+        }
+
+        /* Custom style for the primary action button (Certificate) */
+        .primary-action-button button {
+            background-color: #007bff;
+            color: white;
+            border: 2px solid #007bff;
+        }
+        .primary-action-button button:hover {
+            background-color: white;
+            color: #007bff;
+        }
+        
+        /* Custom style for the secondary action button (Try Again) */
+        .secondary-action-button button {
+            background-color: #f0f2f6;
+            color: #555;
+            border: 2px solid #f0f2f6;
+        }
+        .secondary-action-button button:hover {
+            border: 2px solid #007bff;
+            color: #007bff;
+        }
+    </style>
+    """,
+    unsafe_allow_html=True
+)
+
+# --- UI Layout ---
+with st.container():
+    # Apply the custom class to create the card effect
+    st.markdown('<div class="score-card">', unsafe_allow_html=True)
+
+    # Use st.metric for a clean and effective score display
+    st.metric(
+        label="Final Score",
+        value=f"{final_score:.1f}%",
+        delta=score_message,  # The delta shows the encouraging message
     )
 
-    if final_score >= 80:
-        st.markdown(
-            """
-            <div style='text-align:center; margin-top: 20px;'>
-                <h3 style='color:#007bff;'>🏆 Great job! You're eligible for a certificate.</h3>
-            </div>
-            """,
-            unsafe_allow_html=True
-        )
-        st.markdown(
-            """
-            <div style='display:flex; justify-content:center; margin-bottom: 30px;'>
-                <a href="https://superprofile.bio/vp/corporate-bhaiya-sql-page" target="_blank" style="
-                    background-color:#ffc107;
-                    color:#121212;
-                    font-size:1.5rem;
-                    font-weight:600;
-                    padding:18px 36px;
-                    border-radius:10px;
-                    text-decoration:none;
-                    box-shadow:0 2px 8px rgba(0,0,0,0.11);
-                    transition: background 0.2s;
-                ">🎓 Get Your Certificate</a>
-            </div>
-            """,
-            unsafe_allow_html=True
-        )
-    else:
-        st.markdown(
-            """
-            <div style='text-align:center; margin-top: 20px;'>
-                <h3 style='color:#e74c3c;'>📚 Keep practicing to earn a certificate!</h3>
-                <a href="https://www.corporatebhaiya.com/" target="_blank" style="
-                    background-color:#6c757d;
-                    color:white;
-                    font-size:1.2rem;
-                    padding:12px 28px;
-                    border-radius:8px;
-                    text-decoration:none;
-                    margin-top:10px;
-                    display:inline-block;
-                ">🚀 Book a Mentor Session</a>
-            </div>
-            """,
-            unsafe_allow_html=True
-        )
+    # Use st.progress for a simple and clear visual bar
+    st.progress(int(final_score))
+    
+    st.caption(help_text)
 
-    # --- Try Again Button LAST ---
+    st.markdown('</div>', unsafe_allow_html=True)
+
+
+# --- Action Buttons Section ---
+st.markdown("---")
+col1, col2 = st.columns(2)
+
+with col1:
+    if final_score >= 80:
+        st.markdown('<div class="primary-action-button">', unsafe_allow_html=True)
+        if st.button("🎓 Get Your Certificate"):
+            st.success("Redirecting to certificate page... (feature coming soon!)")
+            # You can add a redirect link here
+        st.markdown('</div>', unsafe_allow_html=True)
+    else:
+        st.markdown('<div class="primary-action-button">', unsafe_allow_html=True)
+        if st.button("🚀 Book a Mentor Session"):
+            st.info("Redirecting to booking page... (feature coming soon!)")
+            # You can add a mentor link here
+        st.markdown('</div>', unsafe_allow_html=True)
+
+with col2:
+    st.markdown('<div class="secondary-action-button">', unsafe_allow_html=True)
     if st.button("🔄 Try Again?"):
+        # Reset the session state to start the quiz over
         st.session_state.user_answers = []
         st.session_state.current_question = 0
-        st.session_state.quiz_started = False
+        st.session_state.quiz_started = True  # Set to True to go directly to the quiz
         st.session_state.quiz_completed = False
-        st.session_state.show_detailed_feedback = False
         st.rerun()
+    st.markdown('</div>', unsafe_allow_html=True)
