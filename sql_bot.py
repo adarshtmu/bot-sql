@@ -9,151 +9,105 @@ import duckdb
 
 hide_streamlit_style = """
 <style>
-    /* Hide Streamlit system UI */
-    header, #MainMenu, footer,
-    .viewerBadge_container__1QSob, .stDeployButton,
-    [data-testid="stToolbar"], [data-testid="stDecoration"],
-    [data-testid="stDeployButton"], .st-emotion-cache-1r8d6ul,
-    .st-emotion-cache-1jicfl2 {
-        display: none !important;
-    }
+/* Hide Streamlit system UI */
+header, #MainMenu, footer,
+.viewerBadge_container__1QSob, .stDeployButton,
+[data-testid="stToolbar"], [data-testid="stDecoration"],
+[data-testid="stDeployButton"], .st-emotion-cache-1r8d6ul,
+.st-emotion-cache-1jicfl2 {
+    display: none !important;
+}
 
-    /* Background and font */
-    body {
-        background: linear-gradient(120deg, #fafdff 0%, #f3f8fe 100%) !important;
-        font-family: 'Segoe UI', 'Roboto', 'Arial', sans-serif !important;
-        color: #354052;
-    }
+/* Set very light background for body and Streamlit container */
+body, .stApp {
+    background: linear-gradient(120deg, #fafdff 0%, #f3f8fe 100%) !important;
+    font-family: 'Segoe UI', 'Roboto', 'Arial', sans-serif !important;
+    color: #354052;
+}
 
-    /* Main container card */
+/* Main container card */
+.main .block-container {
+    background: #ffffff !important;
+    border-radius: 22px;
+    box-shadow: 0 8px 32px rgba(44, 62, 80, 0.07);
+    padding: 48px 32px 32px 32px;
+    margin-top: 32px;
+}
+
+/* Style for Important Notes in markdown */
+h3, h4, h5, h6 {
+    margin-top: 1.5em !important;
+    margin-bottom: 0.7em !important;
+}
+.stMarkdown strong, .stMarkdown b {
+    color: #cb9900 !important; /* Gold/brown for emphasis */
+    background: #fffbe6 !important;
+    padding: 2px 6px;
+    border-radius: 6px;
+}
+.stMarkdown em, .stMarkdown i {
+    color: #2d91f2 !important;
+}
+
+/* Special color for "Important Notes" lines */
+.stMarkdown h3, .stMarkdown h4, .stMarkdown h5, .stMarkdown h6 {
+    color: #d18d00 !important;
+    background: #fffbe6 !important;
+    padding: 0.25em 1em;
+    border-radius: 8px;
+    font-weight: 700;
+}
+
+/* Style for quiz question */
+.question-highlight {
+    color: #2176ae !important;
+    background: #eaf4ff !important;
+    padding: 0.5em 1em;
+    border-radius: 8px;
+    font-size: 1.18rem !important;
+    font-weight: 700;
+    margin-bottom: 1em;
+    display: block;
+}
+
+/* Style for feedback containers */
+.feedback-container {
+    background: #eaffea !important;
+    border: 1px solid #b6e2c5;
+    padding: 28px;
+    border-radius: 18px;
+    box-shadow: 0 4px 18px rgba(33,182,168,.07);
+    font-size: 1.13rem !important;
+    margin-bottom: 2em;
+    color: #166c41 !important;
+}
+.feedback-header {
+    font-size: 1.5rem !important;
+    color: #2574a9 !important;
+    font-weight: 700;
+    margin-bottom: 0.5em;
+}
+.strength-item, .weakness-item {
+    font-size: 1.08rem !important;
+    margin: 7px 0;
+    padding-left: 16px;
+}
+.strength-item {
+    color: #21b6a8;
+    font-weight: 500;
+}
+.weakness-item {
+    color: #ec407a;
+    font-weight: 500;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
     .main .block-container {
-        background: #ffffff;
-        border-radius: 22px;
-        box-shadow: 0 8px 32px rgba(44, 62, 80, 0.07);
-        padding: 48px 32px 32px 32px;
-        margin-top: 32px;
+        padding: 22px 8px 18px 8px;
+        margin-top: 8px;
     }
-
-    /* Headings */
-    h1 {
-        font-size: 2.5rem !important;
-        font-weight: 700;
-        color: #2574a9 !important;
-        margin-bottom: 0.7em;
-    }
-    h2 {
-        font-size: 2rem !important;
-        font-weight: 600;
-        color: #21b6a8 !important;
-        margin-bottom: 0.6em;
-    }
-    h3 {
-        font-size: 1.3rem !important;
-        font-weight: 500;
-        color: #2574a9 !important;
-        margin-bottom: 0.5em;
-    }
-
-    /* Paragraphs and regular text */
-    .stMarkdown, .stText, .stTextArea, .stDataFrame, .stTable {
-        font-size: 1.13rem !important;
-        color: #354052 !important;
-    }
-
-    /* Progress bar */
-    .stProgress > div > div {
-        background: linear-gradient(90deg, #36d1c4 30%, #5b86e5 100%) !important;
-        border-radius: 10px;
-        height: 1.3rem;
-    }
-
-    /* Primary button (e.g., Start, Submit) */
-    button[kind="primary"], .stButton button {
-        background: linear-gradient(90deg, #36d1c4, #5b86e5);
-        color: #fff !important;
-        font-size: 1.15rem !important;
-        font-weight: 600;
-        padding: 15px 32px !important;
-        border-radius: 10px;
-        border: none;
-        box-shadow: 0 2px 8px rgba(44, 62, 80, 0.06);
-        transition: background 0.2s;
-        margin-bottom: 1em;
-    }
-    button[kind="primary"]:hover, .stButton button:hover {
-        background: linear-gradient(90deg, #5b86e5, #36d1c4);
-        color: #fff !important;
-    }
-
-    /* Tabs, Cards, and Table Previews */
-    .stTabs [role="tablist"] {
-        background: #fafdff;
-        padding: 0.7em 1em;
-        border-radius: 12px;
-        box-shadow: 0 2px 12px rgba(44,62,80,0.05);
-        margin-bottom: 2em;
-    }
-
-    /* Feedback/Analysis Container */
-    .feedback-container {
-        background: #f6fcfb;
-        padding: 28px;
-        border-radius: 18px;
-        box-shadow: 0 4px 18px rgba(33,182,168,.07);
-        font-size: 1.13rem !important;
-        margin-bottom: 2em;
-    }
-    .feedback-header {
-        font-size: 1.5rem !important;
-        color: #2574a9;
-        font-weight: 700;
-        margin-bottom: 0.5em;
-    }
-    .strength-item, .weakness-item {
-        font-size: 1.08rem !important;
-        margin: 7px 0;
-        padding-left: 16px;
-    }
-    .strength-item {
-        color: #21b6a8;
-        font-weight: 500;
-    }
-    .weakness-item {
-        color: #ec407a;
-        font-weight: 500;
-    }
-
-    /* Certificate/Score Card */
-    .score-card {
-        background: #f3f8fe;
-        border-radius: 16px;
-        box-shadow: 0 4px 16px rgba(44,62,80,0.05);
-        padding: 34px 0;
-        text-align: center;
-        margin: 34px 0;
-    }
-    .score-card h2 {
-        color: #2574a9 !important;
-        font-size: 2.2rem !important;
-        margin-bottom: 0.5em;
-    }
-    .score-card .score {
-        font-size: 2.7rem;
-        font-weight: bold;
-        color: #21b6a8;
-    }
-
-    /* Responsive adjustments */
-    @media (max-width: 768px) {
-        .main .block-container {
-            padding: 22px 8px 18px 8px;
-            margin-top: 8px;
-        }
-        .score-card {
-            padding: 18px 0;
-            margin: 14px 0;
-        }
-    }
+}
 </style>
 """
 st.markdown(hide_streamlit_style, unsafe_allow_html=True)
