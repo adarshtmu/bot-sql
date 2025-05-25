@@ -1093,7 +1093,7 @@ elif st.session_state.quiz_completed:
         
         # Score Dashboard
         total_questions = len(st.session_state.user_answers)
-        correct_answers = sum(1 for answer in st.session_state.user_answers if answer.get('correct', False))
+        correct_answers = sum(1 for answer in st.session_state.user_answers if answer.get('is_correct', False))
         
         dashboard_html = f"""
         <div class="score-dashboard">
