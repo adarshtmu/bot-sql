@@ -999,6 +999,23 @@ st.markdown(
             font-weight: 700;
             margin: 20px auto;
             animation: floatAnimation 4s ease-in-out infinite;
+            position: relative;
+            overflow: hidden;
+        }}
+        
+        .performance-badge::before {{
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: left 0.5s;
+        }}
+        
+        .performance-badge:hover::before {{
+            left: 100%;
         }}
         
         .sparkle {{
@@ -1156,7 +1173,10 @@ st.markdown(
             </div>
             ''' if display_score >= 80 else f'''
             <div class="achievement-message">
-                📈 Keep learning to unlock your certificate!
+                📈 Every expert was once a beginner - keep learning to unlock your certificate!
+            </div>
+            <div style="margin: 15px 0; padding: 15px; background: rgba(255,193,7,0.1); border-left: 4px solid #ffc107; border-radius: 8px;">
+                <strong>💡 Quick Tips:</strong> Review the material, practice more questions, and don't give up!
             </div>
             <div class="action-buttons">
                 <a href="https://www.corporatebhaiya.com/" target="_blank" class="btn-primary">
@@ -1164,6 +1184,9 @@ st.markdown(
                 </a>
                 <a href="#" onclick="location.reload()" class="btn-secondary">
                     🔄 Try Again
+                </a>
+                <a href="#" class="btn-secondary" style="background: linear-gradient(135deg, #17a2b8, #138496); color: white;">
+                    📖 Study Resources
                 </a>
             </div>
             '''}
