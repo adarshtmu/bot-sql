@@ -1061,8 +1061,6 @@ elif st.session_state.quiz_completed:
         # Progress width for animation
         progress_width = min(final_score, 100)
         
-        show_certificate = final_score >= 80  # or your threshold
-        
         st.markdown(f"""
         <div class="score-card">
             <div class="score-content">
@@ -1072,38 +1070,37 @@ elif st.session_state.quiz_completed:
                 <div class="score-progress">
                     <div class="score-progress-fill" style="--progress-width: {progress_width}%; width: {progress_width}%;"></div>
                 </div>
-                {"<div style='margin-top:2rem; text-align:center;'><h2 style='color:#ffd700; margin-bottom: 1rem;'>🏆 Outstanding Performance!</h2><p style='color:#fff; font-size: 1.1rem; margin-bottom: 2rem;'>Congratulations! You've demonstrated excellent SQL skills and earned your certificate.</p><a href='https://superprofile.bio/vp/corporate-bhaiya-sql-page' target='_blank' style='background: linear-gradient(135deg, #ffd700, #ffed4e); color: #1a1a1a; font-size: 1.3rem; font-weight: 700; padding: 1rem 2.5rem; border-radius: 15px; text-decoration: none; display: inline-block; transition: all 0.3s ease; box-shadow: 0 10px 25px rgba(255,215,0,0.4); border: none;'>🎓 Claim Your Certificate</a></div>" if show_certificate else ""}
             </div>
         </div>
         """, unsafe_allow_html=True)
     
-    # def display_certificate_section(final_score):
-    #     """Display certificate eligibility section"""
-    #     if final_score >= 80:
-    #         st.markdown("""
-    #         <div class="certificate-section">
-    #             <h2 style='color:#2c3e50; margin-bottom: 1rem;'>🏆 Outstanding Performance!</h2>
-    #             <p style='color:#5d6d7e; font-size: 1.1rem; margin-bottom: 2rem;'>
-    #                 Congratulations! You've demonstrated excellent SQL skills and earned your certificate.
-    #             </p>
-    #             <a href="https://superprofile.bio/vp/corporate-bhaiya-sql-page" target="_blank" class="certificate-btn">
-    #                 🎓 Claim Your Certificate
-    #             </a>
-    #         </div>
-    #         """, unsafe_allow_html=True)
-    #     else:
-    #         score_needed = 80 - final_score
-    #         st.markdown(f"""
-    #         <div class="retry-section">
-    #             <h3 style='color:#2c3e50; margin-bottom: 1rem;'>📚 Keep Learning & Growing!</h3>
-    #             <p style='color:#5d6d7e; font-size: 1rem; margin-bottom: 1.5rem;'>
-    #                 You need {score_needed:.1f}% more to earn your certificate. Don't give up!
-    #             </p>
-    #             <a href="https://www.corporatebhaiya.com/" target="_blank" class="mentor-btn">
-    #                 🚀 Book a Mentor Session
-    #             </a>
-    #         </div>
-    #         """, unsafe_allow_html=True)
+    def display_certificate_section(final_score):
+        """Display certificate eligibility section"""
+        if final_score >= 80:
+            st.markdown("""
+            <div class="certificate-section">
+                <h2 style='color:#2c3e50; margin-bottom: 1rem;'>🏆 Outstanding Performance!</h2>
+                <p style='color:#5d6d7e; font-size: 1.1rem; margin-bottom: 2rem;'>
+                    Congratulations! You've demonstrated excellent SQL skills and earned your certificate.
+                </p>
+                <a href="https://superprofile.bio/vp/corporate-bhaiya-sql-page" target="_blank" class="certificate-btn">
+                    🎓 Claim Your Certificate
+                </a>
+            </div>
+            """, unsafe_allow_html=True)
+        else:
+            score_needed = 80 - final_score
+            st.markdown(f"""
+            <div class="retry-section">
+                <h3 style='color:#2c3e50; margin-bottom: 1rem;'>📚 Keep Learning & Growing!</h3>
+                <p style='color:#5d6d7e; font-size: 1rem; margin-bottom: 1.5rem;'>
+                    You need {score_needed:.1f}% more to earn your certificate. Don't give up!
+                </p>
+                <a href="https://www.corporatebhaiya.com/" target="_blank" class="mentor-btn">
+                    🚀 Book a Mentor Session
+                </a>
+            </div>
+            """, unsafe_allow_html=True)
     
     # def display_question_summary(user_answers):
     #     """Display question summary with advanced styling"""
@@ -1247,7 +1244,7 @@ elif st.session_state.quiz_completed:
         display_advanced_scorecard(final_score)
         
         # Certificate section
-        # display_certificate_section(final_score)
+        display_certificate_section(final_score)
         
         # Separator
         st.markdown("---")
@@ -1276,3 +1273,4 @@ elif st.session_state.quiz_completed:
     display_advanced_results_page(final_score , st.session_state.user_answers, analyze_performance)
     
     
+
