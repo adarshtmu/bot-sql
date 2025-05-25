@@ -1209,4 +1209,4 @@ elif st.session_state.quiz_completed:
     
     # Usage example:
     # Replace your existing completion code with:
-    # show_advanced_completion_ui()
+    show_advanced_completion_ui()
