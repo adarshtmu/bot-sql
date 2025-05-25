@@ -709,8 +709,12 @@ elif st.session_state.quiz_completed:
         if final_score >= 90:
             score_tier = "excellent"
             score_color = "#00C851"
-            message = "Outstanding Mastery!"  # Fixed typo here
+            bg_gradient = "linear-gradient(135deg, #667eea 0%, #764ba2 100%)"
+            border_color = "#00C851"
+            icon = "🏆"
+            message = "Outstanding Mastery!"
             subtitle = "You've demonstrated exceptional SQL skills!"
+
         elif final_score >= 80:
             score_tier = "great"
             score_color = "#28a745" 
