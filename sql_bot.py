@@ -4,10 +4,10 @@ import pandas as pd
 import re
 import duckdb
 
-# --- Set Streamlit Theme to Dark ---
-st.set_page_config(layout="wide", initial_sidebar_state="collapsed", theme="dark")
+# --- Set Streamlit Page Configuration ---
+st.set_page_config(layout="wide", initial_sidebar_state="collapsed")
 
-# --- Custom CSS ---
+# --- Custom CSS for Dark Theme and Layout ---
 hide_streamlit_style = """
     <style>
         /* Hide Streamlit default elements */
