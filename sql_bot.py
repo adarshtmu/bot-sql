@@ -1130,7 +1130,7 @@ elif st.session_state.quiz_completed:
                     You need {score_needed:.1f}% more to earn your certificate. Don't give up!
                 </p>
                 <a href="https://www.corporatebhaiya.com/" target="_blank" class="mentor-btn">
-                    🚀 Book a Mentor Session
+                    🚀 Book a SQL Mentor To Guide You
                 </a>
             </div>
             """, unsafe_allow_html=True)
