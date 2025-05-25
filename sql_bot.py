@@ -5,9 +5,6 @@ import re
 import duckdb
 
 # --- Custom CSS ---
-# Updated to increase font sizes globally and for specific elements
-# --- Custom CSS ---
-# --- Custom CSS ---
 hide_streamlit_style = """
     <style>
         header {visibility: hidden;}
@@ -72,7 +69,6 @@ hide_streamlit_style = """
         }
     </style>
 """
-
 st.markdown(hide_streamlit_style, unsafe_allow_html=True)
 
 # --- Set up Gemini API ---
@@ -91,18 +87,23 @@ except Exception as e:
 
 # --- Sample Data ---
 users_table = pd.DataFrame({
-    "user_id": [1, 2, 3, 4],
-    "name": ["Alice", "Bob", "Charlie", "David"],
-    "email": ["alice@example.com", "bob@example.com", "charlie@example.com", "david@example.com"],
-    "age": [25, 30, 35, 40],
-    "city": ["New York", "Los Angeles", "Chicago", "Houston"]
+    "user_id": [1, 2, 3, 4, 5],
+    "name": ["Sophia Clark", "Ethan Carter", "Olivia Bennett", "Liam Foster", "Ava Harper"],
+    "email": [
+        "sophia.clark@example.com",
+        "ethan.carter@example.com",
+        "olivia.bennett@example.com",
+        "liam.foster@example.com",
+        "ava.harper@example.com"
+    ],
+    "signup_date": ["2023-01-15", "2023-02-20", "2023-05-10", "2023-04-05", "2023-05-12"],
+    "last_login": ["2024-05-20", "2024-05-21", "2024-05-19", "2024-05-22", "2024-05-20"]
 })
 orders_table = pd.DataFrame({
     "order_id": [101, 102, 103, 104, 105],
     "user_id": [1, 2, 3, 1, 4],
     "amount": [50.00, 75.50, 120.00, 200.00, 35.00],
-    "order_date": pd.to_datetime(["2024-02-01", "2024-02-05", "2024-02-10", "2024-02-15", "2024-02-20"]),
-    "status": ["Completed", "Pending", "Completed", "Shipped", "Cancelled"]
+    "order_date": pd.to_datetime(["2024-02-01", "2024-02-05", "2024-02-10", "2024-02-15", "2024-02-20"])
 })
 original_tables = {
     "users": users_table,
@@ -110,18 +111,18 @@ original_tables = {
 }
 
 # --- SQL Questions List ---
-sql_questions = [    {"question": "Write a SQL query to get all details about users from the 'users' table.", "correct_answer_example": "SELECT * FROM users;", "sample_table": users_table, "relevant_tables": ["users"]},
+sql_questions = [
+    {"question": "Write a SQL query to get all details about users from the 'users' table.", "correct_answer_example": "SELECT * FROM users;", "sample_table": users_table, "relevant_tables": ["users"]},
     {"question": "Write a SQL query to count the total number of users in the 'users' table.", "correct_answer_example": "SELECT COUNT(*) AS user_count FROM users;", "sample_table": users_table, "relevant_tables": ["users"]},
-    {"question": "Write a SQL query to get all users older than 30 from the 'users' table.", "correct_answer_example": "SELECT * FROM users WHERE age > 30;", "sample_table": users_table, "relevant_tables": ["users"]},
-    {"question": "Write a SQL query to find all orders with a status of 'Pending' from the 'orders' table.", "correct_answer_example": "SELECT * FROM orders WHERE status = 'Pending';", "sample_table": orders_table, "relevant_tables": ["orders"]},
-    {"question": "Write a SQL query to find users from 'chicago' in the 'users' table (test case-insensitivity).", "correct_answer_example": "SELECT * FROM users WHERE city = 'Chicago';", "sample_table": users_table, "relevant_tables": ["users"]},
+    {"question": "Write a SQL query to get all users signed up after 2023-03-01 from the 'users' table.", "correct_answer_example": "SELECT * FROM users WHERE signup_date > '2023-03-01';", "sample_table": users_table, "relevant_tables": ["users"]},
+    {"question": "Write a SQL query to find all orders with an amount greater than 100 from the 'orders' table.", "correct_answer_example": "SELECT * FROM orders WHERE amount > 100;", "sample_table": orders_table, "relevant_tables": ["orders"]},
+    {"question": "Write a SQL query to find users with email domain '@example.com' in the 'users' table.", "correct_answer_example": "SELECT * FROM users WHERE email LIKE '%@example.com';", "sample_table": users_table, "relevant_tables": ["users"]},
     {"question": "Write a SQL query to find the most recent order from the 'orders' table by order date.", "correct_answer_example": "SELECT * FROM orders ORDER BY order_date DESC LIMIT 1;", "sample_table": orders_table, "relevant_tables": ["orders"]},
     {"question": "Write a SQL query to find the average order amount from the 'orders' table.", "correct_answer_example": "SELECT AVG(amount) AS average_amount FROM orders;", "sample_table": orders_table, "relevant_tables": ["orders"]},
-    {"question": "Write a SQL query to find users from 'New York' or 'Chicago' in the 'users' table.", "correct_answer_example": "SELECT * FROM users WHERE city IN ('New York', 'Chicago');", "sample_table": users_table, "relevant_tables": ["users"]},
-    {"question": "Write a SQL query to find users whose orders are still pending. Use the 'users' and 'orders' tables.","correct_answer_example": "SELECT u.* FROM users u JOIN orders o ON u.user_id = o.user_id WHERE o.order_status = 'pending';","sample_table": users_table,"relevant_tables": ["users", "orders"]},
+    {"question": "Write a SQL query to find users with last login in May 2024 from the 'users' table.", "correct_answer_example": "SELECT * FROM users WHERE last_login LIKE '2024-05%';", "sample_table": users_table, "relevant_tables": ["users"]},
+    {"question": "Write a SQL query to find users who placed orders worth more than 150. Use the 'users' and 'orders' tables.", "correct_answer_example": "SELECT u.* FROM users u JOIN orders o ON u.user_id = o.user_id WHERE o.amount > 150;", "sample_table": users_table, "relevant_tables": ["users", "orders"]},
     {"question": "Write a SQL query to calculate the total amount spent by each user by joining the 'users' and 'orders' tables.", "correct_answer_example": "SELECT u.name, SUM(o.amount) AS total_spent FROM users u JOIN orders o ON u.user_id = o.user_id GROUP BY u.name ORDER BY u.name;", "sample_table": users_table, "relevant_tables": ["users", "orders"]}
-
-   ]
+]
 
 # --- Session State Initialization ---
 if "user_answers" not in st.session_state: st.session_state.user_answers = []
@@ -154,7 +155,7 @@ def simulate_query_duckdb(sql_query, tables_dict):
     # Query Modification for case-insensitive comparison
     modified_sql_query = processed_query_for_ilike
     final_executed_query = modified_sql_query
-    case_insensitive_columns = {"orders": ["status"], "users": ["city"]}
+    case_insensitive_columns = {"orders": [], "users": []}
     flat_insensitive_columns = [col for cols in case_insensitive_columns.values() for col in cols]
     
     if flat_insensitive_columns:
@@ -269,17 +270,11 @@ def evaluate_answer_with_llm(question_data, student_answer, original_tables_dict
     **Analysis Instructions:**
 
     * **Correctness:** Does the student's query accurately and completely answer the **Question** based on the **Relevant Table Schemas**? Consider edge cases if applicable (e.g., users with no orders, data types for comparisons).
-        **>>> IMPORTANT QUIZ CONTEXT FOR CORRECTNESS <<<**
-        For *this specific quiz*, assume that simple equality comparisons (`=`) involving the text columns `'status'` (in `orders`) and `'city'` (in `users`) are effectively **CASE-INSENSITIVE**. The quiz environment simulates this behavior.
-        Therefore, a query like `WHERE status = 'pending'` **should be considered CORRECT** if the question asks for 'Pending' status, even if the student did not use explicit `LOWER()` or `UPPER()` functions.
-        Evaluate the *logic* of the query based on this assumed case-insensitivity for these specific columns (`status`, `city`). Penalize only if the core logic (joins, other conditions, selected columns etc.) is wrong.
-        Also, assume the student *can* use **either single quotes (') or double quotes (")** for string literals in their query for this quiz simulation, even though single quotes are standard SQL. Do not mark down for using double quotes if the logic is correct.
-
-    * **Validity:** Is the query syntactically valid standard SQL (ignoring the double quote allowance above)? Briefly mention any *other* syntax errors.
-    * **Logic:** Does the query use appropriate SQL clauses (SELECT, FROM, WHERE, JOIN, GROUP BY, ORDER BY, aggregates, etc.) correctly for the task? Is the logic sound? Are comparisons appropriate for the data types (keeping the case-insensitivity rule for `status`/`city` in mind)?
-    * **Alternatives:** Briefly acknowledge if the student used a valid alternative approach (e.g., different JOIN type if appropriate, subquery vs. JOIN). Mentioning `LOWER`/`UPPER` or using single quotes as *generally good practice* is okay, but don't imply it was *required* for correctness *here*.
+    * **Validity:** Is the query syntactically valid standard SQL? Briefly mention any syntax errors.
+    * **Logic:** Does the query use appropriate SQL clauses (SELECT, FROM, WHERE, JOIN, GROUP BY, ORDER BY, aggregates, etc.) correctly for the task? Is the logic sound? Are comparisons appropriate for the data types?
+    * **Alternatives:** Briefly acknowledge if the student used a valid alternative approach (e.g., different JOIN type if appropriate, subquery vs. JOIN).
     * **Feedback:** Provide clear, constructive feedback in a friendly, encouraging, casual Hindi tone (like a helpful senior or 'bhaiya' talking to a learner).
-        * If incorrect (due to reasons *other* than case-sensitivity on `status`/`city` or using double quotes): Gently point out the error (e.g., "Arre yaar, yahaan thoda sa check karo..." or "Ek chhoti si galti ho gayi hai..."). Explain *what* is wrong (syntax, logic, columns, joins, other conditions etc.). Suggest how to fix it. **Do NOT mark the query incorrect or suggest using LOWER()/UPPER() or single quotes *solely* because of case differences in `status`/`city` or the use of double quotes if the rest of the logic is correct.**
+        * If incorrect: Gently point out the error (e.g., "Arre yaar, yahaan thoda sa check karo..." or "Ek chhoti si galti ho gayi hai..."). Explain *what* is wrong (syntax, logic, columns, joins, other conditions etc.). Suggest how to fix it.
     * **Verdict:** Conclude your entire response with *exactly* one line formatted as: "Verdict: Correct" or "Verdict: Incorrect". This line MUST be the very last line.
 
     **Begin Evaluation:**
@@ -396,16 +391,12 @@ def analyze_performance(user_answers):
         **Incorrectly Answered Questions & Feedback Snippets:**
         {incorrect_summary if incorrect_ans else '(Koi nahi)'}
 
-        **Quiz Context Reminder:**
-        - Case-insensitivity was assumed for '=' comparisons on 'status' and 'city' columns.
-        - Both single (') and double (") quotes were acceptable for string literals in this quiz simulation.
-
         **Task:**
         Ab, neeche diye gaye structure mein overall performance ka ek summary feedback do:
         1.  **Overall Impression:** Score aur general performance pe ek positive ya encouraging comment (e.g., "Overall performance kaafi achhi rahi!", "Thodi aur practice lagegi, but potential hai!"). Be realistic but motivating.
         2.  **Strengths:** Agar kuch specific concepts sahi kiye hain (jo correct answers se pata chale), unko highlight karo (e.g., "SELECT aur WHERE clause ka use aache se samajh aa gaya hai.", "JOINs wale sawaal sahi kiye, yeh achhi baat hai!"). General rakho agar specific pattern na dikhe.
-        3.  **Areas for Improvement:** Jo concepts galat hue (incorrect answers se related), unko gently point out karo. Focus on concepts, not just specific mistakes (e.g., "JOIN ka logic thoda aur clear karna hoga shayad.", "Aggregate functions (COUNT, AVG) pe dhyaan dena.", "Syntax ki chhoti-moti galtiyan ho rahi hain."). Briefly mention standard practices (like single quotes for strings in real DBs) as a learning point, without implying it was wrong *in this quiz*.
-        4.  **Next Steps / Encouragement:** Kuch encouraging words aur aage kya karna chahiye (e.g., "Keep practicing!", "Concept X ko revise kar lena.", "Aise hi lage raho, SQL aa jayega! Real-world ke liye standard SQL practices (jaise single quotes) seekhte rehna important hai.").
+        3.  **Areas for Improvement:** Jo concepts galat hue (incorrect answers se related), unko gently point out karo. Focus on concepts, not just specific mistakes (e.g., "JOIN ka logic thoda aur clear karna hoga shayad.", "Aggregate functions (COUNT, AVG) pe dhyaan dena.", "Syntax ki chhoti-moti galtiyan ho rahi hain.").
+        4.  **Next Steps / Encouragement:** Kuch encouraging words aur aage kya karna chahiye (e.g., "Keep practicing!", "Concept X ko revise kar lena.", "Aise hi lage raho, SQL aa jayega!").
 
         Bas plain text mein feedback generate karna hai. Casual tone rakhna. Sidhe feedback se shuru karo.
         """
@@ -461,18 +452,19 @@ def display_simulation(title, result_data):
 # --- Streamlit App UI ---
 
 # --- Start Screen ---
-# --- Start Screen ---
-# --- Start Screen ---
 if not st.session_state.quiz_started:
-    st.title("🚀 SQL Mentor - Interactive SQL Practice")
+    st.title("SQL Mentor - Interactive SQL Practice")
     st.markdown("### Finish the Quiz to Unlock Your SQL Certificate")
     
     st.markdown("""
-        **Important Notes:**
-        - The quiz consists of 10 questions.
-        - Each question has a time limit of 2 minutes.
-        - You need to score at least 80% to pass.
-        
+        **Important Notes**
+
+        The quiz consists of 10 questions.
+
+        Each question has a time limit of 2 minutes.
+
+        You need to score at least 80% to pass.
+
         In this interactive quiz, you will work with two sample tables.
     """)
     
@@ -694,7 +686,6 @@ elif st.session_state.quiz_completed:
         st.session_state.show_detailed_feedback = False
         st.rerun()
 
-    
     st.markdown("---")
     st.subheader("📝 Aapke Jawaab Aur Feedback Ka Summary")
     
@@ -797,5 +788,3 @@ elif st.session_state.quiz_completed:
         st.session_state.quiz_completed = False
         st.session_state.show_detailed_feedback = False
         st.rerun()
-
-
