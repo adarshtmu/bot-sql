@@ -1151,7 +1151,7 @@ def display_performance_analysis(user_answers, analyze_performance_func):
     </div>
     """, unsafe_allow_html=True)
     
-    if st.button("📊 Generate Detailed Analysis", key="show_analysis"):
+    if st.button("📊 Generate Detailed Analysis", key="show_analysis_results"):
         st.session_state.show_detailed_feedback = not st.session_state.get('show_detailed_feedback', False)
     
     if st.session_state.get('show_detailed_feedback', False):
