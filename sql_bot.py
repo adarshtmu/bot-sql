@@ -986,7 +986,7 @@ elif st.session_state.quiz_completed:
     st.markdown(
         """
         <div style='text-align:center; margin-top: 30px;'>
-            <h1 style='color:#28a745;'>🎉 Congratulations!</h1>
+            <h1 style='color:#28a745;'> Congratulations!</h1>
             <h2 style='color:#1f77b4;'>You have completed the SQL Challenge</h2>
         </div>
         """,
