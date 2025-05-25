@@ -726,534 +726,534 @@ elif st.session_state.quiz_completed:
 
     # Advanced Scorecard with animations, gradient border, and progress circle
     import streamlit as st
-import pandas as pd
-import re
-from datetime import datetime
-
-def inject_custom_css():
-    """Inject advanced CSS styles for the learning platform"""
-    st.markdown("""
-    <style>
-    /* Import Google Fonts */
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+    import pandas as pd
+    import re
+    from datetime import datetime
     
-    /* Global Styles */
-    .main .block-container {
-        padding-top: 2rem;
-        font-family: 'Inter', sans-serif;
-    }
-    
-    /* Advanced Score Card */
-    .score-card {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        border-radius: 24px;
-        padding: 0;
-        margin: 2rem 0;
-        box-shadow: 0 20px 40px rgba(102, 126, 234, 0.3);
-        position: relative;
-        overflow: hidden;
-        animation: scoreCardFloat 6s ease-in-out infinite;
-    }
-    
-    .score-card::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        background: rgba(255, 255, 255, 0.1);
-        backdrop-filter: blur(10px);
-        border-radius: 24px;
-    }
-    
-    .score-content {
-        position: relative;
-        z-index: 2;
-        padding: 3rem 2rem;
-        text-align: center;
-        color: white;
-    }
-    
-    .score-title {
-        font-size: 1.8rem;
-        font-weight: 600;
-        margin-bottom: 1rem;
-        text-shadow: 0 2px 4px rgba(0,0,0,0.3);
-    }
-    
-    .score-value {
-        font-size: 4rem;
-        font-weight: 800;
-        margin: 1rem 0;
-        text-shadow: 0 4px 8px rgba(0,0,0,0.3);
-        animation: scoreCountUp 2s ease-out;
-    }
-    
-    .score-label {
-        font-size: 1.2rem;
-        opacity: 0.9;
-        font-weight: 400;
-    }
-    
-    .score-progress {
-        margin: 2rem 0;
-        background: rgba(255, 255, 255, 0.2);
-        border-radius: 50px;
-        height: 12px;
-        overflow: hidden;
-    }
-    
-    .score-progress-fill {
-        height: 100%;
-        background: linear-gradient(90deg, #ffd700, #ffed4e);
-        border-radius: 50px;
-        animation: progressFill 2s ease-out;
-        box-shadow: 0 0 20px rgba(255, 215, 0, 0.5);
-    }
-    
-    /* Certificate Section */
-    .certificate-section {
-        background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
-        border-radius: 20px;
-        padding: 2.5rem;
-        margin: 2rem 0;
-        text-align: center;
-        box-shadow: 0 15px 35px rgba(252, 182, 159, 0.3);
-        position: relative;
-        overflow: hidden;
-    }
-    
-    .certificate-section::before {
-        content: '🎉';
-        position: absolute;
-        top: -10px;
-        left: -10px;
-        font-size: 3rem;
-        animation: celebrate 2s ease-in-out infinite;
-    }
-    
-    .certificate-section::after {
-        content: '🏆';
-        position: absolute;
-        top: -10px;
-        right: -10px;
-        font-size: 3rem;
-        animation: celebrate 2s ease-in-out infinite reverse;
-    }
-    
-    .certificate-btn {
-        background: linear-gradient(135deg, #ffd700, #ffed4e) !important;
-        color: #1a1a1a !important;
-        font-size: 1.3rem !important;
-        font-weight: 700 !important;
-        padding: 1rem 2.5rem !important;
-        border-radius: 15px !important;
-        text-decoration: none !important;
-        display: inline-block !important;
-        transition: all 0.3s ease !important;
-        box-shadow: 0 10px 25px rgba(255, 215, 0, 0.4) !important;
-        border: none !important;
-    }
-    
-    .certificate-btn:hover {
-        transform: translateY(-3px) !important;
-        box-shadow: 0 15px 35px rgba(255, 215, 0, 0.6) !important;
-    }
-    
-    /* Retry Section */
-    .retry-section {
-        background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%);
-        border-radius: 20px;
-        padding: 2rem;
-        text-align: center;
-        margin: 2rem 0;
-        box-shadow: 0 12px 28px rgba(255, 154, 158, 0.3);
-    }
-    
-    .mentor-btn {
-        background: linear-gradient(135deg, #667eea, #764ba2) !important;
-        color: white !important;
-        font-size: 1.1rem !important;
-        font-weight: 600 !important;
-        padding: 0.8rem 2rem !important;
-        border-radius: 12px !important;
-        text-decoration: none !important;
-        display: inline-block !important;
-        transition: all 0.3s ease !important;
-        box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4) !important;
-        border: none !important;
-    }
-    
-    .mentor-btn:hover {
-        transform: translateY(-2px) !important;
-        box-shadow: 0 12px 30px rgba(102, 126, 234, 0.6) !important;
-    }
-    
-    /* Question Cards */
-    .question-card {
-        background: rgba(255, 255, 255, 0.05);
-        backdrop-filter: blur(10px);
-        border: 1px solid rgba(255, 255, 255, 0.1);
-        border-radius: 16px;
-        margin: 1rem 0;
-        overflow: hidden;
-        transition: all 0.3s ease;
-    }
-    
-    .question-card:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 12px 28px rgba(0, 0, 0, 0.15);
-    }
-    
-    .question-header {
-        padding: 1.5rem;
-        background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-        color: white;
-        font-weight: 600;
-        font-size: 1.1rem;
-    }
-    
-    .question-content {
-        padding: 2rem;
-        background: white;
-    }
-    
-    /* Code Display */
-    .code-container {
-        background: #1e1e1e;
-        border-radius: 12px;
-        padding: 1.5rem;
-        margin: 1rem 0;
-        box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.3);
-        position: relative;
-    }
-    
-    .code-container::before {
-        content: 'SQL';
-        position: absolute;
-        top: 0.5rem;
-        right: 1rem;
-        background: #4CAF50;
-        color: white;
-        padding: 0.2rem 0.8rem;
-        border-radius: 8px;
-        font-size: 0.8rem;
-        font-weight: 600;
-    }
-    
-    /* Feedback Section */
-    .feedback-container {
-        background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
-        border-radius: 20px;
-        padding: 2.5rem;
-        margin: 2rem 0;
-        box-shadow: 0 15px 35px rgba(168, 237, 234, 0.3);
-    }
-    
-    .feedback-header {
-        font-size: 1.5rem;
-        font-weight: 700;
-        color: #2c3e50;
-        text-align: center;
-        margin-bottom: 2rem;
-    }
-    
-    .feedback-section {
-        background: rgba(255, 255, 255, 0.7);
-        border-radius: 12px;
-        padding: 1.5rem;
-        margin: 1rem 0;
-        backdrop-filter: blur(5px);
-    }
-    
-    .strength-item {
-        background: linear-gradient(135deg, #d4fc79 0%, #96e6a1 100%);
-        padding: 0.8rem 1.2rem;
-        margin: 0.5rem 0;
-        border-radius: 10px;
-        color: #2d5016;
-        font-weight: 500;
-    }
-    
-    .weakness-item {
-        background: linear-gradient(135deg, #ffeaa7 0%, #fab1a0 100%);
-        padding: 0.8rem 1.2rem;
-        margin: 0.5rem 0;
-        border-radius: 10px;
-        color: #8b4513;
-        font-weight: 500;
-    }
-    
-    /* Animations */
-    @keyframes scoreCardFloat {
-        0%, 100% { transform: translateY(0px); }
-        50% { transform: translateY(-10px); }
-    }
-    
-    @keyframes scoreCountUp {
-        0% { transform: scale(0.5); opacity: 0; }
-        100% { transform: scale(1); opacity: 1; }
-    }
-    
-    @keyframes progressFill {
-        0% { width: 0%; }
-        100% { width: var(--progress-width, 0%); }
-    }
-    
-    @keyframes celebrate {
-        0%, 100% { transform: rotate(0deg) scale(1); }
-        25% { transform: rotate(-10deg) scale(1.1); }
-        75% { transform: rotate(10deg) scale(1.1); }
-    }
-    
-    /* Button Styles */
-    .stButton > button {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        color: white;
-        border-radius: 12px;
-        border: none;
-        padding: 0.75rem 2rem;
-        font-weight: 600;
-        font-size: 1rem;
-        transition: all 0.3s ease;
-        box-shadow: 0 6px 20px rgba(102, 126, 234, 0.3);
-    }
-    
-    .stButton > button:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 10px 30px rgba(102, 126, 234, 0.5);
-    }
-    
-    /* Responsive Design */
-    @media (max-width: 768px) {
-        .score-value {
-            font-size: 3rem;
+    def inject_custom_css():
+        """Inject advanced CSS styles for the learning platform"""
+        st.markdown("""
+        <style>
+        /* Import Google Fonts */
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+        
+        /* Global Styles */
+        .main .block-container {
+            padding-top: 2rem;
+            font-family: 'Inter', sans-serif;
+        }
+        
+        /* Advanced Score Card */
+        .score-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 24px;
+            padding: 0;
+            margin: 2rem 0;
+            box-shadow: 0 20px 40px rgba(102, 126, 234, 0.3);
+            position: relative;
+            overflow: hidden;
+            animation: scoreCardFloat 6s ease-in-out infinite;
+        }
+        
+        .score-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 24px;
         }
         
         .score-content {
-            padding: 2rem 1rem;
+            position: relative;
+            z-index: 2;
+            padding: 3rem 2rem;
+            text-align: center;
+            color: white;
         }
         
-        .certificate-section, .feedback-container {
-            padding: 1.5rem;
+        .score-title {
+            font-size: 1.8rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
         }
-    }
-    </style>
-    """, unsafe_allow_html=True)
-
-def display_advanced_scorecard(final_score):
-    """Display an advanced animated scorecard"""
-    # Progress width for animation
-    progress_width = min(final_score, 100)
+        
+        .score-value {
+            font-size: 4rem;
+            font-weight: 800;
+            margin: 1rem 0;
+            text-shadow: 0 4px 8px rgba(0,0,0,0.3);
+            animation: scoreCountUp 2s ease-out;
+        }
+        
+        .score-label {
+            font-size: 1.2rem;
+            opacity: 0.9;
+            font-weight: 400;
+        }
+        
+        .score-progress {
+            margin: 2rem 0;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 50px;
+            height: 12px;
+            overflow: hidden;
+        }
+        
+        .score-progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #ffd700, #ffed4e);
+            border-radius: 50px;
+            animation: progressFill 2s ease-out;
+            box-shadow: 0 0 20px rgba(255, 215, 0, 0.5);
+        }
+        
+        /* Certificate Section */
+        .certificate-section {
+            background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
+            border-radius: 20px;
+            padding: 2.5rem;
+            margin: 2rem 0;
+            text-align: center;
+            box-shadow: 0 15px 35px rgba(252, 182, 159, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .certificate-section::before {
+            content: '🎉';
+            position: absolute;
+            top: -10px;
+            left: -10px;
+            font-size: 3rem;
+            animation: celebrate 2s ease-in-out infinite;
+        }
+        
+        .certificate-section::after {
+            content: '🏆';
+            position: absolute;
+            top: -10px;
+            right: -10px;
+            font-size: 3rem;
+            animation: celebrate 2s ease-in-out infinite reverse;
+        }
+        
+        .certificate-btn {
+            background: linear-gradient(135deg, #ffd700, #ffed4e) !important;
+            color: #1a1a1a !important;
+            font-size: 1.3rem !important;
+            font-weight: 700 !important;
+            padding: 1rem 2.5rem !important;
+            border-radius: 15px !important;
+            text-decoration: none !important;
+            display: inline-block !important;
+            transition: all 0.3s ease !important;
+            box-shadow: 0 10px 25px rgba(255, 215, 0, 0.4) !important;
+            border: none !important;
+        }
+        
+        .certificate-btn:hover {
+            transform: translateY(-3px) !important;
+            box-shadow: 0 15px 35px rgba(255, 215, 0, 0.6) !important;
+        }
+        
+        /* Retry Section */
+        .retry-section {
+            background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%);
+            border-radius: 20px;
+            padding: 2rem;
+            text-align: center;
+            margin: 2rem 0;
+            box-shadow: 0 12px 28px rgba(255, 154, 158, 0.3);
+        }
+        
+        .mentor-btn {
+            background: linear-gradient(135deg, #667eea, #764ba2) !important;
+            color: white !important;
+            font-size: 1.1rem !important;
+            font-weight: 600 !important;
+            padding: 0.8rem 2rem !important;
+            border-radius: 12px !important;
+            text-decoration: none !important;
+            display: inline-block !important;
+            transition: all 0.3s ease !important;
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4) !important;
+            border: none !important;
+        }
+        
+        .mentor-btn:hover {
+            transform: translateY(-2px) !important;
+            box-shadow: 0 12px 30px rgba(102, 126, 234, 0.6) !important;
+        }
+        
+        /* Question Cards */
+        .question-card {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            margin: 1rem 0;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+        
+        .question-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 28px rgba(0, 0, 0, 0.15);
+        }
+        
+        .question-header {
+            padding: 1.5rem;
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            font-weight: 600;
+            font-size: 1.1rem;
+        }
+        
+        .question-content {
+            padding: 2rem;
+            background: white;
+        }
+        
+        /* Code Display */
+        .code-container {
+            background: #1e1e1e;
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin: 1rem 0;
+            box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.3);
+            position: relative;
+        }
+        
+        .code-container::before {
+            content: 'SQL';
+            position: absolute;
+            top: 0.5rem;
+            right: 1rem;
+            background: #4CAF50;
+            color: white;
+            padding: 0.2rem 0.8rem;
+            border-radius: 8px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+        
+        /* Feedback Section */
+        .feedback-container {
+            background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+            border-radius: 20px;
+            padding: 2.5rem;
+            margin: 2rem 0;
+            box-shadow: 0 15px 35px rgba(168, 237, 234, 0.3);
+        }
+        
+        .feedback-header {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #2c3e50;
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+        
+        .feedback-section {
+            background: rgba(255, 255, 255, 0.7);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin: 1rem 0;
+            backdrop-filter: blur(5px);
+        }
+        
+        .strength-item {
+            background: linear-gradient(135deg, #d4fc79 0%, #96e6a1 100%);
+            padding: 0.8rem 1.2rem;
+            margin: 0.5rem 0;
+            border-radius: 10px;
+            color: #2d5016;
+            font-weight: 500;
+        }
+        
+        .weakness-item {
+            background: linear-gradient(135deg, #ffeaa7 0%, #fab1a0 100%);
+            padding: 0.8rem 1.2rem;
+            margin: 0.5rem 0;
+            border-radius: 10px;
+            color: #8b4513;
+            font-weight: 500;
+        }
+        
+        /* Animations */
+        @keyframes scoreCardFloat {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+        }
+        
+        @keyframes scoreCountUp {
+            0% { transform: scale(0.5); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        
+        @keyframes progressFill {
+            0% { width: 0%; }
+            100% { width: var(--progress-width, 0%); }
+        }
+        
+        @keyframes celebrate {
+            0%, 100% { transform: rotate(0deg) scale(1); }
+            25% { transform: rotate(-10deg) scale(1.1); }
+            75% { transform: rotate(10deg) scale(1.1); }
+        }
+        
+        /* Button Styles */
+        .stButton > button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 12px;
+            border: none;
+            padding: 0.75rem 2rem;
+            font-weight: 600;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.3);
+        }
+        
+        .stButton > button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.5);
+        }
+        
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .score-value {
+                font-size: 3rem;
+            }
+            
+            .score-content {
+                padding: 2rem 1rem;
+            }
+            
+            .certificate-section, .feedback-container {
+                padding: 1.5rem;
+            }
+        }
+        </style>
+        """, unsafe_allow_html=True)
     
-    st.markdown(f"""
-    <div class="score-card">
-        <div class="score-content">
-            <div class="score-title">📊 Your Final Score</div>
-            <div class="score-value">{final_score:.1f}%</div>
-            <div class="score-label">Performance Rating</div>
-            <div class="score-progress">
-                <div class="score-progress-fill" style="--progress-width: {progress_width}%; width: {progress_width}%;"></div>
+    def display_advanced_scorecard(final_score):
+        """Display an advanced animated scorecard"""
+        # Progress width for animation
+        progress_width = min(final_score, 100)
+        
+        st.markdown(f"""
+        <div class="score-card">
+            <div class="score-content">
+                <div class="score-title">📊 Your Final Score</div>
+                <div class="score-value">{final_score:.1f}%</div>
+                <div class="score-label">Performance Rating</div>
+                <div class="score-progress">
+                    <div class="score-progress-fill" style="--progress-width: {progress_width}%; width: {progress_width}%;"></div>
+                </div>
             </div>
         </div>
-    </div>
-    """, unsafe_allow_html=True)
-
-def display_certificate_section(final_score):
-    """Display certificate eligibility section"""
-    if final_score >= 80:
-        st.markdown("""
-        <div class="certificate-section">
-            <h2 style='color:#2c3e50; margin-bottom: 1rem;'>🏆 Outstanding Performance!</h2>
-            <p style='color:#5d6d7e; font-size: 1.1rem; margin-bottom: 2rem;'>
-                Congratulations! You've demonstrated excellent SQL skills and earned your certificate.
-            </p>
-            <a href="https://superprofile.bio/vp/corporate-bhaiya-sql-page" target="_blank" class="certificate-btn">
-                🎓 Claim Your Certificate
-            </a>
-        </div>
         """, unsafe_allow_html=True)
-    else:
-        score_needed = 80 - final_score
-        st.markdown(f"""
-        <div class="retry-section">
-            <h3 style='color:#2c3e50; margin-bottom: 1rem;'>📚 Keep Learning & Growing!</h3>
-            <p style='color:#5d6d7e; font-size: 1rem; margin-bottom: 1.5rem;'>
-                You need {score_needed:.1f}% more to earn your certificate. Don't give up!
-            </p>
-            <a href="https://www.corporatebhaiya.com/" target="_blank" class="mentor-btn">
-                🚀 Book a Mentor Session
-            </a>
-        </div>
-        """, unsafe_allow_html=True)
-
-# def display_question_summary(user_answers):
-#     """Display question summary with advanced styling"""
-#     st.markdown("""
-#     <div style='text-align: center; margin: 3rem 0 2rem 0;'>
-#         <h2 style='background: linear-gradient(135deg, #667eea, #764ba2); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-weight: 800; font-size: 2rem;'>
-#             📝 Detailed Question Analysis
-#         </h2>
-#         <p style='color: #6c757d; font-size: 1.1rem;'>Review your performance on each question</p>
-#     </div>
-#     """, unsafe_allow_html=True)
     
-#     for i, ans_data in enumerate(user_answers):
-#         q_num = i + 1
-#         is_correct = ans_data.get('is_correct', False)
-#         emoji = "✅" if is_correct else "❌"
+    def display_certificate_section(final_score):
+        """Display certificate eligibility section"""
+        if final_score >= 80:
+            st.markdown("""
+            <div class="certificate-section">
+                <h2 style='color:#2c3e50; margin-bottom: 1rem;'>🏆 Outstanding Performance!</h2>
+                <p style='color:#5d6d7e; font-size: 1.1rem; margin-bottom: 2rem;'>
+                    Congratulations! You've demonstrated excellent SQL skills and earned your certificate.
+                </p>
+                <a href="https://superprofile.bio/vp/corporate-bhaiya-sql-page" target="_blank" class="certificate-btn">
+                    🎓 Claim Your Certificate
+                </a>
+            </div>
+            """, unsafe_allow_html=True)
+        else:
+            score_needed = 80 - final_score
+            st.markdown(f"""
+            <div class="retry-section">
+                <h3 style='color:#2c3e50; margin-bottom: 1rem;'>📚 Keep Learning & Growing!</h3>
+                <p style='color:#5d6d7e; font-size: 1rem; margin-bottom: 1.5rem;'>
+                    You need {score_needed:.1f}% more to earn your certificate. Don't give up!
+                </p>
+                <a href="https://www.corporatebhaiya.com/" target="_blank" class="mentor-btn">
+                    🚀 Book a Mentor Session
+                </a>
+            </div>
+            """, unsafe_allow_html=True)
+    
+    # def display_question_summary(user_answers):
+    #     """Display question summary with advanced styling"""
+    #     st.markdown("""
+    #     <div style='text-align: center; margin: 3rem 0 2rem 0;'>
+    #         <h2 style='background: linear-gradient(135deg, #667eea, #764ba2); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-weight: 800; font-size: 2rem;'>
+    #             📝 Detailed Question Analysis
+    #         </h2>
+    #         <p style='color: #6c757d; font-size: 1.1rem;'>Review your performance on each question</p>
+    #     </div>
+    #     """, unsafe_allow_html=True)
         
-#         with st.expander(f"Question {q_num}: {ans_data['question']} {emoji}", expanded=False):
-#             # Question content container
-#             st.markdown('<div class="question-content">', unsafe_allow_html=True)
+    #     for i, ans_data in enumerate(user_answers):
+    #         q_num = i + 1
+    #         is_correct = ans_data.get('is_correct', False)
+    #         emoji = "✅" if is_correct else "❌"
             
-#             # Student answer
-#             st.markdown("**🧑‍💻 Your Solution:**")
-#             st.code(ans_data.get('student_answer', '(No answer provided)'), language='sql')
-            
-#             # Feedback
-#             st.markdown("**🤖 AI Mentor Feedback:**")
-#             feedback_text = ans_data.get("feedback", "_Feedback not available._")
-#             st.markdown(f'<div style="background: #f8f9fa; padding: 1rem; border-radius: 8px; border-left: 4px solid #007bff;">{feedback_text}</div>', unsafe_allow_html=True)
-            
-#             # Results comparison
-#             col1, col2 = st.columns(2)
-            
-#             with col1:
-#                 st.markdown("**📊 Your Query Result:**")
-#                 display_simulation_result(ans_data.get("actual_result", "N/A"))
-            
-#             if not is_correct:
-#                 with col2:
-#                     st.markdown("**✅ Expected Result:**")
-#                     display_simulation_result(ans_data.get("expected_result", "N/A"))
-            
-#             st.markdown('</div>', unsafe_allow_html=True)
-
-def display_simulation_result(result):
-    """Display simulation results with styling"""
-    if isinstance(result, pd.DataFrame):
-        st.dataframe(result, use_container_width=True)
-    elif isinstance(result, str):
-        st.markdown(f'<div class="code-container"><pre>{result}</pre></div>', unsafe_allow_html=True)
-    else:
-        st.write(result)
-
-def display_performance_analysis(user_answers, analyze_performance_func):
-    """Display detailed performance analysis"""
-    st.markdown("""
-    <div style='text-align: center; margin: 3rem 0 2rem 0;'>
-        <h2 style='background: linear-gradient(135deg, #f093fb, #f5576c); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-weight: 800; font-size: 2rem;'>
-            🧠 AI-Powered Performance Analysis
-        </h2>
-        <p style='color: #6c757d; font-size: 1.1rem;'>Get personalized insights to improve your SQL skills</p>
-    </div>
-    """, unsafe_allow_html=True)
+    #         with st.expander(f"Question {q_num}: {ans_data['question']} {emoji}", expanded=False):
+    #             # Question content container
+    #             st.markdown('<div class="question-content">', unsafe_allow_html=True)
+                
+    #             # Student answer
+    #             st.markdown("**🧑‍💻 Your Solution:**")
+    #             st.code(ans_data.get('student_answer', '(No answer provided)'), language='sql')
+                
+    #             # Feedback
+    #             st.markdown("**🤖 AI Mentor Feedback:**")
+    #             feedback_text = ans_data.get("feedback", "_Feedback not available._")
+    #             st.markdown(f'<div style="background: #f8f9fa; padding: 1rem; border-radius: 8px; border-left: 4px solid #007bff;">{feedback_text}</div>', unsafe_allow_html=True)
+                
+    #             # Results comparison
+    #             col1, col2 = st.columns(2)
+                
+    #             with col1:
+    #                 st.markdown("**📊 Your Query Result:**")
+    #                 display_simulation_result(ans_data.get("actual_result", "N/A"))
+                
+    #             if not is_correct:
+    #                 with col2:
+    #                     st.markdown("**✅ Expected Result:**")
+    #                     display_simulation_result(ans_data.get("expected_result", "N/A"))
+                
+    #             st.markdown('</div>', unsafe_allow_html=True)
     
-    if st.button("📊 Generate Detailed Analysis", key="show_analysis_results"):
-        st.session_state.show_detailed_feedback = not st.session_state.get('show_detailed_feedback', False)
+    def display_simulation_result(result):
+        """Display simulation results with styling"""
+        if isinstance(result, pd.DataFrame):
+            st.dataframe(result, use_container_width=True)
+        elif isinstance(result, str):
+            st.markdown(f'<div class="code-container"><pre>{result}</pre></div>', unsafe_allow_html=True)
+        else:
+            st.write(result)
     
-    if st.session_state.get('show_detailed_feedback', False):
-        with st.spinner("🔍 Analyzing your performance..."):
-            performance_summary = analyze_performance_func(user_answers)
-            feedback_text = performance_summary.get("overall_feedback", "Analysis not available.")
-            
-            st.markdown('<div class="feedback-container">', unsafe_allow_html=True)
-            st.markdown('<div class="feedback-header">📈 Your Comprehensive Performance Report</div>', unsafe_allow_html=True)
-            
-            # Parse feedback sections
-            try:
-                sections = re.split(r'(Overall Impression:|Strengths:|Areas for Improvement:|Next Steps / Encouragement:)', feedback_text)
-                section_dict = {}
-                for i in range(1, len(sections), 2):
-                    if i+1 < len(sections):
-                        section_dict[sections[i].strip(':')] = sections[i+1].strip()
-            except:
-                section_dict = {"Full Feedback": feedback_text}
-            
-            # Overall impression
-            if "Overall Impression" in section_dict:
-                st.markdown("### 🌟 Overall Impression")
-                st.markdown(f'<div style="background: rgba(255,255,255,0.8); padding: 1.5rem; border-radius: 12px; margin: 1rem 0;">{section_dict["Overall Impression"]}</div>', unsafe_allow_html=True)
-            
-            # Strengths
-            st.markdown('<div class="feedback-section">', unsafe_allow_html=True)
-            st.markdown("### ✨ Your Strengths")
-            if "Strengths" in section_dict:
-                strengths = [s.strip() for s in section_dict["Strengths"].split('\n') if s.strip()]
-                for strength in strengths:
-                    st.markdown(f'<div class="strength-item">✔ {strength}</div>', unsafe_allow_html=True)
-            else:
-                st.markdown('<div class="strength-item">✔ Keep practicing to identify your strengths!</div>', unsafe_allow_html=True)
-            st.markdown('</div>', unsafe_allow_html=True)
-            
-            # Areas for improvement
-            st.markdown('<div class="feedback-section">', unsafe_allow_html=True)
-            st.markdown("### 🎯 Areas for Improvement")
-            if "Areas for Improvement" in section_dict:
-                improvements = [s.strip() for s in section_dict["Areas for Improvement"].split('\n') if s.strip()]
-                for improvement in improvements:
-                    st.markdown(f'<div class="weakness-item">📝 {improvement}</div>', unsafe_allow_html=True)
-            else:
-                st.markdown('<div class="weakness-item">📝 Continue practicing to reach the next level!</div>', unsafe_allow_html=True)
-            st.markdown('</div>', unsafe_allow_html=True)
-            
-            # Next steps
-            if "Next Steps / Encouragement" in section_dict:
-                st.markdown("### 🚀 Recommended Next Steps")
-                st.markdown(f'<div style="background: linear-gradient(135deg, #d299c2, #fef9d7); padding: 1.5rem; border-radius: 12px; margin: 1rem 0; color: #2c3e50;">{section_dict["Next Steps / Encouragement"]}</div>', unsafe_allow_html=True)
-            
-            st.markdown('</div>', unsafe_allow_html=True)
-
-def display_retry_section():
-    """Display retry section with advanced styling"""
-    st.markdown("---")
+    def display_performance_analysis(user_answers, analyze_performance_func):
+        """Display detailed performance analysis"""
+        st.markdown("""
+        <div style='text-align: center; margin: 3rem 0 2rem 0;'>
+            <h2 style='background: linear-gradient(135deg, #f093fb, #f5576c); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-weight: 800; font-size: 2rem;'>
+                🧠 AI-Powered Performance Analysis
+            </h2>
+            <p style='color: #6c757d; font-size: 1.1rem;'>Get personalized insights to improve your SQL skills</p>
+        </div>
+        """, unsafe_allow_html=True)
+        
+        if st.button("📊 Generate Detailed Analysis", key="show_analysis_results"):
+            st.session_state.show_detailed_feedback = not st.session_state.get('show_detailed_feedback', False)
+        
+        if st.session_state.get('show_detailed_feedback', False):
+            with st.spinner("🔍 Analyzing your performance..."):
+                performance_summary = analyze_performance_func(user_answers)
+                feedback_text = performance_summary.get("overall_feedback", "Analysis not available.")
+                
+                st.markdown('<div class="feedback-container">', unsafe_allow_html=True)
+                st.markdown('<div class="feedback-header">📈 Your Comprehensive Performance Report</div>', unsafe_allow_html=True)
+                
+                # Parse feedback sections
+                try:
+                    sections = re.split(r'(Overall Impression:|Strengths:|Areas for Improvement:|Next Steps / Encouragement:)', feedback_text)
+                    section_dict = {}
+                    for i in range(1, len(sections), 2):
+                        if i+1 < len(sections):
+                            section_dict[sections[i].strip(':')] = sections[i+1].strip()
+                except:
+                    section_dict = {"Full Feedback": feedback_text}
+                
+                # Overall impression
+                if "Overall Impression" in section_dict:
+                    st.markdown("### 🌟 Overall Impression")
+                    st.markdown(f'<div style="background: rgba(255,255,255,0.8); padding: 1.5rem; border-radius: 12px; margin: 1rem 0;">{section_dict["Overall Impression"]}</div>', unsafe_allow_html=True)
+                
+                # Strengths
+                st.markdown('<div class="feedback-section">', unsafe_allow_html=True)
+                st.markdown("### ✨ Your Strengths")
+                if "Strengths" in section_dict:
+                    strengths = [s.strip() for s in section_dict["Strengths"].split('\n') if s.strip()]
+                    for strength in strengths:
+                        st.markdown(f'<div class="strength-item">✔ {strength}</div>', unsafe_allow_html=True)
+                else:
+                    st.markdown('<div class="strength-item">✔ Keep practicing to identify your strengths!</div>', unsafe_allow_html=True)
+                st.markdown('</div>', unsafe_allow_html=True)
+                
+                # Areas for improvement
+                st.markdown('<div class="feedback-section">', unsafe_allow_html=True)
+                st.markdown("### 🎯 Areas for Improvement")
+                if "Areas for Improvement" in section_dict:
+                    improvements = [s.strip() for s in section_dict["Areas for Improvement"].split('\n') if s.strip()]
+                    for improvement in improvements:
+                        st.markdown(f'<div class="weakness-item">📝 {improvement}</div>', unsafe_allow_html=True)
+                else:
+                    st.markdown('<div class="weakness-item">📝 Continue practicing to reach the next level!</div>', unsafe_allow_html=True)
+                st.markdown('</div>', unsafe_allow_html=True)
+                
+                # Next steps
+                if "Next Steps / Encouragement" in section_dict:
+                    st.markdown("### 🚀 Recommended Next Steps")
+                    st.markdown(f'<div style="background: linear-gradient(135deg, #d299c2, #fef9d7); padding: 1.5rem; border-radius: 12px; margin: 1rem 0; color: #2c3e50;">{section_dict["Next Steps / Encouragement"]}</div>', unsafe_allow_html=True)
+                
+                st.markdown('</div>', unsafe_allow_html=True)
     
-    col1, col2, col3 = st.columns([1, 2, 1])
-    with col2:
-        if st.button("🔄 Start New Quiz", key="retry_quiz", use_container_width=True):
-            # Reset session state
-            for key in ['user_answers', 'current_question', 'quiz_started', 'quiz_completed', 'show_detailed_feedback']:
-                if key in st.session_state:
-                    del st.session_state[key]
-            st.rerun()
-
-# Main function to display the complete results page
-def display_advanced_results_page(final_score, user_answers, analyze_performance_func):
-    """Display the complete advanced results page"""
+    def display_retry_section():
+        """Display retry section with advanced styling"""
+        st.markdown("---")
+        
+        col1, col2, col3 = st.columns([1, 2, 1])
+        with col2:
+            if st.button("🔄 Start New Quiz", key="retry_quiz", use_container_width=True):
+                # Reset session state
+                for key in ['user_answers', 'current_question', 'quiz_started', 'quiz_completed', 'show_detailed_feedback']:
+                    if key in st.session_state:
+                        del st.session_state[key]
+                st.rerun()
     
-    # Inject custom CSS
-    inject_custom_css()
+    # Main function to display the complete results page
+    def display_advanced_results_page(final_score, user_answers, analyze_performance_func):
+        """Display the complete advanced results page"""
+        
+        # Inject custom CSS
+        inject_custom_css()
+        
+        # Advanced scorecard
+        display_advanced_scorecard(final_score)
+        
+        # Certificate section
+        display_certificate_section(final_score)
+        
+        # Separator
+        st.markdown("---")
+        
+        # Question summary
+        # display_question_summary(user_answers)
+        
+        # Performance analysis
+        display_performance_analysis(user_answers, analyze_performance_func)
+        
+        # Retry section
+        display_retry_section()
+        
+        # Footer
+        st.markdown("""
+        <div style='text-align: center; margin-top: 4rem; padding: 2rem; background: linear-gradient(135deg, #667eea, #764ba2); border-radius: 16px; color: white;'>
+            <h3>🎓 Corporate Bhaiya Learning Platform</h3>
+            <p>Empowering careers through quality education</p>
+            <p style='opacity: 0.8; font-size: 0.9rem;'>© 2024 All rights reserved</p>
+        </div>
+        """, unsafe_allow_html=True)
     
-    # Advanced scorecard
-    display_advanced_scorecard(final_score)
+    # Usage example:
+    display_advanced_results_page(85.5, st.session_state.user_answers, analyze_performance)
     
-    # Certificate section
-    display_certificate_section(final_score)
     
-    # Separator
-    st.markdown("---")
-    
-    # Question summary
-    # display_question_summary(user_answers)
-    
-    # Performance analysis
-    display_performance_analysis(user_answers, analyze_performance_func)
-    
-    # Retry section
-    display_retry_section()
-    
-    # Footer
-    st.markdown("""
-    <div style='text-align: center; margin-top: 4rem; padding: 2rem; background: linear-gradient(135deg, #667eea, #764ba2); border-radius: 16px; color: white;'>
-        <h3>🎓 Corporate Bhaiya Learning Platform</h3>
-        <p>Empowering careers through quality education</p>
-        <p style='opacity: 0.8; font-size: 0.9rem;'>© 2024 All rights reserved</p>
-    </div>
-    """, unsafe_allow_html=True)
-
-# Usage example:
-display_advanced_results_page(85.5, st.session_state.user_answers, analyze_performance)
-
-
