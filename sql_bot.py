@@ -627,6 +627,7 @@ elif st.session_state.quiz_started and not st.session_state.quiz_completed:
                 st.rerun()
         else:
             st.warning("⚠️ Please enter your SQL query before submitting.")
+    st.markdown("<div style='height: 220px;'></div>", unsafe_allow_html=True)        
     footer_html = """
     <div style='text-align: center; margin-top: 2rem; padding: 1.2rem; background: linear-gradient(135deg, #667eea, #764ba2); border-radius: 16px; color: white;'>
         <h3>🎓 Corporate Bhaiya Learning Platform</h3>
