@@ -8,6 +8,7 @@ import duckdb
 # Updated to increase font sizes globally and for specific elements
 
 hide_streamlit_style = """
+hide_streamlit_style = """
 <style>
     /* Hide Streamlit system UI */
     header, #MainMenu, footer,
@@ -20,7 +21,7 @@ hide_streamlit_style = """
 
     /* Background and font */
     body {
-        background: linear-gradient(120deg, #f4faff 0%, #e6f6fe 100%) !important;
+        background: linear-gradient(120deg, #fafdff 0%, #f3f8fe 100%) !important;
         font-family: 'Segoe UI', 'Roboto', 'Arial', sans-serif !important;
         color: #354052;
     }
@@ -29,7 +30,7 @@ hide_streamlit_style = """
     .main .block-container {
         background: #ffffff;
         border-radius: 22px;
-        box-shadow: 0 8px 32px rgba(44, 62, 80, 0.10);
+        box-shadow: 0 8px 32px rgba(44, 62, 80, 0.07);
         padding: 48px 32px 32px 32px;
         margin-top: 32px;
     }
@@ -87,16 +88,16 @@ hide_streamlit_style = """
 
     /* Tabs, Cards, and Table Previews */
     .stTabs [role="tablist"] {
-        background: #f7fafc;
+        background: #fafdff;
         padding: 0.7em 1em;
         border-radius: 12px;
-        box-shadow: 0 2px 12px rgba(44,62,80,0.06);
+        box-shadow: 0 2px 12px rgba(44,62,80,0.05);
         margin-bottom: 2em;
     }
 
     /* Feedback/Analysis Container */
     .feedback-container {
-        background: #f0fbf7;
+        background: #f6fcfb;
         padding: 28px;
         border-radius: 18px;
         box-shadow: 0 4px 18px rgba(33,182,168,.07);
@@ -125,9 +126,9 @@ hide_streamlit_style = """
 
     /* Certificate/Score Card */
     .score-card {
-        background: #e6f6fe;
+        background: #f3f8fe;
         border-radius: 16px;
-        box-shadow: 0 4px 16px rgba(44,62,80,0.07);
+        box-shadow: 0 4px 16px rgba(44,62,80,0.05);
         padding: 34px 0;
         text-align: center;
         margin: 34px 0;
