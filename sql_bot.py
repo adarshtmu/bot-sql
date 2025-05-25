@@ -617,8 +617,19 @@ elif st.session_state.quiz_started and not st.session_state.quiz_completed:
             st.warning("⚠️ Please enter your SQL query before submitting.")
 
 # --- Quiz Completed Screen ---
+# --- Quiz Completed Screen ---
 elif st.session_state.quiz_completed:
-
+    st.balloons()
+    # Optional: Show congratulations at top
+    st.markdown(
+        """
+        <div style='text-align:center; margin-top: 30px;'>
+            <h1 style='color:#28a745;'>🎉 Congratulations!</h1>
+            <h2 style='color:#1f77b4;'>You have completed the SQL Challenge</h2>
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
 
     # --- 1. Answer/Feedback Summary first ---
     st.markdown("---")
@@ -703,40 +714,125 @@ elif st.session_state.quiz_completed:
                     st.markdown(section_dict["Full Feedback"])
                 st.markdown('</div>', unsafe_allow_html=True)
 
-    # --- 3. Scorecard & Buttons LAST ---
-
-        # --- 3. Congratulations message just above the scorecard ---
-    st.balloons()
-    # Optional: Show congratulations at top
-    st.markdown(
-        """
-        <div style='text-align:center; margin-top: 30px;'>
-            <h1 style='color:#28a745;'>🎉 Congratulations!</h1>
-            <h2 style='color:#1f77b4;'>You have completed the SQL Challenge</h2>
-        </div>
-        """,
-        unsafe_allow_html=True
-    )
+    # --- 3. Advanced Scorecard & Buttons LAST ---
     st.markdown("---")
     final_score = calculate_score(st.session_state.user_answers)
+
+    # Determine dynamic colors and messages based on score
+    score_color = "#28a745" if final_score >= 80 else "#ff9800" if final_score >= 50 else "#e74c3c"
+    score_message = "Outstanding Performance! 🌟" if final_score >= 80 else "Good Effort! Keep Going! 💪" if final_score >= 50 else "Needs Improvement! 📚"
+    border_gradient = "linear-gradient(45deg, #28a745, #1f77b4)" if final_score >= 80 else "linear-gradient(45deg, #ff9800, #e74c3c)"
+
+    # Advanced Scorecard with animations, gradient border, and progress circle
     st.markdown(
         f"""
-        <div style='
-            background-color:#f8f9fa;
-            border-radius:15px;
-            box-shadow:0 4px 16px rgba(0,0,0,0.08);
-            padding:30px 0;
-            margin:30px 0;
-            text-align:center;
-        '>
-            <h2 style='color:#333;'>📊 Your Final Score</h2>
-            <div style='font-size:2.5rem; font-weight:bold; color:#28a745;'>{final_score:.2f}%</div>
-            <div style='font-size:1.2rem; color:#888;'>Scoreboard</div>
+        <style>
+            @keyframes fadeIn {{
+                0% {{ opacity: 0; transform: scale(0.95); }}
+                100% {{ opacity: 1; transform: scale(1); }}
+            }}
+            @keyframes progressCircle {{
+                0% {{ stroke-dasharray: 0 100; }}
+            }}
+            .scorecard-container {{
+                background: linear-gradient(135deg, #ffffff, #f1f5f9);
+                border: 4px solid transparent;
+                border-radius: 20px;
+                padding: 30px;
+                margin: 30px 0;
+                text-align: center;
+                position: relative;
+                box-shadow: 0 8px 24px rgba(0,0,0,0.1);
+                animation: fadeIn 0.8s ease-in-out;
+                background-clip: padding-box;
+                border-image: {border_gradient} 1;
+            }}
+            .scorecard-container::before {{
+                content: '';
+                position: absolute;
+                top: -4px; bottom: -4px; left: -4px; right: -4px;
+                background: {border_gradient};
+                z-index: -1;
+                border-radius: 24px;
+            }}
+            .scorecard-header {{
+                font-size: 2rem;
+                font-weight: 700;
+                color: #1f77b4;
+                margin-bottom: 10px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                gap: 10px;
+            }}
+            .score-value {{
+                font-size: 3rem;
+                font-weight: 900;
+                color: {score_color};
+                margin: 15px 0;
+                letter-spacing: 2px;
+            }}
+            .score-message {{
+                font-size: 1.3rem;
+                color: #555;
+                margin-bottom: 20px;
+            }}
+            .progress-circle {{
+                position: relative;
+                width: 120px;
+                height: 120px;
+                margin: 0 auto 20px;
+            }}
+            .progress-circle svg {{
+                transform: rotate(-90deg);
+            }}
+            .progress-circle circle {{
+                fill: none;
+                stroke-width: 10;
+                stroke-linecap: round;
+            }}
+            .progress-circle .bg-circle {{
+                stroke: #e0e0e0;
+            }}
+            .progress-circle .progress-ring {{
+                stroke: {score_color};
+                stroke-dasharray: {final_score} 100;
+                animation: progressCircle 1.5s ease-in-out;
+            }}
+            .progress-circle .percent-text {{
+                position: absolute;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                font-size: 1.5rem;
+                font-weight: bold;
+                color: {score_color};
+            }}
+            .scoreboard-label {{
+                font-size: 1.1rem;
+                color: #888;
+                margin-top: 10px;
+            }}
+        </style>
+        <div class="scorecard-container">
+            <div class="scorecard-header">
+                <span>📊 Your Final Score</span>
+                <span style="font-size: 1.5rem;">🏆</span>
+            </div>
+            <div class="progress-circle">
+                <svg width="120" height="120">
+                    <circle class="bg-circle" cx="60" cy="60" r="50"/>
+                    <circle class="progress-ring" cx="60" cy="60" r="50"/>
+                </svg>
+                <div class="percent-text">{final_score:.1f}%</div>
+            </div>
+            <div class="score-value">{final_score:.2f}%</div>
+            <div class="score-message">{score_message}</div>
+            <div class="scoreboard-label">Scoreboard</div>
         </div>
         """,
         unsafe_allow_html=True
     )
-    st.progress(final_score / 100)
 
     if final_score >= 80:
         st.markdown(
@@ -793,5 +889,3 @@ elif st.session_state.quiz_completed:
         st.session_state.quiz_completed = False
         st.session_state.show_detailed_feedback = False
         st.rerun()
-
-
