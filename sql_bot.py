@@ -523,7 +523,7 @@ if not st.session_state.quiz_started:
         st.session_state.quiz_completed = False
 
 # Footer
-    st.markdown("<div style='height: 120px;'></div>", unsafe_allow_html=True)
+    st.markdown("<div style='height: 220px;'></div>", unsafe_allow_html=True)
 
     footer_html = """
     <div style='text-align: center; margin-top: 2rem; padding: 1.2rem; background: linear-gradient(135deg, #667eea, #764ba2); border-radius: 16px; color: white;'>
