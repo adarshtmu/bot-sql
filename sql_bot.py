@@ -724,125 +724,168 @@ elif st.session_state.quiz_completed:
     border_gradient = "linear-gradient(45deg, #28a745, #1f77b4)" if final_score >= 80 else "linear-gradient(45deg, #ff9800, #e74c3c)"
 
     # Advanced Scorecard with animations, gradient border, and progress circle
-    st.markdown(
-        f"""
-        <style>
-            @keyframes fadeIn {{
-                0% {{ opacity: 0; transform: scale(0.95); }}
-                100% {{ opacity: 1; transform: scale(1); }}
-            }}
-            @keyframes progressCircle {{
-                0% {{ stroke-dasharray: 0 100; }}
-            }}
-            .scorecard-container {{
-                background: linear-gradient(135deg, #ffffff, #f1f5f9);
-                border: 4px solid transparent;
-                border-radius: 20px;
-                padding: 30px;
-                margin: 30px 0;
-                text-align: center;
-                position: relative;
-                box-shadow: 0 8px 24px rgba(0,0,0,0.1);
-                animation: fadeIn 0.8s ease-in-out;
-                background-clip: padding-box;
-                border-image: {border_gradient} 1;
-            }}
-            .scorecard-container::before {{
-                content: '';
-                position: absolute;
-                top: -4px; bottom: -4px; left: -4px; right: -4px;
-                background: {border_gradient};
-                z-index: -1;
-                border-radius: 24px;
-            }}
-            .scorecard-header {{
-                font-size: 2rem;
-                font-weight: 700;
-                color: #1f77b4;
-                margin-bottom: 10px;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                gap: 10px;
-            }}
-            .score-value {{
-                font-size: 3rem;
-                font-weight: 900;
-                color: {score_color};
-                margin: 15px 0;
-                letter-spacing: 2px;
-            }}
-            .score-message {{
-                font-size: 1.3rem;
-                color: #555;
-                margin-bottom: 20px;
-            }}
-            .progress-circle {{
-                position: relative;
-                width: 120px;
-                height: 120px;
-                margin: 0 auto 20px;
-            }}
-            .progress-circle svg {{
-                transform: rotate(-90deg);
-            }}
-            .progress-circle circle {{
-                fill: none;
-                stroke-width: 10;
-                stroke-linecap: round;
-            }}
-            .progress-circle .bg-circle {{
-                stroke: #e0e0e0;
-            }}
-            .progress-circle .progress-ring {{
-                stroke: {score_color};
-                stroke-dasharray: {final_score} 100;
-                animation: progressCircle 1.5s ease-in-out;
-            }}
-            .progress-circle .percent-text {{
-                position: absolute;
-                top: 50%;
-                left: 50%;
-                transform: translate(-50%, -50%);
-                font-size: 1.5rem;
-                font-weight: bold;
-                color: {score_color};
-            }}
-            .scoreboard-label {{
-                font-size: 1.1rem;
-                color: #888;
-                margin-top: 10px;
-            }}
-        </style>
-        <div class="scorecard-container">
-            <div class="scorecard-header">
-                <span>📊 Your Final Score</span>
-                <span style="font-size: 1.5rem;">🏆</span>
-            </div>
-            <div class="progress-circle">
-                <svg width="120" height="120">
-                    <circle class="bg-circle" cx="60" cy="60" r="50"/>
-                    <circle class="progress-ring" cx="60" cy="60" r="50"/>
-                </svg>
-                <div class="percent-text">{final_score:.1f}%</div>
-            </div>
-            <div class="score-value">{final_score:.2f}%</div>
-            <div class="score-message">{score_message}</div>
-            <div class="scoreboard-label">Scoreboard</div>
+    st.markdown(f"""
+    <style>
+    .scorecard-container {{
+        background: linear-gradient(135deg, #ffffff, #f8fafc 85%);
+        border-radius: 22px;
+        padding: 32px 18px;
+        margin: 24px 0;
+        text-align: center;
+        position: relative;
+        box-shadow: 0 10px 32px rgba(0,0,0,0.11);
+        border: 5px solid transparent;
+        border-image: {border_gradient} 1;
+        animation: fadeIn 0.9s cubic-bezier(.5,-0.5,.5,1.5);
+        overflow: hidden;
+        max-width: 420px;
+        margin-left:auto;
+        margin-right:auto;
+    }}
+    @media (max-width: 600px) {{
+        .scorecard-container {{ padding: 16px 2vw; max-width:95vw; }}
+        .progress-circle {{ width: 80px; height: 80px; }}
+    }}
+    .scorecard-header {{
+        font-size: 2rem;
+        font-weight: 700;
+        color: #1f77b4;
+        margin-bottom: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+    }}
+    .score-value {{
+        font-size: 3rem;
+        font-weight: 900;
+        color: {score_color};
+        margin: 18px 0;
+        letter-spacing: 2px;
+        transition: color 0.3s;
+    }}
+    .score-message {{
+        font-size: 1.25rem;
+        color: #444;
+        margin-bottom: 20px;
+    }}
+    .progress-circle {{
+        position: relative;
+        width: 120px;
+        height: 120px;
+        margin: 0 auto 18px;
+    }}
+    .progress-circle svg {{
+        transform: rotate(-90deg);
+    }}
+    .progress-circle circle {{
+        fill: none;
+        stroke-width: 10;
+        stroke-linecap: round;
+    }}
+    .progress-circle .bg-circle {{
+        stroke: #e0e0e0;
+    }}
+    .progress-circle .progress-ring {{
+        stroke: {score_color};
+        stroke-dasharray: {final_score}, 100;
+        stroke-dashoffset: 0;
+        transition: stroke-dasharray 1.2s cubic-bezier(.17,.67,.83,.67);
+        animation: progressCircle 1.2s;
+    }}
+    .progress-circle .percent-text {{
+        position: absolute;
+        top: 50%; left: 50%;
+        transform: translate(-50%,-50%);
+        font-size: 1.4rem;
+        font-weight: bold;
+        color: {score_color};
+    }}
+    .animated-trophy {{
+        font-size:2.5rem;
+        animation: bounceTrophy 0.8s infinite alternate;
+    }}
+    @keyframes bounceTrophy {{
+      0% {{ transform: translateY(0); }}
+      100% {{ transform: translateY(-10px) scale(1.12); }}
+    }}
+    .btn-group {{
+        display: flex;
+        gap: 16px;
+        justify-content: center;
+        margin-top: 24px;
+    }}
+    .adv-btn {{
+        padding: 12px 32px;
+        font-size: 1.1rem;
+        font-weight: bold;
+        border-radius: 20px;
+        border: none;
+        background: linear-gradient(90deg, #1f77b4, #28a745);
+        color: #fff;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+        cursor: pointer;
+        transition: all 0.25s;
+    }}
+    .adv-btn:hover {{
+        background: linear-gradient(90deg, #28a745, #1f77b4);
+        transform: translateY(-2px) scale(1.05);
+    }}
+    </style>
+    
+    <div class="scorecard-container">
+        <div class="scorecard-header">
+            <span>📊 Your Final Score</span>
+            {('<span class="animated-trophy">🏆</span>' if final_score >= 80 else '')}
         </div>
-        """,
-        unsafe_allow_html=True
-    )
+        <div class="progress-circle">
+            <svg width="120" height="120">
+                <circle class="bg-circle" cx="60" cy="60" r="50"/>
+                <circle class="progress-ring" cx="60" cy="60" r="50"/>
+            </svg>
+            <div class="percent-text">{final_score:.1f}%</div>
+        </div>
+        <div class="score-value">{final_score:.2f}%</div>
+        <div class="score-message">{score_message}</div>
+        <div class="scoreboard-label">Scoreboard</div>
+        <div class="btn-group">
+            <button class="adv-btn" onclick="window.location.reload()">Retry</button>
+            <button class="adv-btn" onclick="navigator.clipboard.writeText('I scored {final_score:.1f}%! Try to beat me!')">Share</button>
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
 
+    import streamlit as st
+    
+    # ... (your score calculation logic)
+    
     if final_score >= 80:
-        st.markdown(
-            """
-            <div style='text-align:center; margin-top: 20px;'>
-                <h3 style='color:#007bff;'>🏆 Great job! You're eligible for a certificate.</h3>
-            </div>
-            """,
-            unsafe_allow_html=True
-        )
+        st.components.v1.html("""
+        <script>
+        function shootConfetti() {
+          const duration = 2 * 1000;
+          const animationEnd = Date.now() + duration;
+          const defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 2000 };
+    
+          function randomInRange(min, max) {
+            return Math.random() * (max - min) + min;
+          }
+    
+          const interval = setInterval(function() {
+            const timeLeft = animationEnd - Date.now();
+    
+            if (timeLeft <= 0) {
+              return clearInterval(interval);
+            }
+    
+            confetti(Object.assign({}, defaults, {particleCount: 50, origin: { x: randomInRange(0.1, 0.9), y: Math.random() - 0.2 }}));
+          }, 250);
+        }
+    
+        window.onload = shootConfetti;
+        </script>
+        <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.4.0/dist/confetti.browser.min.js"></script>
+        """, height=0)
         st.markdown(
             """
             <div style='display:flex; justify-content:center; margin-bottom: 30px;'>
