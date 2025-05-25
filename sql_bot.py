@@ -441,58 +441,53 @@ def display_simulation(title, result_data):
 
 # --- Start Screen ---
 # --- Start Screen ---
+# --- Start Screen ---
 if not st.session_state.quiz_started:
     st.title("🚀 SQL Mentor - Interactive SQL Practice")
-    st.markdown("### Finish the Quiz Successfully to Unlock Your SQL Certificate")
+    st.markdown("### Finish the Quiz to Unlock Your SQL Certificate")
+    
     st.markdown("""
-        **📌 Important Notes:**
-        - To be eligible for a certificate, you must achieve a score of at least 80%.
-        - This quiz uses standard **SQL syntax** (similar to MySQL/PostgreSQL).
-        - String comparisons (like `WHERE city = 'new york'` or `WHERE status = "pending"`) are simulated to be **case-insensitive** for common text columns (`status`, `city`).
-        - **Both single quotes (') and double quotes (") are accepted** for string literals in this simulation.
-        - Your queries are evaluated by an AI for correctness and logic.
-        - Query simulation is powered by DuckDB to show results on sample data.
-        """)
+        **Important Notes:**
+        - The quiz consists of 10 questions.
+        - Each question has a time limit of 2 minutes.
+        - You need to score at least 80% to pass.
+        
+        In this interactive quiz, you will work with two sample tables.
+    """)
     
-    col1, col2 = st.columns([2, 1])
-    with col1:
-        st.write("""
-        Is interactive quiz mein, aap do sample tables ke saath kaam karenge:
-        - **Users Table**: User details jaise ID, naam, email, umar, aur sheher.
-        - **Orders Table**: Order details jaise ID, user ID, amount, order date, aur status.
-        """)
-    with col2:
-        st.markdown("#### Tables Overview")
-        try:
-            table_overview_data = {"Table": list(original_tables.keys()),
-                                   "Rows": [len(df) for df in original_tables.values()],
-                                   "Columns": [len(df.columns) for df in original_tables.values()]}
-            st.dataframe(pd.DataFrame(table_overview_data), hide_index=True)
-        except Exception as e:
-            st.error(f"Error displaying table overview: {e}")
+    st.markdown("### Table Overview")
+    try:
+        table_overview_data = {
+            "Table": ["Users Table", "Orders Table"],
+            "Rows": [100, 500],
+            "Columns": [5, 4]
+        }
+        st.dataframe(pd.DataFrame(table_overview_data), hide_index=True, use_container_width=True)
+    except Exception as e:
+        st.error(f"Error displaying table overview: {e}")
     
-    st.write("### 🔍 Table Previews")
+    st.markdown("### Table Previews")
     try:
         tab1, tab2 = st.tabs(["Users Table", "Orders Table"])
-        with tab1: st.dataframe(users_table, hide_index=True, use_container_width=True)
-        with tab2: st.dataframe(orders_table, hide_index=True, use_container_width=True)
+        with tab1:
+            st.dataframe(users_table, hide_index=True, use_container_width=True)
+        with tab2:
+            st.dataframe(orders_table, hide_index=True, use_container_width=True)
     except Exception as e:
         st.error(f"Error displaying table previews: {e}")
     
-    with st.expander("📝 Quiz Ke Baare Mein"):
-        st.write(f"""
-        - Aapko {len(sql_questions)} SQL query challenges solve karne honge.
-        - Har jawaab ke baad AI Mentor se immediate feedback milega.
-        - **SQL Dialect Focus:** Standard SQL (MySQL/PostgreSQL like).
-        - Case-insensitivity for `status` and `city` columns in `WHERE =` clauses is simulated.
-        - String literals can be enclosed in single quotes (`'...'`) or double quotes (`"..."`).
+    with st.expander("About the Quiz"):
+        st.write("""
+        This quiz is designed to test your SQL knowledge. You will be presented with various SQL queries to write based on the provided tables.
+        Ensure you understand the table structures before starting the quiz. Good luck!
         """)
     
-    if st.button("🚀 Start SQL Challenge!", type="primary"):
+    if st.button("Start SQL Challenge!", type="primary"):
         st.session_state.quiz_started = True
         st.session_state.user_answers = []
         st.session_state.current_question = 0
         st.session_state.quiz_completed = False
+        st.rerun()
 
 # --- Quiz In Progress Screen ---
 elif st.session_state.quiz_started and not st.session_state.quiz_completed:
