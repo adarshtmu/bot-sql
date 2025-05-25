@@ -97,6 +97,16 @@ orders_table = pd.DataFrame({
     "order_date": pd.to_datetime(["2024-02-01", "2024-02-05", "2024-02-10", "2024-02-15", "2024-02-20"]),
     "status": ["Completed", "Pending", "Completed", "Shipped", "Cancelled"]
 })
+
+extra_user = {
+    "user_id": 5,
+    "name": "Eve",
+    "email": "eve@example.com",
+    "age": 28,
+    "city": "Seattle"
+}
+users_table = pd.concat([users_table, pd.DataFrame([extra_user])], ignore_index=True)
+
 original_tables = {
     "users": users_table,
     "orders": orders_table
@@ -111,7 +121,12 @@ sql_questions = [    {"question": "Write a SQL query to get all details about us
     {"question": "Write a SQL query to find the most recent order from the 'orders' table by order date.", "correct_answer_example": "SELECT * FROM orders ORDER BY order_date DESC LIMIT 1;", "sample_table": orders_table, "relevant_tables": ["orders"]},
     {"question": "Write a SQL query to find the average order amount from the 'orders' table.", "correct_answer_example": "SELECT AVG(amount) AS average_amount FROM orders;", "sample_table": orders_table, "relevant_tables": ["orders"]},
     {"question": "Write a SQL query to find users from 'New York' or 'Chicago' in the 'users' table.", "correct_answer_example": "SELECT * FROM users WHERE city IN ('New York', 'Chicago');", "sample_table": users_table, "relevant_tables": ["users"]},
-    {"question": "Write a SQL query to find users whose orders are still pending. Use the 'users' and 'orders' tables.","correct_answer_example": "SELECT u.* FROM users u JOIN orders o ON u.user_id = o.user_id WHERE o.order_status = 'pending';","sample_table": users_table,"relevant_tables": ["users", "orders"]},
+  {
+    "question": "Write a SQL query to list all users who have never placed any orders. Use the 'users' and 'orders' tables.",
+    "correct_answer_example": "SELECT u.* FROM users u LEFT JOIN orders o ON u.user_id = o.user_id WHERE o.user_id IS NULL;",
+    "sample_table": "users_table",
+    "relevant_tables": ["users", "orders"]
+  },
     {"question": "Write a SQL query to calculate the total amount spent by each user by joining the 'users' and 'orders' tables.", "correct_answer_example": "SELECT u.name, SUM(o.amount) AS total_spent FROM users u JOIN orders o ON u.user_id = o.user_id GROUP BY u.name ORDER BY u.name;", "sample_table": users_table, "relevant_tables": ["users", "orders"]}
 
    ]
