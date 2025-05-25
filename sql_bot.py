@@ -727,176 +727,176 @@ elif st.session_state.quiz_completed:
 
     # Advanced Scorecard with animations, gradient border, and progress circle
     st.markdown("---")
-final_score = calculate_score(st.session_state.user_answers)
-
-# Simple scoring logic
-def get_score_details(score):
-    if score >= 90:
-        return {"grade": "A+", "color": "#28a745", "message": "Outstanding! 🌟", "emoji": "🏆"}
-    elif score >= 80:
-        return {"grade": "A", "color": "#28a745", "message": "Excellent Work! ⭐", "emoji": "🎯"}
-    elif score >= 70:
-        return {"grade": "B", "color": "#17a2b8", "message": "Good Job! 👍", "emoji": "👌"}
-    elif score >= 60:
-        return {"grade": "C", "color": "#ffc107", "message": "Keep Going! 💪", "emoji": "📈"}
+    final_score = calculate_score(st.session_state.user_answers)
+    
+    # Simple scoring logic
+    def get_score_details(score):
+        if score >= 90:
+            return {"grade": "A+", "color": "#28a745", "message": "Outstanding! 🌟", "emoji": "🏆"}
+        elif score >= 80:
+            return {"grade": "A", "color": "#28a745", "message": "Excellent Work! ⭐", "emoji": "🎯"}
+        elif score >= 70:
+            return {"grade": "B", "color": "#17a2b8", "message": "Good Job! 👍", "emoji": "👌"}
+        elif score >= 60:
+            return {"grade": "C", "color": "#ffc107", "message": "Keep Going! 💪", "emoji": "📈"}
+        else:
+            return {"grade": "D", "color": "#dc3545", "message": "More Practice Needed 📚", "emoji": "📖"}
+    
+    score_details = get_score_details(final_score)
+    
+    # Simple, clean scorecard
+    st.markdown(
+        f"""
+        <div style="
+            background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+            border: 2px solid #e9ecef;
+            border-radius: 15px;
+            padding: 30px;
+            text-align: center;
+            margin: 20px 0;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        ">
+            <h2 style="color: #333; margin-bottom: 20px; font-size: 1.8rem;">
+                📊 Quiz Results
+            </h2>
+            
+            <div style="
+                background: {score_details['color']};
+                color: white;
+                border-radius: 50%;
+                width: 120px;
+                height: 120px;
+                margin: 0 auto 20px;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                font-size: 2rem;
+                font-weight: bold;
+                box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            ">
+                <div style="font-size: 1.8rem;">{final_score:.0f}%</div>
+                <div style="font-size: 1rem; margin-top: 5px;">{score_details['grade']}</div>
+            </div>
+            
+            <h3 style="color: {score_details['color']}; margin: 15px 0; font-size: 1.4rem;">
+                {score_details['emoji']} {score_details['message']}
+            </h3>
+            
+            <div style="
+                display: flex;
+                justify-content: space-around;
+                margin-top: 25px;
+                flex-wrap: wrap;
+                gap: 15px;
+            ">
+                <div style="
+                    background: #f8f9fa;
+                    padding: 15px;
+                    border-radius: 10px;
+                    border: 1px solid #dee2e6;
+                    min-width: 80px;
+                ">
+                    <div style="font-size: 1.5rem; font-weight: bold; color: {score_details['color']};">
+                        {final_score:.1f}%
+                    </div>
+                    <div style="font-size: 0.9rem; color: #6c757d; margin-top: 5px;">
+                        Score
+                    </div>
+                </div>
+                
+                <div style="
+                    background: #f8f9fa;
+                    padding: 15px;
+                    border-radius: 10px;
+                    border: 1px solid #dee2e6;
+                    min-width: 80px;
+                ">
+                    <div style="font-size: 1.5rem; font-weight: bold; color: {score_details['color']};">
+                        {len([a for a in st.session_state.user_answers if a.get('is_correct', False)])}
+                    </div>
+                    <div style="font-size: 0.9rem; color: #6c757d; margin-top: 5px;">
+                        Correct
+                    </div>
+                </div>
+                
+                <div style="
+                    background: #f8f9fa;
+                    padding: 15px;
+                    border-radius: 10px;
+                    border: 1px solid #dee2e6;
+                    min-width: 80px;
+                ">
+                    <div style="font-size: 1.5rem; font-weight: bold; color: {score_details['color']};">
+                        {len(st.session_state.user_answers)}
+                    </div>
+                    <div style="font-size: 0.9rem; color: #6c757d; margin-top: 5px;">
+                        Total
+                    </div>
+                </div>
+                
+                <div style="
+                    background: #f8f9fa;
+                    padding: 15px;
+                    border-radius: 10px;
+                    border: 1px solid #dee2e6;
+                    min-width: 80px;
+                ">
+                    <div style="font-size: 1.5rem; font-weight: bold; color: {score_details['color']};">
+                        {score_details['grade']}
+                    </div>
+                    <div style="font-size: 0.9rem; color: #6c757d; margin-top: 5px;">
+                        Grade
+                    </div>
+                </div>
+            </div>
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
+    
+    # Certificate section
+    if final_score >= 80:
+        st.success("🎉 **Congratulations! You're eligible for a certificate!**")
+        st.markdown(
+            """
+            <div style='text-align: center; margin: 20px 0;'>
+                <a href='https://superprofile.bio/vp/corporate-bhaiya-sql-page' target='_blank' 
+                   style='background-color: #ffc107; color: #212529; padding: 12px 30px; 
+                          border-radius: 25px; text-decoration: none; font-weight: bold; 
+                          font-size: 1.1rem; display: inline-block; margin: 10px;
+                          box-shadow: 0 2px 4px rgba(0,0,0,0.1);'>
+                    🏆 Get Your Certificate
+                </a>
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
     else:
-        return {"grade": "D", "color": "#dc3545", "message": "More Practice Needed 📚", "emoji": "📖"}
-
-score_details = get_score_details(final_score)
-
-# Simple, clean scorecard
-st.markdown(
-    f"""
-    <div style="
-        background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
-        border: 2px solid #e9ecef;
-        border-radius: 15px;
-        padding: 30px;
-        text-align: center;
-        margin: 20px 0;
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    ">
-        <h2 style="color: #333; margin-bottom: 20px; font-size: 1.8rem;">
-            📊 Quiz Results
-        </h2>
-        
-        <div style="
-            background: {score_details['color']};
-            color: white;
-            border-radius: 50%;
-            width: 120px;
-            height: 120px;
-            margin: 0 auto 20px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            font-size: 2rem;
-            font-weight: bold;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-        ">
-            <div style="font-size: 1.8rem;">{final_score:.0f}%</div>
-            <div style="font-size: 1rem; margin-top: 5px;">{score_details['grade']}</div>
-        </div>
-        
-        <h3 style="color: {score_details['color']}; margin: 15px 0; font-size: 1.4rem;">
-            {score_details['emoji']} {score_details['message']}
-        </h3>
-        
-        <div style="
-            display: flex;
-            justify-content: space-around;
-            margin-top: 25px;
-            flex-wrap: wrap;
-            gap: 15px;
-        ">
-            <div style="
-                background: #f8f9fa;
-                padding: 15px;
-                border-radius: 10px;
-                border: 1px solid #dee2e6;
-                min-width: 80px;
-            ">
-                <div style="font-size: 1.5rem; font-weight: bold; color: {score_details['color']};">
-                    {final_score:.1f}%
-                </div>
-                <div style="font-size: 0.9rem; color: #6c757d; margin-top: 5px;">
-                    Score
-                </div>
+        st.warning("📚 **Keep practicing to earn a certificate! You need 80% or higher.**")
+        st.markdown(
+            """
+            <div style='text-align: center; margin: 20px 0;'>
+                <a href='https://www.corporatebhaiya.com/' target='_blank' 
+                   style='background-color: #007bff; color: white; padding: 10px 25px; 
+                          border-radius: 20px; text-decoration: none; font-weight: bold;
+                          display: inline-block; margin: 5px;
+                          box-shadow: 0 2px 4px rgba(0,0,0,0.1);'>
+                    🚀 Book Mentor Session
+                </a>
             </div>
-            
-            <div style="
-                background: #f8f9fa;
-                padding: 15px;
-                border-radius: 10px;
-                border: 1px solid #dee2e6;
-                min-width: 80px;
-            ">
-                <div style="font-size: 1.5rem; font-weight: bold; color: {score_details['color']};">
-                    {len([a for a in st.session_state.user_answers if a.get('is_correct', False)])}
-                </div>
-                <div style="font-size: 0.9rem; color: #6c757d; margin-top: 5px;">
-                    Correct
-                </div>
-            </div>
-            
-            <div style="
-                background: #f8f9fa;
-                padding: 15px;
-                border-radius: 10px;
-                border: 1px solid #dee2e6;
-                min-width: 80px;
-            ">
-                <div style="font-size: 1.5rem; font-weight: bold; color: {score_details['color']};">
-                    {len(st.session_state.user_answers)}
-                </div>
-                <div style="font-size: 0.9rem; color: #6c757d; margin-top: 5px;">
-                    Total
-                </div>
-            </div>
-            
-            <div style="
-                background: #f8f9fa;
-                padding: 15px;
-                border-radius: 10px;
-                border: 1px solid #dee2e6;
-                min-width: 80px;
-            ">
-                <div style="font-size: 1.5rem; font-weight: bold; color: {score_details['color']};">
-                    {score_details['grade']}
-                </div>
-                <div style="font-size: 0.9rem; color: #6c757d; margin-top: 5px;">
-                    Grade
-                </div>
-            </div>
-        </div>
-    </div>
-    """,
-    unsafe_allow_html=True
-)
-
-# Certificate section
-if final_score >= 80:
-    st.success("🎉 **Congratulations! You're eligible for a certificate!**")
-    st.markdown(
-        """
-        <div style='text-align: center; margin: 20px 0;'>
-            <a href='https://superprofile.bio/vp/corporate-bhaiya-sql-page' target='_blank' 
-               style='background-color: #ffc107; color: #212529; padding: 12px 30px; 
-                      border-radius: 25px; text-decoration: none; font-weight: bold; 
-                      font-size: 1.1rem; display: inline-block; margin: 10px;
-                      box-shadow: 0 2px 4px rgba(0,0,0,0.1);'>
-                🏆 Get Your Certificate
-            </a>
-        </div>
-        """,
-        unsafe_allow_html=True
-    )
-else:
-    st.warning("📚 **Keep practicing to earn a certificate! You need 80% or higher.**")
-    st.markdown(
-        """
-        <div style='text-align: center; margin: 20px 0;'>
-            <a href='https://www.corporatebhaiya.com/' target='_blank' 
-               style='background-color: #007bff; color: white; padding: 10px 25px; 
-                      border-radius: 20px; text-decoration: none; font-weight: bold;
-                      display: inline-block; margin: 5px;
-                      box-shadow: 0 2px 4px rgba(0,0,0,0.1);'>
-                🚀 Book Mentor Session
-            </a>
-        </div>
-        """,
-        unsafe_allow_html=True
-    )
-
-# Try Again Button
-st.markdown("<br>", unsafe_allow_html=True)
-col1, col2, col3 = st.columns([1, 1, 1])
-with col2:
-    if st.button("🔄 Try Again", type="primary", use_container_width=True):
-        st.session_state.user_answers = []
-        st.session_state.current_question = 0
-        st.session_state.quiz_started = False
-        st.session_state.quiz_completed = False
-        st.session_state.show_detailed_feedback = False
-        st.rerun()
+            """,
+            unsafe_allow_html=True
+        )
+    
+    # Try Again Button
+    st.markdown("<br>", unsafe_allow_html=True)
+    col1, col2, col3 = st.columns([1, 1, 1])
+    with col2:
+        if st.button("🔄 Try Again", type="primary", use_container_width=True):
+            st.session_state.user_answers = []
+            st.session_state.current_question = 0
+            st.session_state.quiz_started = False
+            st.session_state.quiz_completed = False
+            st.session_state.show_detailed_feedback = False
+            st.rerun()
