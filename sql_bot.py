@@ -752,487 +752,487 @@ performance_emoji = "🚀" if display_score >= 90 else "🌟" if display_score >
 display_accuracy = base_accuracy if base_accuracy > 0 else display_score
 
 # Enhanced HTML with embedded CSS for guaranteed rendering
-scoreboard_html = f"""
-<style>
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+# scoreboard_html = f"""
+# <style>
+#     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
     
-    .stApp {{
-        font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif !important;
-    }}
+#     .stApp {{
+#         font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif !important;
+#     }}
     
-    @keyframes scoreReveal {{
-        0% {{ 
-            opacity: 0; 
-            transform: scale(0.8) rotateY(-15deg);
-            filter: blur(10px);
-        }}
-        50% {{
-            opacity: 0.7;
-            transform: scale(1.05) rotateY(0deg);
-            filter: blur(2px);
-        }}
-        100% {{ 
-            opacity: 1; 
-            transform: scale(1) rotateY(0deg);
-            filter: blur(0px);
-        }}
-    }}
+#     @keyframes scoreReveal {{
+#         0% {{ 
+#             opacity: 0; 
+#             transform: scale(0.8) rotateY(-15deg);
+#             filter: blur(10px);
+#         }}
+#         50% {{
+#             opacity: 0.7;
+#             transform: scale(1.05) rotateY(0deg);
+#             filter: blur(2px);
+#         }}
+#         100% {{ 
+#             opacity: 1; 
+#             transform: scale(1) rotateY(0deg);
+#             filter: blur(0px);
+#         }}
+#     }}
     
-    @keyframes progressRing {{
-        0% {{ 
-            stroke-dasharray: 0 314;
-            stroke-dashoffset: 0;
-        }}
-        100% {{ 
-            stroke-dasharray: {int(display_score * 3.14)} 314;
-            stroke-dashoffset: 0;
-        }}
-    }}
+#     @keyframes progressRing {{
+#         0% {{ 
+#             stroke-dasharray: 0 314;
+#             stroke-dashoffset: 0;
+#         }}
+#         100% {{ 
+#             stroke-dasharray: {int(display_score * 3.14)} 314;
+#             stroke-dashoffset: 0;
+#         }}
+#     }}
     
-    @keyframes glowPulse {{
-        0%, 100% {{ 
-            box-shadow: 
-                0 0 20px rgba(0, 212, 255, 0.3),
-                0 0 40px rgba(0, 212, 255, 0.2),
-                0 0 60px rgba(0, 212, 255, 0.1);
-        }}
-        50% {{ 
-            box-shadow: 
-                0 0 30px rgba(0, 212, 255, 0.5),
-                0 0 60px rgba(0, 212, 255, 0.3),
-                0 0 90px rgba(0, 212, 255, 0.2);
-        }}
-    }}
+#     @keyframes glowPulse {{
+#         0%, 100% {{ 
+#             box-shadow: 
+#                 0 0 20px rgba(0, 212, 255, 0.3),
+#                 0 0 40px rgba(0, 212, 255, 0.2),
+#                 0 0 60px rgba(0, 212, 255, 0.1);
+#         }}
+#         50% {{ 
+#             box-shadow: 
+#                 0 0 30px rgba(0, 212, 255, 0.5),
+#                 0 0 60px rgba(0, 212, 255, 0.3),
+#                 0 0 90px rgba(0, 212, 255, 0.2);
+#         }}
+#     }}
     
-    @keyframes floatAnimation {{
-        0%, 100% {{ transform: translateY(0px); }}
-        25% {{ transform: translateY(-5px); }}
-        50% {{ transform: translateY(-10px); }}
-        75% {{ transform: translateY(-5px); }}
-    }}
+#     @keyframes floatAnimation {{
+#         0%, 100% {{ transform: translateY(0px); }}
+#         25% {{ transform: translateY(-5px); }}
+#         50% {{ transform: translateY(-10px); }}
+#         75% {{ transform: translateY(-5px); }}
+#     }}
     
-    @keyframes sparkle {{
-        0%, 100% {{ opacity: 0; transform: scale(0) rotate(0deg); }}
-        50% {{ opacity: 1; transform: scale(1) rotate(180deg); }}
-    }}
+#     @keyframes sparkle {{
+#         0%, 100% {{ opacity: 0; transform: scale(0) rotate(0deg); }}
+#         50% {{ opacity: 1; transform: scale(1) rotate(180deg); }}
+#     }}
     
-    @keyframes rotateGradient {{
-        0% {{ transform: rotate(0deg); }}
-        100% {{ transform: rotate(360deg); }}
-    }}
+#     @keyframes rotateGradient {{
+#         0% {{ transform: rotate(0deg); }}
+#         100% {{ transform: rotate(360deg); }}
+#     }}
     
-    .advanced-scoreboard {{
-        background: linear-gradient(135deg, 
-            rgba(255, 255, 255, 0.9) 0%,
-            rgba(255, 255, 255, 0.7) 50%,
-            rgba(255, 255, 255, 0.5) 100%);
-        backdrop-filter: blur(20px);
-        -webkit-backdrop-filter: blur(20px);
-        border: 2px solid rgba(255, 255, 255, 0.3);
-        border-radius: 24px;
-        padding: 40px 30px;
-        margin: 40px auto;
-        max-width: 900px;
-        position: relative;
-        overflow: hidden;
-        animation: scoreReveal 1.2s cubic-bezier(0.4, 0, 0.2, 1) forwards;
-        box-shadow: 0 20px 60px rgba(0,0,0,0.1);
-    }}
+#     .advanced-scoreboard {{
+#         background: linear-gradient(135deg, 
+#             rgba(255, 255, 255, 0.9) 0%,
+#             rgba(255, 255, 255, 0.7) 50%,
+#             rgba(255, 255, 255, 0.5) 100%);
+#         backdrop-filter: blur(20px);
+#         -webkit-backdrop-filter: blur(20px);
+#         border: 2px solid rgba(255, 255, 255, 0.3);
+#         border-radius: 24px;
+#         padding: 40px 30px;
+#         margin: 40px auto;
+#         max-width: 900px;
+#         position: relative;
+#         overflow: hidden;
+#         animation: scoreReveal 1.2s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+#         box-shadow: 0 20px 60px rgba(0,0,0,0.1);
+#     }}
     
-    .advanced-scoreboard::before {{
-        content: '';
-        position: absolute;
-        top: -2px;
-        left: -2px;
-        right: -2px;
-        bottom: -2px;
-        background: conic-gradient(
-            from 0deg,
-            {performance_color}40,
-            {performance_color}20,
-            {performance_color}40
-        );
-        border-radius: 26px;
-        z-index: -1;
-        animation: rotateGradient 6s linear infinite;
-    }}
+#     .advanced-scoreboard::before {{
+#         content: '';
+#         position: absolute;
+#         top: -2px;
+#         left: -2px;
+#         right: -2px;
+#         bottom: -2px;
+#         background: conic-gradient(
+#             from 0deg,
+#             {performance_color}40,
+#             {performance_color}20,
+#             {performance_color}40
+#         );
+#         border-radius: 26px;
+#         z-index: -1;
+#         animation: rotateGradient 6s linear infinite;
+#     }}
     
-    .score-header {{
-        text-align: center;
-        margin-bottom: 30px;
-        position: relative;
-    }}
+#     .score-header {{
+#         text-align: center;
+#         margin-bottom: 30px;
+#         position: relative;
+#     }}
     
-    .score-title {{
-        font-size: 2.5rem;
-        font-weight: 800;
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        background-clip: text;
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        margin-bottom: 10px;
-        letter-spacing: -1px;
-    }}
+#     .score-title {{
+#         font-size: 2.5rem;
+#         font-weight: 800;
+#         background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+#         background-clip: text;
+#         -webkit-background-clip: text;
+#         -webkit-text-fill-color: transparent;
+#         margin-bottom: 10px;
+#         letter-spacing: -1px;
+#     }}
     
-    .score-subtitle {{
-        font-size: 1.1rem;
-        color: #6b7280;
-        font-weight: 500;
-    }}
+#     .score-subtitle {{
+#         font-size: 1.1rem;
+#         color: #6b7280;
+#         font-weight: 500;
+#     }}
     
-    .score-main-section {{
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        margin: 30px 0;
-        gap: 40px;
-        flex-wrap: wrap;
-    }}
+#     .score-main-section {{
+#         display: flex;
+#         align-items: center;
+#         justify-content: space-between;
+#         margin: 30px 0;
+#         gap: 40px;
+#         flex-wrap: wrap;
+#     }}
     
-    .score-circle-container {{
-        position: relative;
-        flex-shrink: 0;
-        margin: 0 auto;
-    }}
+#     .score-circle-container {{
+#         position: relative;
+#         flex-shrink: 0;
+#         margin: 0 auto;
+#     }}
     
-    .score-circle {{
-        width: 200px;
-        height: 200px;
-        position: relative;
-        animation: floatAnimation 6s ease-in-out infinite;
-    }}
+#     .score-circle {{
+#         width: 200px;
+#         height: 200px;
+#         position: relative;
+#         animation: floatAnimation 6s ease-in-out infinite;
+#     }}
     
-    .score-circle svg {{
-        transform: rotate(-90deg);
-        width: 100%;
-        height: 100%;
-        filter: drop-shadow(0 10px 20px rgba(0,0,0,0.2));
-    }}
+#     .score-circle svg {{
+#         transform: rotate(-90deg);
+#         width: 100%;
+#         height: 100%;
+#         filter: drop-shadow(0 10px 20px rgba(0,0,0,0.2));
+#     }}
     
-    .score-circle .bg-ring {{
-        fill: none;
-        stroke: rgba(0, 0, 0, 0.1);
-        stroke-width: 12;
-        stroke-linecap: round;
-    }}
+#     .score-circle .bg-ring {{
+#         fill: none;
+#         stroke: rgba(0, 0, 0, 0.1);
+#         stroke-width: 12;
+#         stroke-linecap: round;
+#     }}
     
-    .score-circle .progress-ring {{
-        fill: none;
-        stroke: {performance_color};
-        stroke-width: 12;
-        stroke-linecap: round;
-        stroke-dasharray: 0 314;
-        animation: progressRing 2s cubic-bezier(0.4, 0, 0.2, 1) 0.5s forwards;
-    }}
+#     .score-circle .progress-ring {{
+#         fill: none;
+#         stroke: {performance_color};
+#         stroke-width: 12;
+#         stroke-linecap: round;
+#         stroke-dasharray: 0 314;
+#         animation: progressRing 2s cubic-bezier(0.4, 0, 0.2, 1) 0.5s forwards;
+#     }}
     
-    .score-value {{
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        text-align: center;
-    }}
+#     .score-value {{
+#         position: absolute;
+#         top: 50%;
+#         left: 50%;
+#         transform: translate(-50%, -50%);
+#         text-align: center;
+#     }}
     
-    .score-number {{
-        font-size: 3rem;
-        font-weight: 900;
-        color: {performance_color};
-        line-height: 1;
-        margin-bottom: 5px;
-    }}
+#     .score-number {{
+#         font-size: 3rem;
+#         font-weight: 900;
+#         color: {performance_color};
+#         line-height: 1;
+#         margin-bottom: 5px;
+#     }}
     
-    .score-percent {{
-        font-size: 1.2rem;
-        color: #6b7280;
-        font-weight: 600;
-    }}
+#     .score-percent {{
+#         font-size: 1.2rem;
+#         color: #6b7280;
+#         font-weight: 600;
+#     }}
     
-    .score-details {{
-        flex: 1;
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-        gap: 20px;
-        min-width: 300px;
-    }}
+#     .score-details {{
+#         flex: 1;
+#         display: grid;
+#         grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+#         gap: 20px;
+#         min-width: 300px;
+#     }}
     
-    .score-metric {{
-        background: rgba(255, 255, 255, 0.6);
-        border: 1px solid rgba(255, 255, 255, 0.4);
-        border-radius: 16px;
-        padding: 20px 15px;
-        text-align: center;
-        backdrop-filter: blur(10px);
-        transition: all 0.3s ease;
-    }}
+#     .score-metric {{
+#         background: rgba(255, 255, 255, 0.6);
+#         border: 1px solid rgba(255, 255, 255, 0.4);
+#         border-radius: 16px;
+#         padding: 20px 15px;
+#         text-align: center;
+#         backdrop-filter: blur(10px);
+#         transition: all 0.3s ease;
+#     }}
     
-    .score-metric:hover {{
-        transform: translateY(-5px);
-        box-shadow: 0 20px 40px rgba(0,0,0,0.1);
-        border-color: rgba(255, 255, 255, 0.6);
-        background: rgba(255, 255, 255, 0.8);
-    }}
+#     .score-metric:hover {{
+#         transform: translateY(-5px);
+#         box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+#         border-color: rgba(255, 255, 255, 0.6);
+#         background: rgba(255, 255, 255, 0.8);
+#     }}
     
-    .metric-value {{
-        font-size: 1.8rem;
-        font-weight: 700;
-        color: {performance_color};
-        margin-bottom: 5px;
-        line-height: 1.2;
-    }}
+#     .metric-value {{
+#         font-size: 1.8rem;
+#         font-weight: 700;
+#         color: {performance_color};
+#         margin-bottom: 5px;
+#         line-height: 1.2;
+#     }}
     
-    .metric-label {{
-        font-size: 0.85rem;
-        color: #6b7280;
-        font-weight: 500;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-    }}
+#     .metric-label {{
+#         font-size: 0.85rem;
+#         color: #6b7280;
+#         font-weight: 500;
+#         text-transform: uppercase;
+#         letter-spacing: 0.5px;
+#     }}
     
-    .performance-badge {{
-        display: inline-flex;
-        align-items: center;
-        gap: 10px;
-        background: linear-gradient(135deg, {performance_color}20, {performance_color}10);
-        border: 2px solid {performance_color}40;
-        color: {performance_color};
-        padding: 15px 25px;
-        border-radius: 50px;
-        font-size: 1.2rem;
-        font-weight: 700;
-        margin: 20px auto;
-        animation: floatAnimation 4s ease-in-out infinite;
-        position: relative;
-        overflow: hidden;
-    }}
+#     .performance-badge {{
+#         display: inline-flex;
+#         align-items: center;
+#         gap: 10px;
+#         background: linear-gradient(135deg, {performance_color}20, {performance_color}10);
+#         border: 2px solid {performance_color}40;
+#         color: {performance_color};
+#         padding: 15px 25px;
+#         border-radius: 50px;
+#         font-size: 1.2rem;
+#         font-weight: 700;
+#         margin: 20px auto;
+#         animation: floatAnimation 4s ease-in-out infinite;
+#         position: relative;
+#         overflow: hidden;
+#     }}
     
-    .performance-badge::before {{
-        content: '';
-        position: absolute;
-        top: 0;
-        left: -100%;
-        width: 100%;
-        height: 100%;
-        background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
-        transition: left 0.8s;
-    }}
+#     .performance-badge::before {{
+#         content: '';
+#         position: absolute;
+#         top: 0;
+#         left: -100%;
+#         width: 100%;
+#         height: 100%;
+#         background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+#         transition: left 0.8s;
+#     }}
     
-    .performance-badge:hover::before {{
-        left: 100%;
-    }}
+#     .performance-badge:hover::before {{
+#         left: 100%;
+#     }}
     
-    .achievement-section {{
-        margin-top: 30px;
-        text-align: center;
-    }}
+#     .achievement-section {{
+#         margin-top: 30px;
+#         text-align: center;
+#     }}
     
-    .achievement-message {{
-        font-size: 1.4rem;
-        font-weight: 600;
-        color: #374151;
-        margin-bottom: 20px;
-        line-height: 1.4;
-    }}
+#     .achievement-message {{
+#         font-size: 1.4rem;
+#         font-weight: 600;
+#         color: #374151;
+#         margin-bottom: 20px;
+#         line-height: 1.4;
+#     }}
     
-    .tips-box {{
-        margin: 20px auto;
-        padding: 20px;
-        background: linear-gradient(135deg, rgba(255,193,7,0.15), rgba(255,193,7,0.05));
-        border-left: 4px solid #ffc107;
-        border-radius: 12px;
-        max-width: 600px;
-        font-size: 1rem;
-        line-height: 1.5;
-    }}
+#     .tips-box {{
+#         margin: 20px auto;
+#         padding: 20px;
+#         background: linear-gradient(135deg, rgba(255,193,7,0.15), rgba(255,193,7,0.05));
+#         border-left: 4px solid #ffc107;
+#         border-radius: 12px;
+#         max-width: 600px;
+#         font-size: 1rem;
+#         line-height: 1.5;
+#     }}
     
-    .action-buttons {{
-        display: flex;
-        gap: 15px;
-        justify-content: center;
-        flex-wrap: wrap;
-        margin-top: 25px;
-    }}
+#     .action-buttons {{
+#         display: flex;
+#         gap: 15px;
+#         justify-content: center;
+#         flex-wrap: wrap;
+#         margin-top: 25px;
+#     }}
     
-    .btn-primary {{
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        color: white;
-        padding: 15px 30px;
-        border-radius: 12px;
-        text-decoration: none;
-        font-weight: 600;
-        font-size: 1.1rem;
-        border: none;
-        cursor: pointer;
-        transition: all 0.3s ease;
-        box-shadow: 0 10px 25px rgba(102, 126, 234, 0.3);
-        display: inline-block;
-    }}
+#     .btn-primary {{
+#         background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+#         color: white;
+#         padding: 15px 30px;
+#         border-radius: 12px;
+#         text-decoration: none;
+#         font-weight: 600;
+#         font-size: 1.1rem;
+#         border: none;
+#         cursor: pointer;
+#         transition: all 0.3s ease;
+#         box-shadow: 0 10px 25px rgba(102, 126, 234, 0.3);
+#         display: inline-block;
+#     }}
     
-    .btn-primary:hover {{
-        transform: translateY(-3px);
-        box-shadow: 0 15px 35px rgba(102, 126, 234, 0.4);
-        text-decoration: none;
-        color: white;
-    }}
+#     .btn-primary:hover {{
+#         transform: translateY(-3px);
+#         box-shadow: 0 15px 35px rgba(102, 126, 234, 0.4);
+#         text-decoration: none;
+#         color: white;
+#     }}
     
-    .btn-secondary {{
-        background: rgba(255, 255, 255, 0.8);
-        color: #374151;
-        padding: 15px 30px;
-        border-radius: 12px;
-        text-decoration: none;
-        font-weight: 600;
-        font-size: 1.1rem;
-        border: 2px solid rgba(255, 255, 255, 0.5);
-        transition: all 0.3s ease;
-        display: inline-block;
-    }}
+#     .btn-secondary {{
+#         background: rgba(255, 255, 255, 0.8);
+#         color: #374151;
+#         padding: 15px 30px;
+#         border-radius: 12px;
+#         text-decoration: none;
+#         font-weight: 600;
+#         font-size: 1.1rem;
+#         border: 2px solid rgba(255, 255, 255, 0.5);
+#         transition: all 0.3s ease;
+#         display: inline-block;
+#     }}
     
-    .btn-secondary:hover {{
-        background: rgba(255, 255, 255, 1);
-        transform: translateY(-2px);
-        box-shadow: 0 10px 25px rgba(0,0,0,0.1);
-        text-decoration: none;
-        color: #374151;
-    }}
+#     .btn-secondary:hover {{
+#         background: rgba(255, 255, 255, 1);
+#         transform: translateY(-2px);
+#         box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+#         text-decoration: none;
+#         color: #374151;
+#     }}
     
-    .btn-resources {{
-        background: linear-gradient(135deg, #17a2b8, #138496);
-        color: white !important;
-    }}
+#     .btn-resources {{
+#         background: linear-gradient(135deg, #17a2b8, #138496);
+#         color: white !important;
+#     }}
     
-    .btn-resources:hover {{
-        color: white !important;
-        text-decoration: none;
-    }}
+#     .btn-resources:hover {{
+#         color: white !important;
+#         text-decoration: none;
+#     }}
     
-    .sparkle {{
-        position: absolute;
-        width: 20px;
-        height: 20px;
-        background: radial-gradient(circle, #ffd700, #ffed4a);
-        border-radius: 50%;
-        animation: sparkle 2s ease-in-out infinite;
-    }}
+#     .sparkle {{
+#         position: absolute;
+#         width: 20px;
+#         height: 20px;
+#         background: radial-gradient(circle, #ffd700, #ffed4a);
+#         border-radius: 50%;
+#         animation: sparkle 2s ease-in-out infinite;
+#     }}
     
-    .sparkle:nth-child(1) {{ top: 10%; left: 15%; animation-delay: 0s; }}
-    .sparkle:nth-child(2) {{ top: 20%; right: 10%; animation-delay: 0.5s; }}
-    .sparkle:nth-child(3) {{ bottom: 15%; left: 20%; animation-delay: 1s; }}
-    .sparkle:nth-child(4) {{ bottom: 25%; right: 15%; animation-delay: 1.5s; }}
+#     .sparkle:nth-child(1) {{ top: 10%; left: 15%; animation-delay: 0s; }}
+#     .sparkle:nth-child(2) {{ top: 20%; right: 10%; animation-delay: 0.5s; }}
+#     .sparkle:nth-child(3) {{ bottom: 15%; left: 20%; animation-delay: 1s; }}
+#     .sparkle:nth-child(4) {{ bottom: 25%; right: 15%; animation-delay: 1.5s; }}
     
-    @media (max-width: 768px) {{
-        .score-main-section {{
-            flex-direction: column;
-            gap: 30px;
-        }}
+#     @media (max-width: 768px) {{
+#         .score-main-section {{
+#             flex-direction: column;
+#             gap: 30px;
+#         }}
         
-        .score-details {{
-            grid-template-columns: repeat(2, 1fr);
-        }}
+#         .score-details {{
+#             grid-template-columns: repeat(2, 1fr);
+#         }}
         
-        .action-buttons {{
-            flex-direction: column;
-            align-items: center;
-        }}
+#         .action-buttons {{
+#             flex-direction: column;
+#             align-items: center;
+#         }}
         
-        .score-title {{
-            font-size: 2rem;
-        }}
+#         .score-title {{
+#             font-size: 2rem;
+#         }}
         
-        .score-circle {{
-            width: 160px;
-            height: 160px;
-        }}
+#         .score-circle {{
+#             width: 160px;
+#             height: 160px;
+#         }}
         
-        .score-number {{
-            font-size: 2.5rem;
-        }}
-    }}
-</style>
+#         .score-number {{
+#             font-size: 2.5rem;
+#         }}
+#     }}
+# </style>
 
-<div class="advanced-scoreboard">
-    {('<div class="sparkle"></div>' * 4) if display_score >= 80 else ''}
+# <div class="advanced-scoreboard">
+#     {('<div class="sparkle"></div>' * 4) if display_score >= 80 else ''}
     
-    <div class="score-header">
-        <h1 class="score-title">Assessment Complete</h1>
-        <p class="score-subtitle">Your learning journey continues</p>
-    </div>
+#     <div class="score-header">
+#         <h1 class="score-title">Assessment Complete</h1>
+#         <p class="score-subtitle">Your learning journey continues</p>
+#     </div>
     
-    <div class="score-main-section">
-        <div class="score-circle-container">
-            <div class="score-circle">
-                <svg viewBox="0 0 120 120">
-                    <circle class="bg-ring" cx="60" cy="60" r="50"/>
-                    <circle class="progress-ring" cx="60" cy="60" r="50"/>
-                </svg>
-                <div class="score-value">
-                    <div class="score-number">{display_score:.0f}</div>
-                    <div class="score-percent">%</div>
-                </div>
-            </div>
-        </div>
+#     <div class="score-main-section">
+#         <div class="score-circle-container">
+#             <div class="score-circle">
+#                 <svg viewBox="0 0 120 120">
+#                     <circle class="bg-ring" cx="60" cy="60" r="50"/>
+#                     <circle class="progress-ring" cx="60" cy="60" r="50"/>
+#                 </svg>
+#                 <div class="score-value">
+#                     <div class="score-number">{display_score:.0f}</div>
+#                     <div class="score-percent">%</div>
+#                 </div>
+#             </div>
+#         </div>
         
-        <div class="score-details">
-            <div class="score-metric">
-                <div class="metric-value">{correct_answers}/{total_questions}</div>
-                <div class="metric-label">Correct Answers</div>
-            </div>
-            <div class="score-metric">
-                <div class="metric-value">{display_accuracy:.0f}%</div>
-                <div class="metric-label">Accuracy Rate</div>
-            </div>
-            <div class="score-metric">
-                <div class="metric-value">{performance_level}</div>
-                <div class="metric-label">Performance</div>
-            </div>
-            <div class="score-metric">
-                <div class="metric-value">+{time_bonus:.0f}</div>
-                <div class="metric-label">Time Bonus</div>
-            </div>
-        </div>
-    </div>
+#         <div class="score-details">
+#             <div class="score-metric">
+#                 <div class="metric-value">{correct_answers}/{total_questions}</div>
+#                 <div class="metric-label">Correct Answers</div>
+#             </div>
+#             <div class="score-metric">
+#                 <div class="metric-value">{display_accuracy:.0f}%</div>
+#                 <div class="metric-label">Accuracy Rate</div>
+#             </div>
+#             <div class="score-metric">
+#                 <div class="metric-value">{performance_level}</div>
+#                 <div class="metric-label">Performance</div>
+#             </div>
+#             <div class="score-metric">
+#                 <div class="metric-value">+{time_bonus:.0f}</div>
+#                 <div class="metric-label">Time Bonus</div>
+#             </div>
+#         </div>
+#     </div>
     
-    <div style="text-align: center;">
-        <div class="performance-badge">
-            <span>{performance_emoji}</span>
-            <span>{performance_level} Performance!</span>
-        </div>
-    </div>
+#     <div style="text-align: center;">
+#         <div class="performance-badge">
+#             <span>{performance_emoji}</span>
+#             <span>{performance_level} Performance!</span>
+#         </div>
+#     </div>
     
-    <div class="achievement-section">
-        {f'''
-        <div class="achievement-message">
-            🏆 Outstanding! You've earned your certificate!
-        </div>
-        <div class="action-buttons">
-            <a href="https://superprofile.bio/vp/corporate-bhaiya-sql-page" target="_blank" class="btn-primary">
-                🎓 Claim Certificate
-            </a>
-            <a href="https://www.corporatebhaiya.com/" target="_blank" class="btn-secondary">
-                🚀 Advanced Training
-            </a>
-        </div>
-        ''' if display_score >= 80 else f'''
-        <div class="achievement-message">
-            📈 Every expert was once a beginner - keep learning to unlock your certificate!
-        </div>
-        <div class="tips-box">
-            <strong>💡 Quick Tips:</strong> Review the material, practice more questions, and don't give up! Learning is a journey, not a destination.
-        </div>
-        <div class="action-buttons">
-            <a href="https://www.corporatebhaiya.com/" target="_blank" class="btn-primary">
-                💪 Get Mentorship
-            </a>
-            <a href="#" onclick="location.reload()" class="btn-secondary">
-                🔄 Try Again
-            </a>
-            <a href="#" class="btn-secondary btn-resources">
-                📖 Study Resources
-            </a>
-        </div>
-        '''}
-    </div>
-</div>
-"""
+#     <div class="achievement-section">
+#         {f'''
+#         <div class="achievement-message">
+#             🏆 Outstanding! You've earned your certificate!
+#         </div>
+#         <div class="action-buttons">
+#             <a href="https://superprofile.bio/vp/corporate-bhaiya-sql-page" target="_blank" class="btn-primary">
+#                 🎓 Claim Certificate
+#             </a>
+#             <a href="https://www.corporatebhaiya.com/" target="_blank" class="btn-secondary">
+#                 🚀 Advanced Training
+#             </a>
+#         </div>
+#         ''' if display_score >= 80 else f'''
+#         <div class="achievement-message">
+#             📈 Every expert was once a beginner - keep learning to unlock your certificate!
+#         </div>
+#         <div class="tips-box">
+#             <strong>💡 Quick Tips:</strong> Review the material, practice more questions, and don't give up! Learning is a journey, not a destination.
+#         </div>
+#         <div class="action-buttons">
+#             <a href="https://www.corporatebhaiya.com/" target="_blank" class="btn-primary">
+#                 💪 Get Mentorship
+#             </a>
+#             <a href="#" onclick="location.reload()" class="btn-secondary">
+#                 🔄 Try Again
+#             </a>
+#             <a href="#" class="btn-secondary btn-resources">
+#                 📖 Study Resources
+#             </a>
+#         </div>
+#         '''}
+#     </div>
+# </div>
+# """
 
 # Render with Streamlit
 st.markdown(scoreboard_html, unsafe_allow_html=True)
