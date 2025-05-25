@@ -6,13 +6,8 @@ import duckdb
 
 # --- Custom CSS ---
 # Updated to increase font sizes globally and for specific elements
-# Replace the existing hide_streamlit_style CSS section with this advanced version:
-
 hide_streamlit_style = """
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
-        
-        /* Hide Streamlit branding */
         header {visibility: hidden;}
         #MainMenu {visibility: hidden;}
         footer {visibility: hidden;}
@@ -23,319 +18,46 @@ hide_streamlit_style = """
         [data-testid="stDeployButton"] {display: none !important;}
         .st-emotion-cache-1r8d6ul {display: none !important;}
         .st-emotion-cache-1jicfl2 {display: none !important;}
-        
-        /* Root styling */
-        .stApp {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-        }
-        
-        /* Main container */
-        .main .block-container {
-            padding: 2rem 3rem;
-            max-width: 85%;
-            background: rgba(255, 255, 255, 0.98);
-            border-radius: 20px;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1);
-            backdrop-filter: blur(10px);
-            margin: 2rem auto;
-        }
-        
-        /* Typography enhancements */
+        /* Increase global font size */
         body, .stMarkdown, .stText, .stTextArea, .stButton button, .stLinkButton a {
-            font-family: 'Inter', sans-serif !important;
-            font-size: 16px !important;
-            line-height: 1.6;
-        }
-        
-        h1 {
-            font-size: 2.5rem !important;
-            font-weight: 700 !important;
-            background: linear-gradient(135deg, #667eea, #764ba2);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            text-align: center;
-            margin-bottom: 1.5rem !important;
-        }
-        
-        h2 {
-            font-size: 1.8rem !important;
-            font-weight: 600 !important;
-            color: #2d3748;
-            margin: 1.5rem 0 1rem 0 !important;
-        }
-        
-        h3 {
-            font-size: 1.4rem !important;
-            font-weight: 500 !important;
-            color: #4a5568;
-            margin: 1rem 0 0.5rem 0 !important;
-        }
-        
-        /* Enhanced buttons */
-        button[data-testid="baseButton-primary"] {
-            background: linear-gradient(135deg, #667eea, #764ba2) !important;
-            color: white !important;
-            border: none !important;
-            border-radius: 12px !important;
-            padding: 16px 32px !important;
             font-size: 18px !important;
-            font-weight: 600 !important;
-            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3) !important;
-            transition: all 0.3s ease !important;
-            text-transform: none !important;
         }
-        
-        button[data-testid="baseButton-primary"]:hover {
-            transform: translateY(-2px) !important;
-            box-shadow: 0 12px 30px rgba(102, 126, 234, 0.4) !important;
+        h1 {font-size: 36px !important;}
+        h2 {font-size: 28px !important;}
+        h3 {font-size: 24px !important;}
+        /* Style for Start SQL Challenge! button */
+        button[kind="primary"] {
+            font-size: 24px !important;
+            padding: 15px 30px !important;
+            color: white !important;
+            background-color: red;
+            border-radius: 10px;
         }
-        
-        .stButton button:not([data-testid="baseButton-primary"]) {
-            background: #f7fafc !important;
-            color: #2d3748 !important;
-            border: 2px solid #e2e8f0 !important;
-            border-radius: 10px !important;
+        /* Style for other buttons (Submit, Analysis, Retry) */
+        .stButton button:not([kind="primary"]), .stLinkButton a {
+            font-size: 20px !important;
             padding: 12px 24px !important;
-            font-size: 16px !important;
-            font-weight: 500 !important;
-            transition: all 0.3s ease !important;
+            border-radius: 8px;
         }
-        
-        .stButton button:not([data-testid="baseButton-primary"]):hover {
-            background: #edf2f7 !important;
-            border-color: #cbd5e0 !important;
-            transform: translateY(-1px) !important;
-        }
-        
-        /* Card-style containers */
-        .element-container {
-            background: white;
-            border-radius: 12px;
-            padding: 1.5rem;
-            margin: 1rem 0;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
-            border: 1px solid #e2e8f0;
-        }
-        
-        /* Enhanced dataframes */
-        .stDataFrame {
-            border-radius: 12px !important;
-            overflow: hidden !important;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08) !important;
-            border: 1px solid #e2e8f0 !important;
-        }
-        
-        .stDataFrame > div {
-            border-radius: 12px !important;
-        }
-        
-        /* Text areas and inputs */
-        .stTextArea textarea {
-            border-radius: 10px !important;
-            border: 2px solid #e2e8f0 !important;
-            padding: 12px 16px !important;
-            font-family: 'Monaco', 'Consolas', monospace !important;
-            font-size: 14px !important;
-            line-height: 1.5 !important;
-            background: #f8fafc !important;
-            transition: border-color 0.3s ease !important;
-        }
-        
-        .stTextArea textarea:focus {
-            border-color: #667eea !important;
-            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1) !important;
-            outline: none !important;
-        }
-        
-        /* Progress bars */
-        .stProgress .st-bo {
-            background: linear-gradient(90deg, #667eea, #764ba2) !important;
-            border-radius: 10px !important;
-        }
-        
-        .stProgress > div > div {
-            border-radius: 10px !important;
-            background: #e2e8f0 !important;
-        }
-        
-        /* Tabs enhancement */
-        .stTabs [data-baseweb="tab-list"] {
-            gap: 8px;
-            background: #f7fafc;
-            border-radius: 12px;
-            padding: 4px;
-        }
-        
-        .stTabs [data-baseweb="tab"] {
-            border-radius: 8px !important;
-            padding: 12px 20px !important;
-            font-weight: 500 !important;
-            transition: all 0.3s ease !important;
-        }
-        
-        .stTabs [aria-selected="true"] {
-            background: white !important;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1) !important;
-        }
-        
-        /* Expanders */
-        .streamlit-expanderHeader {
-            background: #f7fafc !important;
-            border-radius: 10px !important;
-            padding: 12px 16px !important;
-            font-weight: 500 !important;
-            border: 1px solid #e2e8f0 !important;
-            transition: all 0.3s ease !important;
-        }
-        
-        .streamlit-expanderHeader:hover {
-            background: #edf2f7 !important;
-        }
-        
-        .streamlit-expanderContent {
-            border: 1px solid #e2e8f0 !important;
-            border-top: none !important;
-            border-radius: 0 0 10px 10px !important;
-            padding: 16px !important;
-            background: white !important;
-        }
-        
-        /* Code blocks */
-        .stCode {
-            border-radius: 8px !important;
-            border: 1px solid #e2e8f0 !important;
-        }
-        
-        /* Alerts and messages */
-        .stAlert {
-            border-radius: 10px !important;
-            border: none !important;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05) !important;
-        }
-        
-        .stSuccess {
-            background: linear-gradient(135deg, #48bb78, #38a169) !important;
-            color: white !important;
-        }
-        
-        .stWarning {
-            background: linear-gradient(135deg, #ed8936, #dd6b20) !important;
-            color: white !important;
-        }
-        
-        .stError {
-            background: linear-gradient(135deg, #f56565, #e53e3e) !important;
-            color: white !important;
-        }
-        
-        .stInfo {
-            background: linear-gradient(135deg, #4299e1, #3182ce) !important;
-            color: white !important;
-        }
-        
-        /* Sidebar enhancements */
-        .css-1d391kg {
-            background: linear-gradient(180deg, #667eea 0%, #764ba2 100%) !important;
-        }
-        
         /* Feedback container styling */
         .feedback-container {
-            background: linear-gradient(135deg, #f7fafc, #edf2f7);
-            padding: 24px;
-            border-radius: 16px;
-            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
-            border: 1px solid #e2e8f0;
-            margin: 20px 0;
+            background-color: #f9f9f9;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            font-size: 18px !important;
         }
-        
         .feedback-header {
-            font-size: 1.5rem !important;
-            font-weight: 600 !important;
-            background: linear-gradient(135deg, #667eea, #764ba2);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            margin-bottom: 16px;
+            font-size: 24px !important;
+            color: #1f77b4;
+            margin-bottom: 10px;
         }
-        
         .feedback-section {
-            margin: 20px 0;
-            padding: 16px;
-            background: white;
-            border-radius: 12px;
-            border-left: 4px solid #667eea;
+            margin-top: 15px;
         }
-        
         .strength-item, .weakness-item {
-            font-size: 16px !important;
-            margin: 8px 0;
-            padding: 8px 12px;
-            border-radius: 8px;
-            background: rgba(102, 126, 234, 0.05);
-        }
-        
-        /* Score display enhancement */
-        .score-card {
-            background: linear-gradient(135deg, #667eea, #764ba2);
-            color: white;
-            padding: 30px;
-            border-radius: 20px;
-            text-align: center;
-            box-shadow: 0 15px 35px rgba(102, 126, 234, 0.3);
-            margin: 30px 0;
-        }
-        
-        /* Animations */
-        @keyframes fadeInUp {
-            from {
-                opacity: 0;
-                transform: translateY(20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-        
-        .element-container {
-            animation: fadeInUp 0.6s ease-out;
-        }
-        
-        /* Responsive design */
-        @media (max-width: 768px) {
-            .main .block-container {
-                padding: 1rem 1.5rem;
-                margin: 1rem;
-                border-radius: 15px;
-            }
-            
-            h1 {
-                font-size: 2rem !important;
-            }
-            
-            button[data-testid="baseButton-primary"] {
-                padding: 14px 24px !important;
-                font-size: 16px !important;
-            }
-        }
-        
-        /* Custom scrollbar */
-        ::-webkit-scrollbar {
-            width: 8px;
-        }
-        
-        ::-webkit-scrollbar-track {
-            background: #f1f1f1;
-            border-radius: 10px;
-        }
-        
-        ::-webkit-scrollbar-thumb {
-            background: linear-gradient(135deg, #667eea, #764ba2);
-            border-radius: 10px;
-        }
-        
-        ::-webkit-scrollbar-thumb:hover {
-            background: linear-gradient(135deg, #5a67d8, #6b46c1);
+            font-size: 18px !important;
+            margin: 5px 0;
         }
     </style>
 """
