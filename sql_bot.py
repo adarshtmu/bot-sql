@@ -725,170 +725,201 @@ elif st.session_state.quiz_completed:
     border_gradient = "linear-gradient(45deg, #28a745, #1f77b4)" if final_score >= 80 else "linear-gradient(45deg, #ff9800, #e74c3c)"
 
     # Advanced Scorecard with animations, gradient border, and progress circle
-    st.markdown(
-        f"""
-        <style>
-            @keyframes fadeIn {{
-                0% {{ opacity: 0; transform: scale(0.95); }}
-                100% {{ opacity: 1; transform: scale(1); }}
-            }}
-            @keyframes progressCircle {{
-                0% {{ stroke-dasharray: 0 100; }}
-            }}
-            .scorecard-container {{
-                background: linear-gradient(135deg, #ffffff, #f1f5f9);
-                border: 4px solid transparent;
-                border-radius: 20px;
-                padding: 30px;
-                margin: 30px 0;
-                text-align: center;
-                position: relative;
-                box-shadow: 0 8px 24px rgba(0,0,0,0.1);
-                animation: fadeIn 0.8s ease-in-out;
-                background-clip: padding-box;
-                border-image: {border_gradient} 1;
-            }}
-            .scorecard-container::before {{
-                content: '';
-                position: absolute;
-                top: -4px; bottom: -4px; left: -4px; right: -4px;
-                background: {border_gradient};
-                z-index: -1;
-                border-radius: 24px;
-            }}
-            .scorecard-header {{
-                font-size: 2rem;
-                font-weight: 700;
-                color: #1f77b4;
-                margin-bottom: 10px;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                gap: 10px;
-            }}
-            .score-value {{
-                font-size: 3rem;
-                font-weight: 900;
-                color: {score_color};
-                margin: 15px 0;
-                letter-spacing: 2px;
-            }}
-            .score-message {{
-                font-size: 1.3rem;
-                color: #555;
-                margin-bottom: 20px;
-            }}
-            .progress-circle {{
-                position: relative;
-                width: 120px;
-                height: 120px;
-                margin: 0 auto 20px;
-            }}
-            .progress-circle svg {{
-                transform: rotate(-90deg);
-            }}
-            .progress-circle circle {{
-                fill: none;
-                stroke-width: 10;
-                stroke-linecap: round;
-            }}
-            .progress-circle .bg-circle {{
-                stroke: #e0e0e0;
-            }}
-            .progress-circle .progress-ring {{
-                stroke: {score_color};
-                stroke-dasharray: {final_score} 100;
-                animation: progressCircle 1.5s ease-in-out;
-            }}
-            .progress-circle .percent-text {{
-                position: absolute;
-                top: 50%;
-                left: 50%;
-                transform: translate(-50%, -50%);
-                font-size: 1.5rem;
-                font-weight: bold;
-                color: {score_color};
-            }}
-            .scoreboard-label {{
-                font-size: 1.1rem;
-                color: #888;
-                margin-top: 10px;
-            }}
-        </style>
-        <div class="scorecard-container">
-            <div class="scorecard-header">
-                <span>📊 Your Final Score</span>
-                <span style="font-size: 1.5rem;">🏆</span>
-            </div>
-            <div class="progress-circle">
-                <svg width="120" height="120">
-                    <circle class="bg-circle" cx="60" cy="60" r="50"/>
-                    <circle class="progress-ring" cx="60" cy="60" r="50"/>
-                </svg>
-                <div class="percent-text">{final_score:.1f}%</div>
-            </div>
-            <div class="score-value">{final_score:.2f}%</div>
-            <div class="score-message">{score_message}</div>
-            <div class="scoreboard-label">Scoreboard</div>
+    st.markdown("""
+    <style>
+        /* Animation for fade-in effect */
+        @keyframes fadeIn {
+            0% {
+                opacity: 0;
+                transform: scale(0.95);
+            }
+            100% {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        /* Main scorecard styles */
+        .scorecard-container {
+            background: linear-gradient(135deg, #ffffff, #f1f5f9);
+            border: 4px solid transparent;
+            border-radius: 20px;
+            padding: 30px;
+            margin: 30px auto;
+            text-align: center;
+            position: relative;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.1);
+            animation: fadeIn 0.8s ease-in-out;
+            background-clip: padding-box;
+            border-image: {border_gradient} 1;
+            max-width: 500px; /* Responsive width */
+        }
+
+        .scorecard-container::before {
+            content: '';
+            position: absolute;
+            top: -4px;
+            bottom: -4px;
+            left: -4px;
+            right: -4px;
+            background: {border_gradient};
+            z-index: -1;
+            border-radius: 24px;
+        }
+
+        /* Header styles */
+        .scorecard-header {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #1f77b4;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        /* Score value styles */
+        .score-value {
+            font-size: 3rem;
+            font-weight: 900;
+            color: {score_color};
+            margin: 15px 0;
+            letter-spacing: 2px;
+        }
+
+        /* Score message styles */
+        .score-message {
+            font-size: 1.3rem;
+            color: #555;
+            margin-bottom: 20px;
+        }
+
+        /* Progress circle styles */
+        .progress-circle {
+            position: relative;
+            width: 120px;
+            height: 120px;
+            margin: 0 auto 20px;
+        }
+
+        .progress-circle svg {
+            transform: rotate(-90deg);
+        }
+
+        .progress-circle circle {
+            fill: none;
+            stroke-width: 10;
+            stroke-linecap: round;
+        }
+
+        .progress-circle .bg-circle {
+            stroke: #e0e0e0;
+        }
+
+        .progress-circle .progress-ring {
+            stroke: {score_color};
+            stroke-dasharray: {final_score} 100;
+            animation: progressCircle 1.5s ease-in-out;
+        }
+
+        .progress-circle .percent-text {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: {score_color};
+        }
+
+        /* Scoreboard label styles */
+        .scoreboard-label {
+            font-size: 1.1rem;
+            color: #888;
+            margin-top: 10px;
+        }
+
+        /* Button styles */
+        .certificate-button, .mentor-button {
+            background-color: #ffc107; /* Default button color */
+            color: #121212;
+            font-size: 1.5rem;
+            font-weight: 600;
+            padding: 18px 36px;
+            border-radius: 10px;
+            text-decoration: none;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.11);
+            transition: background 0.2s;
+            margin-top: 20px; /* Spacing between button and text */
+        }
+
+        /* Specific button color for mentor */
+        .mentor-button {
+            background-color: #6c757d;
+            color: white; 
+        }
+
+        /* Responsive styles */
+        @media (max-width: 600px) {
+            .score-value {
+                font-size: 2.5rem; /* Adjust score value size */
+            }
+
+            .score-message {
+                font-size: 1.2rem; /* Adjust message size */
+            }
+
+            .certificate-button, .mentor-button {
+                font-size: 1.2rem; /* Adjust button size */
+                padding: 12px 24px; /* Adjust button padding */
+            }
+        }
+    </style>
+""", unsafe_allow_html=True)
+
+# HTML structure remains similar but adds classes for buttons.
+st.markdown(f"""
+    <div class="scorecard-container">
+        <div class="scorecard-header">
+            <span>📊 Your Final Score</span>
+            <span style="font-size: 1.5rem;">🏆</span>
         </div>
-        """,
-        unsafe_allow_html=True
-    )
+        <div class="progress-circle">
+            <svg width="120" height="120">
+                <circle class="bg-circle" cx="60" cy="60" r="50"/>
+                <circle class="progress-ring" cx="60" cy="60" r="50"/>
+            </svg>
+            <div class="percent-text">{final_score:.1f}%</div>
+        </div>
+        <div class="score-value">{final_score:.2f}%</div>
+        <div class="score-message">{score_message}</div>
+        <div class="scoreboard-label">Scoreboard</div>
+    </div>
+    
+""", unsafe_allow_html=True)
 
-    if final_score >= 80:
-        st.markdown(
-            """
-            <div style='text-align:center; margin-top: 20px;'>
-                <h3 style='color:#007bff;'>🏆 Great job! You're eligible for a certificate.</h3>
-            </div>
-            """,
-            unsafe_allow_html=True
-        )
-        st.markdown(
-            """
-            <div style='display:flex; justify-content:center; margin-bottom: 30px;'>
-                <a href="https://superprofile.bio/vp/corporate-bhaiya-sql-page" target="_blank" style="
-                    background-color:#ffc107;
-                    color:#121212;
-                    font-size:1.5rem;
-                    font-weight:600;
-                    padding:18px 36px;
-                    border-radius:10px;
-                    text-decoration:none;
-                    box-shadow:0 2px 8px rgba(0,0,0,0.11);
-                    transition: background 0.2s;
-                ">🎓 Get Your Certificate</a>
-            </div>
-            """,
-            unsafe_allow_html=True
-        )
-    else:
-        st.markdown(
-            """
-            <div style='text-align:center; margin-top: 20px;'>
-                <h3 style='color:#e74c3c;'>📚 Keep practicing to earn a certificate!</h3>
-                <a href="https://www.corporatebhaiya.com/" target="_blank" style="
-                    background-color:#6c757d;
-                    color:white;
-                    font-size:1.2rem;
-                    padding:12px 28px;
-                    border-radius:8px;
-                    text-decoration:none;
-                    margin-top:10px;
-                    display:inline-block;
-                ">🚀 Book a Mentor Session</a>
-            </div>
-            """,
-            unsafe_allow_html=True
-        )
+# Conditional messaging and buttons
+if final_score >= 80:
+    st.markdown("""
+        <div style='text-align:center; margin-top: 20px;'>
+            <h3 style='color:#007bff;'>🏆 Great job! You're eligible for a certificate.</h3>
+            <a href="https://superprofile.bio/vp/corporate-bhaiya-sql-page" target="_blank" class="certificate-button">🎓 Get Your Certificate</a>
+        </div>
+    """, unsafe_allow_html=True)
+else:
+    st.markdown("""
+        <div style='text-align:center; margin-top: 20px;'>
+            <h3 style='color:#e74c3c;'>📚 Keep practicing to earn a certificate!</h3>
+            <a href="https://www.corporatebhaiya.com/" target="_blank" class="mentor-button">🚀 Book a Mentor Session</a>
+        </div>
+    """, unsafe_allow_html=True)
 
-    # --- Try Again Button LAST ---
-    if st.button("🔄 Try Again?"):
-        st.session_state.user_answers = []
-        st.session_state.current_question = 0
-        st.session_state.quiz_started = False
-        st.session_state.quiz_completed = False
-        st.session_state.show_detailed_feedback = False
-        st.rerun()
-
-
+# Button for trying again
+if st.button("🔄 Try Again?"):
+    st.session_state.user_answers = []
+    st.session_state.current_question = 0
+    st.session_state.quiz_started = False
+    st.session_state.quiz_completed = False
+    st.session_state.show_detailed_feedback = False
+    st.rerun()
