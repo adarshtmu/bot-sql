@@ -471,57 +471,110 @@ def display_simulation(title, result_data):
 # --- Start Screen ---
 # --- Start Screen ---
 if not st.session_state.quiz_started:
+    # --- START SCREEN ---
     st.title("🚀 SQL Mentor - Interactive SQL Practice")
     st.markdown("### Finish the Quiz Successfully to Unlock Your SQL Certificate")
-    st.markdown("""
-        **📌 Important Notes:**
-        - To be eligible for a certificate, you must achieve a score of at least 80%.
-        - This quiz uses standard **SQL syntax** (similar to MySQL/PostgreSQL).
-        - String comparisons (like `WHERE city = 'new york'` or `WHERE status = "pending"`) are simulated to be **case-insensitive** for common text columns (`status`, `city`).
-        - **Both single quotes (') and double quotes (") are accepted** for string literals in this simulation.
-        - Your queries are evaluated by an AI for correctness and logic.
-        - Query simulation is powered by DuckDB to show results on sample data.
-        """)
-    
-    col1, col2 = st.columns([2, 1])
-    with col1:
-        st.write("""
-        Is interactive quiz mein, aap do sample tables ke saath kaam karenge:
-        - **Users Table**: User details jaise ID, naam, email, umar, aur sheher.
-        - **Orders Table**: Order details jaise ID, user ID, amount, order date, aur status.
-        """)
-    with col2:
-        st.markdown("#### Tables Overview")
-        try:
-            table_overview_data = {"Table": list(original_tables.keys()),
-                                   "Rows": [len(df) for df in original_tables.values()],
-                                   "Columns": [len(df.columns) for df in original_tables.values()]}
-            st.dataframe(pd.DataFrame(table_overview_data), hide_index=True)
-        except Exception as e:
-            st.error(f"Error displaying table overview: {e}")
-    
-    st.write("### 🔍 Table Previews")
-    try:
-        tab1, tab2 = st.tabs(["Users Table", "Orders Table"])
-        with tab1: st.dataframe(users_table, hide_index=True, use_container_width=False)
-        with tab2: st.dataframe(orders_table, hide_index=True, use_container_width=False)
-    except Exception as e:
-        st.error(f"Error displaying table previews: {e}")
-    
-    with st.expander("📝 Quiz Ke Baare Mein"):
-        st.write(f"""
-        - Aapko {len(sql_questions)} SQL query challenges solve karne honge.
-        - Har jawaab ke baad AI Mentor se immediate feedback milega.
-        - **SQL Dialect Focus:** Standard SQL (MySQL/PostgreSQL like).
-        - Case-insensitivity for `status` and `city` columns in `WHERE =` clauses is simulated.
-        - String literals can be enclosed in single quotes (`'...'`) or double quotes (`"..."`).
-        """)
-    
+    # ... (rest of your start screen code, table previews, etc.) ...
     if st.button("🚀 Start SQL Challenge!", type="primary"):
         st.session_state.quiz_started = True
         st.session_state.user_answers = []
         st.session_state.current_question = 0
         st.session_state.quiz_completed = False
+
+elif st.session_state.quiz_started and not st.session_state.quiz_completed:
+    # --- QUIZ IN PROGRESS SCREEN ---
+    st.title("✍️ SQL Query Challenge")
+    # Show summary of previous answers, if any
+    if st.session_state.user_answers:
+        st.markdown("---")
+        st.subheader("📖 Ab Tak Ke Jawaab Aur Feedback")
+        for i, ans_data in enumerate(st.session_state.user_answers):
+            q_num = i + 1
+            is_correct = ans_data.get('is_correct', False)
+            with st.expander(f"Question {q_num}: {ans_data['question']} {'✅' if is_correct else '❌'}", expanded=False):
+                st.write(f"**Aapka Jawaab:**")
+                st.code(ans_data.get('student_answer', '(No answer provided)'), language='sql')
+                st.write(f"**SQL Mentor Feedback:**")
+                st.markdown(ans_data.get("feedback", "_Feedback not available._"))
+                # Show simulation etc. if you wish
+
+    st.markdown("---")
+    # Show current question
+    current_q_index = st.session_state.current_question
+    question_data = sql_questions[current_q_index]
+    st.subheader(f"Question {current_q_index + 1} of {len(sql_questions)}")
+    st.markdown(f"**{question_data['question']}**")
+    # ... (show relevant tables if desired) ...
+    user_query = st.text_area("Apna SQL Query Yahan Likhein:", height=150, key=f"query_input_{current_q_index}")
+
+    if st.button("✅ Submit Query", key=f"submit_{current_q_index}"):
+        if user_query and user_query.strip():
+            with st.spinner("🔄 Query ko check kiya ja raha hai..."):
+                feedback, is_correct, expected_res, actual_res, raw_llm = evaluate_answer_with_llm(
+                    question_data,
+                    user_query,
+                    original_tables
+                )
+                st.session_state.user_answers.append({
+                    "question_number": current_q_index + 1,
+                    "question": question_data["question"],
+                    "student_answer": user_query,
+                    "feedback": feedback,
+                    "is_correct": is_correct,
+                    "expected_result": expected_res,
+                    "actual_result": actual_res,
+                    "raw_llm_output": raw_llm
+                })
+                if current_q_index + 1 < len(sql_questions):
+                    st.session_state.current_question += 1
+                else:
+                    st.session_state.quiz_completed = True
+                st.rerun()
+        else:
+            st.warning("⚠️ Please enter your SQL query before submitting.")
+
+elif st.session_state.quiz_completed:
+    # ------------------- RESULTS SCREEN --------------------
+    final_score = calculate_score(st.session_state.user_answers)
+    # 1. Show congratulations and scorecard
+    st.balloons()
+    st.markdown(
+        """
+        <div style='text-align:center; margin-top: 30px;'>
+            <h1 style='color:#28a745;'>🎉 Congratulations!</h1>
+            <h2 style='color:#1f77b4;'>You have completed the SQL Challenge</h2>
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
+    # ---- Advanced Scorecard ----
+    # (Assuming you use the inject_custom_css, display_advanced_scorecard, etc. from your modular functions)
+    inject_custom_css()
+    display_advanced_scorecard(final_score)
+    display_certificate_section(final_score)
+    st.markdown("---")
+
+    # 2. Question by question summary
+    display_question_summary(st.session_state.user_answers)
+
+    # 3. Detailed Performance Analysis (with unique key for the button)
+    display_performance_analysis(
+        st.session_state.user_answers,
+        analyze_performance_func=analyze_performance
+    )
+
+    # 4. Retry Section
+    display_retry_section()
+
+    # 5. Footer
+    st.markdown("""
+    <div style='text-align: center; margin-top: 4rem; padding: 2rem; background: linear-gradient(135deg, #667eea, #764ba2); border-radius: 16px; color: white;'>
+        <h3>🎓 Corporate Bhaiya Learning Platform</h3>
+        <p>Empowering careers through quality education</p>
+        <p style='opacity: 0.8; font-size: 0.9rem;'>© 2024 All rights reserved</p>
+    </div>
+    """, unsafe_allow_html=True)
+
 
 # --- Quiz In Progress Screen ---
 elif st.session_state.quiz_started and not st.session_state.quiz_completed:
