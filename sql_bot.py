@@ -4,10 +4,13 @@ import pandas as pd
 import re
 import duckdb
 
+# --- Set Streamlit Theme to Dark ---
+st.set_page_config(layout="wide", initial_sidebar_state="collapsed", theme="dark")
+
 # --- Custom CSS ---
-# Updated to increase font sizes globally and for specific elements
 hide_streamlit_style = """
     <style>
+        /* Hide Streamlit default elements */
         header {visibility: hidden;}
         #MainMenu {visibility: hidden;}
         footer {visibility: hidden;}
@@ -18,46 +21,95 @@ hide_streamlit_style = """
         [data-testid="stDeployButton"] {display: none !important;}
         .st-emotion-cache-1r8d6ul {display: none !important;}
         .st-emotion-cache-1jicfl2 {display: none !important;}
-        /* Increase global font size */
-        body, .stMarkdown, .stText, .stTextArea, .stButton button, .stLinkButton a {
-            font-size: 18px !important;
+
+        /* Set background color to match screenshot */
+        body {
+            background-color: #1a1a1a !important;
+            color: #ffffff !important;
         }
-        h1 {font-size: 36px !important;}
-        h2 {font-size: 28px !important;}
-        h3 {font-size: 24px !important;}
+
+        /* Center content with max-width for horizontal stretch */
+        .main .block-container {
+            max-width: 80% !important; /* Stretch to 80% of viewport width */
+            margin-left: auto !important;
+            margin-right: auto !important;
+            padding-left: 20px !important;
+            padding-right: 20px !important;
+        }
+
+        /* Global font size and styling */
+        body, .stMarkdown, .stText, .stTextArea, .stButton button, .stLinkButton a {
+            font-size: 16px !important;
+            color: #ffffff !important;
+        }
+        h1 {
+            font-size: 32px !important;
+            font-weight: bold !important;
+            color: #ffffff !important;
+        }
+        h2 {
+            font-size: 24px !important;
+            font-weight: bold !important;
+            color: #ffffff !important;
+        }
+        h3 {
+            font-size: 20px !important;
+            font-weight: bold !important;
+            color: #ffffff !important;
+        }
+
         /* Style for Start SQL Challenge! button */
         button[kind="primary"] {
-            font-size: 24px !important;
-            padding: 15px 30px !important;
-            color: white !important;
-            background-color: red;
-            border-radius: 10px;
-        }
-        /* Style for other buttons (Submit, Analysis, Retry) */
-        .stButton button:not([kind="primary"]), .stLinkButton a {
-            font-size: 20px !important;
+            font-size: 18px !important;
             padding: 12px 24px !important;
-            border-radius: 8px;
+            color: white !important;
+            background-color: #ff4d4f !important; /* Red color as in the screenshot */
+            border-radius: 8px !important;
+            border: none !important;
         }
-        /* Feedback container styling */
-        .feedback-container {
-            background-color: #f9f9f9;
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-            font-size: 18px !important;
+
+        /* Style for other buttons */
+        .stButton button:not([kind="primary"]), .stLinkButton a {
+            font-size: 16px !important;
+            padding: 10px 20px !important;
+            border-radius: 8px !important;
         }
-        .feedback-header {
-            font-size: 24px !important;
-            color: #1f77b4;
-            margin-bottom: 10px;
+
+        /* Table styling */
+        .stDataFrame {
+            border: 1px solid #444 !important;
+            border-radius: 8px !important;
+            background-color: #2a2a2a !important;
         }
-        .feedback-section {
-            margin-top: 15px;
+        .stDataFrame thead tr th {
+            background-color: #333 !important;
+            color: #ffffff !important;
         }
-        .strength-item, .weakness-item {
-            font-size: 18px !important;
-            margin: 5px 0;
+        .stDataFrame tbody tr td {
+            background-color: #2a2a2a !important;
+            color: #ffffff !important;
+        }
+
+        /* Expander styling */
+        .stExpander {
+            border: 1px solid #444 !important;
+            border-radius: 8px !important;
+            background-color: #2a2a2a !important;
+        }
+        .stExpander p {
+            color: #ffffff !important;
+        }
+
+        /* Tab styling */
+        .stTabs [role="tab"] {
+            font-size: 16px !important;
+            padding: 8px 16px !important;
+            color: #ffffff !important;
+            background-color: #333 !important;
+        }
+        .stTabs [role="tab"][aria-selected="true"] {
+            background-color: #444 !important;
+            color: #ffffff !important;
         }
     </style>
 """
