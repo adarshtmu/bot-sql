@@ -5,8 +5,6 @@ import re
 import duckdb
 
 # --- Custom CSS ---
-# Updated to increase font sizes globally and for specific elements
-# --- Custom CSS ---
 # --- Custom CSS ---
 hide_streamlit_style = """
     <style>
@@ -65,30 +63,40 @@ hide_streamlit_style = """
             font-size: 18px !important;
             margin: 5px 0;
         }
-        /* Ensure tables fit within container and are scrollable if needed */
+        /* Ensure tables fit within container without horizontal scrolling */
         .stDataFrame {
             width: 100% !important;
-            overflow-x: auto !important; /* Enable horizontal scrolling */
+            max-width: 100% !important; /* Ensure it doesn't exceed container */
+            overflow-x: hidden !important; /* Disable horizontal scrolling */
         }
         /* Style the dataframe container to prevent overflow */
         [data-testid="stDataFrame"] {
-            max-width: 100% !important;
-            overflow-x: auto !important; /* Horizontal scroll for overflow */
+            width: 100% !important;
+            max-width: 100% !important; /* Fit within the container */
+            overflow-x: hidden !important; /* No horizontal scroll */
             box-sizing: border-box !important;
         }
-        /* Optional: Style the table itself for better readability */
+        /* Style the table itself to adjust dynamically */
         [data-testid="stDataFrame"] table {
             width: 100% !important;
-            min-width: 600px; /* Optional: Set a minimum width for readability */
+            max-width: 100% !important; /* Ensure table fits container */
+            table-layout: auto !important; /* Allow columns to resize dynamically */
             border-collapse: collapse !important;
         }
         [data-testid="stDataFrame"] th, [data-testid="stDataFrame"] td {
-            white-space: nowrap !important; /* Prevent text wrapping in cells */
+            white-space: normal !important; /* Allow text to wrap in cells */
+            word-wrap: break-word !important; /* Ensure long text wraps */
             padding: 8px !important;
             text-align: left !important;
+            font-size: 14px !important; /* Reduce font size slightly to help fit */
+        }
+        /* Ensure columns adjust proportionally */
+        [data-testid="stDataFrame"] th {
+            width: auto !important; /* Allow columns to resize */
         }
     </style>
 """
+st.markdown(hide_streamlit_style, unsafe_allow_html=True)
 st.markdown(hide_streamlit_style, unsafe_allow_html=True)
 st.markdown(hide_streamlit_style, unsafe_allow_html=True)
 
