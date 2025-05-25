@@ -6,7 +6,7 @@ import duckdb
 
 # --- Custom CSS ---
 # Updated to increase font sizes globally and for specific elements
-hide_streamlit_style = """
+
 hide_streamlit_style = """
 <style>
     /* Hide Streamlit system UI */
