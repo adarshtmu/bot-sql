@@ -710,503 +710,503 @@ elif st.session_state.quiz_completed:
     # Optional: Show congratulations at top
 
 
-def show_advanced_completion_ui():
-    """Advanced UI for quiz completion with modern design and animations"""
-    
-    # Celebration effect
-    st.balloons()
-    
-    # Calculate score and determine styling
-    final_score = calculate_score(st.session_state.user_answers)
-    
-    # Dynamic styling based on score
-    if final_score >= 90:
-        score_tier = "excellent"
-        score_color = "#00C851"
-        bg_gradient = "linear-gradient(135deg, #667eea 0%, #764ba2 100%)"
-        border_color = "#00C851"
-        icon = "🏆"
-        message = "Outstanding Mastery!"
-        subtitle = "You've demonstrated exceptional SQL skills!"
-    elif final_score >= 80:
-        score_tier = "great"
-        score_color = "#28a745" 
-        bg_gradient = "linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)"
-        border_color = "#28a745"
-        icon = "⭐"
-        message = "Excellent Performance!"
-        subtitle = "You have strong SQL fundamentals!"
-    elif final_score >= 70:
-        score_tier = "good"
-        score_color = "#17a2b8"
-        bg_gradient = "linear-gradient(135deg, #a8edea 0%, #fed6e3 100%)"
-        border_color = "#17a2b8"
-        icon = "💪"
-        message = "Good Progress!"
-        subtitle = "You're on the right track!"
-    elif final_score >= 50:
-        score_tier = "average"
-        score_color = "#ffc107"
-        bg_gradient = "linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%)"
-        border_color = "#ffc107"
-        icon = "📈"
-        message = "Keep Improving!"
-        subtitle = "Practice makes perfect!"
-    else:
-        score_tier = "needs_work"
-        score_color = "#dc3545"
-        bg_gradient = "linear-gradient(135deg, #ffeaa7 0%, #fab1a0 100%)"
-        border_color = "#dc3545"
-        icon = "📚"
-        message = "More Practice Needed"
-        subtitle = "Don't give up - keep learning!"
-
-    # Advanced CSS with animations and modern design
-    advanced_css = f"""
-    <style>
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
-    
-    * {{
-        font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-    }}
-    
-    @keyframes slideInFromTop {{
-        0% {{ transform: translateY(-100px); opacity: 0; }}
-        100% {{ transform: translateY(0); opacity: 1; }}
-    }}
-    
-    @keyframes fadeInScale {{
-        0% {{ transform: scale(0.8); opacity: 0; }}
-        100% {{ transform: scale(1); opacity: 1; }}
-    }}
-    
-    @keyframes progressFill {{
-        0% {{ stroke-dasharray: 0 314; }}
-        100% {{ stroke-dasharray: {final_score * 3.14} 314; }}
-    }}
-    
-    @keyframes float {{
-        0%, 100% {{ transform: translateY(0px); }}
-        50% {{ transform: translateY(-10px); }}
-    }}
-    
-    @keyframes glow {{
-        0%, 100% {{ box-shadow: 0 0 20px rgba(0, 200, 81, 0.3); }}
-        50% {{ box-shadow: 0 0 40px rgba(0, 200, 81, 0.6), 0 0 60px rgba(0, 200, 81, 0.4); }}
-    }}
-    
-    .completion-hero {{
-        background: {bg_gradient};
-        padding: 60px 40px;
-        border-radius: 24px;
-        margin: 40px 0;
-        position: relative;
-        overflow: hidden;
-        box-shadow: 0 20px 60px rgba(0,0,0,0.15);
-        animation: slideInFromTop 0.8s ease-out;
-    }}
-    
-    .completion-hero::before {{
-        content: '';
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        background: linear-gradient(45deg, rgba(255,255,255,0.1) 0%, transparent 100%);
-        pointer-events: none;
-    }}
-    
-    .hero-content {{
-        position: relative;
-        z-index: 2;
-        text-align: center;
-        color: white;
-    }}
-    
-    .hero-icon {{
-        font-size: 4rem;
-        margin-bottom: 20px;
-        animation: float 3s ease-in-out infinite;
-        display: inline-block;
-    }}
-    
-    .hero-title {{
-        font-size: 3.5rem;
-        font-weight: 800;
-        margin-bottom: 15px;
-        text-shadow: 0 2px 10px rgba(0,0,0,0.3);
-        letter-spacing: -1px;
-    }}
-    
-    .hero-subtitle {{
-        font-size: 1.4rem;
-        font-weight: 400;
-        opacity: 0.95;
-        margin-bottom: 30px;
-    }}
-    
-    .score-dashboard {{
-        background: rgba(255,255,255,0.95);
-        backdrop-filter: blur(20px);
-        border-radius: 20px;
-        padding: 40px;
-        margin: 40px 0;
-        box-shadow: 0 15px 35px rgba(0,0,0,0.1);
-        animation: fadeInScale 0.8s ease-out 0.3s both;
-        border: 1px solid rgba(255,255,255,0.2);
-    }}
-    
-    .score-header {{
-        text-align: center;
-        margin-bottom: 40px;
-    }}
-    
-    .score-title {{
-        font-size: 2rem;
-        font-weight: 700;
-        color: #2c3e50;
-        margin-bottom: 10px;
-    }}
-    
-    .score-container {{
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        gap: 60px;
-        flex-wrap: wrap;
-    }}
-    
-    .progress-circle-container {{
-        position: relative;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-    }}
-    
-    .progress-circle {{
-        width: 200px;
-        height: 200px;
-        position: relative;
-    }}
-    
-    .progress-svg {{
-        width: 100%;
-        height: 100%;
-        transform: rotate(-90deg);
-    }}
-    
-    .progress-bg {{
-        fill: none;
-        stroke: #e9ecef;
-        stroke-width: 12;
-    }}
-    
-    .progress-bar {{
-        fill: none;
-        stroke: {score_color};
-        stroke-width: 12;
-        stroke-linecap: round;
-        stroke-dasharray: 0 314;
-        animation: progressFill 2s ease-out 0.5s forwards;
-        filter: drop-shadow(0 0 10px {score_color}44);
-    }}
-    
-    .score-text {{
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        text-align: center;
-    }}
-    
-    .score-number {{
-        font-size: 3rem;
-        font-weight: 900;
-        color: {score_color};
-        line-height: 1;
-        margin-bottom: 5px;
-    }}
-    
-    .score-label {{
-        font-size: 1rem;
-        color: #6c757d;
-        font-weight: 500;
-        text-transform: uppercase;
-        letter-spacing: 1px;
-    }}
-    
-    .score-details {{
-        text-align: center;
-    }}
-    
-    .score-message {{
-        font-size: 1.8rem;
-        font-weight: 700;
-        color: {score_color};
-        margin-bottom: 15px;
-    }}
-    
-    .score-description {{
-        font-size: 1.2rem;
-        color: #6c757d;
-        margin-bottom: 30px;
-        line-height: 1.5;
-    }}
-    
-    .action-buttons {{
-        display: flex;
-        justify-content: center;
-        gap: 20px;
-        flex-wrap: wrap;
-        margin-top: 40px;
-    }}
-    
-    .btn-primary {{
-        background: linear-gradient(135deg, {score_color}, {score_color}dd);
-        color: white;
-        padding: 16px 32px;
-        border-radius: 12px;
-        text-decoration: none;
-        font-weight: 600;
-        font-size: 1.1rem;
-        border: none;
-        cursor: pointer;
-        transition: all 0.3s ease;
-        box-shadow: 0 8px 25px {score_color}33;
-        display: inline-flex;
-        align-items: center;
-        gap: 10px;
-    }}
-    
-    .btn-primary:hover {{
-        transform: translateY(-3px);
-        box-shadow: 0 15px 35px {score_color}44;
-        text-decoration: none;
-        color: white;
-    }}
-    
-    .btn-secondary {{
-        background: linear-gradient(135deg, #6c757d, #5a6268);
-        color: white;
-        padding: 16px 32px;
-        border-radius: 12px;
-        text-decoration: none;
-        font-weight: 600;
-        font-size: 1.1rem;
-        border: none;
-        cursor: pointer;
-        transition: all 0.3s ease;
-        box-shadow: 0 8px 25px rgba(108,117,125,0.3);
-        display: inline-flex;
-        align-items: center;
-        gap: 10px;
-    }}
-    
-    .btn-secondary:hover {{
-        transform: translateY(-3px);
-        box-shadow: 0 15px 35px rgba(108,117,125,0.4);
-        text-decoration: none;
-        color: white;
-    }}
-    
-    .certificate-banner {{
-        background: linear-gradient(135deg, #ffd700, #ffed4e);
-        padding: 30px;
-        border-radius: 16px;
-        margin: 30px 0;
-        text-align: center;
-        animation: glow 2s ease-in-out infinite;
-        border: 2px solid #ffd700;
-    }}
-    
-    .certificate-text {{
-        font-size: 1.4rem;
-        font-weight: 700;
-        color: #856404;
-        margin-bottom: 20px;
-    }}
-    
-    .stats-grid {{
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-        gap: 20px;
-        margin: 30px 0;
-    }}
-    
-    .stat-card {{
-        background: white;
-        padding: 25px;
-        border-radius: 12px;
-        text-align: center;
-        box-shadow: 0 5px 15px rgba(0,0,0,0.08);
-        border: 1px solid #e9ecef;
-        transition: transform 0.3s ease;
-    }}
-    
-    .stat-card:hover {{
-        transform: translateY(-5px);
-        box-shadow: 0 10px 25px rgba(0,0,0,0.12);
-    }}
-    
-    .stat-number {{
-        font-size: 2rem;
-        font-weight: 800;
-        color: {score_color};
-        margin-bottom: 5px;
-    }}
-    
-    .stat-label {{
-        font-size: 0.9rem;
-        color: #6c757d;
-        font-weight: 500;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-    }}
-    
-    @media (max-width: 768px) {{
-        .hero-title {{ font-size: 2.5rem; }}
-        .score-container {{ flex-direction: column; gap: 30px; }}
-        .progress-circle {{ width: 150px; height: 150px; }}
-        .score-number {{ font-size: 2.5rem; }}
-        .action-buttons {{ flex-direction: column; align-items: center; }}
-        .completion-hero {{ padding: 40px 20px; }}
-        .score-dashboard {{ padding: 30px 20px; }}
-    }}
-    </style>
-    """
-    
-    # Render the advanced UI
-    st.markdown(advanced_css, unsafe_allow_html=True)
-    
-    # Hero Section
-    hero_html = f"""
-    <div class="completion-hero">
-        <div class="hero-content">
-            <div class="hero-icon">{icon}</div>
-            <h1 class="hero-title">Quiz Complete!</h1>
-            <p class="hero-subtitle">{subtitle}</p>
-        </div>
-    </div>
-    """
-    st.markdown(hero_html, unsafe_allow_html=True)
-    
-    # Score Dashboard
-    total_questions = len(st.session_state.user_answers)
-    correct_answers = sum(1 for answer in st.session_state.user_answers if answer.get('correct', False))
-    
-    dashboard_html = f"""
-    <div class="score-dashboard">
-        <div class="score-header">
-            <h2 class="score-title">Your Performance</h2>
-        </div>
+    def show_advanced_completion_ui():
+        """Advanced UI for quiz completion with modern design and animations"""
         
-        <div class="score-container">
-            <div class="progress-circle-container">
-                <div class="progress-circle">
-                    <svg class="progress-svg" viewBox="0 0 120 120">
-                        <circle class="progress-bg" cx="60" cy="60" r="50"/>
-                        <circle class="progress-bar" cx="60" cy="60" r="50"/>
-                    </svg>
-                    <div class="score-text">
-                        <div class="score-number">{final_score:.0f}%</div>
-                        <div class="score-label">Score</div>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="score-details">
-                <div class="score-message">{message}</div>
-                <div class="score-description">{subtitle}</div>
-                
-                <div class="stats-grid">
-                    <div class="stat-card">
-                        <div class="stat-number">{correct_answers}</div>
-                        <div class="stat-label">Correct</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-number">{total_questions - correct_answers}</div>
-                        <div class="stat-label">Incorrect</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-number">{total_questions}</div>
-                        <div class="stat-label">Total</div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-    """
-    st.markdown(dashboard_html, unsafe_allow_html=True)
+        # Celebration effect
+        st.balloons()
+        
+        # Calculate score and determine styling
+        final_score = calculate_score(st.session_state.user_answers)
+        
+        # Dynamic styling based on score
+        if final_score >= 90:
+            score_tier = "excellent"
+            score_color = "#00C851"
+            bg_gradient = "linear-gradient(135deg, #667eea 0%, #764ba2 100%)"
+            border_color = "#00C851"
+            icon = "🏆"
+            message = "Outstanding Mastery!"
+            subtitle = "You've demonstrated exceptional SQL skills!"
+        elif final_score >= 80:
+            score_tier = "great"
+            score_color = "#28a745" 
+            bg_gradient = "linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)"
+            border_color = "#28a745"
+            icon = "⭐"
+            message = "Excellent Performance!"
+            subtitle = "You have strong SQL fundamentals!"
+        elif final_score >= 70:
+            score_tier = "good"
+            score_color = "#17a2b8"
+            bg_gradient = "linear-gradient(135deg, #a8edea 0%, #fed6e3 100%)"
+            border_color = "#17a2b8"
+            icon = "💪"
+            message = "Good Progress!"
+            subtitle = "You're on the right track!"
+        elif final_score >= 50:
+            score_tier = "average"
+            score_color = "#ffc107"
+            bg_gradient = "linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%)"
+            border_color = "#ffc107"
+            icon = "📈"
+            message = "Keep Improving!"
+            subtitle = "Practice makes perfect!"
+        else:
+            score_tier = "needs_work"
+            score_color = "#dc3545"
+            bg_gradient = "linear-gradient(135deg, #ffeaa7 0%, #fab1a0 100%)"
+            border_color = "#dc3545"
+            icon = "📚"
+            message = "More Practice Needed"
+            subtitle = "Don't give up - keep learning!"
     
-    # Certificate or Improvement Section
-    if final_score >= 80:
-        certificate_html = f"""
-        <div class="certificate-banner">
-            <div class="certificate-text">
-                🎓 Congratulations! You've earned a certificate!
+        # Advanced CSS with animations and modern design
+        advanced_css = f"""
+        <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+        
+        * {{
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+        }}
+        
+        @keyframes slideInFromTop {{
+            0% {{ transform: translateY(-100px); opacity: 0; }}
+            100% {{ transform: translateY(0); opacity: 1; }}
+        }}
+        
+        @keyframes fadeInScale {{
+            0% {{ transform: scale(0.8); opacity: 0; }}
+            100% {{ transform: scale(1); opacity: 1; }}
+        }}
+        
+        @keyframes progressFill {{
+            0% {{ stroke-dasharray: 0 314; }}
+            100% {{ stroke-dasharray: {final_score * 3.14} 314; }}
+        }}
+        
+        @keyframes float {{
+            0%, 100% {{ transform: translateY(0px); }}
+            50% {{ transform: translateY(-10px); }}
+        }}
+        
+        @keyframes glow {{
+            0%, 100% {{ box-shadow: 0 0 20px rgba(0, 200, 81, 0.3); }}
+            50% {{ box-shadow: 0 0 40px rgba(0, 200, 81, 0.6), 0 0 60px rgba(0, 200, 81, 0.4); }}
+        }}
+        
+        .completion-hero {{
+            background: {bg_gradient};
+            padding: 60px 40px;
+            border-radius: 24px;
+            margin: 40px 0;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.15);
+            animation: slideInFromTop 0.8s ease-out;
+        }}
+        
+        .completion-hero::before {{
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(45deg, rgba(255,255,255,0.1) 0%, transparent 100%);
+            pointer-events: none;
+        }}
+        
+        .hero-content {{
+            position: relative;
+            z-index: 2;
+            text-align: center;
+            color: white;
+        }}
+        
+        .hero-icon {{
+            font-size: 4rem;
+            margin-bottom: 20px;
+            animation: float 3s ease-in-out infinite;
+            display: inline-block;
+        }}
+        
+        .hero-title {{
+            font-size: 3.5rem;
+            font-weight: 800;
+            margin-bottom: 15px;
+            text-shadow: 0 2px 10px rgba(0,0,0,0.3);
+            letter-spacing: -1px;
+        }}
+        
+        .hero-subtitle {{
+            font-size: 1.4rem;
+            font-weight: 400;
+            opacity: 0.95;
+            margin-bottom: 30px;
+        }}
+        
+        .score-dashboard {{
+            background: rgba(255,255,255,0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            padding: 40px;
+            margin: 40px 0;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+            animation: fadeInScale 0.8s ease-out 0.3s both;
+            border: 1px solid rgba(255,255,255,0.2);
+        }}
+        
+        .score-header {{
+            text-align: center;
+            margin-bottom: 40px;
+        }}
+        
+        .score-title {{
+            font-size: 2rem;
+            font-weight: 700;
+            color: #2c3e50;
+            margin-bottom: 10px;
+        }}
+        
+        .score-container {{
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 60px;
+            flex-wrap: wrap;
+        }}
+        
+        .progress-circle-container {{
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }}
+        
+        .progress-circle {{
+            width: 200px;
+            height: 200px;
+            position: relative;
+        }}
+        
+        .progress-svg {{
+            width: 100%;
+            height: 100%;
+            transform: rotate(-90deg);
+        }}
+        
+        .progress-bg {{
+            fill: none;
+            stroke: #e9ecef;
+            stroke-width: 12;
+        }}
+        
+        .progress-bar {{
+            fill: none;
+            stroke: {score_color};
+            stroke-width: 12;
+            stroke-linecap: round;
+            stroke-dasharray: 0 314;
+            animation: progressFill 2s ease-out 0.5s forwards;
+            filter: drop-shadow(0 0 10px {score_color}44);
+        }}
+        
+        .score-text {{
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+        }}
+        
+        .score-number {{
+            font-size: 3rem;
+            font-weight: 900;
+            color: {score_color};
+            line-height: 1;
+            margin-bottom: 5px;
+        }}
+        
+        .score-label {{
+            font-size: 1rem;
+            color: #6c757d;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }}
+        
+        .score-details {{
+            text-align: center;
+        }}
+        
+        .score-message {{
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: {score_color};
+            margin-bottom: 15px;
+        }}
+        
+        .score-description {{
+            font-size: 1.2rem;
+            color: #6c757d;
+            margin-bottom: 30px;
+            line-height: 1.5;
+        }}
+        
+        .action-buttons {{
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            flex-wrap: wrap;
+            margin-top: 40px;
+        }}
+        
+        .btn-primary {{
+            background: linear-gradient(135deg, {score_color}, {score_color}dd);
+            color: white;
+            padding: 16px 32px;
+            border-radius: 12px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 1.1rem;
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 8px 25px {score_color}33;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+        }}
+        
+        .btn-primary:hover {{
+            transform: translateY(-3px);
+            box-shadow: 0 15px 35px {score_color}44;
+            text-decoration: none;
+            color: white;
+        }}
+        
+        .btn-secondary {{
+            background: linear-gradient(135deg, #6c757d, #5a6268);
+            color: white;
+            padding: 16px 32px;
+            border-radius: 12px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 1.1rem;
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 8px 25px rgba(108,117,125,0.3);
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+        }}
+        
+        .btn-secondary:hover {{
+            transform: translateY(-3px);
+            box-shadow: 0 15px 35px rgba(108,117,125,0.4);
+            text-decoration: none;
+            color: white;
+        }}
+        
+        .certificate-banner {{
+            background: linear-gradient(135deg, #ffd700, #ffed4e);
+            padding: 30px;
+            border-radius: 16px;
+            margin: 30px 0;
+            text-align: center;
+            animation: glow 2s ease-in-out infinite;
+            border: 2px solid #ffd700;
+        }}
+        
+        .certificate-text {{
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: #856404;
+            margin-bottom: 20px;
+        }}
+        
+        .stats-grid {{
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 20px;
+            margin: 30px 0;
+        }}
+        
+        .stat-card {{
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            text-align: center;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+            border: 1px solid #e9ecef;
+            transition: transform 0.3s ease;
+        }}
+        
+        .stat-card:hover {{
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.12);
+        }}
+        
+        .stat-number {{
+            font-size: 2rem;
+            font-weight: 800;
+            color: {score_color};
+            margin-bottom: 5px;
+        }}
+        
+        .stat-label {{
+            font-size: 0.9rem;
+            color: #6c757d;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }}
+        
+        @media (max-width: 768px) {{
+            .hero-title {{ font-size: 2.5rem; }}
+            .score-container {{ flex-direction: column; gap: 30px; }}
+            .progress-circle {{ width: 150px; height: 150px; }}
+            .score-number {{ font-size: 2.5rem; }}
+            .action-buttons {{ flex-direction: column; align-items: center; }}
+            .completion-hero {{ padding: 40px 20px; }}
+            .score-dashboard {{ padding: 30px 20px; }}
+        }}
+        </style>
+        """
+        
+        # Render the advanced UI
+        st.markdown(advanced_css, unsafe_allow_html=True)
+        
+        # Hero Section
+        hero_html = f"""
+        <div class="completion-hero">
+            <div class="hero-content">
+                <div class="hero-icon">{icon}</div>
+                <h1 class="hero-title">Quiz Complete!</h1>
+                <p class="hero-subtitle">{subtitle}</p>
             </div>
-            <a href="https://superprofile.bio/vp/corporate-bhaiya-sql-page" target="_blank" class="btn-primary">
-                🏆 Download Certificate
-            </a>
         </div>
         """
-        st.markdown(certificate_html, unsafe_allow_html=True)
+        st.markdown(hero_html, unsafe_allow_html=True)
+        
+        # Score Dashboard
+        total_questions = len(st.session_state.user_answers)
+        correct_answers = sum(1 for answer in st.session_state.user_answers if answer.get('correct', False))
+        
+        dashboard_html = f"""
+        <div class="score-dashboard">
+            <div class="score-header">
+                <h2 class="score-title">Your Performance</h2>
+            </div>
+            
+            <div class="score-container">
+                <div class="progress-circle-container">
+                    <div class="progress-circle">
+                        <svg class="progress-svg" viewBox="0 0 120 120">
+                            <circle class="progress-bg" cx="60" cy="60" r="50"/>
+                            <circle class="progress-bar" cx="60" cy="60" r="50"/>
+                        </svg>
+                        <div class="score-text">
+                            <div class="score-number">{final_score:.0f}%</div>
+                            <div class="score-label">Score</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="score-details">
+                    <div class="score-message">{message}</div>
+                    <div class="score-description">{subtitle}</div>
+                    
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <div class="stat-number">{correct_answers}</div>
+                            <div class="stat-label">Correct</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-number">{total_questions - correct_answers}</div>
+                            <div class="stat-label">Incorrect</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-number">{total_questions}</div>
+                            <div class="stat-label">Total</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        """
+        st.markdown(dashboard_html, unsafe_allow_html=True)
+        
+        # Certificate or Improvement Section
+        if final_score >= 80:
+            certificate_html = f"""
+            <div class="certificate-banner">
+                <div class="certificate-text">
+                    🎓 Congratulations! You've earned a certificate!
+                </div>
+                <a href="https://superprofile.bio/vp/corporate-bhaiya-sql-page" target="_blank" class="btn-primary">
+                    🏆 Download Certificate
+                </a>
+            </div>
+            """
+            st.markdown(certificate_html, unsafe_allow_html=True)
+        
+        # Action Buttons
+        action_buttons_html = f"""
+        <div class="action-buttons">
+            {"" if final_score >= 80 else f'''
+            <a href="https://www.corporatebhaiya.com/" target="_blank" class="btn-primary">
+                🚀 Book Mentor Session
+            </a>
+            '''}
+        </div>
+        """
+        st.markdown(action_buttons_html, unsafe_allow_html=True)
+        
+        # Try Again Button (styled to match)
+        st.markdown("<div style='text-align: center; margin-top: 40px;'>", unsafe_allow_html=True)
+        
+        # Custom button styling for Streamlit button
+        st.markdown("""
+        <style>
+        .stButton > button {
+            background: linear-gradient(135deg, #6c757d, #5a6268) !important;
+            color: white !important;
+            border: none !important;
+            padding: 16px 32px !important;
+            border-radius: 12px !important;
+            font-weight: 600 !important;
+            font-size: 1.1rem !important;
+            transition: all 0.3s ease !important;
+            box-shadow: 0 8px 25px rgba(108,117,125,0.3) !important;
+            width: auto !important;
+            min-width: 200px !important;
+        }
+        
+        .stButton > button:hover {
+            transform: translateY(-3px) !important;
+            box-shadow: 0 15px 35px rgba(108,117,125,0.4) !important;
+        }
+        
+        .stButton > button:active {
+            transform: translateY(-1px) !important;
+        }
+        </style>
+        """, unsafe_allow_html=True)
+        
+        if st.button("🔄 Take Quiz Again"):
+            # Reset all session state
+            st.session_state.user_answers = []
+            st.session_state.current_question = 0
+            st.session_state.quiz_started = False
+            st.session_state.quiz_completed = False
+            st.session_state.show_detailed_feedback = False
+            st.rerun()
+        
+        st.markdown("</div>", unsafe_allow_html=True)
     
-    # Action Buttons
-    action_buttons_html = f"""
-    <div class="action-buttons">
-        {"" if final_score >= 80 else f'''
-        <a href="https://www.corporatebhaiya.com/" target="_blank" class="btn-primary">
-            🚀 Book Mentor Session
-        </a>
-        '''}
-    </div>
-    """
-    st.markdown(action_buttons_html, unsafe_allow_html=True)
-    
-    # Try Again Button (styled to match)
-    st.markdown("<div style='text-align: center; margin-top: 40px;'>", unsafe_allow_html=True)
-    
-    # Custom button styling for Streamlit button
-    st.markdown("""
-    <style>
-    .stButton > button {
-        background: linear-gradient(135deg, #6c757d, #5a6268) !important;
-        color: white !important;
-        border: none !important;
-        padding: 16px 32px !important;
-        border-radius: 12px !important;
-        font-weight: 600 !important;
-        font-size: 1.1rem !important;
-        transition: all 0.3s ease !important;
-        box-shadow: 0 8px 25px rgba(108,117,125,0.3) !important;
-        width: auto !important;
-        min-width: 200px !important;
-    }
-    
-    .stButton > button:hover {
-        transform: translateY(-3px) !important;
-        box-shadow: 0 15px 35px rgba(108,117,125,0.4) !important;
-    }
-    
-    .stButton > button:active {
-        transform: translateY(-1px) !important;
-    }
-    </style>
-    """, unsafe_allow_html=True)
-    
-    if st.button("🔄 Take Quiz Again"):
-        # Reset all session state
-        st.session_state.user_answers = []
-        st.session_state.current_question = 0
-        st.session_state.quiz_started = False
-        st.session_state.quiz_completed = False
-        st.session_state.show_detailed_feedback = False
-        st.rerun()
-    
-    st.markdown("</div>", unsafe_allow_html=True)
-
-# Usage example:
-# Replace your existing completion code with:
-# show_advanced_completion_ui()
+    # Usage example:
+    # Replace your existing completion code with:
+    # show_advanced_completion_ui()
