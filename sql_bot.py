@@ -1055,18 +1055,22 @@ elif st.session_state.quiz_completed:
         }
         </style>
         """, unsafe_allow_html=True)
-    
-    def display_advanced_scorecard(final_score):
-        """Display an advanced animated scorecard"""
-        # Progress width for animation
-        progress_width = min(final_score, 100)
         
+    def get_correct_wrong_counts(user_answers):
+    correct = sum(1 for ans in user_answers if ans.get("is_correct", False))
+    wrong = len(user_answers) - correct
+    return correct, wrong
+    correct_count, wrong_count = get_correct_wrong_counts(st.session_state.user_answers)
+    
+    def display_advanced_scorecard(final_score, correct_count, wrong_count):
+        progress_width = min(final_score, 100)
         st.markdown(f"""
         <div class="score-card">
             <div class="score-content">
                 <div class="score-title">📊 Your Final Score</div>
                 <div class="score-value">{final_score:.1f}%</div>
                 <div class="score-label">Performance Rating</div>
+                <div style='font-size:1.35rem; margin: 14px 0 0 0;'><b>Questions Correct:</b> {correct_count} &nbsp; | &nbsp; <b>Wrong:</b> {wrong_count}</div>
                 <div class="score-progress">
                     <div class="score-progress-fill" style="--progress-width: {progress_width}%; width: {progress_width}%;"></div>
                 </div>
@@ -1241,7 +1245,7 @@ elif st.session_state.quiz_completed:
         inject_custom_css()
         
         # Advanced scorecard
-        display_advanced_scorecard(final_score)
+        display_advanced_scorecard(final_score, correct_count, wrong_count)
         
         # Certificate section
         display_certificate_section(final_score)
