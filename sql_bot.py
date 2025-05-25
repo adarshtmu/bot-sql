@@ -1236,10 +1236,10 @@ def display_advanced_results_page(final_score, user_answers, analyze_performance
     st.markdown("---")
     
     # Question summary
-    display_question_summary(user_answers)
+    # display_question_summary(user_answers)
     
     # Performance analysis
-    # display_performance_analysis(user_answers, analyze_performance_func)
+    display_performance_analysis(user_answers, analyze_performance_func)
     
     # Retry section
     display_retry_section()
