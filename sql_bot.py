@@ -604,12 +604,15 @@ elif st.session_state.quiz_started and not st.session_state.quiz_completed:
 # --- Quiz Completed Screen ---
 elif st.session_state.quiz_completed:
     st.balloons()
-    # --- Scroll to Top when Quiz is Completed ---
+    # --- Always scroll to top on quiz complete (optional but recommended) ---
     st.markdown("""
         <script>
         window.parent.scrollTo({top: 0, behavior: 'smooth'});
         </script>
     """, unsafe_allow_html=True)
+
+    # --- Score Card & Try Again at the top ---
+    final_score = calculate_score(st.session_state.user_answers)
     st.markdown(
         """
         <div style='text-align:center; margin-top: 30px;'>
@@ -619,10 +622,6 @@ elif st.session_state.quiz_completed:
         """,
         unsafe_allow_html=True
     )
-    final_score = calculate_score(st.session_state.user_answers)
-    
-
-    # --- Scoreboard Card ---
     st.markdown(
         f"""
         <div style='
@@ -642,7 +641,7 @@ elif st.session_state.quiz_completed:
     )
     st.progress(final_score / 100)
 
-    # --- Certificate Button Section ---
+    # --- Certificate and Try Again Buttons ---
     if final_score >= 80:
         st.markdown(
             """
@@ -690,6 +689,7 @@ elif st.session_state.quiz_completed:
             unsafe_allow_html=True
         )
 
+    # --- Try Again Button ---
     st.markdown("---")
     if st.button("🔄 Try Again?"):
         st.session_state.user_answers = []
@@ -699,10 +699,9 @@ elif st.session_state.quiz_completed:
         st.session_state.show_detailed_feedback = False
         st.rerun()
 
-    
+    # --- Answers/Feedback Below ---
     st.markdown("---")
     st.subheader("📝 Aapke Jawaab Aur Feedback Ka Summary")
-    
     for i, ans_data in enumerate(st.session_state.user_answers):
         q_num = i + 1
         is_correct = ans_data.get('is_correct', False)
@@ -714,7 +713,6 @@ elif st.session_state.quiz_completed:
             st.markdown(feedback_text)
             st.markdown("---")
             display_simulation("Simulated Result (Your Query Output)", ans_data.get("actual_result", "N/A"))
-            
             show_expected_final = False
             if not is_correct:
                 show_expected_final = True
@@ -725,25 +723,21 @@ elif st.session_state.quiz_completed:
             elif isinstance(ans_data.get("actual_result"), str) and \
                  ans_data.get("actual_result") != ans_data.get("expected_result"):
                 show_expected_final = True
-            
             if show_expected_final:
                 display_simulation("Simulated Result (Correct Query Output)", ans_data.get("expected_result", "N/A"))
-    
+
+    # --- Analysis at the very bottom ---
     st.markdown("---")
     st.subheader("💡 AI Mentor Se Detailed Performance Analysis")
-    
     if st.button("📊 Show Detailed Analysis", key="show_analysis"):
         st.session_state.show_detailed_feedback = not st.session_state.show_detailed_feedback
-    
     if st.session_state.show_detailed_feedback:
         with st.spinner("🧠 Performance analysis generate ho raha hai..."):
             performance_summary = analyze_performance(st.session_state.user_answers)
             feedback_text = performance_summary.get("overall_feedback", "Analysis available nahi hai.")
-            
             with st.container():
                 st.markdown('<div class="feedback-container">', unsafe_allow_html=True)
                 st.markdown('<div class="feedback-header">📈 Aapki Performance Ka Vistaar Se Analysis</div>', unsafe_allow_html=True)
-                
                 try:
                     sections = re.split(r'(Overall Impression:|Strengths:|Areas for Improvement:|Next Steps / Encouragement:)', feedback_text)
                     section_dict = {}
@@ -751,11 +745,9 @@ elif st.session_state.quiz_completed:
                         section_dict[sections[i].strip(':')] = sections[i+1].strip()
                 except:
                     section_dict = {"Full Feedback": feedback_text}
-                
                 if "Overall Impression" in section_dict:
                     st.markdown("### 🌟 Overall Impression")
                     st.markdown(section_dict["Overall Impression"])
-                
                 st.markdown('<div class="feedback-section">', unsafe_allow_html=True)
                 st.markdown("### ✅ Strengths")
                 if "Strengths" in section_dict:
@@ -769,7 +761,6 @@ elif st.session_state.quiz_completed:
                 else:
                     st.markdown("Koi specific strengths identify nahi hue. Aur practice karo!")
                 st.markdown('</div>', unsafe_allow_html=True)
-                
                 st.markdown('<div class="feedback-section">', unsafe_allow_html=True)
                 st.markdown("### 📝 Areas for Improvement")
                 if "Areas for Improvement" in section_dict:
@@ -783,17 +774,15 @@ elif st.session_state.quiz_completed:
                 else:
                     st.markdown("Koi major weaknesses nahi! Bas practice jari rakho.")
                 st.markdown('</div>', unsafe_allow_html=True)
-                
                 if "Next Steps / Encouragement" in section_dict:
                     st.markdown("### 🚀 Next Steps")
                     st.markdown(section_dict["Next Steps / Encouragement"])
-                
                 if "Full Feedback" in section_dict:
                     st.markdown("### 📋 Complete Feedback")
                     st.markdown(section_dict["Full Feedback"])
-                
                 st.markdown('</div>', unsafe_allow_html=True)
-    
+
+    # --- Option to Try Again at the very end (if you want) ---
     st.markdown("---")
     if st.button("🔄 Dobara Try Karein?"):
         st.session_state.user_answers = []
@@ -802,5 +791,3 @@ elif st.session_state.quiz_completed:
         st.session_state.quiz_completed = False
         st.session_state.show_detailed_feedback = False
         st.rerun()
-
-
