@@ -747,8 +747,8 @@ elif st.session_state.quiz_completed:
         .score-card {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             border-radius: 24px;
-            width: 650px;
-            height: 250px;
+            width: 690px;
+            height: 350px;
             padding: 0;
             margin: 2rem 0;
             box-shadow: 0 20px 40px rgba(102, 126, 234, 0.3);
