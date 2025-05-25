@@ -717,10 +717,63 @@ elif st.session_state.quiz_completed:
         unsafe_allow_html=True
     )
     st.markdown("---")
+    import streamlit as st
+    
+    def animated_scorecard(final_score, total, correct):
+        # Colors and messages based on score
+        score_color = "#28a745" if final_score >= 80 else "#ff9800" if final_score >= 50 else "#e74c3c"
+        score_message = "🥳 Excellent!" if final_score >= 80 else "👍 Good Effort!" if final_score >= 50 else "💡 Keep Practicing!"
+        trophy = "🏆" if final_score >= 80 else "👏" if final_score >= 50 else "📚"
+    
+        st.markdown(
+            f"""
+            <style>
+            .adv-score {{
+                background: rgba(255,255,255,0.8);
+                border-radius: 22px;
+                box-shadow: 0 8px 32px 0 rgba(31,38,135,0.23);
+                border: 4px solid #fff;
+                padding: 32px 24px;
+                margin: 32px 0;
+                text-align: center;
+                position: relative;
+                animation: pop 0.8s cubic-bezier(.37,1.14,.26,1.24);
+            }}
+            @keyframes pop {{
+                0% {{ transform: scale(0.9); }}
+                100% {{ transform: scale(1); }}
+            }}
+            </style>
+            <div class="adv-score">
+                <div style="font-size:2.2rem;font-weight:700;color:#1f77b4;margin-bottom:10px;">
+                    {trophy} Scorecard
+                </div>
+                <svg width="120" height="120" style="margin-bottom: -30px;">
+                    <circle cx="60" cy="60" r="54" stroke="#e0e0e0" stroke-width="10" fill="none"/>
+                    <circle cx="60" cy="60" r="54" stroke="{score_color}" stroke-width="10"
+                            fill="none"
+                            stroke-dasharray="{final_score*3.39} 339"
+                            style="transition:stroke-dasharray 1.2s;"/>
+                </svg>
+                <div style="font-size:2.8rem;color:{score_color};font-weight:800;margin:10px 0;">{final_score:.1f}%</div>
+                <div style="font-size:1.25rem;color:#555;">{score_message}</div>
+                <div style="margin-top:14px;">
+                    <span style="background:#ffe066;color:#422800;font-weight:600;border-radius:16px;padding:2px 14px;font-size:1.1rem;margin:0 6px;">Questions: {total}</span>
+                    <span style="background:#d4edda;color:#155724;font-weight:600;border-radius:16px;padding:2px 14px;font-size:1.1rem;margin:0 6px;">Correct: {correct}</span>
+                </div>
+                {"<div style='margin:18px 0;'><span style='font-size:2rem;color:#ffd700;'>🎓</span><br/><b>Certificate Unlocked!</b></div>" if final_score >= 80 else ""}
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
+    
+    # Usage in your score section:
     final_score = calculate_score(st.session_state.user_answers)
-    score_color = "#28a745" if final_score >= 80 else "#ff9800" if final_score >= 50 else "#e74c3c"
-    score_message = "Outstanding! 🌟" if final_score >= 80 else "Good Effort! Keep Going! 💪" if final_score >= 50 else "Needs Improvement! 📚"
-    border_gradient = "linear-gradient(45deg, #28a745, #1f77b4)" if final_score >= 80 else "linear-gradient(45deg, #ff9800, #e74c3c)"
+    total = len(st.session_state.user_answers)
+    correct = sum(1 for a in st.session_state.user_answers if a['is_correct'])
+    animated_scorecard(final_score, total, correct)
+    if final_score >= 80:
+        st.balloons()
     
     # --- Advanced Scorecard with animation ---
     st.markdown(
