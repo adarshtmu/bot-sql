@@ -992,6 +992,7 @@ elif st.session_state.quiz_completed:
         """,
         unsafe_allow_html=True
     )
+
     final_score = calculate_score(st.session_state.user_answers)
 
     # --- Scoreboard Card ---
