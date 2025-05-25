@@ -27,9 +27,9 @@ hide_streamlit_style = """
         body, .stMarkdown, .stText, .stTextArea, .stButton button, .stLinkButton a {
             font-size: 18px !important;
         }
-        h1 {font-size: 36px !important;}
-        h2 {font-size: 28px !important;}
-        h3 {font-size: 24px !important;}
+        h1 {font-size: 48px !important;}
+        h2 {font-size: 36px !important;}
+        h3 {font-size: 30px !important;}
         /* Style for Start SQL Challenge! button */
         button[kind="primary"] {
             font-size: 24px !important;
