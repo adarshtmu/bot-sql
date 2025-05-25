@@ -709,10 +709,7 @@ elif st.session_state.quiz_completed:
         if final_score >= 90:
             score_tier = "excellent"
             score_color = "#00C851"
-            bg_gradient = "linear-gradient(135deg, #667eea 0%, #764ba2 100%)"
-            border_color = "#00C851"
-            icon = "🏆"
-            message = "Outstanding Mastery!"
+            message = "Outstanding Mastery!"  # Fixed typo here
             subtitle = "You've demonstrated exceptional SQL skills!"
         elif final_score >= 80:
             score_tier = "great"
@@ -1092,31 +1089,12 @@ elif st.session_state.quiz_completed:
                     <div class="progress-circle">
                         <svg class="progress-svg" viewBox="0 0 120 120">
                             <circle class="progress-bg" cx="60" cy="60" r="50"/>
-                            <circle class="progress-bar" cx="60" cy="60" r="50"/>
+                            <circle class="progress-bar" cx="60" cy="60" r="50"
+                                     style="stroke-dasharray: {final_score * 3.14}, 314"/>
                         </svg>
                         <div class="score-text">
                             <div class="score-number">{final_score:.0f}%</div>
                             <div class="score-label">Score</div>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="score-details">
-                    <div class="score-message">{message}</div>
-                    <div class="score-description">{subtitle}</div>
-                    
-                    <div class="stats-grid">
-                        <div class="stat-card">
-                            <div class="stat-number">{correct_answers}</div>
-                            <div class="stat-label">Correct</div>
-                        </div>
-                        <div class="stat-card">
-                            <div class="stat-number">{total_questions - correct_answers}</div>
-                            <div class="stat-label">Incorrect</div>
-                        </div>
-                        <div class="stat-card">
-                            <div class="stat-number">{total_questions}</div>
-                            <div class="stat-label">Total</div>
                         </div>
                     </div>
                 </div>
