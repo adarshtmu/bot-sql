@@ -5,6 +5,7 @@ import re
 import duckdb
 
 # --- Set Streamlit Theme to Dark ---
+st.set_page_config(layout="wide", initial_sidebar_state="collapsed", theme="dark")
 
 # --- Custom CSS ---
 hide_streamlit_style = """
@@ -140,8 +141,7 @@ orders_table = pd.DataFrame({
     "order_id": [101, 102, 103, 104, 105],
     "user_id": [1, 2, 3, 1, 4],
     "amount": [50.00, 75.50, 120.00, 200.00, 35.00],
-    "order_date": pd.to_datetime(["2024-02-01", "2024-02-05", "2024-02-10", "2024-02-15", "2024-02-20"]),
-    "status": ["Completed", "Pending", "Completed", "Shipped", "Cancelled"]
+    "order_date": pd.to_datetime(["2024-02-01", "2024-02-05", "2024-02-10", "2024-02-15", "2024-02-20"])
 })
 original_tables = {
     "users": users_table,
@@ -149,18 +149,18 @@ original_tables = {
 }
 
 # --- SQL Questions List ---
-sql_questions = [    {"question": "Write a SQL query to get all details about users from the 'users' table.", "correct_answer_example": "SELECT * FROM users;", "sample_table": users_table, "relevant_tables": ["users"]},
+sql_questions = [
+    {"question": "Write a SQL query to get all details about users from the 'users' table.", "correct_answer_example": "SELECT * FROM users;", "sample_table": users_table, "relevant_tables": ["users"]},
     {"question": "Write a SQL query to count the total number of users in the 'users' table.", "correct_answer_example": "SELECT COUNT(*) AS user_count FROM users;", "sample_table": users_table, "relevant_tables": ["users"]},
     {"question": "Write a SQL query to get all users older than 30 from the 'users' table.", "correct_answer_example": "SELECT * FROM users WHERE age > 30;", "sample_table": users_table, "relevant_tables": ["users"]},
-    {"question": "Write a SQL query to find all orders with a status of 'Pending' from the 'orders' table.", "correct_answer_example": "SELECT * FROM orders WHERE status = 'Pending';", "sample_table": orders_table, "relevant_tables": ["orders"]},
+    {"question": "Write a SQL query to find all orders with an amount greater than 100 from the 'orders' table.", "correct_answer_example": "SELECT * FROM orders WHERE amount > 100;", "sample_table": orders_table, "relevant_tables": ["orders"]},
     {"question": "Write a SQL query to find users from 'chicago' in the 'users' table (test case-insensitivity).", "correct_answer_example": "SELECT * FROM users WHERE city = 'Chicago';", "sample_table": users_table, "relevant_tables": ["users"]},
     {"question": "Write a SQL query to find the most recent order from the 'orders' table by order date.", "correct_answer_example": "SELECT * FROM orders ORDER BY order_date DESC LIMIT 1;", "sample_table": orders_table, "relevant_tables": ["orders"]},
     {"question": "Write a SQL query to find the average order amount from the 'orders' table.", "correct_answer_example": "SELECT AVG(amount) AS average_amount FROM orders;", "sample_table": orders_table, "relevant_tables": ["orders"]},
     {"question": "Write a SQL query to find users from 'New York' or 'Chicago' in the 'users' table.", "correct_answer_example": "SELECT * FROM users WHERE city IN ('New York', 'Chicago');", "sample_table": users_table, "relevant_tables": ["users"]},
-    {"question": "Write a SQL query to find users whose orders are still pending. Use the 'users' and 'orders' tables.","correct_answer_example": "SELECT u.* FROM users u JOIN orders o ON u.user_id = o.user_id WHERE o.order_status = 'pending';","sample_table": users_table,"relevant_tables": ["users", "orders"]},
+    {"question": "Write a SQL query to find users who placed orders worth more than 150. Use the 'users' and 'orders' tables.", "correct_answer_example": "SELECT u.* FROM users u JOIN orders o ON u.user_id = o.user_id WHERE o.amount > 150;", "sample_table": users_table, "relevant_tables": ["users", "orders"]},
     {"question": "Write a SQL query to calculate the total amount spent by each user by joining the 'users' and 'orders' tables.", "correct_answer_example": "SELECT u.name, SUM(o.amount) AS total_spent FROM users u JOIN orders o ON u.user_id = o.user_id GROUP BY u.name ORDER BY u.name;", "sample_table": users_table, "relevant_tables": ["users", "orders"]}
-
-   ]
+]
 
 # --- Session State Initialization ---
 if "user_answers" not in st.session_state: st.session_state.user_answers = []
@@ -179,21 +179,16 @@ def simulate_query_duckdb(sql_query, tables_dict):
     con = None
     processed_query_for_ilike = sql_query
     
-    # Replace double-quoted strings with single-quoted strings
     try:
         double_quote_pattern = r'"([^"]*)"'
         processed_query_for_ilike = re.sub(double_quote_pattern, r"'\1'", sql_query)
-        if processed_query_for_ilike != sql_query:
-            print(f"DEBUG: Original query: {sql_query}")
-            print(f"DEBUG: Query after double->single quote conversion: {processed_query_for_ilike}")
     except Exception as e_quotes:
-        print(f"Warning: Failed during double quote replacement: {e_quotes}. Proceeding with original query structure for ILIKE.")
+        print(f"Warning: Failed during double quote replacement: {e_quotes}.")
         processed_query_for_ilike = sql_query
     
-    # Query Modification for case-insensitive comparison
     modified_sql_query = processed_query_for_ilike
     final_executed_query = modified_sql_query
-    case_insensitive_columns = {"orders": ["status"], "users": ["city"]}
+    case_insensitive_columns = {"orders": [], "users": ["city"]}
     flat_insensitive_columns = [col for cols in case_insensitive_columns.values() for col in cols]
     
     if flat_insensitive_columns:
@@ -204,19 +199,14 @@ def simulate_query_duckdb(sql_query, tables_dict):
                 pre_context = match.group(1)
                 col_name = match.group(2)
                 literal = match.group(4)
-                print(f"DEBUG: Rewriting query part: Replacing '=' with 'ILIKE' for column '{col_name}'")
                 space_prefix = "" if not pre_context or pre_context.endswith(" ") or pre_context.endswith("(") else " "
                 return f"{pre_context}{space_prefix}{col_name} ILIKE {literal}"
-            
             modified_sql_query = re.sub(pattern, replace_with_ilike, processed_query_for_ilike, flags=re.IGNORECASE)
             final_executed_query = modified_sql_query
-            if modified_sql_query != processed_query_for_ilike:
-                print(f"DEBUG: Query after ILIKE rewrite: {modified_sql_query}")
         except Exception as e_rewrite:
-            print(f"Warning: Failed to rewrite query for case-insensitivity (ILIKE), using quote-converted query. Error: {e_rewrite}")
+            print(f"Warning: Failed to rewrite query for case-insensitivity: {e_rewrite}")
             final_executed_query = processed_query_for_ilike
     
-    # Execute with DuckDB
     try:
         con = duckdb.connect(database=':memory:', read_only=False)
         for table_name, df in tables_dict.items():
@@ -225,7 +215,6 @@ def simulate_query_duckdb(sql_query, tables_dict):
             else:
                 print(f"Warning [simulate_query]: Item '{table_name}' not a DataFrame during registration.")
         
-        print(f"DEBUG: Executing final query in DuckDB: {final_executed_query}")
         result_df = con.execute(final_executed_query).df()
         con.close()
         return result_df
@@ -234,30 +223,24 @@ def simulate_query_duckdb(sql_query, tables_dict):
         e_str = str(e).lower()
         hint = ""
         
-        if "ILIKE" in str(e).upper() or (modified_sql_query != processed_query_for_ilike and "syntax error" in e_str):
-            hint = "\n\n**Hint:** The simulation tried using case-insensitive matching (ILIKE). Check your SQL syntax near the comparison, especially if using complex conditions."
-        else:
-            catalog_match = re.search(r'catalog error:.*table with name "([^"]+)" does not exist', e_str)
-            binder_match = re.search(r'(?:binder error|catalog error):.*column "([^"]+)" not found', e_str)
-            syntax_match = re.search(r'parser error: syntax error at or near "([^"]+)"', e_str) \
-                        or re.search(r'parser error: syntax error at end of input', e_str) \
-                        or re.search(r'parser error: syntax error at:', e_str)
-            type_match = re.search(r'conversion error:.*try cast\("([^"]+)"', e_str)
-            
-            if catalog_match: hint = f"\n\n**Hint:** Table '{catalog_match.group(1)}' might be misspelled or doesn't exist. Available tables: {list(tables_dict.keys())}."
-            elif binder_match: hint = f"\n\n**Hint:** Column '{binder_match.group(1)}' might be misspelled or doesn't exist in the referenced table(s)."
-            elif syntax_match:
-                problem_area = syntax_match.group(1) if syntax_match.groups() and syntax_match.lastindex == 1 else "the location indicated"
-                hint = f"\n\n**Hint:** Check your SQL syntax, especially around `{problem_area}`. Remember standard SQL uses single quotes (') for text values like `'example text'` (though the tool tries to handle double quotes for you)."
-            elif type_match: hint = f"\n\n**Hint:** There might be a type mismatch. You tried using '{type_match.group(1)}' in a way that's incompatible with its data type (e.g., comparing text to a number)."
-            elif "syntax error" in e_str:
-                hint = "\n\n**Hint:** Double-check your SQL syntax. Ensure all clauses (SELECT, FROM, WHERE, etc.) are correct and in order. Use single quotes (') for string values."
+        catalog_match = re.search(r'catalog error:.*table with name "([^"]+)" does not exist', e_str)
+        binder_match = re.search(r'(?:binder error|catalog error):.*column "([^"]+)" not found', e_str)
+        syntax_match = re.search(r'parser error: syntax error at or near "([^"]+)"', e_str) \
+                    or re.search(r'parser error: syntax error at end of input', e_str) \
+                    or re.search(r'parser error: syntax error at:', e_str)
+        type_match = re.search(r'conversion error:.*try cast\("([^"]+)"', e_str)
+        
+        if catalog_match: hint = f"\n\n**Hint:** Table '{catalog_match.group(1)}' might be misspelled or doesn't exist. Available tables: {list(tables_dict.keys())}."
+        elif binder_match: hint = f"\n\n**Hint:** Column '{binder_match.group(1)}' might be misspelled or doesn't exist in the referenced table(s)."
+        elif syntax_match:
+            problem_area = syntax_match.group(1) if syntax_match.groups() and syntax_match.lastindex == 1 else "the location indicated"
+            hint = f"\n\n**Hint:** Check your SQL syntax, especially around `{problem_area}`."
+        elif type_match: hint = f"\n\n**Hint:** There might be a type mismatch with '{type_match.group(1)}'."
         
         if not hint:
-            hint = "\n\n**Hint:** Double-check your query syntax, table/column names, and data types. Ensure string values are correctly quoted (standard SQL uses single quotes '). Verify function names and usage."
+            hint = "\n\n**Hint:** Double-check your query syntax, table/column names, and data types."
         
         error_message += hint
-        print(f"ERROR [simulate_query_duckdb]: {error_message}\nOriginal Query: {sql_query}\nFinal Attempted Query: {final_executed_query}")
         if con:
             try: con.close()
             except: pass
@@ -309,16 +292,16 @@ def evaluate_answer_with_llm(question_data, student_answer, original_tables_dict
 
     * **Correctness:** Does the student's query accurately and completely answer the **Question** based on the **Relevant Table Schemas**? Consider edge cases if applicable (e.g., users with no orders, data types for comparisons).
         **>>> IMPORTANT QUIZ CONTEXT FOR CORRECTNESS <<<**
-        For *this specific quiz*, assume that simple equality comparisons (`=`) involving the text columns `'status'` (in `orders`) and `'city'` (in `users`) are effectively **CASE-INSENSITIVE**. The quiz environment simulates this behavior.
-        Therefore, a query like `WHERE status = 'pending'` **should be considered CORRECT** if the question asks for 'Pending' status, even if the student did not use explicit `LOWER()` or `UPPER()` functions.
-        Evaluate the *logic* of the query based on this assumed case-insensitivity for these specific columns (`status`, `city`). Penalize only if the core logic (joins, other conditions, selected columns etc.) is wrong.
+        For *this specific quiz*, assume that simple equality comparisons (`=`) involving the text column `'city'` (in `users`) are effectively **CASE-INSENSITIVE**. The quiz environment simulates this behavior.
+        Therefore, a query like `WHERE city = 'chicago'` **should be considered CORRECT** if the question asks for 'Chicago' city, even if the student did not use explicit `LOWER()` or `UPPER()` functions.
+        Evaluate the *logic* of the query based on this assumed case-insensitivity for the `city` column. Penalize only if the core logic (joins, other conditions, selected columns etc.) is wrong.
         Also, assume the student *can* use **either single quotes (') or double quotes (")** for string literals in their query for this quiz simulation, even though single quotes are standard SQL. Do not mark down for using double quotes if the logic is correct.
 
     * **Validity:** Is the query syntactically valid standard SQL (ignoring the double quote allowance above)? Briefly mention any *other* syntax errors.
-    * **Logic:** Does the query use appropriate SQL clauses (SELECT, FROM, WHERE, JOIN, GROUP BY, ORDER BY, aggregates, etc.) correctly for the task? Is the logic sound? Are comparisons appropriate for the data types (keeping the case-insensitivity rule for `status`/`city` in mind)?
+    * **Logic:** Does the query use appropriate SQL clauses (SELECT, FROM, WHERE, JOIN, GROUP BY, ORDER BY, aggregates, etc.) correctly for the task? Is the logic sound? Are comparisons appropriate for the data types (keeping the case-insensitivity rule for `city` in mind)?
     * **Alternatives:** Briefly acknowledge if the student used a valid alternative approach (e.g., different JOIN type if appropriate, subquery vs. JOIN). Mentioning `LOWER`/`UPPER` or using single quotes as *generally good practice* is okay, but don't imply it was *required* for correctness *here*.
     * **Feedback:** Provide clear, constructive feedback in a friendly, encouraging, casual Hindi tone (like a helpful senior or 'bhaiya' talking to a learner).
-        * If incorrect (due to reasons *other* than case-sensitivity on `status`/`city` or using double quotes): Gently point out the error (e.g., "Arre yaar, yahaan thoda sa check karo..." or "Ek chhoti si galti ho gayi hai..."). Explain *what* is wrong (syntax, logic, columns, joins, other conditions etc.). Suggest how to fix it. **Do NOT mark the query incorrect or suggest using LOWER()/UPPER() or single quotes *solely* because of case differences in `status`/`city` or the use of double quotes if the rest of the logic is correct.**
+        * If incorrect (due to reasons *other* than case-sensitivity on `city` or using double quotes): Gently point out the error (e.g., "Arre yaar, yahaan thoda sa check karo..." or "Ek chhoti si galti ho gayi hai..."). Explain *what* is wrong (syntax, logic, columns, joins, other conditions etc.). Suggest how to fix it. **Do NOT mark the query incorrect or suggest using LOWER()/UPPER() or single quotes *solely* because of case differences in `city` or the use of double quotes if the rest of the logic is correct.**
     * **Verdict:** Conclude your entire response with *exactly* one line formatted as: "Verdict: Correct" or "Verdict: Incorrect". This line MUST be the very last line.
 
     **Begin Evaluation:**
@@ -350,22 +333,18 @@ def evaluate_answer_with_llm(question_data, student_answer, original_tables_dict
                     feedback_llm = re.sub(r'\s*Verdict:\s*(Correct|Incorrect)?\s*$', '', feedback_llm, flags=re.MULTILINE | re.IGNORECASE).strip()
                 else:
                     st.warning(f"⚠️ Could not parse AI verdict from response.")
-                    print(f"WARNING: Could not parse verdict from LLM output:\n---\n{llm_output}\n---")
                     feedback_llm = llm_output + "\n\n_(System Note: AI correctness check might be unreliable as verdict wasn't found.)_"
                     is_correct_llm = False
         except AttributeError as ae:
             llm_output = f"Error: Unexpected response format from AI. Details: {ae}"
-            print(f"ERROR: Unexpected response format from AI: {response}")
             feedback_llm = f"AI feedback format error: {ae}"
             is_correct_llm = False
         except Exception as e_resp:
             llm_output = f"Error processing AI response: {e_resp}"
-            print(f"ERROR: Processing AI response failed: {e_resp}")
             feedback_llm = f"AI response processing error: {e_resp}"
             is_correct_llm = False
     except Exception as e_call:
         st.error(f"🚨 AI Error during evaluation: {e_call}")
-        print(f"ERROR: Gemini API call failed: {e_call}")
         feedback_llm = f"AI feedback generation error: {e_call}"
         is_correct_llm = False
         llm_output = f"Error during AI call: {e_call}"
@@ -436,15 +415,15 @@ def analyze_performance(user_answers):
         {incorrect_summary if incorrect_ans else '(Koi nahi)'}
 
         **Quiz Context Reminder:**
-        - Case-insensitivity was assumed for '=' comparisons on 'status' and 'city' columns.
+        - Case-insensitivity was assumed for '=' comparisons on 'city' columns.
         - Both single (') and double (") quotes were acceptable for string literals in this quiz simulation.
 
         **Task:**
         Ab, neeche diye gaye structure mein overall performance ka ek summary feedback do:
-        1.  **Overall Impression:** Score aur general performance pe ek positive ya encouraging comment (e.g., "Overall performance kaafi achhi rahi!", "Thodi aur practice lagegi, but potential hai!"). Be realistic but motivating.
-        2.  **Strengths:** Agar kuch specific concepts sahi kiye hain (jo correct answers se pata chale), unko highlight karo (e.g., "SELECT aur WHERE clause ka use aache se samajh aa gaya hai.", "JOINs wale sawaal sahi kiye, yeh achhi baat hai!"). General rakho agar specific pattern na dikhe.
-        3.  **Areas for Improvement:** Jo concepts galat hue (incorrect answers se related), unko gently point out karo. Focus on concepts, not just specific mistakes (e.g., "JOIN ka logic thoda aur clear karna hoga shayad.", "Aggregate functions (COUNT, AVG) pe dhyaan dena.", "Syntax ki chhoti-moti galtiyan ho rahi hain."). Briefly mention standard practices (like single quotes for strings in real DBs) as a learning point, without implying it was wrong *in this quiz*.
-        4.  **Next Steps / Encouragement:** Kuch encouraging words aur aage kya karna chahiye (e.g., "Keep practicing!", "Concept X ko revise kar lena.", "Aise hi lage raho, SQL aa jayega! Real-world ke liye standard SQL practices (jaise single quotes) seekhte rehna important hai.").
+        1.  **Overall Impression:** Score aur general performance pe ek positive ya encouraging comment.
+        2.  **Strengths:** Agar kuch specific concepts sahi kiye hain, unko highlight karo.
+        3.  **Areas for Improvement:** Jo concepts galat hue, unko gently point out karo.
+        4.  **Next Steps / Encouragement:** Kuch encouraging words aur aage kya karna chahiye.
 
         Bas plain text mein feedback generate karna hai. Casual tone rakhna. Sidhe feedback se shuru karo.
         """
@@ -461,16 +440,12 @@ def analyze_performance(user_answers):
         elif hasattr(response, 'parts') and response.parts:
             generated_feedback = "".join(part.text for part in response.parts if hasattr(part, 'text')).strip()
         else:
-            try:
-                generated_feedback = f"AI Response Blocked or Empty. Prompt Feedback: {response.prompt_feedback}"
-            except Exception:
-                generated_feedback = "Error: Received unexpected or empty response from AI for summary."
+            generated_feedback = "Error: Received unexpected or empty response from AI for summary."
         
         if generated_feedback:
             performance_data["overall_feedback"] = generated_feedback
         else:
             performance_data["overall_feedback"] = "AI response format unclear or empty for summary analysis."
-            print(f"Warning: Unexpected LLM response for performance summary.")
     except Exception as e:
         print(f"Error generating performance summary using LLM: {e}")
         performance_data["overall_feedback"] = f"Summary generation error from AI: {e}"
@@ -495,11 +470,9 @@ def display_simulation(title, result_data):
         st.info(f"_{result_data}_")
     else:
         st.error(f"_(Unexpected simulation result type: {type(result_data)})_")
-        print(f"DEBUG: Unexpected simulation data type: {type(result_data)}, value: {result_data}")
 
 # --- Streamlit App UI ---
 
-# --- Start Screen ---
 # --- Start Screen ---
 if not st.session_state.quiz_started:
     st.title("🚀 SQL Mentor - Interactive SQL Practice")
@@ -508,30 +481,22 @@ if not st.session_state.quiz_started:
         **📌 Important Notes:**
         - To be eligible for a certificate, you must achieve a score of at least 80%.
         - This quiz uses standard **SQL syntax** (similar to MySQL/PostgreSQL).
-        - String comparisons (like `WHERE city = 'new york'` or `WHERE status = "pending"`) are simulated to be **case-insensitive** for common text columns (`status`, `city`).
+        - String comparisons (like `WHERE city = 'new york'`) are simulated to be **case-insensitive** for common text columns (`city`).
         - **Both single quotes (') and double quotes (") are accepted** for string literals in this simulation.
         - Your queries are evaluated by an AI for correctness and logic.
         - Query simulation is powered by DuckDB to show results on sample data.
-        """)
+    """)
     
-    col1, col2 = st.columns([2, 1])
-    with col1:
-        st.write("""
-        Is interactive quiz mein, aap do sample tables ke saath kaam karenge:
-        - **Users Table**: User details jaise ID, naam, email, umar, aur sheher.
-        - **Orders Table**: Order details jaise ID, user ID, amount, order date, aur status.
-        """)
-    with col2:
-        st.markdown("#### Tables Overview")
-        try:
-            table_overview_data = {"Table": list(original_tables.keys()),
-                                   "Rows": [len(df) for df in original_tables.values()],
-                                   "Columns": [len(df.columns) for df in original_tables.values()]}
-            st.dataframe(pd.DataFrame(table_overview_data), hide_index=True)
-        except Exception as e:
-            st.error(f"Error displaying table overview: {e}")
+    st.markdown("#### Tables Overview")
+    try:
+        table_overview_data = {"Table": list(original_tables.keys()),
+                               "Rows": [len(df) for df in original_tables.values()],
+                               "Columns": [len(df.columns) for df in original_tables.values()]}
+        st.dataframe(pd.DataFrame(table_overview_data), hide_index=True, use_container_width=True)
+    except Exception as e:
+        st.error(f"Error displaying table overview: {e}")
     
-    st.write("### 🔍 Table Previews")
+    st.markdown("### 🔍 Table Previews")
     try:
         tab1, tab2 = st.tabs(["Users Table", "Orders Table"])
         with tab1: st.dataframe(users_table, hide_index=True, use_container_width=True)
@@ -544,7 +509,7 @@ if not st.session_state.quiz_started:
         - Aapko {len(sql_questions)} SQL query challenges solve karne honge.
         - Har jawaab ke baad AI Mentor se immediate feedback milega.
         - **SQL Dialect Focus:** Standard SQL (MySQL/PostgreSQL like).
-        - Case-insensitivity for `status` and `city` columns in `WHERE =` clauses is simulated.
+        - Case-insensitivity for `city` columns in `WHERE =` clauses is simulated.
         - String literals can be enclosed in single quotes (`'...'`) or double quotes (`"..."`).
         """)
     
@@ -553,6 +518,7 @@ if not st.session_state.quiz_started:
         st.session_state.user_answers = []
         st.session_state.current_question = 0
         st.session_state.quiz_completed = False
+        st.rerun()
 
 # --- Quiz In Progress Screen ---
 elif st.session_state.quiz_started and not st.session_state.quiz_completed:
@@ -620,7 +586,7 @@ elif st.session_state.quiz_started and not st.session_state.quiz_completed:
     
     if st.button("✅ Submit Query", key=f"submit_{current_q_index}"):
         if user_query and user_query.strip():
-            with st.spinner("🔄 Query ko check kiya ja raha hai... AI Mentor se feedback aur simulation results generate ho rahe hain..."):
+            with st.spinner("🔄 Query ko check kiya ja raha hai..."):
                 feedback, is_correct, expected_res, actual_res, raw_llm = evaluate_answer_with_llm(
                     question_data,
                     user_query,
@@ -661,18 +627,17 @@ elif st.session_state.quiz_completed:
     )
     final_score = calculate_score(st.session_state.user_answers)
 
-    # --- Scoreboard Card ---
     st.markdown(
         f"""
         <div style='
-            background-color:#f8f9fa;
+            background-color:#333;
             border-radius:15px;
             box-shadow:0 4px 16px rgba(0,0,0,0.08);
             padding:30px 0;
             margin:30px 0;
             text-align:center;
         '>
-            <h2 style='color:#333;'>📊 Your Final Score</h2>
+            <h2 style='color:#ffffff;'>📊 Your Final Score</h2>
             <div style='font-size:2.5rem; font-weight:bold; color:#28a745;'>{final_score:.2f}%</div>
             <div style='font-size:1.2rem; color:#888;'>Scoreboard</div>
         </div>
@@ -681,7 +646,6 @@ elif st.session_state.quiz_completed:
     )
     st.progress(final_score / 100)
 
-    # --- Certificate Button Section ---
     if final_score >= 80:
         st.markdown(
             """
@@ -703,7 +667,6 @@ elif st.session_state.quiz_completed:
                     border-radius:10px;
                     text-decoration:none;
                     box-shadow:0 2px 8px rgba(0,0,0,0.11);
-                    transition: background 0.2s;
                 ">🎓 Get Your Certificate</a>
             </div>
             """,
@@ -738,7 +701,6 @@ elif st.session_state.quiz_completed:
         st.session_state.show_detailed_feedback = False
         st.rerun()
 
-    
     st.markdown("---")
     st.subheader("📝 Aapke Jawaab Aur Feedback Ka Summary")
     
@@ -841,5 +803,3 @@ elif st.session_state.quiz_completed:
         st.session_state.quiz_completed = False
         st.session_state.show_detailed_feedback = False
         st.rerun()
-
-
