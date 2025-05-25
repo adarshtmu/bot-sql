@@ -114,20 +114,20 @@ original_tables = {
 
 # --- SQL Questions List ---
 sql_questions = [    {"question": "Write a SQL query to get all details about users from the 'users' table.", "correct_answer_example": "SELECT * FROM users;", "sample_table": users_table, "relevant_tables": ["users"]},
-  #   {"question": "Write a SQL query to count the total number of users in the 'users' table.", "correct_answer_example": "SELECT COUNT(*) AS user_count FROM users;", "sample_table": users_table, "relevant_tables": ["users"]},
-  #   {"question": "Write a SQL query to get all users older than 30 from the 'users' table.", "correct_answer_example": "SELECT * FROM users WHERE age > 30;", "sample_table": users_table, "relevant_tables": ["users"]},
-  #   {"question": "Write a SQL query to find all orders with a status of 'Pending' from the 'orders' table.", "correct_answer_example": "SELECT * FROM orders WHERE status = 'Pending';", "sample_table": orders_table, "relevant_tables": ["orders"]},
-  #   {"question": "Write a SQL query to find users from 'chicago' in the 'users' table (test case-insensitivity).", "correct_answer_example": "SELECT * FROM users WHERE city = 'Chicago';", "sample_table": users_table, "relevant_tables": ["users"]},
-  #   {"question": "Write a SQL query to find the most recent order from the 'orders' table by order date.", "correct_answer_example": "SELECT * FROM orders ORDER BY order_date DESC LIMIT 1;", "sample_table": orders_table, "relevant_tables": ["orders"]},
-  #   {"question": "Write a SQL query to find the average order amount from the 'orders' table.", "correct_answer_example": "SELECT AVG(amount) AS average_amount FROM orders;", "sample_table": orders_table, "relevant_tables": ["orders"]},
-  #   {"question": "Write a SQL query to find users from 'New York' or 'Chicago' in the 'users' table.", "correct_answer_example": "SELECT * FROM users WHERE city IN ('New York', 'Chicago');", "sample_table": users_table, "relevant_tables": ["users"]},
-  # {
-  #   "question": "Write a SQL query to list all users who have never placed any orders. Use the 'users' and 'orders' tables.",
-  #   "correct_answer_example": "SELECT u.* FROM users u LEFT JOIN orders o ON u.user_id = o.user_id WHERE o.user_id IS NULL;",
-  #   "sample_table": "users_table",
-  #   "relevant_tables": ["users", "orders"]
-  # },
-  #   {"question": "Write a SQL query to calculate the total amount spent by each user by joining the 'users' and 'orders' tables.", "correct_answer_example": "SELECT u.name, SUM(o.amount) AS total_spent FROM users u JOIN orders o ON u.user_id = o.user_id GROUP BY u.name ORDER BY u.name;", "sample_table": users_table, "relevant_tables": ["users", "orders"]}
+    {"question": "Write a SQL query to count the total number of users in the 'users' table.", "correct_answer_example": "SELECT COUNT(*) AS user_count FROM users;", "sample_table": users_table, "relevant_tables": ["users"]},
+    {"question": "Write a SQL query to get all users older than 30 from the 'users' table.", "correct_answer_example": "SELECT * FROM users WHERE age > 30;", "sample_table": users_table, "relevant_tables": ["users"]},
+    {"question": "Write a SQL query to find all orders with a status of 'Pending' from the 'orders' table.", "correct_answer_example": "SELECT * FROM orders WHERE status = 'Pending';", "sample_table": orders_table, "relevant_tables": ["orders"]},
+    {"question": "Write a SQL query to find users from 'chicago' in the 'users' table (test case-insensitivity).", "correct_answer_example": "SELECT * FROM users WHERE city = 'Chicago';", "sample_table": users_table, "relevant_tables": ["users"]},
+    {"question": "Write a SQL query to find the most recent order from the 'orders' table by order date.", "correct_answer_example": "SELECT * FROM orders ORDER BY order_date DESC LIMIT 1;", "sample_table": orders_table, "relevant_tables": ["orders"]},
+    {"question": "Write a SQL query to find the average order amount from the 'orders' table.", "correct_answer_example": "SELECT AVG(amount) AS average_amount FROM orders;", "sample_table": orders_table, "relevant_tables": ["orders"]},
+    {"question": "Write a SQL query to find users from 'New York' or 'Chicago' in the 'users' table.", "correct_answer_example": "SELECT * FROM users WHERE city IN ('New York', 'Chicago');", "sample_table": users_table, "relevant_tables": ["users"]},
+  {
+    "question": "Write a SQL query to list all users who have never placed any orders. Use the 'users' and 'orders' tables.",
+    "correct_answer_example": "SELECT u.* FROM users u LEFT JOIN orders o ON u.user_id = o.user_id WHERE o.user_id IS NULL;",
+    "sample_table": "users_table",
+    "relevant_tables": ["users", "orders"]
+  },
+    {"question": "Write a SQL query to calculate the total amount spent by each user by joining the 'users' and 'orders' tables.", "correct_answer_example": "SELECT u.name, SUM(o.amount) AS total_spent FROM users u JOIN orders o ON u.user_id = o.user_id GROUP BY u.name ORDER BY u.name;", "sample_table": users_table, "relevant_tables": ["users", "orders"]}
 
    ]
 
@@ -619,7 +619,17 @@ elif st.session_state.quiz_started and not st.session_state.quiz_completed:
 # --- Quiz Completed Screen ---
 # --- Quiz Completed Screen ---
 elif st.session_state.quiz_completed:
-
+    st.balloons()
+    # Optional: Show congratulations at top
+    st.markdown(
+        """
+        <div style='text-align:center; margin-top: 30px;'>
+            <h1 style='color:#28a745;'>🎉 Congratulations!</h1>
+            <h2 style='color:#1f77b4;'>You have completed the SQL Challenge</h2>
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
 
     # --- 1. Answer/Feedback Summary first ---
     st.markdown("---")
@@ -705,18 +715,6 @@ elif st.session_state.quiz_completed:
                 st.markdown('</div>', unsafe_allow_html=True)
 
     # --- 3. Advanced Scorecard & Buttons LAST ---
-
-    st.balloons()
-    # Optional: Show congratulations at top
-    st.markdown(
-        """
-        <div style='text-align:center; margin-top: 30px;'>
-            <h1 style='color:#28a745;'>🎉 Congratulations!</h1>
-            <h2 style='color:#1f77b4;'>You have completed the SQL Challenge</h2>
-        </div>
-        """,
-        unsafe_allow_html=True
-    )
     st.markdown("---")
     final_score = calculate_score(st.session_state.user_answers)
 
@@ -726,177 +724,170 @@ elif st.session_state.quiz_completed:
     border_gradient = "linear-gradient(45deg, #28a745, #1f77b4)" if final_score >= 80 else "linear-gradient(45deg, #ff9800, #e74c3c)"
 
     # Advanced Scorecard with animations, gradient border, and progress circle
-    st.markdown("---")
-    final_score = calculate_score(st.session_state.user_answers)
-    
-    # Simple scoring logic
-    def get_score_details(score):
-        if score >= 90:
-            return {"grade": "A+", "color": "#28a745", "message": "Outstanding! 🌟", "emoji": "🏆"}
-        elif score >= 80:
-            return {"grade": "A", "color": "#28a745", "message": "Excellent Work! ⭐", "emoji": "🎯"}
-        elif score >= 70:
-            return {"grade": "B", "color": "#17a2b8", "message": "Good Job! 👍", "emoji": "👌"}
-        elif score >= 60:
-            return {"grade": "C", "color": "#ffc107", "message": "Keep Going! 💪", "emoji": "📈"}
-        else:
-            return {"grade": "D", "color": "#dc3545", "message": "More Practice Needed 📚", "emoji": "📖"}
-    
-    score_details = get_score_details(final_score)
-    
-    # Simple, clean scorecard
     st.markdown(
         f"""
-        <div style="
-            background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
-            border: 2px solid #e9ecef;
-            border-radius: 15px;
-            padding: 30px;
-            text-align: center;
-            margin: 20px 0;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        ">
-            <h2 style="color: #333; margin-bottom: 20px; font-size: 1.8rem;">
-                📊 Quiz Results
-            </h2>
-            
-            <div style="
-                background: {score_details['color']};
-                color: white;
-                border-radius: 50%;
+        <style>
+            @keyframes fadeIn {{
+                0% {{ opacity: 0; transform: scale(0.95); }}
+                100% {{ opacity: 1; transform: scale(1); }}
+            }}
+            @keyframes progressCircle {{
+                0% {{ stroke-dasharray: 0 100; }}
+            }}
+            .scorecard-container {{
+                background: linear-gradient(135deg, #ffffff, #f1f5f9);
+                border: 4px solid transparent;
+                border-radius: 20px;
+                padding: 30px;
+                margin: 30px 0;
+                text-align: center;
+                position: relative;
+                box-shadow: 0 8px 24px rgba(0,0,0,0.1);
+                animation: fadeIn 0.8s ease-in-out;
+                background-clip: padding-box;
+                border-image: {border_gradient} 1;
+            }}
+            .scorecard-container::before {{
+                content: '';
+                position: absolute;
+                top: -4px; bottom: -4px; left: -4px; right: -4px;
+                background: {border_gradient};
+                z-index: -1;
+                border-radius: 24px;
+            }}
+            .scorecard-header {{
+                font-size: 2rem;
+                font-weight: 700;
+                color: #1f77b4;
+                margin-bottom: 10px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                gap: 10px;
+            }}
+            .score-value {{
+                font-size: 3rem;
+                font-weight: 900;
+                color: {score_color};
+                margin: 15px 0;
+                letter-spacing: 2px;
+            }}
+            .score-message {{
+                font-size: 1.3rem;
+                color: #555;
+                margin-bottom: 20px;
+            }}
+            .progress-circle {{
+                position: relative;
                 width: 120px;
                 height: 120px;
                 margin: 0 auto 20px;
-                display: flex;
-                flex-direction: column;
-                align-items: center;
-                justify-content: center;
-                font-size: 2rem;
+            }}
+            .progress-circle svg {{
+                transform: rotate(-90deg);
+            }}
+            .progress-circle circle {{
+                fill: none;
+                stroke-width: 10;
+                stroke-linecap: round;
+            }}
+            .progress-circle .bg-circle {{
+                stroke: #e0e0e0;
+            }}
+            .progress-circle .progress-ring {{
+                stroke: {score_color};
+                stroke-dasharray: {final_score} 100;
+                animation: progressCircle 1.5s ease-in-out;
+            }}
+            .progress-circle .percent-text {{
+                position: absolute;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                font-size: 1.5rem;
                 font-weight: bold;
-                box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-            ">
-                <div style="font-size: 1.8rem;">{final_score:.0f}%</div>
-                <div style="font-size: 1rem; margin-top: 5px;">{score_details['grade']}</div>
+                color: {score_color};
+            }}
+            .scoreboard-label {{
+                font-size: 1.1rem;
+                color: #888;
+                margin-top: 10px;
+            }}
+        </style>
+        <div class="scorecard-container">
+            <div class="scorecard-header">
+                <span>📊 Your Final Score</span>
+                <span style="font-size: 1.5rem;">🏆</span>
             </div>
-            
-            <h3 style="color: {score_details['color']}; margin: 15px 0; font-size: 1.4rem;">
-                {score_details['emoji']} {score_details['message']}
-            </h3>
-            
-            <div style="
-                display: flex;
-                justify-content: space-around;
-                margin-top: 25px;
-                flex-wrap: wrap;
-                gap: 15px;
-            ">
-                <div style="
-                    background: #f8f9fa;
-                    padding: 15px;
-                    border-radius: 10px;
-                    border: 1px solid #dee2e6;
-                    min-width: 80px;
-                ">
-                    <div style="font-size: 1.5rem; font-weight: bold; color: {score_details['color']};">
-                        {final_score:.1f}%
-                    </div>
-                    <div style="font-size: 0.9rem; color: #6c757d; margin-top: 5px;">
-                        Score
-                    </div>
-                </div>
-                
-                <div style="
-                    background: #f8f9fa;
-                    padding: 15px;
-                    border-radius: 10px;
-                    border: 1px solid #dee2e6;
-                    min-width: 80px;
-                ">
-                    <div style="font-size: 1.5rem; font-weight: bold; color: {score_details['color']};">
-                        {len([a for a in st.session_state.user_answers if a.get('is_correct', False)])}
-                    </div>
-                    <div style="font-size: 0.9rem; color: #6c757d; margin-top: 5px;">
-                        Correct
-                    </div>
-                </div>
-                
-                <div style="
-                    background: #f8f9fa;
-                    padding: 15px;
-                    border-radius: 10px;
-                    border: 1px solid #dee2e6;
-                    min-width: 80px;
-                ">
-                    <div style="font-size: 1.5rem; font-weight: bold; color: {score_details['color']};">
-                        {len(st.session_state.user_answers)}
-                    </div>
-                    <div style="font-size: 0.9rem; color: #6c757d; margin-top: 5px;">
-                        Total
-                    </div>
-                </div>
-                
-                <div style="
-                    background: #f8f9fa;
-                    padding: 15px;
-                    border-radius: 10px;
-                    border: 1px solid #dee2e6;
-                    min-width: 80px;
-                ">
-                    <div style="font-size: 1.5rem; font-weight: bold; color: {score_details['color']};">
-                        {score_details['grade']}
-                    </div>
-                    <div style="font-size: 0.9rem; color: #6c757d; margin-top: 5px;">
-                        Grade
-                    </div>
-                </div>
+            <div class="progress-circle">
+                <svg width="120" height="120">
+                    <circle class="bg-circle" cx="60" cy="60" r="50"/>
+                    <circle class="progress-ring" cx="60" cy="60" r="50"/>
+                </svg>
+                <div class="percent-text">{final_score:.1f}%</div>
             </div>
+            <div class="score-value">{final_score:.2f}%</div>
+            <div class="score-message">{score_message}</div>
+            <div class="scoreboard-label">Scoreboard</div>
         </div>
         """,
         unsafe_allow_html=True
     )
-    
-    # Certificate section
+
     if final_score >= 80:
-        st.success("🎉 **Congratulations! You're eligible for a certificate!**")
         st.markdown(
             """
-            <div style='text-align: center; margin: 20px 0;'>
-                <a href='https://superprofile.bio/vp/corporate-bhaiya-sql-page' target='_blank' 
-                   style='background-color: #ffc107; color: #212529; padding: 12px 30px; 
-                          border-radius: 25px; text-decoration: none; font-weight: bold; 
-                          font-size: 1.1rem; display: inline-block; margin: 10px;
-                          box-shadow: 0 2px 4px rgba(0,0,0,0.1);'>
-                    🏆 Get Your Certificate
-                </a>
+            <div style='text-align:center; margin-top: 20px;'>
+                <h3 style='color:#007bff;'>🏆 Great job! You're eligible for a certificate.</h3>
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
+        st.markdown(
+            """
+            <div style='display:flex; justify-content:center; margin-bottom: 30px;'>
+                <a href="https://superprofile.bio/vp/corporate-bhaiya-sql-page" target="_blank" style="
+                    background-color:#ffc107;
+                    color:#121212;
+                    font-size:1.5rem;
+                    font-weight:600;
+                    padding:18px 36px;
+                    border-radius:10px;
+                    text-decoration:none;
+                    box-shadow:0 2px 8px rgba(0,0,0,0.11);
+                    transition: background 0.2s;
+                ">🎓 Get Your Certificate</a>
             </div>
             """,
             unsafe_allow_html=True
         )
     else:
-        st.warning("📚 **Keep practicing to earn a certificate! You need 80% or higher.**")
         st.markdown(
             """
-            <div style='text-align: center; margin: 20px 0;'>
-                <a href='https://www.corporatebhaiya.com/' target='_blank' 
-                   style='background-color: #007bff; color: white; padding: 10px 25px; 
-                          border-radius: 20px; text-decoration: none; font-weight: bold;
-                          display: inline-block; margin: 5px;
-                          box-shadow: 0 2px 4px rgba(0,0,0,0.1);'>
-                    🚀 Book Mentor Session
-                </a>
+            <div style='text-align:center; margin-top: 20px;'>
+                <h3 style='color:#e74c3c;'>📚 Keep practicing to earn a certificate!</h3>
+                <a href="https://www.corporatebhaiya.com/" target="_blank" style="
+                    background-color:#6c757d;
+                    color:white;
+                    font-size:1.2rem;
+                    padding:12px 28px;
+                    border-radius:8px;
+                    text-decoration:none;
+                    margin-top:10px;
+                    display:inline-block;
+                ">🚀 Book a Mentor Session</a>
             </div>
             """,
             unsafe_allow_html=True
         )
-    
-    # Try Again Button
-    st.markdown("<br>", unsafe_allow_html=True)
-    col1, col2, col3 = st.columns([1, 1, 1])
-    with col2:
-        if st.button("🔄 Try Again", type="primary", use_container_width=True):
-            st.session_state.user_answers = []
-            st.session_state.current_question = 0
-            st.session_state.quiz_started = False
-            st.session_state.quiz_completed = False
-            st.session_state.show_detailed_feedback = False
-            st.rerun()
+
+    # --- Try Again Button LAST ---
+    if st.button("🔄 Try Again?"):
+        st.session_state.user_answers = []
+        st.session_state.current_question = 0
+        st.session_state.quiz_started = False
+        st.session_state.quiz_completed = False
+        st.session_state.show_detailed_feedback = False
+        st.rerun()
+
+
