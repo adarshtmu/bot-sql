@@ -18,50 +18,48 @@ header, #MainMenu, footer,
     display: none !important;
 }
 
-/* Light background for body and main app container */
+/* Light background */
 body, .stApp {
     background: linear-gradient(120deg, #fafdff 0%, #f3f8fe 100%) !important;
     font-family: 'Segoe UI', 'Roboto', 'Arial', sans-serif !important;
     color: #354052;
 }
 
-/* Main container: wider and centered for desktops */
+/* Main container: wider and centered for desktop */
 .main .block-container {
     background: #fff !important;
     border-radius: 22px;
     box-shadow: 0 8px 32px rgba(44, 62, 80, 0.09);
-    padding: 48px 48px 32px 48px;
+    padding: 56px 72px 48px 72px;
     margin-top: 48px;
-    max-width: 980px;
+    max-width: 1200px;
     margin-left: auto;
     margin-right: auto;
 }
 
-/* Headings */
+/* Headings and text: larger for desktop */
 h1 {
-    font-size: 2.8rem !important;
+    font-size: 3.4rem !important;
     font-weight: 700;
     color: #2574a9 !important;
-    margin-bottom: 1em;
+    margin-bottom: 1.1em;
     text-align: center;
 }
 h2 {
-    font-size: 2.1rem !important;
+    font-size: 2.3rem !important;
     font-weight: 600;
     color: #21b6a8 !important;
-    margin-bottom: 0.8em;
+    margin-bottom: 1em;
     text-align: center;
 }
 h3 {
-    font-size: 1.35rem !important;
+    font-size: 1.6rem !important;
     font-weight: 500;
     color: #2574a9 !important;
-    margin-bottom: 0.6em;
+    margin-bottom: 0.7em;
 }
-
-/* Paragraphs and regular text */
 .stMarkdown, .stText, .stTextArea, .stDataFrame, .stTable {
-    font-size: 1.15rem !important;
+    font-size: 1.2rem !important;
     color: #354052 !important;
 }
 
@@ -76,12 +74,12 @@ h3 {
 button[kind="primary"], .stButton button {
     background: linear-gradient(90deg, #36d1c4, #5b86e5);
     color: #fff !important;
-    font-size: 1.13rem !important;
+    font-size: 1.25rem !important;
     font-weight: 600;
-    padding: 14px 38px !important;
+    padding: 18px 44px !important;
     border-radius: 10px;
     border: none;
-    box-shadow: 0 2px 8px rgba(44, 62, 80, 0.06);
+    box-shadow: 0 2px 8px rgba(44, 62, 80, 0.08);
     transition: background 0.2s;
     margin-bottom: 1.2em;
     margin-top: 0.5em;
@@ -94,15 +92,18 @@ button[kind="primary"]:hover, .stButton button:hover {
 /* Tabs and cards */
 .stTabs [role="tablist"] {
     background: #fafdff;
-    padding: 0.8em 1.2em;
+    padding: 1em 2em;
     border-radius: 12px;
     box-shadow: 0 2px 12px rgba(44,62,80,0.05);
     margin-bottom: 2em;
+    max-width: 1150px;
+    margin-left: auto;
+    margin-right: auto;
 }
 
-/* Table previews (wider for desktop) */
+/* Table previews: wider for desktop */
 .stDataFrame, .stTable {
-    max-width: 920px !important;
+    max-width: 1100px !important;
     margin-left: auto !important;
     margin-right: auto !important;
     border-radius: 10px !important;
@@ -113,24 +114,24 @@ button[kind="primary"]:hover, .stButton button:hover {
 .feedback-container {
     background: #f6fcfb !important;
     border: 1px solid #b6e2c5;
-    padding: 28px;
+    padding: 36px;
     border-radius: 18px;
     box-shadow: 0 4px 18px rgba(33,182,168,.07);
-    font-size: 1.13rem !important;
+    font-size: 1.18rem !important;
     margin-bottom: 2em;
     color: #166c41 !important;
-    max-width: 850px;
+    max-width: 950px;
     margin-left: auto;
     margin-right: auto;
 }
 .feedback-header {
-    font-size: 1.5rem !important;
+    font-size: 1.7rem !important;
     color: #2574a9 !important;
     font-weight: 700;
     margin-bottom: 0.5em;
 }
 .strength-item, .weakness-item {
-    font-size: 1.08rem !important;
+    font-size: 1.13rem !important;
     margin: 7px 0;
     padding-left: 16px;
 }
@@ -147,24 +148,24 @@ button[kind="primary"]:hover, .stButton button:hover {
 .stMarkdown h3, .stMarkdown h4, .stMarkdown h5, .stMarkdown h6 {
     color: #d18d00 !important;
     background: #fffbe6 !important;
-    padding: 0.25em 1em;
+    padding: 0.35em 1.3em;
     border-radius: 8px;
     font-weight: 700;
 }
 .stMarkdown strong, .stMarkdown b {
     color: #cb9900 !important;
     background: #fffbe6 !important;
-    padding: 2px 6px;
+    padding: 2px 8px;
     border-radius: 6px;
 }
 .question-highlight {
     color: #2176ae !important;
     background: #eaf4ff !important;
-    padding: 0.5em 1em;
+    padding: 0.65em 1.2em;
     border-radius: 8px;
-    font-size: 1.18rem !important;
+    font-size: 1.22rem !important;
     font-weight: 700;
-    margin-bottom: 1em;
+    margin-bottom: 1.1em;
     display: block;
 }
 
@@ -173,37 +174,40 @@ button[kind="primary"]:hover, .stButton button:hover {
     background: #f3f8fe;
     border-radius: 16px;
     box-shadow: 0 4px 16px rgba(44,62,80,0.05);
-    padding: 34px 0;
+    padding: 40px 0;
     text-align: center;
-    margin: 34px auto;
-    max-width: 600px;
+    margin: 40px auto;
+    max-width: 650px;
 }
 .score-card h2 {
     color: #2574a9 !important;
-    font-size: 2.2rem !important;
-    margin-bottom: 0.5em;
+    font-size: 2.4rem !important;
+    margin-bottom: 0.7em;
 }
 .score-card .score {
-    font-size: 2.7rem;
+    font-size: 3rem;
     font-weight: bold;
     color: #21b6a8;
 }
 
 /* Responsive adjustments for mobile only */
-@media (max-width: 900px) {
+@media (max-width: 1200px) {
     .main .block-container, .feedback-container, .score-card {
         max-width: 99vw !important;
-        padding-left: 5vw !important;
-        padding-right: 5vw !important;
+        padding-left: 4vw !important;
+        padding-right: 4vw !important;
+    }
+    .stTabs [role="tablist"], .stDataFrame, .stTable {
+        max-width: 98vw !important;
     }
 }
 @media (max-width: 600px) {
     .main .block-container {
-        padding: 18px 2vw 12px 2vw;
+        padding: 14px 2vw 10px 2vw;
         margin-top: 8px;
     }
     .score-card {
-        padding: 12px 0;
+        padding: 10px 0;
         margin: 10px 0;
     }
 }
