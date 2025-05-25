@@ -840,16 +840,24 @@ elif st.session_state.quiz_completed:
         }
         
         /* Certificate Section */
-        .certificate-section {
-            background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
-            border-radius: 20px;
-            padding: 2.5rem;
-            margin: 2rem 0;
-            text-align: center;
-            box-shadow: 0 15px 35px rgba(252, 182, 159, 0.3);
-            position: relative;
-            overflow: hidden;
-        }
+       .certificate-section {
+        background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
+        border-radius: 20px;
+        padding: 2.5rem;
+        margin: 2rem 0;
+        text-align: center;
+        box-shadow: 0 15px 35px rgba(252, 182, 159, 0.3);
+        position: relative;
+        overflow: hidden;
+        width: 690px;
+        height: 350px;
+        max-width: 95vw;
+        max-height: 60vh;
+        min-width: 220px;
+        min-height: 140px;
+        margin-left: auto;
+        margin-right: auto;
+    }
         
         .certificate-section::before {
             content: '🎉';
@@ -896,8 +904,16 @@ elif st.session_state.quiz_completed:
             text-align: center;
             margin: 2rem 0;
             box-shadow: 0 12px 28px rgba(255, 154, 158, 0.3);
+            width: 690px;
+            height: 350px;
+            max-width: 95vw;
+            max-height: 60vh;
+            min-width: 220px;
+            min-height: 140px;
+            margin-left: auto;
+            margin-right: auto;
         }
-        
+                
         .mentor-btn {
             background: linear-gradient(135deg, #667eea, #764ba2) !important;
             color: white !important;
