@@ -18,61 +18,100 @@ header, #MainMenu, footer,
     display: none !important;
 }
 
-/* Set very light background for body and Streamlit container */
+/* Light background for body and main app container */
 body, .stApp {
     background: linear-gradient(120deg, #fafdff 0%, #f3f8fe 100%) !important;
     font-family: 'Segoe UI', 'Roboto', 'Arial', sans-serif !important;
     color: #354052;
 }
 
-/* Main container card */
+/* Main container: wider and centered for desktops */
 .main .block-container {
-    background: #ffffff !important;
+    background: #fff !important;
     border-radius: 22px;
-    box-shadow: 0 8px 32px rgba(44, 62, 80, 0.07);
-    padding: 48px 32px 32px 32px;
-    margin-top: 32px;
+    box-shadow: 0 8px 32px rgba(44, 62, 80, 0.09);
+    padding: 48px 48px 32px 48px;
+    margin-top: 48px;
+    max-width: 980px;
+    margin-left: auto;
+    margin-right: auto;
 }
 
-/* Style for Important Notes in markdown */
-h3, h4, h5, h6 {
-    margin-top: 1.5em !important;
-    margin-bottom: 0.7em !important;
-}
-.stMarkdown strong, .stMarkdown b {
-    color: #cb9900 !important; /* Gold/brown for emphasis */
-    background: #fffbe6 !important;
-    padding: 2px 6px;
-    border-radius: 6px;
-}
-.stMarkdown em, .stMarkdown i {
-    color: #2d91f2 !important;
-}
-
-/* Special color for "Important Notes" lines */
-.stMarkdown h3, .stMarkdown h4, .stMarkdown h5, .stMarkdown h6 {
-    color: #d18d00 !important;
-    background: #fffbe6 !important;
-    padding: 0.25em 1em;
-    border-radius: 8px;
+/* Headings */
+h1 {
+    font-size: 2.8rem !important;
     font-weight: 700;
-}
-
-/* Style for quiz question */
-.question-highlight {
-    color: #2176ae !important;
-    background: #eaf4ff !important;
-    padding: 0.5em 1em;
-    border-radius: 8px;
-    font-size: 1.18rem !important;
-    font-weight: 700;
+    color: #2574a9 !important;
     margin-bottom: 1em;
-    display: block;
+    text-align: center;
+}
+h2 {
+    font-size: 2.1rem !important;
+    font-weight: 600;
+    color: #21b6a8 !important;
+    margin-bottom: 0.8em;
+    text-align: center;
+}
+h3 {
+    font-size: 1.35rem !important;
+    font-weight: 500;
+    color: #2574a9 !important;
+    margin-bottom: 0.6em;
 }
 
-/* Style for feedback containers */
+/* Paragraphs and regular text */
+.stMarkdown, .stText, .stTextArea, .stDataFrame, .stTable {
+    font-size: 1.15rem !important;
+    color: #354052 !important;
+}
+
+/* Progress bar */
+.stProgress > div > div {
+    background: linear-gradient(90deg, #36d1c4 30%, #5b86e5 100%) !important;
+    border-radius: 10px;
+    height: 1.3rem;
+}
+
+/* Buttons: desktop-friendly size */
+button[kind="primary"], .stButton button {
+    background: linear-gradient(90deg, #36d1c4, #5b86e5);
+    color: #fff !important;
+    font-size: 1.13rem !important;
+    font-weight: 600;
+    padding: 14px 38px !important;
+    border-radius: 10px;
+    border: none;
+    box-shadow: 0 2px 8px rgba(44, 62, 80, 0.06);
+    transition: background 0.2s;
+    margin-bottom: 1.2em;
+    margin-top: 0.5em;
+}
+button[kind="primary"]:hover, .stButton button:hover {
+    background: linear-gradient(90deg, #5b86e5, #36d1c4);
+    color: #fff !important;
+}
+
+/* Tabs and cards */
+.stTabs [role="tablist"] {
+    background: #fafdff;
+    padding: 0.8em 1.2em;
+    border-radius: 12px;
+    box-shadow: 0 2px 12px rgba(44,62,80,0.05);
+    margin-bottom: 2em;
+}
+
+/* Table previews (wider for desktop) */
+.stDataFrame, .stTable {
+    max-width: 920px !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
+    border-radius: 10px !important;
+    overflow-x: auto !important;
+}
+
+/* Feedback/Analysis Container */
 .feedback-container {
-    background: #eaffea !important;
+    background: #f6fcfb !important;
     border: 1px solid #b6e2c5;
     padding: 28px;
     border-radius: 18px;
@@ -80,6 +119,9 @@ h3, h4, h5, h6 {
     font-size: 1.13rem !important;
     margin-bottom: 2em;
     color: #166c41 !important;
+    max-width: 850px;
+    margin-left: auto;
+    margin-right: auto;
 }
 .feedback-header {
     font-size: 1.5rem !important;
@@ -101,11 +143,68 @@ h3, h4, h5, h6 {
     font-weight: 500;
 }
 
-/* Responsive adjustments */
-@media (max-width: 768px) {
+/* Important Notes and Question Highlighting */
+.stMarkdown h3, .stMarkdown h4, .stMarkdown h5, .stMarkdown h6 {
+    color: #d18d00 !important;
+    background: #fffbe6 !important;
+    padding: 0.25em 1em;
+    border-radius: 8px;
+    font-weight: 700;
+}
+.stMarkdown strong, .stMarkdown b {
+    color: #cb9900 !important;
+    background: #fffbe6 !important;
+    padding: 2px 6px;
+    border-radius: 6px;
+}
+.question-highlight {
+    color: #2176ae !important;
+    background: #eaf4ff !important;
+    padding: 0.5em 1em;
+    border-radius: 8px;
+    font-size: 1.18rem !important;
+    font-weight: 700;
+    margin-bottom: 1em;
+    display: block;
+}
+
+/* Score card */
+.score-card {
+    background: #f3f8fe;
+    border-radius: 16px;
+    box-shadow: 0 4px 16px rgba(44,62,80,0.05);
+    padding: 34px 0;
+    text-align: center;
+    margin: 34px auto;
+    max-width: 600px;
+}
+.score-card h2 {
+    color: #2574a9 !important;
+    font-size: 2.2rem !important;
+    margin-bottom: 0.5em;
+}
+.score-card .score {
+    font-size: 2.7rem;
+    font-weight: bold;
+    color: #21b6a8;
+}
+
+/* Responsive adjustments for mobile only */
+@media (max-width: 900px) {
+    .main .block-container, .feedback-container, .score-card {
+        max-width: 99vw !important;
+        padding-left: 5vw !important;
+        padding-right: 5vw !important;
+    }
+}
+@media (max-width: 600px) {
     .main .block-container {
-        padding: 22px 8px 18px 8px;
+        padding: 18px 2vw 12px 2vw;
         margin-top: 8px;
+    }
+    .score-card {
+        padding: 12px 0;
+        margin: 10px 0;
     }
 }
 </style>
