@@ -3,6 +3,7 @@ import google.generativeai as genai
 import pandas as pd
 import re
 import duckdb
+import time
 
 # --- Custom CSS ---
 # Updated to increase font sizes globally and for specific elements
@@ -707,8 +708,7 @@ elif st.session_state.quiz_completed:
     # --- 3. Advanced Scorecard & Buttons LAST ---
     st.balloons()
     # Optional: Show congratulations at top
- import streamlit as st
-import time
+
 
 def show_advanced_completion_ui():
     """Advanced UI for quiz completion with modern design and animations"""
