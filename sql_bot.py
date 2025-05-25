@@ -5,7 +5,6 @@ import re
 import duckdb
 
 # --- Set Streamlit Theme to Dark ---
-st.set_page_config(layout="wide", initial_sidebar_state="collapsed", theme="dark")
 
 # --- Custom CSS ---
 hide_streamlit_style = """
