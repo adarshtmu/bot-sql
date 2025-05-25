@@ -6,372 +6,62 @@ import duckdb
 
 # --- Custom CSS ---
 # Updated to increase font sizes globally and for specific elements
-st.set_page_config(
-    page_title="SQL Mentor EdTech",
-    layout="wide",
-    page_icon=":rocket:",
-)
-
-# --- Custom CSS: Website-Like, Not Centered ---
 hide_streamlit_style = """
-<style>
-    /* Hide Streamlit default elements */
-    header, #MainMenu, footer,
-    .viewerBadge_container__1QSob, .stDeployButton,
-    [data-testid="stToolbar"], [data-testid="stDecoration"],
-    [data-testid="stDeployButton"], .st-emotion-cache-1r8d6ul,
-    .st-emotion-cache-1jicfl2 {
-        display: none !important;
-    }
-
-    /* Body styles */
-    body {
-        background: #1a1a2e !important; /* Dark blue background */
-        font-family: 'Segoe UI', 'Roboto', 'Arial', sans-serif !important;
-        color: #e0e6ed !important; /* Light text color for dark theme */
-    }
-
-    /* Main app background */
-    .stApp {
-        background: #1a1a2e !important;
-    }
-
-    /* Main content container - constrained width */
-    .main .block-container {
-        background: #16213e !important; /* Darker blue for content area */
-        border-radius: 16px;
-        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-        padding: 32px 28px;
-        margin: 20px auto; /* Center the container */
-        max-width: 1000px !important; /* Constrain maximum width */
-        width: 95% !important; /* Responsive width */
-        border: 1px solid #0f3460;
-    }
-
-    /* Headings with better contrast */
-    h1, h2, h3, h4, h5, h6 {
-        text-align: left !important;
-        color: #f8f9fa !important; /* Bright white for headings */
-        font-weight: 600;
-    }
-
-    h1 { font-size: 2.2rem !important; }
-    h2 { font-size: 1.8rem !important; }
-    h3 { font-size: 1.5rem !important; }
-
-    /* General text elements styling */
-    .stMarkdown, .stText, .stTextArea, .stDataFrame, .stTable, p, div, span {
-        font-size: 1.05rem !important;
-        color: #e0e6ed !important; /* Light gray text */
-        text-align: left !important;
-        line-height: 1.6;
-    }
-
-    /* Special styling for markdown content */
-    .stMarkdown div {
-        color: #e0e6ed !important;
-    }
-
-    /* Code blocks */
-    .stCodeBlock, pre, code {
-        background: #0f1419 !important;
-        color: #e0e6ed !important;
-        border: 1px solid #2d3748 !important;
-        border-radius: 8px;
-    }
-
-    /* Button styling */
-    .stButton button {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
-        color: #ffffff !important;
-        font-size: 1.1rem !important;
-        font-weight: 600;
-        padding: 12px 28px !important;
-        border-radius: 12px;
-        border: none;
-        box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
-        margin-bottom: 1em;
-        transition: all 0.3s ease;
-        min-height: 48px;
-    }
-
-    .stButton button:hover {
-        background: linear-gradient(135deg, #764ba2 0%, #667eea 100%) !important;
-        color: #ffffff !important;
-        box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
-        transform: translateY(-2px);
-    }
-
-    /* Tabs styling */
-    .stTabs [role="tablist"] {
-        background: #0f3460 !important;
-        padding: 8px 12px;
-        border-radius: 12px;
-        box-shadow: inset 0 2px 4px rgba(0,0,0,0.2);
-        margin-bottom: 2em;
-        border: 1px solid #1e4976;
-    }
-
-    .stTabs [data-baseweb="tab"] {
-        font-size: 1rem !important;
-        padding: 10px 18px;
-        border-radius: 8px;
-        transition: all 0.3s ease;
-        color: #b0bec5 !important;
-        background: transparent;
-        border: 1px solid transparent;
-    }
-    
-    .stTabs [data-baseweb="tab"]:hover {
-        background-color: #1e4976 !important;
-        color: #e0e6ed !important;
-    }
-
-    .stTabs [data-baseweb="tab"][aria-selected="true"] {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
-        color: #ffffff !important;
-        box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
-        border: 1px solid #667eea;
-    }
-
-    /* DataFrame styling */
-    .stDataFrame {
-        background: #0f1419 !important;
-        border-radius: 12px;
-        overflow: hidden;
-        border: 1px solid #2d3748;
-        max-width: 100% !important;
-    }
-
-    .stDataFrame table {
-        color: #e0e6ed !important;
-        background: #0f1419 !important;
-    }
-
-    .stDataFrame th {
-        background: #1e4976 !important;
-        color: #ffffff !important;
-        font-weight: 600;
-        padding: 12px 8px !important;
-        border-bottom: 2px solid #667eea;
-    }
-
-    .stDataFrame td {
-        background: #16213e !important;
-        color: #e0e6ed !important;
-        padding: 10px 8px !important;
-        border-bottom: 1px solid #2d3748;
-    }
-
-    /* Input fields */
-    .stTextArea textarea, .stTextInput input {
-        background: #0f1419 !important;
-        color: #e0e6ed !important;
-        border: 1px solid #2d3748 !important;
-        border-radius: 8px;
-        font-size: 1rem !important;
-    }
-
-    .stTextArea textarea:focus, .stTextInput input:focus {
-        border-color: #667eea !important;
-        box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.2) !important;
-    }
-
-    /* Info, warning, success boxes */
-    .stInfo {
-        background: #0f3460 !important;
-        color: #e0e6ed !important;
-        border-left: 4px solid #667eea !important;
-    }
-
-    .stWarning {
-        background: #2d1b14 !important;
-        color: #f8d7da !important;
-        border-left: 4px solid #ffc107 !important;
-    }
-
-    .stSuccess {
-        background: #0f2027 !important;
-        color: #d4edda !important;
-        border-left: 4px solid #28a745 !important;
-    }
-
-    .stError {
-        background: #2d1b1f !important;
-        color: #f8d7da !important;
-        border-left: 4px solid #dc3545 !important;
-    }
-
-    /* Expander styling */
-    .streamlit-expanderHeader {
-        background: #0f3460 !important;
-        color: #e0e6ed !important;
-        border-radius: 8px;
-        padding: 12px 16px !important;
-        border: 1px solid #1e4976;
-    }
-
-    .streamlit-expanderContent {
-        background: #16213e !important;
-        color: #e0e6ed !important;
-        border: 1px solid #1e4976;
-        border-top: none;
-        padding: 16px !important;
-    }
-
-    /* Progress bar */
-    .stProgress .st-bo {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
-    }
-
-    /* Sidebar styling */
-    .css-1d391kg {
-        background: #0f1419 !important;
-        border-right: 1px solid #2d3748;
-    }
-
-    .css-1d391kg .stMarkdown {
-        color: #e0e6ed !important;
-    }
-
-    /* Links */
-    a {
-        color: #667eea !important;
-        text-decoration: none;
-    }
-
-    a:hover {
-        color: #764ba2 !important;
-        text-decoration: underline;
-    }
-
-    /* Feedback container styling */
-    .feedback-container {
-        background: #0f2027 !important;
-        padding: 24px;
-        border-radius: 12px;
-        border: 1px solid #28a745;
-        box-shadow: 0 4px 15px rgba(40, 167, 69, 0.1);
-        font-size: 1.05rem !important;
-        margin-bottom: 2em;
-        text-align: left !important;
-        color: #e0e6ed !important;
-    }
-
-    .feedback-header {
-        font-size: 1.4rem !important;
-        color: #28a745 !important;
-        font-weight: 600;
-        margin-bottom: 0.8em;
-        text-align: left !important;
-    }
-
-    .strength-item, .weakness-item {
-        font-size: 1.03rem !important;
-        margin: 8px 0;
-        padding-left: 16px;
-        text-align: left !important;
-        color: #e0e6ed !important;
-    }
-
-    /* Score card styling */
-    .score-card {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        padding: 32px;
-        border-radius: 16px;
-        text-align: center;
-        margin: 24px 0;
-        box-shadow: 0 8px 32px rgba(102, 126, 234, 0.3);
-        max-width: 400px;
-        margin-left: auto;
-        margin-right: auto;
-    }
-
-    .score-card h2 {
-        color: #ffffff !important;
-        margin-bottom: 16px;
-    }
-
-    .score {
-        font-size: 3rem;
-        font-weight: 700;
-        color: #ffffff;
-        margin: 16px 0;
-    }
-
-    /* Responsive design */
-    @media (max-width: 768px) {
-        .main .block-container {
-            padding: 20px 16px;
-            margin: 10px 5px;
-            width: calc(100% - 10px) !important;
-            max-width: none !important;
+    <style>
+        header {visibility: hidden;}
+        #MainMenu {visibility: hidden;}
+        footer {visibility: hidden;}
+        .viewerBadge_container__1QSob {display: none !important;}
+        .stDeployButton {display: none !important;}
+        [data-testid="stToolbar"] {display: none !important;}
+        [data-testid="stDecoration"] {display: none !important;}
+        [data-testid="stDeployButton"] {display: none !important;}
+        .st-emotion-cache-1r8d6ul {display: none !important;}
+        .st-emotion-cache-1jicfl2 {display: none !important;}
+        /* Increase global font size */
+        body, .stMarkdown, .stText, .stTextArea, .stButton button, .stLinkButton a {
+            font-size: 18px !important;
         }
-        
-        .stMarkdown, .stText, .stTextArea, .stDataFrame, .stTable {
-            font-size: 0.95rem !important;
+        h1 {font-size: 36px !important;}
+        h2 {font-size: 28px !important;}
+        h3 {font-size: 24px !important;}
+        /* Style for Start SQL Challenge! button */
+        button[kind="primary"] {
+            font-size: 24px !important;
+            padding: 15px 30px !important;
+            color: white !important;
+            background-color: red;
+            border-radius: 10px;
         }
-
-        h1 { font-size: 1.8rem !important; }
-        h2 { font-size: 1.5rem !important; }
-        h3 { font-size: 1.3rem !important; }
-
-        .score {
-            font-size: 2.5rem;
+        /* Style for other buttons (Submit, Analysis, Retry) */
+        .stButton button:not([kind="primary"]), .stLinkButton a {
+            font-size: 20px !important;
+            padding: 12px 24px !important;
+            border-radius: 8px;
         }
-
-        .score-card {
-            padding: 24px;
-            margin: 16px 0;
+        /* Feedback container styling */
+        .feedback-container {
+            background-color: #f9f9f9;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            font-size: 18px !important;
         }
-    }
-
-    /* Table overflow handling */
-    .stDataFrame > div {
-        overflow-x: auto;
-    }
-
-    /* Ensure consistent spacing */
-    .element-container {
-        margin-bottom: 1rem;
-    }
-
-    /* Custom certificate button styling */
-    .certificate-button {
-        background: linear-gradient(135deg, #ffc107 0%, #ff8c00 100%) !important;
-        color: #000000 !important;
-        font-size: 1.3rem !important;
-        font-weight: 700 !important;
-        padding: 20px 40px !important;
-        border-radius: 12px !important;
-        text-decoration: none !important;
-        box-shadow: 0 6px 20px rgba(255, 193, 7, 0.4) !important;
-        display: inline-block !important;
-        margin: 20px 0 !important;
-        transition: all 0.3s ease !important;
-    }
-
-    .certificate-button:hover {
-        background: linear-gradient(135deg, #ff8c00 0%, #ffc107 100%) !important;
-        transform: translateY(-2px) !important;
-        box-shadow: 0 8px 25px rgba(255, 193, 7, 0.5) !important;
-    }
-</style>
+        .feedback-header {
+            font-size: 24px !important;
+            color: #1f77b4;
+            margin-bottom: 10px;
+        }
+        .feedback-section {
+            margin-top: 15px;
+        }
+        .strength-item, .weakness-item {
+            font-size: 18px !important;
+            margin: 5px 0;
+        }
+    </style>
 """
 st.markdown(hide_streamlit_style, unsafe_allow_html=True)
-
-# --- Sidebar ---
-with st.sidebar:
-    st.image("https://cdn-icons-png.flaticon.com/512/2991/2991148.png", width=90)
-    st.title("SQL Mentor")
-    st.markdown("👋 Welcome to your interactive SQL learning platform!")
-    st.markdown("---")
-    st.markdown("### 📚 Resources")
-    st.markdown("[Khan Academy SQL](https://www.khanacademy.org/computing/computer-programming/sql)")
-    st.markdown("[LeetCode SQL Practice](https://leetcode.com/problemset/database/)")
-    st.markdown("[SQLBolt](https://sqlbolt.com/)")
-    st.markdown("---")
-    st.info("Earn a certificate by scoring 80%+ on the quiz!")
 
 # --- Set up Gemini API ---
 gemini_api_key = "AIzaSyAfzl_66GZsgaYjAM7cT2djVCBCAr86t2k"  # Replace with your Gemini API Key
@@ -408,8 +98,7 @@ original_tables = {
 }
 
 # --- SQL Questions List ---
-sql_questions = [
-    {"question": "Write a SQL query to get all details about users from the 'users' table.", "correct_answer_example": "SELECT * FROM users;", "sample_table": users_table, "relevant_tables": ["users"]},
+sql_questions = [    {"question": "Write a SQL query to get all details about users from the 'users' table.", "correct_answer_example": "SELECT * FROM users;", "sample_table": users_table, "relevant_tables": ["users"]},
     {"question": "Write a SQL query to count the total number of users in the 'users' table.", "correct_answer_example": "SELECT COUNT(*) AS user_count FROM users;", "sample_table": users_table, "relevant_tables": ["users"]},
     {"question": "Write a SQL query to get all users older than 30 from the 'users' table.", "correct_answer_example": "SELECT * FROM users WHERE age > 30;", "sample_table": users_table, "relevant_tables": ["users"]},
     {"question": "Write a SQL query to find all orders with a status of 'Pending' from the 'orders' table.", "correct_answer_example": "SELECT * FROM orders WHERE status = 'Pending';", "sample_table": orders_table, "relevant_tables": ["orders"]},
@@ -419,7 +108,8 @@ sql_questions = [
     {"question": "Write a SQL query to find users from 'New York' or 'Chicago' in the 'users' table.", "correct_answer_example": "SELECT * FROM users WHERE city IN ('New York', 'Chicago');", "sample_table": users_table, "relevant_tables": ["users"]},
     {"question": "Write a SQL query to find users whose orders are still pending. Use the 'users' and 'orders' tables.","correct_answer_example": "SELECT u.* FROM users u JOIN orders o ON u.user_id = o.user_id WHERE o.order_status = 'pending';","sample_table": users_table,"relevant_tables": ["users", "orders"]},
     {"question": "Write a SQL query to calculate the total amount spent by each user by joining the 'users' and 'orders' tables.", "correct_answer_example": "SELECT u.name, SUM(o.amount) AS total_spent FROM users u JOIN orders o ON u.user_id = o.user_id GROUP BY u.name ORDER BY u.name;", "sample_table": users_table, "relevant_tables": ["users", "orders"]}
-]
+
+   ]
 
 # --- Session State Initialization ---
 if "user_answers" not in st.session_state: st.session_state.user_answers = []
@@ -761,25 +451,24 @@ def display_simulation(title, result_data):
 # --- Start Screen ---
 # --- Start Screen ---
 if not st.session_state.quiz_started:
-    st.image("https://cdn-icons-png.flaticon.com/512/2991/2991148.png", width=65)
     st.title("🚀 SQL Mentor - Interactive SQL Practice")
     st.markdown("### Finish the Quiz Successfully to Unlock Your SQL Certificate")
-    st.markdown("> 💡 **Tip:** Use `WHERE` to filter data and `JOIN` to combine tables. Try them in the quiz!")
     st.markdown("""
         **📌 Important Notes:**
         - To be eligible for a certificate, you must achieve a score of at least 80%.
-        - This quiz uses standard **SQL syntax** (MySQL/PostgreSQL style).
-        - String comparisons (like `WHERE city = 'new york'` or `WHERE status = "pending"`) are simulated to be **case-insensitive** for columns `status` and `city`.
+        - This quiz uses standard **SQL syntax** (similar to MySQL/PostgreSQL).
+        - String comparisons (like `WHERE city = 'new york'` or `WHERE status = "pending"`) are simulated to be **case-insensitive** for common text columns (`status`, `city`).
         - **Both single quotes (') and double quotes (") are accepted** for string literals in this simulation.
         - Your queries are evaluated by an AI for correctness and logic.
         - Query simulation is powered by DuckDB to show results on sample data.
-    """)
+        """)
+    
     col1, col2 = st.columns([2, 1])
     with col1:
         st.write("""
-        In this interactive quiz, you'll work with two sample tables:
-        - **Users Table**: User details like ID, name, email, age, and city.
-        - **Orders Table**: Order details like ID, user ID, amount, order date, and status.
+        Is interactive quiz mein, aap do sample tables ke saath kaam karenge:
+        - **Users Table**: User details jaise ID, naam, email, umar, aur sheher.
+        - **Orders Table**: Order details jaise ID, user ID, amount, order date, aur status.
         """)
     with col2:
         st.markdown("#### Tables Overview")
@@ -790,6 +479,7 @@ if not st.session_state.quiz_started:
             st.dataframe(pd.DataFrame(table_overview_data), hide_index=True)
         except Exception as e:
             st.error(f"Error displaying table overview: {e}")
+    
     st.write("### 🔍 Table Previews")
     try:
         tab1, tab2 = st.tabs(["Users Table", "Orders Table"])
@@ -797,8 +487,16 @@ if not st.session_state.quiz_started:
         with tab2: st.dataframe(orders_table, hide_index=True, use_container_width=True)
     except Exception as e:
         st.error(f"Error displaying table previews: {e}")
-
-    st.markdown("---")
+    
+    with st.expander("📝 Quiz Ke Baare Mein"):
+        st.write(f"""
+        - Aapko {len(sql_questions)} SQL query challenges solve karne honge.
+        - Har jawaab ke baad AI Mentor se immediate feedback milega.
+        - **SQL Dialect Focus:** Standard SQL (MySQL/PostgreSQL like).
+        - Case-insensitivity for `status` and `city` columns in `WHERE =` clauses is simulated.
+        - String literals can be enclosed in single quotes (`'...'`) or double quotes (`"..."`).
+        """)
+    
     if st.button("🚀 Start SQL Challenge!", type="primary"):
         st.session_state.quiz_started = True
         st.session_state.user_answers = []
@@ -808,27 +506,45 @@ if not st.session_state.quiz_started:
 # --- Quiz In Progress Screen ---
 elif st.session_state.quiz_started and not st.session_state.quiz_completed:
     st.title("✍️ SQL Query Challenge")
+    
     if st.session_state.user_answers:
         st.markdown("---")
-        st.subheader("📖 Previous Answers & Feedback")
+        st.subheader("📖 Ab Tak Ke Jawaab Aur Feedback")
         for i, ans_data in enumerate(st.session_state.user_answers):
             q_num = i + 1
             is_correct = ans_data.get('is_correct', False)
-            with st.expander(f"Question {q_num}: {ans_data['question']} {'✅' if is_correct else '❌'}", expanded=False):
-                st.write("**Your Answer:**")
+            with st.expander(f"Question {q_num}: {ans_data['question']} {get_emoji(is_correct)}", expanded=False):
+                st.write(f"**Aapka Jawaab:**")
                 st.code(ans_data.get('student_answer', '(No answer provided)'), language='sql')
-                st.write("**SQL Mentor Feedback:**")
+                st.write(f"**SQL Mentor Feedback:**")
                 feedback_text = ans_data.get("feedback", "_Feedback not available._")
                 st.markdown(feedback_text)
+                
                 st.markdown("---")
-                # [Display simulation results as in your code]
-
+                display_simulation("Simulated Result (Your Query Output)", ans_data.get("actual_result", "N/A"))
+                
+                show_expected = False
+                if not is_correct:
+                    show_expected = True
+                elif isinstance(ans_data.get("actual_result"), pd.DataFrame) and \
+                     isinstance(ans_data.get("expected_result"), pd.DataFrame) and \
+                     not ans_data["actual_result"].equals(ans_data["expected_result"]):
+                    show_expected = True
+                elif isinstance(ans_data.get("actual_result"), str) and \
+                     ans_data.get("actual_result") != ans_data.get("expected_result"):
+                    show_expected = True
+                
+                if show_expected:
+                    display_simulation("Simulated Result (Correct Query Output)", ans_data.get("expected_result", "N/A"))
+    
     st.markdown("---")
+    
     current_q_index = st.session_state.current_question
     question_data = sql_questions[current_q_index]
+    
     st.subheader(f"Question {current_q_index + 1} of {len(sql_questions)}")
     st.markdown(f"**{question_data['question']}**")
-
+    
     relevant_tables = question_data["relevant_tables"]
     if relevant_tables:
         st.markdown("**Sample Table Preview(s):**")
@@ -848,15 +564,34 @@ elif st.session_state.quiz_started and not st.session_state.quiz_completed:
                 st.warning(f"Data for table '{table_name}' not found.")
     else:
         st.info("No specific table context provided for this question.")
-
-    user_query = st.text_area("Write your SQL query here:", height=150, key=f"query_input_{current_q_index}")
-
+    
+    user_query = st.text_area("Apna SQL Query Yahan Likhein:", height=150, key=f"query_input_{current_q_index}")
+    
     if st.button("✅ Submit Query", key=f"submit_{current_q_index}"):
         if user_query and user_query.strip():
-            with st.spinner("🔄 Checking your query... Getting feedback and simulation results from AI Mentor..."):
-                # [Call your evaluate_answer_with_llm function and update session state as per your code]
-                # st.session_state.user_answers.append(...)
-                # st.session_state.current_question += 1 or st.session_state.quiz_completed = True
+            with st.spinner("🔄 Query ko check kiya ja raha hai... AI Mentor se feedback aur simulation results generate ho rahe hain..."):
+                feedback, is_correct, expected_res, actual_res, raw_llm = evaluate_answer_with_llm(
+                    question_data,
+                    user_query,
+                    original_tables
+                )
+                
+                st.session_state.user_answers.append({
+                    "question_number": current_q_index + 1,
+                    "question": question_data["question"],
+                    "student_answer": user_query,
+                    "feedback": feedback,
+                    "is_correct": is_correct,
+                    "expected_result": expected_res,
+                    "actual_result": actual_res,
+                    "raw_llm_output": raw_llm
+                })
+                
+                if current_q_index + 1 < len(sql_questions):
+                    st.session_state.current_question += 1
+                else:
+                    st.session_state.quiz_completed = True
+                
                 st.rerun()
         else:
             st.warning("⚠️ Please enter your SQL query before submitting.")
@@ -864,40 +599,84 @@ elif st.session_state.quiz_started and not st.session_state.quiz_completed:
 # --- Quiz Completed Screen ---
 elif st.session_state.quiz_completed:
     st.balloons()
-    st.markdown("""
-        <h1 style='color:#28a745;'>🎉 Congratulations!</h1>
-        <h2 style='color:#1f77b4;'>You have completed the SQL Challenge</h2>
-    """, unsafe_allow_html=True)
-    final_score = 0 # [Calculate score with your helper function]
+    st.markdown(
+        """
+        <div style='text-align:center; margin-top: 30px;'>
+            <h1 style='color:#28a745;'>🎉 Congratulations!</h1>
+            <h2 style='color:#1f77b4;'>You have completed the SQL Challenge</h2>
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
+    final_score = calculate_score(st.session_state.user_answers)
 
+    # --- Scoreboard Card ---
     st.markdown(
         f"""
-        <div class="score-card">
-            <h2>📊 Your Final Score</h2>
-            <div class="score">{final_score:.2f}%</div>
+        <div style='
+            background-color:#f8f9fa;
+            border-radius:15px;
+            box-shadow:0 4px 16px rgba(0,0,0,0.08);
+            padding:30px 0;
+            margin:30px 0;
+            text-align:center;
+        '>
+            <h2 style='color:#333;'>📊 Your Final Score</h2>
+            <div style='font-size:2.5rem; font-weight:bold; color:#28a745;'>{final_score:.2f}%</div>
             <div style='font-size:1.2rem; color:#888;'>Scoreboard</div>
         </div>
         """,
         unsafe_allow_html=True
     )
     st.progress(final_score / 100)
+
+    # --- Certificate Button Section ---
     if final_score >= 80:
-        st.success("🏆 Great job! You're eligible for a certificate.")
-        st.markdown("""
-            <a href="https://superprofile.bio/vp/corporate-bhaiya-sql-page" target="_blank" style="
-                background-color:#ffc107;
-                color:#121212;
-                font-size:1.5rem;
-                font-weight:600;
-                padding:18px 36px;
-                border-radius:10px;
-                text-decoration:none;
-                box-shadow:0 2px 8px rgba(0,0,0,0.11);
-                display:inline-block;
-                margin-bottom:2em;">🎓 Get Your Certificate</a>
-            """, unsafe_allow_html=True)
+        st.markdown(
+            """
+            <div style='text-align:center; margin-top: 20px;'>
+                <h3 style='color:#007bff;'>🏆 Great job! You're eligible for a certificate.</h3>
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
+        st.markdown(
+            """
+            <div style='display:flex; justify-content:center; margin-bottom: 30px;'>
+                <a href="https://superprofile.bio/vp/corporate-bhaiya-sql-page" target="_blank" style="
+                    background-color:#ffc107;
+                    color:#121212;
+                    font-size:1.5rem;
+                    font-weight:600;
+                    padding:18px 36px;
+                    border-radius:10px;
+                    text-decoration:none;
+                    box-shadow:0 2px 8px rgba(0,0,0,0.11);
+                    transition: background 0.2s;
+                ">🎓 Get Your Certificate</a>
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
     else:
-        st.info("📚 Keep practicing to earn a certificate!")
+        st.markdown(
+            """
+            <div style='text-align:center; margin-top: 20px;'>
+                <h3 style='color:#e74c3c;'>📚 Keep practicing to earn a certificate!</h3>
+                <a href="https://www.corporatebhaiya.com/" target="_blank" style="
+                    background-color:#6c757d;
+                    color:white;
+                    font-size:1.2rem;
+                    padding:12px 28px;
+                    border-radius:8px;
+                    text-decoration:none;
+                    margin-top:10px;
+                    display:inline-block;
+                ">🚀 Book a Mentor Session</a>
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
 
     st.markdown("---")
     if st.button("🔄 Try Again?"):
@@ -908,24 +687,108 @@ elif st.session_state.quiz_completed:
         st.session_state.show_detailed_feedback = False
         st.rerun()
 
-    st.subheader("📝 Your Answers & Feedback Summary")
+    
+    st.markdown("---")
+    st.subheader("📝 Aapke Jawaab Aur Feedback Ka Summary")
+    
     for i, ans_data in enumerate(st.session_state.user_answers):
         q_num = i + 1
         is_correct = ans_data.get('is_correct', False)
-        with st.expander(f"Question {q_num}: {ans_data['question']} {'✅' if is_correct else '❌'}", expanded=False):
-            st.write("**Your Answer:**")
+        with st.expander(f"Question {q_num}: {ans_data['question']} {get_emoji(is_correct)}", expanded=False):
+            st.write(f"**Aapka Jawaab:**")
             st.code(ans_data.get('student_answer', '(No answer provided)'), language='sql')
-            st.write("**SQL Mentor Feedback:**")
+            st.write(f"**SQL Mentor Feedback:**")
             feedback_text = ans_data.get("feedback", "_Feedback not available._")
             st.markdown(feedback_text)
             st.markdown("---")
-            # [Display simulation results as in your code]
-
+            display_simulation("Simulated Result (Your Query Output)", ans_data.get("actual_result", "N/A"))
+            
+            show_expected_final = False
+            if not is_correct:
+                show_expected_final = True
+            elif isinstance(ans_data.get("actual_result"), pd.DataFrame) and \
+                 isinstance(ans_data.get("expected_result"), pd.DataFrame) and \
+                 not ans_data["actual_result"].equals(ans_data["expected_result"]):
+                show_expected_final = True
+            elif isinstance(ans_data.get("actual_result"), str) and \
+                 ans_data.get("actual_result") != ans_data.get("expected_result"):
+                show_expected_final = True
+            
+            if show_expected_final:
+                display_simulation("Simulated Result (Correct Query Output)", ans_data.get("expected_result", "N/A"))
+    
     st.markdown("---")
-    if st.button("🔄 Try Again?"):
+    st.subheader("💡 AI Mentor Se Detailed Performance Analysis")
+    
+    if st.button("📊 Show Detailed Analysis", key="show_analysis"):
+        st.session_state.show_detailed_feedback = not st.session_state.show_detailed_feedback
+    
+    if st.session_state.show_detailed_feedback:
+        with st.spinner("🧠 Performance analysis generate ho raha hai..."):
+            performance_summary = analyze_performance(st.session_state.user_answers)
+            feedback_text = performance_summary.get("overall_feedback", "Analysis available nahi hai.")
+            
+            with st.container():
+                st.markdown('<div class="feedback-container">', unsafe_allow_html=True)
+                st.markdown('<div class="feedback-header">📈 Aapki Performance Ka Vistaar Se Analysis</div>', unsafe_allow_html=True)
+                
+                try:
+                    sections = re.split(r'(Overall Impression:|Strengths:|Areas for Improvement:|Next Steps / Encouragement:)', feedback_text)
+                    section_dict = {}
+                    for i in range(1, len(sections), 2):
+                        section_dict[sections[i].strip(':')] = sections[i+1].strip()
+                except:
+                    section_dict = {"Full Feedback": feedback_text}
+                
+                if "Overall Impression" in section_dict:
+                    st.markdown("### 🌟 Overall Impression")
+                    st.markdown(section_dict["Overall Impression"])
+                
+                st.markdown('<div class="feedback-section">', unsafe_allow_html=True)
+                st.markdown("### ✅ Strengths")
+                if "Strengths" in section_dict:
+                    strengths = section_dict["Strengths"].split('\n')
+                    for strength in strengths:
+                        if strength.strip():
+                            st.markdown(f'<div class="strength-item">✔ {strength.strip()}</div>', unsafe_allow_html=True)
+                elif performance_summary.get("strengths"):
+                    for strength in performance_summary["strengths"]:
+                        st.markdown(f'<div class="strength-item">✔ {strength}</div>', unsafe_allow_html=True)
+                else:
+                    st.markdown("Koi specific strengths identify nahi hue. Aur practice karo!")
+                st.markdown('</div>', unsafe_allow_html=True)
+                
+                st.markdown('<div class="feedback-section">', unsafe_allow_html=True)
+                st.markdown("### 📝 Areas for Improvement")
+                if "Areas for Improvement" in section_dict:
+                    weaknesses = section_dict["Areas for Improvement"].split('\n')
+                    for weakness in weaknesses:
+                        if weakness.strip():
+                            st.markdown(f'<div class="weakness-item">➡ {weakness.strip()}</div>', unsafe_allow_html=True)
+                elif performance_summary.get("weaknesses"):
+                    for weakness in performance_summary["weaknesses"]:
+                        st.markdown(f'<div class="weakness-item">➡ {weakness}</div>', unsafe_allow_html=True)
+                else:
+                    st.markdown("Koi major weaknesses nahi! Bas practice jari rakho.")
+                st.markdown('</div>', unsafe_allow_html=True)
+                
+                if "Next Steps / Encouragement" in section_dict:
+                    st.markdown("### 🚀 Next Steps")
+                    st.markdown(section_dict["Next Steps / Encouragement"])
+                
+                if "Full Feedback" in section_dict:
+                    st.markdown("### 📋 Complete Feedback")
+                    st.markdown(section_dict["Full Feedback"])
+                
+                st.markdown('</div>', unsafe_allow_html=True)
+    
+    st.markdown("---")
+    if st.button("🔄 Dobara Try Karein?"):
         st.session_state.user_answers = []
         st.session_state.current_question = 0
         st.session_state.quiz_started = False
         st.session_state.quiz_completed = False
         st.session_state.show_detailed_feedback = False
         st.rerun()
+
+
