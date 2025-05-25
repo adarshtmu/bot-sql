@@ -11,7 +11,7 @@ hide_streamlit_style = """
     <style>
         /* Apply zoom-out effect to the entire app */
         html, body, .stApp {
-            zoom: 0.95 !important; /* Adjust this value to control zoom level (e.g., 0.85 = 85% zoom) */
+            zoom: 0.1 !important; /* Adjust this value to control zoom level (e.g., 0.85 = 85% zoom) */
         }
         header {visibility: hidden;}
         #MainMenu {visibility: hidden;}
