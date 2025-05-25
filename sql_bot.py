@@ -3,53 +3,66 @@ import google.generativeai as genai
 import pandas as pd
 import re
 import duckdb
-import time
 
 # --- Custom CSS ---
 # Updated to increase font sizes globally and for specific elements
 # --- Custom CSS ---
-# --- Custom CSS ---
-# Remove duplicate comment and fix CSS structure
 hide_streamlit_style = """
     <style>
         /* Apply zoom-out effect to the entire app */
         html, body, .stApp {
-            zoom: 1.15 !important;
+            zoom: 1.15 !important; /* Adjust this value to control zoom level (e.g., 0.85 = 85% zoom) */
         }
         header {visibility: hidden;}
-        /* ... (keep other existing styles) ... */
-
-        /* Progress Circle Animation Fix */
-        .progress-circle {
-            width: 200px;
-            height: 200px;
-            margin: 0 auto;
+        #MainMenu {visibility: hidden;}
+        footer {visibility: hidden;}
+        .viewerBadge_container__1QSob {display: none !important;}
+        .stDeployButton {display: none !important;}
+        [data-testid="stToolbar"] {display: none !important;}
+        [data-testid="stDecoration"] {display: none !important;}
+        [data-testid="stDeployButton"] {display: none !important;}
+        .st-emotion-cache-1r8d6ul {display: none !important;}
+        .st-emotion-cache-1jicfl2 {display: none !important;}
+        /* Increase global font size */
+        body, .stMarkdown, .stText, .stTextArea, .stButton button, .stLinkButton a {
+            font-size: 18px !important;
         }
-        
-        .progress-svg {
-            transform: rotate(-90deg);
+        h1 {font-size: 48px !important;}
+        h2 {font-size: 36px !important;}
+        h3 {font-size: 30px !important;}
+        /* Style for Start SQL Challenge! button */
+        button[kind="primary"] {
+            font-size: 24px !important;
+            padding: 15px 30px !important;
+            color: white !important;
+            background-color: red;
+            border-radius: 10px;
         }
-        
-        .progress-bg {
-            fill: none;
-            stroke: #e9ecef;
-            stroke-width: 12;
+        /* Style for other buttons (Submit, Analysis, Retry) */
+        .stButton button:not([kind="primary"]), .stLinkButton a {
+            font-size: 20px !important;
+            padding: 12px 24px !important;
+            border-radius: 8px;
         }
-        
-        .progress-bar {
-            fill: none;
-            stroke: #00C851;
-            stroke-width: 12;
-            stroke-linecap: round;
+        /* Feedback container styling */
+        .feedback-container {
+            background-color: #f9f9f9;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            font-size: 18px !important;
         }
-
-        /* Score Text Alignment */
-        .score-text {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            text-align: center;
+        .feedback-header {
+            font-size: 24px !important;
+            color: #1f77b4;
+            margin-bottom: 10px;
+        }
+        .feedback-section {
+            margin-top: 15px;
+        }
+        .strength-item, .weakness-item {
+            font-size: 18px !important;
+            margin: 5px 0;
         }
     </style>
 """
@@ -100,24 +113,23 @@ original_tables = {
 }
 
 # --- SQL Questions List ---
-sql_questions = [
-    {"question": "Write a SQL query to get all details about users from the 'users' table.", "correct_answer_example": "SELECT * FROM users;", "sample_table": users_table, "relevant_tables": ["users"]},
-    {"question": "Write a SQL query to count the total number of users in the 'users' table.", "correct_answer_example": "SELECT COUNT(*) AS user_count FROM users;", "sample_table": users_table, "relevant_tables": ["users"]},
-    {"question": "Write a SQL query to get all users older than 30 from the 'users' table.", "correct_answer_example": "SELECT * FROM users WHERE age > 30;", "sample_table": users_table, "relevant_tables": ["users"]},
-    {"question": "Write a SQL query to find all orders with a status of 'Pending' from the 'orders' table.", "correct_answer_example": "SELECT * FROM orders WHERE status = 'Pending';", "sample_table": orders_table, "relevant_tables": ["orders"]},
-    {"question": "Write a SQL query to find users from 'chicago' in the 'users' table (test case-insensitivity).", "correct_answer_example": "SELECT * FROM users WHERE city = 'Chicago';", "sample_table": users_table, "relevant_tables": ["users"]},
-    {"question": "Write a SQL query to find the most recent order from the 'orders' table by order date.", "correct_answer_example": "SELECT * FROM orders ORDER BY order_date DESC LIMIT 1;", "sample_table": orders_table, "relevant_tables": ["orders"]},
-    {"question": "Write a SQL query to find the average order amount from the 'orders' table.", "correct_answer_example": "SELECT AVG(amount) AS average_amount FROM orders;", "sample_table": orders_table, "relevant_tables": ["orders"]},
-    {"question": "Write a SQL query to find users from 'New York' or 'Chicago' in the 'users' table.", "correct_answer_example": "SELECT * FROM users WHERE city IN ('New York', 'Chicago');", "sample_table": users_table, "relevant_tables": ["users"]},
-    {
-    "question": "Write a SQL query to list all users who have never placed any orders. Use the 'users' and 'orders' tables.",
-    "correct_answer_example": "SELECT u.* FROM users u LEFT JOIN orders o ON u.user_id = o.user_id WHERE o.user_id IS NULL;",
-    "sample_table": "users_table",
-    "relevant_tables": ["users", "orders"]
-    },
-    {"question": "Write a SQL query to calculate the total amount spent by each user by joining the 'users' and 'orders' tables.", "correct_answer_example": "SELECT u.name, SUM(o.amount) AS total_spent FROM users u JOIN orders o ON u.user_id = o.user_id GROUP BY u.name ORDER BY u.name;", "sample_table": users_table, "relevant_tables": ["users", "orders"]}
+sql_questions = [    {"question": "Write a SQL query to get all details about users from the 'users' table.", "correct_answer_example": "SELECT * FROM users;", "sample_table": users_table, "relevant_tables": ["users"]},
+  #   {"question": "Write a SQL query to count the total number of users in the 'users' table.", "correct_answer_example": "SELECT COUNT(*) AS user_count FROM users;", "sample_table": users_table, "relevant_tables": ["users"]},
+  #   {"question": "Write a SQL query to get all users older than 30 from the 'users' table.", "correct_answer_example": "SELECT * FROM users WHERE age > 30;", "sample_table": users_table, "relevant_tables": ["users"]},
+  #   {"question": "Write a SQL query to find all orders with a status of 'Pending' from the 'orders' table.", "correct_answer_example": "SELECT * FROM orders WHERE status = 'Pending';", "sample_table": orders_table, "relevant_tables": ["orders"]},
+  #   {"question": "Write a SQL query to find users from 'chicago' in the 'users' table (test case-insensitivity).", "correct_answer_example": "SELECT * FROM users WHERE city = 'Chicago';", "sample_table": users_table, "relevant_tables": ["users"]},
+  #   {"question": "Write a SQL query to find the most recent order from the 'orders' table by order date.", "correct_answer_example": "SELECT * FROM orders ORDER BY order_date DESC LIMIT 1;", "sample_table": orders_table, "relevant_tables": ["orders"]},
+  #   {"question": "Write a SQL query to find the average order amount from the 'orders' table.", "correct_answer_example": "SELECT AVG(amount) AS average_amount FROM orders;", "sample_table": orders_table, "relevant_tables": ["orders"]},
+  #   {"question": "Write a SQL query to find users from 'New York' or 'Chicago' in the 'users' table.", "correct_answer_example": "SELECT * FROM users WHERE city IN ('New York', 'Chicago');", "sample_table": users_table, "relevant_tables": ["users"]},
+  # {
+  #   "question": "Write a SQL query to list all users who have never placed any orders. Use the 'users' and 'orders' tables.",
+  #   "correct_answer_example": "SELECT u.* FROM users u LEFT JOIN orders o ON u.user_id = o.user_id WHERE o.user_id IS NULL;",
+  #   "sample_table": "users_table",
+  #   "relevant_tables": ["users", "orders"]
+  # },
+  #   {"question": "Write a SQL query to calculate the total amount spent by each user by joining the 'users' and 'orders' tables.", "correct_answer_example": "SELECT u.name, SUM(o.amount) AS total_spent FROM users u JOIN orders o ON u.user_id = o.user_id GROUP BY u.name ORDER BY u.name;", "sample_table": users_table, "relevant_tables": ["users", "orders"]}
 
-    ]
+   ]
 
 # --- Session State Initialization ---
 if "user_answers" not in st.session_state: st.session_state.user_answers = []
@@ -197,8 +209,8 @@ def simulate_query_duckdb(sql_query, tables_dict):
             catalog_match = re.search(r'catalog error:.*table with name "([^"]+)" does not exist', e_str)
             binder_match = re.search(r'(?:binder error|catalog error):.*column "([^"]+)" not found', e_str)
             syntax_match = re.search(r'parser error: syntax error at or near "([^"]+)"', e_str) \
-                                or re.search(r'parser error: syntax error at end of input', e_str) \
-                                or re.search(r'parser error: syntax error at:', e_str)
+                        or re.search(r'parser error: syntax error at end of input', e_str) \
+                        or re.search(r'parser error: syntax error at:', e_str)
             type_match = re.search(r'conversion error:.*try cast\("([^"]+)"', e_str)
             
             if catalog_match: hint = f"\n\n**Hint:** Table '{catalog_match.group(1)}' might be misspelled or doesn't exist. Available tables: {list(tables_dict.keys())}."
@@ -364,7 +376,7 @@ def analyze_performance(user_answers):
             incorrect_summary = "In sawaalon mein thodi galti hui:\n"
             for idx, item in enumerate(incorrect_ans):
                 feedback_snippet = item['feedback_received'][:150].strip() + ('...' if len(item['feedback_received']) > 150 else '')
-                incorrect_summary += f"  {idx+1}. Sawaal: {item['question']}\n      Aapka Jawaab: `{item['your_answer']}`\n      Feedback Mila: {feedback_snippet}\n"
+                incorrect_summary += f"  {idx+1}. Sawaal: {item['question']}\n     Aapka Jawaab: `{item['your_answer']}`\n     Feedback Mila: {feedback_snippet}\n"
             incorrect_summary = incorrect_summary.strip()
         else:
             incorrect_summary = "Koi galat jawaab nahi! Bahut badhiya!"
@@ -510,19 +522,11 @@ if not st.session_state.quiz_started:
         st.session_state.user_answers = []
         st.session_state.current_question = 0
         st.session_state.quiz_completed = False
-        st.experimental_rerun() # Rerun to switch to quiz screen
 
 # --- Quiz In Progress Screen ---
 elif st.session_state.quiz_started and not st.session_state.quiz_completed:
     st.title("✍️ SQL Query Challenge")
-
-    # Display Current Score
-    correct_count = sum(1 for ans in st.session_state.user_answers if ans.get("is_correct", False))
-    total_answered = len(st.session_state.user_answers)
-    current_score = calculate_score(st.session_state.user_answers)
     
-    st.progress(total_answered / len(sql_questions), text=f"**Progress:** {total_answered}/{len(sql_questions)} questions solved. **Correct:** {correct_count} (Score: {current_score:.2f}%)")
-
     if st.session_state.user_answers:
         st.markdown("---")
         st.subheader("📖 Ab Tak Ke Jawaab Aur Feedback")
@@ -556,153 +560,335 @@ elif st.session_state.quiz_started and not st.session_state.quiz_completed:
     st.markdown("---")
     
     current_q_index = st.session_state.current_question
-    if current_q_index < len(sql_questions):
-        question_data = sql_questions[current_q_index]
-        
-        st.subheader(f"Question {current_q_index + 1} of {len(sql_questions)}")
-        st.markdown(f"**{question_data['question']}**")
-        
-        relevant_tables = question_data["relevant_tables"]
-        if relevant_tables:
-            st.markdown("**Sample Table Preview(s):**")
-            # Create a list of tab names from relevant_tables
-            tab_names = [f"{name.capitalize()} Table" for name in relevant_tables]
-            
-            # Dynamically create tabs based on relevant_tables
-            selected_tabs = st.tabs(tab_names)
-            
+    question_data = sql_questions[current_q_index]
+    
+    st.subheader(f"Question {current_q_index + 1} of {len(sql_questions)}")
+    st.markdown(f"**{question_data['question']}**")
+    
+    relevant_tables = question_data["relevant_tables"]
+    if relevant_tables:
+        st.markdown("**Sample Table Preview(s):**")
+        if len(relevant_tables) > 1:
+            tabs = st.tabs([f"{name} Preview" for name in relevant_tables])
             for i, table_name in enumerate(relevant_tables):
-                with selected_tabs[i]:
+                with tabs[i]:
                     if table_name in original_tables:
-                        st.dataframe(original_tables[table_name], hide_index=True, use_container_width=True)
+                        st.dataframe(original_tables[table_name], hide_index=True, use_container_width=False)
                     else:
-                        st.warning(f"Table '{table_name}' not found in original_tables.")
-
-
-        user_sql_input = st.text_area("SQL Query Likhein Yahaan (Write your SQL query here):", height=150, key=f"sql_input_{current_q_index}",
-                                    placeholder="SELECT * FROM users WHERE age > 30;")
-        
-        col_submit, col_clear = st.columns([1, 1])
-        with col_submit:
-            if st.button("Submit Answer", type="primary"):
-                with st.spinner("Evaluating your SQL query..."):
-                    feedback, is_correct, expected_sim_result, actual_sim_result, llm_raw_output = \
-                        evaluate_answer_with_llm(question_data, user_sql_input, original_tables)
-                    
-                    st.session_state.user_answers.append({
-                        "question_index": current_q_index,
-                        "question": question_data["question"],
-                        "student_answer": user_sql_input,
-                        "feedback": feedback,
-                        "is_correct": is_correct,
-                        "expected_result": expected_sim_result,
-                        "actual_result": actual_sim_result,
-                        "llm_raw_output": llm_raw_output
-                    })
-                    st.session_state.current_question += 1
-                    if st.session_state.current_question >= len(sql_questions):
-                        st.session_state.quiz_completed = True
-                    st.experimental_rerun() # Rerun to update the UI with new feedback/question
-        with col_clear:
-            if st.button("Clear Input"):
-                st.session_state[f"sql_input_{current_q_index}"] = ""
-                st.experimental_rerun()
+                        st.warning(f"Data for table '{table_name}' not found.")
+        elif len(relevant_tables) == 1:
+            table_name = relevant_tables[0]
+            if table_name in original_tables:
+                st.dataframe(original_tables[table_name], hide_index=True, use_container_width=False)
+            else:
+                st.warning(f"Data for table '{table_name}' not found.")
     else:
-        st.session_state.quiz_completed = True
-        st.experimental_rerun()
+        st.info("No specific table context provided for this question.")
+    
+    user_query = st.text_area("Apna SQL Query Yahan Likhein:", height=150, key=f"query_input_{current_q_index}")
+    
+    if st.button("✅ Submit Query", key=f"submit_{current_q_index}"):
+        if user_query and user_query.strip():
+            with st.spinner("🔄 Query ko check kiya ja raha hai... AI Mentor se feedback aur simulation results generate ho rahe hain..."):
+                feedback, is_correct, expected_res, actual_res, raw_llm = evaluate_answer_with_llm(
+                    question_data,
+                    user_query,
+                    original_tables
+                )
+                
+                st.session_state.user_answers.append({
+                    "question_number": current_q_index + 1,
+                    "question": question_data["question"],
+                    "student_answer": user_query,
+                    "feedback": feedback,
+                    "is_correct": is_correct,
+                    "expected_result": expected_res,
+                    "actual_result": actual_res,
+                    "raw_llm_output": raw_llm
+                })
+                
+                if current_q_index + 1 < len(sql_questions):
+                    st.session_state.current_question += 1
+                else:
+                    st.session_state.quiz_completed = True
+                
+                st.rerun()
+        else:
+            st.warning("⚠️ Please enter your SQL query before submitting.")
 
 # --- Quiz Completed Screen ---
-elif st.session_state.quiz_started and st.session_state.quiz_completed:
-    st.title("🎉 Quiz Complete!")
+# --- Quiz Completed Screen ---
+elif st.session_state.quiz_completed:
+
+    # --- 1. Answer/Feedback Summary first ---
+    st.markdown("---")
+    st.subheader("📝 Aapke Jawaab Aur Feedback Ka Summary")
+    for i, ans_data in enumerate(st.session_state.user_answers):
+        q_num = i + 1
+        is_correct = ans_data.get('is_correct', False)
+        with st.expander(f"Question {q_num}: {ans_data['question']} {get_emoji(is_correct)}", expanded=False):
+            st.write(f"**Aapka Jawaab:**")
+            st.code(ans_data.get('student_answer', '(No answer provided)'), language='sql')
+            st.write(f"**SQL Mentor Feedback:**")
+            feedback_text = ans_data.get("feedback", "_Feedback not available._")
+            st.markdown(feedback_text)
+            st.markdown("---")
+            display_simulation("Simulated Result (Your Query Output)", ans_data.get("actual_result", "N/A"))
+            show_expected_final = False
+            if not is_correct:
+                show_expected_final = True
+            elif isinstance(ans_data.get("actual_result"), pd.DataFrame) and \
+                 isinstance(ans_data.get("expected_result"), pd.DataFrame) and \
+                 not ans_data["actual_result"].equals(ans_data["expected_result"]):
+                show_expected_final = True
+            elif isinstance(ans_data.get("actual_result"), str) and \
+                 ans_data.get("actual_result") != ans_data.get("expected_result"):
+                show_expected_final = True
+            if show_expected_final:
+                display_simulation("Simulated Result (Correct Query Output)", ans_data.get("expected_result", "N/A"))
+
+    # --- 2. Analysis Section ---
+    st.markdown("---")
+    st.subheader("💡 AI Mentor Se Detailed Performance Analysis")
+    if st.button("📊 Show Detailed Analysis", key="show_analysis"):
+        st.session_state.show_detailed_feedback = not st.session_state.show_detailed_feedback
+    if st.session_state.show_detailed_feedback:
+        with st.spinner("🧠 Performance analysis generate ho raha hai..."):
+            performance_summary = analyze_performance(st.session_state.user_answers)
+            feedback_text = performance_summary.get("overall_feedback", "Analysis available nahi hai.")
+            with st.container():
+                st.markdown('<div class="feedback-container">', unsafe_allow_html=True)
+                st.markdown('<div class="feedback-header">📈 Aapki Performance Ka Vistaar Se Analysis</div>', unsafe_allow_html=True)
+                try:
+                    sections = re.split(r'(Overall Impression:|Strengths:|Areas for Improvement:|Next Steps / Encouragement:)', feedback_text)
+                    section_dict = {}
+                    for i in range(1, len(sections), 2):
+                        section_dict[sections[i].strip(':')] = sections[i+1].strip()
+                except:
+                    section_dict = {"Full Feedback": feedback_text}
+                if "Overall Impression" in section_dict:
+                    st.markdown("### 🌟 Overall Impression")
+                    st.markdown(section_dict["Overall Impression"])
+                st.markdown('<div class="feedback-section">', unsafe_allow_html=True)
+                st.markdown("### ✅ Strengths")
+                if "Strengths" in section_dict:
+                    strengths = section_dict["Strengths"].split('\n')
+                    for strength in strengths:
+                        if strength.strip():
+                            st.markdown(f'<div class="strength-item">✔ {strength.strip()}</div>', unsafe_allow_html=True)
+                elif performance_summary.get("strengths"):
+                    for strength in performance_summary["strengths"]:
+                        st.markdown(f'<div class="strength-item">✔ {strength}</div>', unsafe_allow_html=True)
+                else:
+                    st.markdown("Koi specific strengths identify nahi hue. Aur practice karo!")
+                st.markdown('</div>', unsafe_allow_html=True)
+                st.markdown('<div class="feedback-section">', unsafe_allow_html=True)
+                st.markdown("### 📝 Areas for Improvement")
+                if "Areas for Improvement" in section_dict:
+                    weaknesses = section_dict["Areas for Improvement"].split('\n')
+                    for weakness in weaknesses:
+                        if weakness.strip():
+                            st.markdown(f'<div class="weakness-item">➡ {weakness.strip()}</div>', unsafe_allow_html=True)
+                elif performance_summary.get("weaknesses"):
+                    for weakness in performance_summary["weaknesses"]:
+                        st.markdown(f'<div class="weakness-item">➡ {weakness}</div>', unsafe_allow_html=True)
+                else:
+                    st.markdown("Koi major weaknesses nahi! Bas practice jari rakho.")
+                st.markdown('</div>', unsafe_allow_html=True)
+                if "Next Steps / Encouragement" in section_dict:
+                    st.markdown("### 🚀 Next Steps")
+                    st.markdown(section_dict["Next Steps / Encouragement"])
+                if "Full Feedback" in section_dict:
+                    st.markdown("### 📋 Complete Feedback")
+                    st.markdown(section_dict["Full Feedback"])
+                st.markdown('</div>', unsafe_allow_html=True)
+
+    # --- 3. Advanced Scorecard & Buttons LAST ---
     st.balloons()
-
-    final_score = calculate_score(st.session_state.user_answers)
-    correct_count = sum(1 for ans in st.session_state.user_answers if ans.get("is_correct", False))
-    total_questions = len(sql_questions)
-    
-    st.markdown(f"### Aapka Final Score: **{final_score:.2f}%**")
-    st.markdown(f"Aapne **{correct_count} out of {total_questions}** sawaal sahi kiye!")
-
-    # Progress Circle for Score
-    radius = 70
-    circumference = 2 * 3.14159 * radius
-    stroke_dashoffset = circumference - (final_score / 100) * circumference
-
-    st.markdown(f"""
-        <div class="progress-circle" style="position: relative; width: 200px; height: 200px; margin: 0 auto;">
-            <svg class="progress-svg" width="200" height="200" style="transform: rotate(-90deg);">
-                <circle class="progress-bg" cx="100" cy="100" r="{radius}"></circle>
-                <circle class="progress-bar" cx="100" cy="100" r="{radius}"
-                    stroke-dasharray="{circumference}"
-                    stroke-dashoffset="{stroke_dashoffset}"></circle>
-            </svg>
-            <div class="score-text" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center;">
-                <span style="font-size: 3em; font-weight: bold; color: {'#00C851' if final_score >= 80 else '#FF4B4B'};">{final_score:.0f}%</span>
-                <br>
-                <span style="font-size: 0.9em; color: #666;">Score</span>
-            </div>
+    # Optional: Show congratulations at top
+    st.markdown(
+        """
+        <div style='text-align:center; margin-top: 30px;'>
+            <h1 style='color:#28a745;'>🎉 Congratulations!</h1>
+            <h2 style='color:#1f77b4;'>You have completed the SQL Challenge</h2>
         </div>
-        """, unsafe_allow_html=True)
-    
+        """,
+        unsafe_allow_html=True
+    )
+
+    st.markdown("---")
+    final_score = calculate_score(st.session_state.user_answers)
+
+    # Determine dynamic colors and messages based on score
+    score_color = "#28a745" if final_score >= 80 else "#ff9800" if final_score >= 50 else "#e74c3c"
+    score_message = "Outstanding Performance! 🌟" if final_score >= 80 else "Good Effort! Keep Going! 💪" if final_score >= 50 else "Needs Improvement! 📚"
+    border_gradient = "linear-gradient(45deg, #28a745, #1f77b4)" if final_score >= 80 else "linear-gradient(45deg, #ff9800, #e74c3c)"
+
+    # Advanced Scorecard with animations, gradient border, and progress circle
+    st.markdown(
+        f"""
+        <style>
+            @keyframes fadeIn {{
+                0% {{ opacity: 0; transform: scale(0.95); }}
+                100% {{ opacity: 1; transform: scale(1); }}
+            }}
+            @keyframes progressCircle {{
+                0% {{ stroke-dasharray: 0 100; }}
+            }}
+            .scorecard-container {{
+                background: linear-gradient(135deg, #ffffff, #f1f5f9);
+                border: 4px solid transparent;
+                border-radius: 20px;
+                padding: 30px;
+                margin: 30px 0;
+                text-align: center;
+                position: relative;
+                box-shadow: 0 8px 24px rgba(0,0,0,0.1);
+                animation: fadeIn 0.8s ease-in-out;
+                background-clip: padding-box;
+                border-image: {border_gradient} 1;
+            }}
+            .scorecard-container::before {{
+                content: '';
+                position: absolute;
+                top: -4px; bottom: -4px; left: -4px; right: -4px;
+                background: {border_gradient};
+                z-index: -1;
+                border-radius: 24px;
+            }}
+            .scorecard-header {{
+                font-size: 2rem;
+                font-weight: 700;
+                color: #1f77b4;
+                margin-bottom: 10px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                gap: 10px;
+            }}
+            .score-value {{
+                font-size: 3rem;
+                font-weight: 900;
+                color: {score_color};
+                margin: 15px 0;
+                letter-spacing: 2px;
+            }}
+            .score-message {{
+                font-size: 1.3rem;
+                color: #555;
+                margin-bottom: 20px;
+            }}
+            .progress-circle {{
+                position: relative;
+                width: 120px;
+                height: 120px;
+                margin: 0 auto 20px;
+            }}
+            .progress-circle svg {{
+                transform: rotate(-90deg);
+            }}
+            .progress-circle circle {{
+                fill: none;
+                stroke-width: 10;
+                stroke-linecap: round;
+            }}
+            .progress-circle .bg-circle {{
+                stroke: #e0e0e0;
+            }}
+            .progress-circle .progress-ring {{
+                stroke: {score_color};
+                stroke-dasharray: {final_score} 100;
+                animation: progressCircle 1.5s ease-in-out;
+            }}
+            .progress-circle .percent-text {{
+                position: absolute;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                font-size: 1.5rem;
+                font-weight: bold;
+                color: {score_color};
+            }}
+            .scoreboard-label {{
+                font-size: 1.1rem;
+                color: #888;
+                margin-top: 10px;
+            }}
+        </style>
+        <div class="scorecard-container">
+            <div class="scorecard-header">
+                <span>📊 Your Final Score</span>
+                <span style="font-size: 1.5rem;">🏆</span>
+            </div>
+            <div class="progress-circle">
+                <svg width="120" height="120">
+                    <circle class="bg-circle" cx="60" cy="60" r="50"/>
+                    <circle class="progress-ring" cx="60" cy="60" r="50"/>
+                </svg>
+                <div class="percent-text">{final_score:.1f}%</div>
+            </div>
+            <div class="score-value">{final_score:.2f}%</div>
+            <div class="score-message">{score_message}</div>
+            <div class="scoreboard-label">Scoreboard</div>
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
+
     if final_score >= 80:
-        st.success("🏆 Badhai ho! Aapne 80% ya usse zyada score kiya hai. Aap certificate ke liye eligible hain!")
-        st.image("https://images.unsplash.com/photo-1543286386-779426f6a1d2", caption="Certificate Unlocked!", use_column_width=True)
-        st.download_button(
-            label="Download Your Certificate",
-            data="This is a placeholder for your SQL proficiency certificate. Congratulations!", # In a real app, generate a PDF
-            file_name="SQL_Proficiency_Certificate.txt",
-            mime="text/plain"
+        st.markdown(
+            """
+            <div style='text-align:center; margin-top: 20px;'>
+                <h3 style='color:#007bff;'>🏆 Great job! You're eligible for a certificate.</h3>
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
+        st.markdown(
+            """
+            <div style='display:flex; justify-content:center; margin-bottom: 30px;'>
+                <a href="https://superprofile.bio/vp/corporate-bhaiya-sql-page" target="_blank" style="
+                    background-color:#ffc107;
+                    color:#121212;
+                    font-size:1.5rem;
+                    font-weight:600;
+                    padding:18px 36px;
+                    border-radius:10px;
+                    text-decoration:none;
+                    box-shadow:0 2px 8px rgba(0,0,0,0.11);
+                    transition: background 0.2s;
+                ">🎓 Get Your Certificate</a>
+            </div>
+            """,
+            unsafe_allow_html=True
         )
     else:
-        st.warning("😕 Achha attempt tha, par certificate ke liye 80% chahiye. Thodi aur practice karo, ho jayega!")
-        if st.button("Practice Again"):
-            st.session_state.quiz_started = False
-            st.session_state.quiz_completed = False
-            st.session_state.user_answers = []
-            st.session_state.current_question = 0
-            st.experimental_rerun()
+        st.markdown(
+            """
+            <div style='text-align:center; margin-top: 20px;'>
+                <h3 style='color:#e74c3c;'>📚 Keep practicing to earn a certificate!</h3>
+                <a href="https://www.corporatebhaiya.com/" target="_blank" style="
+                    background-color:#6c757d;
+                    color:white;
+                    font-size:1.2rem;
+                    padding:12px 28px;
+                    border-radius:8px;
+                    text-decoration:none;
+                    margin-top:10px;
+                    display:inline-block;
+                ">🚀 Book a Mentor Session</a>
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
 
-    st.markdown("---")
-    st.subheader("📊 Performance Analysis")
-    performance_summary = analyze_performance(st.session_state.user_answers)
-    st.markdown(performance_summary["overall_feedback"])
-
-    st.markdown("---")
-    if st.button("Review All Your Answers"):
-        st.session_state.show_detailed_feedback = not st.session_state.show_detailed_feedback
-
-    if st.session_state.show_detailed_feedback:
-        st.subheader("📚 Detailed Review")
-        for i, ans_data in enumerate(st.session_state.user_answers):
-            q_num = i + 1
-            is_correct = ans_data.get('is_correct', False)
-            with st.expander(f"Question {q_num}: {ans_data['question']} {get_emoji(is_correct)}", expanded=True):
-                st.write(f"**Aapka Jawaab:**")
-                st.code(ans_data.get('student_answer', '(No answer provided)'), language='sql')
-                st.write(f"**SQL Mentor Feedback:**")
-                feedback_text = ans_data.get("feedback", "_Feedback not available._")
-                st.markdown(feedback_text)
-                
-                st.markdown("---")
-                display_simulation("Simulated Result (Your Query Output)", ans_data.get("actual_result", "N/A"))
-                
-                show_expected = False
-                if not is_correct:
-                    show_expected = True
-                elif isinstance(ans_data.get("actual_result"), pd.DataFrame) and \
-                     isinstance(ans_data.get("expected_result"), pd.DataFrame) and \
-                     not ans_data["actual_result"].equals(ans_data["expected_result"]):
-                    show_expected = True
-                elif isinstance(ans_data.get("actual_result"), str) and \
-                     ans_data.get("actual_result") != ans_data.get("expected_result"):
-                    show_expected = True
-                
-                if show_expected:
-                    display_simulation("Simulated Result (Correct Query Output)", ans_data.get("expected_result", "N/A"))
-
-    if st.button("Restart Quiz", key="restart_quiz_end"):
-        st.session_state.quiz_started = False
-        st.session_state.quiz_completed = False
+    # --- Try Again Button LAST ---
+    if st.button("🔄 Try Again?"):
         st.session_state.user_answers = []
         st.session_state.current_question = 0
-        st.experimental_rerun()
+        st.session_state.quiz_started = False
+        st.session_state.quiz_completed = False
+        st.session_state.show_detailed_feedback = False
+        st.rerun()
+
+
