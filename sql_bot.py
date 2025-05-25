@@ -487,7 +487,7 @@ def display_simulation(title, result_data):
         if result_data.empty:
             st.info("_(Simulation resulted in an empty table)_")
         else:
-            st.dataframe(result_data.reset_index(drop=True), hide_index=False, use_container_width=True)
+            st.dataframe(result_data.reset_index(drop=True), hide_index=True, use_container_width=True)
     elif isinstance(result_data, str) and "Simulation Error" in result_data:
         st.warning(result_data, icon="⚠️")
     elif result_data == "N/A":
@@ -535,8 +535,8 @@ if not st.session_state.quiz_started:
     st.write("### 🔍 Table Previews")
     try:
         tab1, tab2 = st.tabs(["Users Table", "Orders Table"])
-        with tab1: st.dataframe(users_table, hide_index=False, use_container_width=True)
-        with tab2: st.dataframe(orders_table, hide_index=False, use_container_width=True)
+        with tab1: st.dataframe(users_table, hide_index=True, use_container_width=True)
+        with tab2: st.dataframe(orders_table, hide_index=True, use_container_width=True)
     except Exception as e:
         st.error(f"Error displaying table previews: {e}")
     
