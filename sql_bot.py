@@ -5,589 +5,69 @@ import re
 import duckdb
 
 # --- Custom CSS ---
-import streamlit as st
-from datetime import datetime
-import time
-
-def inject_advanced_first_page_css():
-    """Inject advanced CSS styles for the first page of the learning platform"""
-    st.markdown("""
+# Updated to increase font sizes globally and for specific elements
+# --- Custom CSS ---
+hide_streamlit_style = """
     <style>
-    /* Import Google Fonts */
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap');
-    
-    /* Global Zoom and Base Styles */
-    html, body, .stApp {
-        zoom: 1.15 !important;
-        font-family: 'Inter', sans-serif !important;
-    }
-    
-    /* Hide Streamlit Elements */
-    header {visibility: hidden;}
-    #MainMenu {visibility: hidden;}
-    footer {visibility: hidden;}
-    .viewerBadge_container__1QSob {display: none !important;}
-    .stDeployButton {display: none !important;}
-    [data-testid="stToolbar"] {display: none !important;}
-    [data-testid="stDecoration"] {display: none !important;}
-    [data-testid="stDeployButton"] {display: none !important;}
-    .st-emotion-cache-1r8d6ul {display: none !important;}
-    .st-emotion-cache-1jicfl2 {display: none !important;}
-    
-    /* Main Container */
-    .main .block-container {
-        padding-top: 1rem;
-        padding-bottom: 3rem;
-        max-width: 1200px;
-    }
-    
-    /* Hero Section */
-    .hero-section {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        border-radius: 30px;
-        padding: 0;
-        margin: 2rem 0 3rem 0;
-        box-shadow: 0 25px 50px rgba(102, 126, 234, 0.4);
-        position: relative;
-        overflow: hidden;
-        animation: heroFloat 8s ease-in-out infinite;
-    }
-    
-    .hero-section::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        background: rgba(255, 255, 255, 0.1);
-        backdrop-filter: blur(10px);
-        border-radius: 30px;
-    }
-    
-    .hero-content {
-        position: relative;
-        z-index: 2;
-        padding: 4rem 3rem;
-        text-align: center;
-        color: white;
-    }
-    
-    .hero-title {
-        font-size: 3.5rem !important;
-        font-weight: 900 !important;
-        margin-bottom: 1rem !important;
-        text-shadow: 0 4px 8px rgba(0,0,0,0.3);
-        background: linear-gradient(135deg, #ffffff, #f8f9ff);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        background-clip: text;
-        animation: titleGlow 3s ease-in-out infinite alternate;
-    }
-    
-    .hero-subtitle {
-        font-size: 1.4rem !important;
-        font-weight: 400 !important;
-        opacity: 0.95;
-        margin-bottom: 2rem !important;
-        text-shadow: 0 2px 4px rgba(0,0,0,0.2);
-    }
-    
-    .hero-description {
-        font-size: 1.1rem !important;
-        opacity: 0.9;
-        margin-bottom: 3rem !important;
-        max-width: 600px;
-        margin-left: auto;
-        margin-right: auto;
-        line-height: 1.6;
-    }
-    
-    /* Platform Stats */
-    .stats-container {
-        display: flex;
-        justify-content: center;
-        gap: 3rem;
-        margin: 2rem 0;
-        flex-wrap: wrap;
-    }
-    
-    .stat-item {
-        text-align: center;
-        background: rgba(255, 255, 255, 0.15);
-        padding: 1.5rem;
-        border-radius: 20px;
-        backdrop-filter: blur(10px);
-        border: 1px solid rgba(255, 255, 255, 0.2);
-        min-width: 150px;
-        transition: transform 0.3s ease;
-    }
-    
-    .stat-item:hover {
-        transform: translateY(-5px);
-    }
-    
-    .stat-number {
-        font-size: 2.2rem !important;
-        font-weight: 800 !important;
-        color: #ffd700;
-        margin-bottom: 0.5rem;
-        text-shadow: 0 2px 4px rgba(0,0,0,0.3);
-    }
-    
-    .stat-label {
-        font-size: 0.9rem !important;
-        opacity: 0.9;
-        font-weight: 500;
-    }
-    
-    /* Feature Cards */
-    .features-section {
-        margin: 4rem 0;
-    }
-    
-    .features-title {
-        text-align: center;
-        font-size: 2.5rem !important;
-        font-weight: 800 !important;
-        margin-bottom: 3rem !important;
-        background: linear-gradient(135deg, #667eea, #764ba2);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        background-clip: text;
-    }
-    
-    .features-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-        gap: 2rem;
-        margin: 2rem 0;
-    }
-    
-    .feature-card {
-        background: rgba(255, 255, 255, 0.05);
-        backdrop-filter: blur(20px);
-        border: 1px solid rgba(255, 255, 255, 0.1);
-        border-radius: 24px;
-        padding: 2.5rem;
-        text-align: center;
-        transition: all 0.4s ease;
-        position: relative;
-        overflow: hidden;
-    }
-    
-    .feature-card::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: -100%;
-        width: 100%;
-        height: 100%;
-        background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
-        transition: left 0.6s ease;
-    }
-    
-    .feature-card:hover::before {
-        left: 100%;
-    }
-    
-    .feature-card:hover {
-        transform: translateY(-8px) scale(1.02);
-        box-shadow: 0 20px 40px rgba(102, 126, 234, 0.2);
-        border-color: rgba(255, 255, 255, 0.3);
-    }
-    
-    .feature-icon {
-        font-size: 3rem !important;
-        margin-bottom: 1.5rem;
-        display: block;
-        animation: iconFloat 4s ease-in-out infinite;
-    }
-    
-    .feature-title {
-        font-size: 1.4rem !important;
-        font-weight: 700 !important;
-        color: #2c3e50;
-        margin-bottom: 1rem !important;
-    }
-    
-    .feature-description {
-        font-size: 1rem !important;
-        color: #6c757d;
-        line-height: 1.6;
-        font-weight: 400;
-    }
-    
-    /* Start Button */
-    .start-button-container {
-        text-align: center;
-        margin: 4rem 0;
-        position: relative;
-    }
-    
-    .stButton > button[kind="primary"] {
-        background: linear-gradient(135deg, #ff6b6b, #ee5a24) !important;
-        color: white !important;
-        font-size: 1.6rem !important;
-        font-weight: 800 !important;
-        padding: 1.5rem 4rem !important;
-        border-radius: 20px !important;
-        border: none !important;
-        box-shadow: 0 15px 35px rgba(255, 107, 107, 0.4) !important;
-        transition: all 0.3s ease !important;
-        text-transform: uppercase;
-        letter-spacing: 1px;
-        position: relative;
-        overflow: hidden;
-    }
-    
-    .stButton > button[kind="primary"]:hover {
-        transform: translateY(-5px) scale(1.05) !important;
-        box-shadow: 0 25px 50px rgba(255, 107, 107, 0.6) !important;
-        background: linear-gradient(135deg, #ff5252, #d63031) !important;
-    }
-    
-    .stButton > button[kind="primary"]:active {
-        transform: translateY(-2px) scale(1.02) !important;
-    }
-    
-    /* Information Cards */
-    .info-section {
-        margin: 4rem 0;
-    }
-    
-    .info-card {
-        background: linear-gradient(135deg, #ffeaa7 0%, #fab1a0 100%);
-        border-radius: 20px;
-        padding: 2.5rem;
-        margin: 2rem 0;
-        box-shadow: 0 15px 35px rgba(255, 234, 167, 0.3);
-        position: relative;
-        overflow: hidden;
-    }
-    
-    .info-card::before {
-        content: '💡';
-        position: absolute;
-        top: 1rem;
-        right: 1rem;
-        font-size: 2rem;
-        animation: pulse 2s ease-in-out infinite;
-    }
-    
-    .info-title {
-        font-size: 1.6rem !important;
-        font-weight: 700 !important;
-        color: #2c3e50;
-        margin-bottom: 1rem !important;
-    }
-    
-    .info-content {
-        font-size: 1.1rem !important;
-        color: #5d6d7e;
-        line-height: 1.7;
-    }
-    
-    /* Quiz Preview */
-    .quiz-preview {
-        background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
-        border-radius: 20px;
-        padding: 2.5rem;
-        margin: 3rem 0;
-        box-shadow: 0 15px 35px rgba(168, 237, 234, 0.3);
-    }
-    
-    .preview-title {
-        font-size: 1.8rem !important;
-        font-weight: 700 !important;
-        color: #2c3e50;
-        text-align: center;
-        margin-bottom: 2rem !important;
-    }
-    
-    .preview-items {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-        gap: 1.5rem;
-    }
-    
-    .preview-item {
-        background: rgba(255, 255, 255, 0.7);
-        padding: 1.5rem;
-        border-radius: 15px;
-        text-align: center;
-        transition: transform 0.3s ease;
-    }
-    
-    .preview-item:hover {
-        transform: translateY(-3px);
-    }
-    
-    .preview-icon {
-        font-size: 2rem !important;
-        margin-bottom: 1rem;
-    }
-    
-    .preview-text {
-        font-size: 1rem !important;
-        color: #2c3e50;
-        font-weight: 500;
-    }
-    
-    /* Animations */
-    @keyframes heroFloat {
-        0%, 100% { transform: translateY(0px); }
-        50% { transform: translateY(-15px); }
-    }
-    
-    @keyframes titleGlow {
-        0% { text-shadow: 0 4px 8px rgba(0,0,0,0.3); }
-        100% { text-shadow: 0 4px 20px rgba(255,255,255,0.5); }
-    }
-    
-    @keyframes iconFloat {
-        0%, 100% { transform: translateY(0px); }
-        50% { transform: translateY(-10px); }
-    }
-    
-    @keyframes pulse {
-        0%, 100% { transform: scale(1); }
-        50% { transform: scale(1.1); }
-    }
-    
-    /* Responsive Design */
-    @media (max-width: 768px) {
-        .hero-title {
-            font-size: 2.5rem !important;
+        /* Apply zoom-out effect to the entire app */
+        html, body, .stApp {
+            zoom: 1.15 !important; /* Adjust this value to control zoom level (e.g., 0.85 = 85% zoom) */
         }
-        
-        .hero-content {
-            padding: 2.5rem 1.5rem;
+        header {visibility: hidden;}
+        #MainMenu {visibility: hidden;}
+        footer {visibility: hidden;}
+        .viewerBadge_container__1QSob {display: none !important;}
+        .stDeployButton {display: none !important;}
+        [data-testid="stToolbar"] {display: none !important;}
+        [data-testid="stDecoration"] {display: none !important;}
+        [data-testid="stDeployButton"] {display: none !important;}
+        .st-emotion-cache-1r8d6ul {display: none !important;}
+        .st-emotion-cache-1jicfl2 {display: none !important;}
+        /* Increase global font size */
+        body, .stMarkdown, .stText, .stTextArea, .stButton button, .stLinkButton a {
+            font-size: 18px !important;
         }
-        
-        .stats-container {
-            gap: 1.5rem;
+        h1 {font-size: 48px !important;}
+        h2 {font-size: 36px !important;}
+        h3 {font-size: 30px !important;}
+        /* Style for Start SQL Challenge! button */
+        button[kind="primary"] {
+            font-size: 24px !important;
+            padding: 15px 30px !important;
+            color: white !important;
+            background-color: red;
+            border-radius: 10px;
         }
-        
-        .features-grid {
-            grid-template-columns: 1fr;
+        /* Style for other buttons (Submit, Analysis, Retry) */
+        .stButton button:not([kind="primary"]), .stLinkButton a {
+            font-size: 20px !important;
+            padding: 12px 24px !important;
+            border-radius: 8px;
         }
-        
-        .stButton > button[kind="primary"] {
-            font-size: 1.3rem !important;
-            padding: 1.2rem 3rem !important;
+        /* Feedback container styling */
+        .feedback-container {
+            background-color: #f9f9f9;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            font-size: 18px !important;
         }
-    }
-    
-    /* Global font size increases */
-    body, .stMarkdown, .stText, .stTextArea {
-        font-size: 18px !important;
-    }
-    
-    h1 { font-size: 48px !important; }
-    h2 { font-size: 36px !important; }
-    h3 { font-size: 30px !important; }
+        .feedback-header {
+            font-size: 24px !important;
+            color: #1f77b4;
+            margin-bottom: 10px;
+        }
+        .feedback-section {
+            margin-top: 15px;
+        }
+        .strength-item, .weakness-item {
+            font-size: 18px !important;
+            margin: 5px 0;
+        }
     </style>
-    """, unsafe_allow_html=True)
+"""
+st.markdown(hide_streamlit_style, unsafe_allow_html=True)
 
-def display_hero_section():
-    """Display the main hero section"""
-    st.markdown("""
-    <div class="hero-section">
-        <div class="hero-content">
-            <h1 class="hero-title">🚀 SQL Master Challenge</h1>
-            <p class="hero-subtitle">Test Your Database Skills with AI-Powered Learning</p>
-            <p class="hero-description">
-                Take on our comprehensive SQL quiz designed by industry experts. 
-                Get instant feedback, detailed analysis, and earn your certification 
-                to boost your career in data science and analytics.
-            </p>
-            
-            <div class="stats-container">
-                <div class="stat-item">
-                    <div class="stat-number">10+</div>
-                    <div class="stat-label">Expert Questions</div>
-                </div>
-                <div class="stat-item">
-                    <div class="stat-number">AI</div>
-                    <div class="stat-label">Powered Feedback</div>
-                </div>
-                <div class="stat-item">
-                    <div class="stat-number">5★</div>
-                    <div class="stat-label">Industry Rating</div>
-                </div>
-            </div>
-        </div>
-    </div>
-    """, unsafe_allow_html=True)
-
-def display_features_section():
-    """Display the features section"""
-    st.markdown("""
-    <div class="features-section">
-        <h2 class="features-title">🎯 Why Choose Our SQL Challenge?</h2>
-        <div class="features-grid">
-            <div class="feature-card">
-                <span class="feature-icon">🧠</span>
-                <h3 class="feature-title">AI-Powered Analysis</h3>
-                <p class="feature-description">
-                    Get detailed feedback on your SQL queries with personalized 
-                    recommendations from our advanced AI mentor system.
-                </p>
-            </div>
-            
-            <div class="feature-card">
-                <span class="feature-icon">🏆</span>
-                <h3 class="feature-title">Industry Certification</h3>
-                <p class="feature-description">
-                    Earn a professional certificate upon scoring 80% or above. 
-                    Showcase your SQL skills to potential employers.
-                </p>
-            </div>
-            
-            <div class="feature-card">
-                <span class="feature-icon">📊</span>
-                <h3 class="feature-title">Real-Time Results</h3>
-                <p class="feature-description">
-                    See your query results instantly and compare them with 
-                    expected outputs for immediate learning.
-                </p>
-            </div>
-        </div>
-    </div>
-    """, unsafe_allow_html=True)
-
-def display_quiz_preview():
-    """Display quiz preview section"""
-    st.markdown("""
-    <div class="quiz-preview">
-        <h3 class="preview-title">📚 What You'll Learn & Practice</h3>
-        <div class="preview-items">
-            <div class="preview-item">
-                <div class="preview-icon">🔍</div>
-                <div class="preview-text">Advanced SELECT Queries</div>
-            </div>
-            <div class="preview-item">
-                <div class="preview-icon">🔗</div>
-                <div class="preview-text">JOIN Operations</div>
-            </div>
-            <div class="preview-item">
-                <div class="preview-icon">📈</div>
-                <div class="preview-text">Aggregate Functions</div>
-            </div>
-            <div class="preview-item">
-                <div class="preview-icon">🎯</div>
-                <div class="preview-text">Subqueries & CTEs</div>
-            </div>
-            <div class="preview-item">
-                <div class="preview-icon">⚡</div>
-                <div class="preview-text">Query Optimization</div>
-            </div>
-            <div class="preview-item">
-                <div class="preview-icon">🛠️</div>
-                <div class="preview-text">Data Manipulation</div>
-            </div>
-        </div>
-    </div>
-    """, unsafe_allow_html=True)
-
-def display_info_section():
-    """Display information and instructions"""
-    st.markdown("""
-    <div class="info-section">
-        <div class="info-card">
-            <h3 class="info-title">📋 Before You Start</h3>
-            <div class="info-content">
-                <strong>⏱️ Time Required:</strong> 20-30 minutes<br>
-                <strong>📝 Question Format:</strong> Practical SQL coding challenges<br>
-                <strong>🎯 Passing Score:</strong> 80% for certification<br>
-                <strong>🔄 Retakes:</strong> Unlimited attempts allowed<br>
-                <strong>💡 Tip:</strong> Read each question carefully and test your logic!
-            </div>
-        </div>
-    </div>
-    """, unsafe_allow_html=True)
-
-def display_start_button():
-    """Display the main start button"""
-    st.markdown('<div class="start-button-container">', unsafe_allow_html=True)
-    
-    col1, col2, col3 = st.columns([1, 2, 1])
-    with col2:
-        if st.button("🎯 Start SQL Challenge!", type="primary", use_container_width=True):
-            st.session_state.quiz_started = True
-            st.session_state.current_question = 0
-            st.session_state.user_answers = []
-            st.session_state.quiz_completed = False
-            st.rerun()
-    
-    st.markdown('</div>', unsafe_allow_html=True)
-
-def display_footer():
-    """Display footer section"""
-    st.markdown("""
-    <div style='margin-top: 4rem; text-align: center; padding: 3rem; background: linear-gradient(135deg, #667eea, #764ba2); border-radius: 20px; color: white;'>
-        <h3 style='margin-bottom: 1rem;'>🎓 Corporate Bhaiya Learning Platform</h3>
-        <p style='opacity: 0.9; font-size: 1.1rem; margin-bottom: 1rem;'>
-            Empowering careers through hands-on technical education
-        </p>
-        <div style='display: flex; justify-content: center; gap: 2rem; flex-wrap: wrap; margin-top: 2rem;'>
-            <a href="https://www.corporatebhaiya.com/" target="_blank" style="color: #ffd700; text-decoration: none; font-weight: 600;">
-                🌐 Visit Website
-            </a>
-            <a href="https://superprofile.bio/vp/corporate-bhaiya-sql-page" target="_blank" style="color: #ffd700; text-decoration: none; font-weight: 600;">
-                📜 View Certificates
-            </a>
-        </div>
-        <p style='opacity: 0.7; font-size: 0.9rem; margin-top: 2rem;'>
-            © 2024 Corporate Bhaiya. All rights reserved.
-        </p>
-    </div>
-    """, unsafe_allow_html=True)
-
-def display_advanced_first_page():
-    """Display the complete advanced first page"""
-    
-    # Inject custom CSS
-    inject_advanced_first_page_css()
-    
-    # Hero section
-    display_hero_section()
-    
-    # Features section
-    display_features_section()
-    
-    # Quiz preview
-    display_quiz_preview()
-    
-    # Information section
-    display_info_section()
-    
-    # Start button
-    display_start_button()
-    
-    # Footer
-    display_footer()
-
-# Usage example:
-def main():
-    """Main function to display the first page"""
-    st.set_page_config(
-        page_title="SQL Master Challenge",
-        page_icon="🚀",
-        layout="wide",
-        initial_sidebar_state="collapsed"
-    )
-    
-    # Check if quiz has started
-    if not st.session_state.get('quiz_started', False):
-        display_advanced_first_page()
-    else:
-        st.write("Quiz has started! (This would be your quiz logic)")
-
-# Uncomment to run
-# if __name__ == "__main__":
-#     main()
 # --- Set up Gemini API ---
 gemini_api_key = "AIzaSyAfzl_66GZsgaYjAM7cT2djVCBCAr86t2k"  # Replace with your Gemini API Key
 
@@ -1810,4 +1290,5 @@ elif st.session_state.quiz_completed:
     display_advanced_results_page(final_score , st.session_state.user_answers, analyze_performance)
     
     
+
 
