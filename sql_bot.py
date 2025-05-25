@@ -1247,7 +1247,7 @@ elif st.session_state.quiz_completed:
         display_advanced_scorecard(final_score)
         
         # Certificate section
-        display_certificate_section(final_score)
+        # display_certificate_section(final_score)
         
         # Separator
         st.markdown("---")
