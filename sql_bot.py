@@ -528,8 +528,8 @@ if not st.session_state.quiz_started:
     footer_html = """
     <div style='text-align: center; margin-top: 2rem; padding: 1.2rem; background: linear-gradient(135deg, #667eea, #764ba2); border-radius: 16px; color: white;'>
         <h3>🎓 Corporate Bhaiya Learning Platform</h3>
-        <p>Empowering careers through quality education</p>
-        <p style='opacity: 0.8; font-size: 0.9rem;'>© 2024 All rights reserved</p>
+        <p>Empowering careers through expert mentorship</p>
+        <p style='opacity: 0.8; font-size: 0.9rem;'>© 2025 All rights reserved</p>
     </div>
     """
     st.markdown(footer_html, unsafe_allow_html=True)
