@@ -7,6 +7,7 @@ import duckdb
 # --- Custom CSS ---
 # Updated to increase font sizes globally and for specific elements
 # --- Custom CSS ---
+# --- Custom CSS ---
 hide_streamlit_style = """
     <style>
         header {visibility: hidden;}
@@ -19,52 +20,55 @@ hide_streamlit_style = """
         [data-testid="stDeployButton"] {display: none !important;}
         .st-emotion-cache-1r8d6ul {display: none !important;}
         .st-emotion-cache-1jicfl2 {display: none !important;}
-        /* Increase global font size */
+        /* Global font size and styling */
         body, .stMarkdown, .stText, .stTextArea, .stButton button, .stLinkButton a {
-            font-size: 18px !important;
+            font-size: 16px !important;
+            color: #333 !important;
         }
-        h1 {font-size: 36px !important;}
-        h2 {font-size: 28px !important;}
-        h3 {font-size: 24px !important;}
+        h1 {
+            font-size: 32px !important;
+            font-weight: bold !important;
+            color: #1a1a1a !important;
+        }
+        h2 {
+            font-size: 24px !important;
+            font-weight: bold !important;
+            color: #1a1a1a !important;
+        }
+        h3 {
+            font-size: 20px !important;
+            font-weight: bold !important;
+            color: #1a1a1a !important;
+        }
         /* Style for Start SQL Challenge! button */
         button[kind="primary"] {
-            font-size: 24px !important;
-            padding: 15px 30px !important;
+            font-size: 18px !important;
+            padding: 12px 24px !important;
             color: white !important;
-            background-color: #007bff !important; /* Blue color as in the image */
-            border-radius: 10px !important;
+            background-color: #007bff !important;
+            border-radius: 8px !important;
             border: none !important;
         }
-        /* Style for other buttons (Submit, Analysis, Retry) */
+        /* Style for other buttons */
         .stButton button:not([kind="primary"]), .stLinkButton a {
-            font-size: 20px !important;
-            padding: 12px 24px !important;
+            font-size: 16px !important;
+            padding: 10px 20px !important;
             border-radius: 8px !important;
         }
-        /* Feedback container styling */
-        .feedback-container {
-            background-color: #f9f9f9;
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-            font-size: 18px !important;
-        }
-        .feedback-header {
-            font-size: 24px !important;
-            color: #1f77b4;
-            margin-bottom: 10px;
-        }
-        .feedback-section {
-            margin-top: 15px;
-        }
-        .strength-item, .weakness-item {
-            font-size: 18px !important;
-            margin: 5px 0;
-        }
-        /* Table styling to match the image */
+        /* Table styling */
         .stDataFrame {
             border: 1px solid #e0e0e0 !important;
             border-radius: 8px !important;
+        }
+        /* Expander styling */
+        .stExpander {
+            border: 1px solid #e0e0e0 !important;
+            border-radius: 8px !important;
+        }
+        /* Tab styling */
+        .stTabs [role="tab"] {
+            font-size: 16px !important;
+            padding: 8px 16px !important;
         }
     </style>
 """
