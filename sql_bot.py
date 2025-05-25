@@ -15,17 +15,14 @@ hide_streamlit_style = """
         .stDeployButton {display: none !important;}
         [data-testid="stToolbar"] {display: none !important;}
         [data-testid="stDecoration"] {display: none !important;}
-        [data-testid="stDeployButton"] {display: none !important;}
         .st-emotion-cache-1r8d6ul {display: none !important;}
         .st-emotion-cache-1jicfl2 {display: none !important;}
-        /* Increase global font size */
-        body, .stMarkdown, .stText, .stTextArea, .stButton button, .stLinkButton a {
+        body, .stMarkdown, .stText, .stTextArea, .stButton button {
             font-size: 18px !important;
         }
         h1 {font-size: 36px !important;}
         h2 {font-size: 28px !important;}
         h3 {font-size: 24px !important;}
-        /* Style for Start SQL Challenge! button */
         button[kind="primary"] {
             font-size: 24px !important;
             padding: 15px 30px !important;
@@ -33,13 +30,6 @@ hide_streamlit_style = """
             background-color: red;
             border-radius: 10px;
         }
-        /* Style for other buttons (Submit, Analysis, Retry) */
-        .stButton button:not([kind="primary"]), .stLinkButton a {
-            font-size: 20px !important;
-            padding: 12px 24px !important;
-            border-radius: 8px;
-        }
-        /* Feedback container styling */
         .feedback-container {
             background-color: #f9f9f9;
             padding: 20px;
@@ -61,6 +51,7 @@ hide_streamlit_style = """
         }
     </style>
 """
+st.markdown(hide_streamlit_style, unsafe_allow_html=True)
 st.markdown(hide_streamlit_style, unsafe_allow_html=True)
 
 # --- Set up Gemini API ---
