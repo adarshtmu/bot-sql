@@ -455,7 +455,7 @@ def display_simulation(title, result_data):
         if result_data.empty:
             st.info("_(Simulation resulted in an empty table)_")
         else:
-            st.dataframe(result_data.reset_index(drop=True), hide_index=True, use_container_width=True)
+            st.dataframe(result_data.reset_index(drop=True), hide_index=False, use_container_width=True)
     elif isinstance(result_data, str) and "Simulation Error" in result_data:
         st.warning(result_data, icon="⚠️")
     elif result_data == "N/A":
