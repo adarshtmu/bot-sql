@@ -618,17 +618,7 @@ elif st.session_state.quiz_started and not st.session_state.quiz_completed:
 
 # --- Quiz Completed Screen ---
 elif st.session_state.quiz_completed:
-    st.balloons()
-    # Optional: Show congratulations at top
-    st.markdown(
-        """
-        <div style='text-align:center; margin-top: 30px;'>
-            <h1 style='color:#28a745;'>🎉 Congratulations!</h1>
-            <h2 style='color:#1f77b4;'>You have completed the SQL Challenge</h2>
-        </div>
-        """,
-        unsafe_allow_html=True
-    )
+
 
     # --- 1. Answer/Feedback Summary first ---
     st.markdown("---")
@@ -714,6 +704,19 @@ elif st.session_state.quiz_completed:
                 st.markdown('</div>', unsafe_allow_html=True)
 
     # --- 3. Scorecard & Buttons LAST ---
+
+        # --- 3. Congratulations message just above the scorecard ---
+    st.balloons()
+    # Optional: Show congratulations at top
+    st.markdown(
+        """
+        <div style='text-align:center; margin-top: 30px;'>
+            <h1 style='color:#28a745;'>🎉 Congratulations!</h1>
+            <h2 style='color:#1f77b4;'>You have completed the SQL Challenge</h2>
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
     st.markdown("---")
     final_score = calculate_score(st.session_state.user_answers)
     st.markdown(
