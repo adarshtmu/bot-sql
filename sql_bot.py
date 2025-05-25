@@ -7,6 +7,7 @@ import duckdb
 # --- Custom CSS ---
 # Updated to increase font sizes globally and for specific elements
 hide_streamlit_style = """
+hide_streamlit_style = """
 <style>
     /* Hide Streamlit system UI */
     header, #MainMenu, footer,
@@ -16,60 +17,66 @@ hide_streamlit_style = """
     .st-emotion-cache-1jicfl2 {
         display: none !important;
     }
-    /* Set a soft background and modern font */
+
+    /* Background and font */
     body {
-        background: linear-gradient(120deg, #f4f8fb 0%, #e8f0fe 100%) !important;
+        background: linear-gradient(120deg, #f4faff 0%, #e6f6fe 100%) !important;
         font-family: 'Segoe UI', 'Roboto', 'Arial', sans-serif !important;
-        color: #222;
+        color: #354052;
     }
+
     /* Main container card */
     .main .block-container {
-        background: #fff;
+        background: #ffffff;
         border-radius: 22px;
-        box-shadow: 0 8px 32px rgba(44, 62, 80, 0.12);
+        box-shadow: 0 8px 32px rgba(44, 62, 80, 0.10);
         padding: 48px 32px 32px 32px;
         margin-top: 32px;
     }
+
     /* Headings */
     h1 {
-        font-size: 2.7rem !important;
+        font-size: 2.5rem !important;
         font-weight: 700;
-        color: #2e5aac !important;
+        color: #2574a9 !important;
         margin-bottom: 0.7em;
     }
     h2 {
         font-size: 2rem !important;
         font-weight: 600;
-        color: #4267b2 !important;
+        color: #21b6a8 !important;
         margin-bottom: 0.6em;
     }
     h3 {
         font-size: 1.3rem !important;
         font-weight: 500;
-        color: #4d4d4d !important;
+        color: #2574a9 !important;
         margin-bottom: 0.5em;
     }
+
     /* Paragraphs and regular text */
     .stMarkdown, .stText, .stTextArea, .stDataFrame, .stTable {
         font-size: 1.13rem !important;
-        color: #222 !important;
+        color: #354052 !important;
     }
-    /* Quiz progress bar/card */
+
+    /* Progress bar */
     .stProgress > div > div {
         background: linear-gradient(90deg, #36d1c4 30%, #5b86e5 100%) !important;
         border-radius: 10px;
         height: 1.3rem;
     }
+
     /* Primary button (e.g., Start, Submit) */
     button[kind="primary"], .stButton button {
         background: linear-gradient(90deg, #36d1c4, #5b86e5);
         color: #fff !important;
-        font-size: 1.25rem !important;
+        font-size: 1.15rem !important;
         font-weight: 600;
-        padding: 16px 36px !important;
+        padding: 15px 32px !important;
         border-radius: 10px;
         border: none;
-        box-shadow: 0 2px 8px rgba(44, 62, 80, 0.08);
+        box-shadow: 0 2px 8px rgba(44, 62, 80, 0.06);
         transition: background 0.2s;
         margin-bottom: 1em;
     }
@@ -77,6 +84,7 @@ hide_streamlit_style = """
         background: linear-gradient(90deg, #5b86e5, #36d1c4);
         color: #fff !important;
     }
+
     /* Tabs, Cards, and Table Previews */
     .stTabs [role="tablist"] {
         background: #f7fafc;
@@ -85,18 +93,19 @@ hide_streamlit_style = """
         box-shadow: 0 2px 12px rgba(44,62,80,0.06);
         margin-bottom: 2em;
     }
+
     /* Feedback/Analysis Container */
     .feedback-container {
-        background: #fdf6e3;
+        background: #f0fbf7;
         padding: 28px;
         border-radius: 18px;
-        box-shadow: 0 4px 18px rgba(40,167,69,.07);
+        box-shadow: 0 4px 18px rgba(33,182,168,.07);
         font-size: 1.13rem !important;
         margin-bottom: 2em;
     }
     .feedback-header {
         font-size: 1.5rem !important;
-        color: #2e5aac;
+        color: #2574a9;
         font-weight: 700;
         margin-bottom: 0.5em;
     }
@@ -106,16 +115,17 @@ hide_streamlit_style = """
         padding-left: 16px;
     }
     .strength-item {
-        color: #20b273;
+        color: #21b6a8;
         font-weight: 500;
     }
     .weakness-item {
-        color: #e74c3c;
+        color: #ec407a;
         font-weight: 500;
     }
+
     /* Certificate/Score Card */
     .score-card {
-        background: #e8f0fe;
+        background: #e6f6fe;
         border-radius: 16px;
         box-shadow: 0 4px 16px rgba(44,62,80,0.07);
         padding: 34px 0;
@@ -123,15 +133,16 @@ hide_streamlit_style = """
         margin: 34px 0;
     }
     .score-card h2 {
-        color: #2e5aac !important;
+        color: #2574a9 !important;
         font-size: 2.2rem !important;
         margin-bottom: 0.5em;
     }
     .score-card .score {
         font-size: 2.7rem;
         font-weight: bold;
-        color: #20b273;
+        color: #21b6a8;
     }
+
     /* Responsive adjustments */
     @media (max-width: 768px) {
         .main .block-container {
