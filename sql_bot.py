@@ -1088,48 +1088,48 @@ def display_certificate_section(final_score):
         </div>
         """, unsafe_allow_html=True)
 
-def display_question_summary(user_answers):
-    """Display question summary with advanced styling"""
-    st.markdown("""
-    <div style='text-align: center; margin: 3rem 0 2rem 0;'>
-        <h2 style='background: linear-gradient(135deg, #667eea, #764ba2); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-weight: 800; font-size: 2rem;'>
-            📝 Detailed Question Analysis
-        </h2>
-        <p style='color: #6c757d; font-size: 1.1rem;'>Review your performance on each question</p>
-    </div>
-    """, unsafe_allow_html=True)
+# def display_question_summary(user_answers):
+#     """Display question summary with advanced styling"""
+#     st.markdown("""
+#     <div style='text-align: center; margin: 3rem 0 2rem 0;'>
+#         <h2 style='background: linear-gradient(135deg, #667eea, #764ba2); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-weight: 800; font-size: 2rem;'>
+#             📝 Detailed Question Analysis
+#         </h2>
+#         <p style='color: #6c757d; font-size: 1.1rem;'>Review your performance on each question</p>
+#     </div>
+#     """, unsafe_allow_html=True)
     
-    for i, ans_data in enumerate(user_answers):
-        q_num = i + 1
-        is_correct = ans_data.get('is_correct', False)
-        emoji = "✅" if is_correct else "❌"
+#     for i, ans_data in enumerate(user_answers):
+#         q_num = i + 1
+#         is_correct = ans_data.get('is_correct', False)
+#         emoji = "✅" if is_correct else "❌"
         
-        with st.expander(f"Question {q_num}: {ans_data['question']} {emoji}", expanded=False):
-            # Question content container
-            st.markdown('<div class="question-content">', unsafe_allow_html=True)
+#         with st.expander(f"Question {q_num}: {ans_data['question']} {emoji}", expanded=False):
+#             # Question content container
+#             st.markdown('<div class="question-content">', unsafe_allow_html=True)
             
-            # Student answer
-            st.markdown("**🧑‍💻 Your Solution:**")
-            st.code(ans_data.get('student_answer', '(No answer provided)'), language='sql')
+#             # Student answer
+#             st.markdown("**🧑‍💻 Your Solution:**")
+#             st.code(ans_data.get('student_answer', '(No answer provided)'), language='sql')
             
-            # Feedback
-            st.markdown("**🤖 AI Mentor Feedback:**")
-            feedback_text = ans_data.get("feedback", "_Feedback not available._")
-            st.markdown(f'<div style="background: #f8f9fa; padding: 1rem; border-radius: 8px; border-left: 4px solid #007bff;">{feedback_text}</div>', unsafe_allow_html=True)
+#             # Feedback
+#             st.markdown("**🤖 AI Mentor Feedback:**")
+#             feedback_text = ans_data.get("feedback", "_Feedback not available._")
+#             st.markdown(f'<div style="background: #f8f9fa; padding: 1rem; border-radius: 8px; border-left: 4px solid #007bff;">{feedback_text}</div>', unsafe_allow_html=True)
             
-            # Results comparison
-            col1, col2 = st.columns(2)
+#             # Results comparison
+#             col1, col2 = st.columns(2)
             
-            with col1:
-                st.markdown("**📊 Your Query Result:**")
-                display_simulation_result(ans_data.get("actual_result", "N/A"))
+#             with col1:
+#                 st.markdown("**📊 Your Query Result:**")
+#                 display_simulation_result(ans_data.get("actual_result", "N/A"))
             
-            if not is_correct:
-                with col2:
-                    st.markdown("**✅ Expected Result:**")
-                    display_simulation_result(ans_data.get("expected_result", "N/A"))
+#             if not is_correct:
+#                 with col2:
+#                     st.markdown("**✅ Expected Result:**")
+#                     display_simulation_result(ans_data.get("expected_result", "N/A"))
             
-            st.markdown('</div>', unsafe_allow_html=True)
+#             st.markdown('</div>', unsafe_allow_html=True)
 
 def display_simulation_result(result):
     """Display simulation results with styling"""
