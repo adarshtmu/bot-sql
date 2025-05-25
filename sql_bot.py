@@ -717,7 +717,7 @@ elif st.session_state.quiz_completed:
         """,
         unsafe_allow_html=True
     )
-    st.markdown("---")
+st.markdown("---")
 final_score = calculate_score(st.session_state.user_answers)
 
 # Advanced scoring system with multiple metrics
@@ -1153,7 +1153,7 @@ st.markdown(
     unsafe_allow_html=True
 )
     # --- Try Again Button LAST ---
-    if st.button("🔄 Try Again?"):
+if st.button("🔄 Try Again?"):
         st.session_state.user_answers = []
         st.session_state.current_question = 0
         st.session_state.quiz_started = False
