@@ -728,242 +728,146 @@ def display_simulation(title, result_data):
 
 # --- Start Screen ---
 # --- Start Screen ---
+# Replace the Start Screen section with this enhanced version:
+
 if not st.session_state.quiz_started:
-    st.title("🚀 SQL Mentor - Interactive SQL Practice")
-    st.markdown("### Finish the Quiz Successfully to Unlock Your SQL Certificate")
+    # Hero Section
     st.markdown("""
-        **📌 Important Notes:**
-        - To be eligible for a certificate, you must achieve a score of at least 80%.
-        - This quiz uses standard **SQL syntax** (similar to MySQL/PostgreSQL).
-        - String comparisons (like `WHERE city = 'new york'` or `WHERE status = "pending"`) are simulated to be **case-insensitive** for common text columns (`status`, `city`).
-        - **Both single quotes (') and double quotes (") are accepted** for string literals in this simulation.
-        - Your queries are evaluated by an AI for correctness and logic.
-        - Query simulation is powered by DuckDB to show results on sample data.
-        """)
+        <div style='text-align: center; padding: 2rem 0; margin-bottom: 2rem;'>
+            <h1 style='font-size: 3rem; margin-bottom: 0.5rem;'>🚀 SQL Mentor</h1>
+            <p style='font-size: 1.2rem; color: #718096; margin-bottom: 1rem;'>Master SQL with Interactive Practice & AI-Powered Feedback</p>
+            <div style='background: linear-gradient(135deg, #667eea, #764ba2); color: white; padding: 12px 24px; border-radius: 50px; display: inline-block; font-weight: 500;'>
+                🎯 Earn Your SQL Certificate with 80%+ Score
+            </div>
+        </div>
+    """, unsafe_allow_html=True)
     
-    col1, col2 = st.columns([2, 1])
+    # Features Section
+    st.markdown("""
+        <div style='display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem; margin-bottom: 2rem;'>
+            <div style='background: white; padding: 1.5rem; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.08); border-left: 4px solid #48bb78;'>
+                <h3 style='color: #48bb78; margin-top: 0;'>🎯 Interactive Learning</h3>
+                <p>Practice with real SQL queries on sample databases with instant feedback</p>
+            </div>
+            <div style='background: white; padding: 1.5rem; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.08); border-left: 4px solid #4299e1;'>
+                <h3 style='color: #4299e1; margin-top: 0;'>🤖 AI-Powered Evaluation</h3>
+                <p>Get detailed feedback on your queries from our intelligent SQL mentor</p>
+            </div>
+            <div style='background: white; padding: 1.5rem; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.08); border-left: 4px solid #ed8936;'>
+                <h3 style='color: #ed8936; margin-top: 0;'>📊 Real-time Results</h3>
+                <p>See your query results instantly with DuckDB-powered simulation</p>
+            </div>
+        </div>
+    """, unsafe_allow_html=True)
+    
+    # Important Notes Card
+    with st.container():
+        st.markdown("""
+            <div style='background: linear-gradient(135deg, #f7fafc, #edf2f7); padding: 2rem; border-radius: 16px; border: 1px solid #e2e8f0; margin-bottom: 2rem;'>
+                <h3 style='color: #2d3748; margin-top: 0; display: flex; align-items: center;'>
+                    📌 <span style='margin-left: 0.5rem;'>Quiz Guidelines</span>
+                </h3>
+                <div style='display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem;'>
+                    <div style='background: white; padding: 1rem; border-radius: 8px;'>
+                        <strong>🎯 Certificate Requirement:</strong><br>
+                        Score 80%+ to earn your SQL certificate
+                    </div>
+                    <div style='background: white; padding: 1rem; border-radius: 8px;'>
+                        <strong>💻 SQL Syntax:</strong><br>
+                        Standard SQL (MySQL/PostgreSQL style)
+                    </div>
+                    <div style='background: white; padding: 1rem; border-radius: 8px;'>
+                        <strong>🔍 Case Sensitivity:</strong><br>
+                        City & status comparisons are case-insensitive
+                    </div>
+                    <div style='background: white; padding: 1rem; border-radius: 8px;'>
+                        <strong>📝 Quote Flexibility:</strong><br>
+                        Both single (') and double (") quotes accepted
+                    </div>
+                </div>
+            </div>
+        """, unsafe_allow_html=True)
+    
+    # Tables Overview Section
+    col1, col2 = st.columns([3, 2])
+    
     with col1:
-        st.write("""
-        Is interactive quiz mein, aap do sample tables ke saath kaam karenge:
-        - **Users Table**: User details jaise ID, naam, email, umar, aur sheher.
-        - **Orders Table**: Order details jaise ID, user ID, amount, order date, aur status.
-        """)
+        st.markdown("""
+            <div style='background: white; padding: 1.5rem; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.08);'>
+                <h3 style='color: #2d3748; margin-top: 0;'>🗃️ Database Overview</h3>
+                <p style='color: #718096; margin-bottom: 1.5rem;'>You'll work with two interconnected tables representing a simple e-commerce system:</p>
+                <div style='display: flex; gap: 1rem; margin-bottom: 1rem;'>
+                    <div style='flex: 1; background: #f7fafc; padding: 1rem; border-radius: 8px; border-left: 3px solid #4299e1;'>
+                        <strong>👥 Users Table</strong><br>
+                        <small>Customer information, demographics</small>
+                    </div>
+                    <div style='flex: 1; background: #f7fafc; padding: 1rem; border-radius: 8px; border-left: 3px solid #48bb78;'>
+                        <strong>🛒 Orders Table</strong><br>
+                        <small>Purchase history, order details</small>
+                    </div>
+                </div>
+            </div>
+        """, unsafe_allow_html=True)
+    
     with col2:
-        st.markdown("#### Tables Overview")
+        st.markdown("#### 📊 Quick Stats")
         try:
-            table_overview_data = {"Table": list(original_tables.keys()),
-                                   "Rows": [len(df) for df in original_tables.values()],
-                                   "Columns": [len(df.columns) for df in original_tables.values()]}
-            st.dataframe(pd.DataFrame(table_overview_data), hide_index=True)
+            table_overview_data = {
+                "Table": ["👥 Users", "🛒 Orders"],
+                "Rows": [len(df) for df in original_tables.values()],
+                "Columns": [len(df.columns) for df in original_tables.values()]
+            }
+            st.dataframe(pd.DataFrame(table_overview_data), hide_index=True, use_container_width=True)
         except Exception as e:
             st.error(f"Error displaying table overview: {e}")
     
-    st.write("### 🔍 Table Previews")
+    # Table Previews with Enhanced UI
+    st.markdown("### 🔍 Sample Data Preview")
     try:
-        tab1, tab2 = st.tabs(["Users Table", "Orders Table"])
-        with tab1: st.dataframe(users_table, hide_index=True, use_container_width=True)
-        with tab2: st.dataframe(orders_table, hide_index=True, use_container_width=True)
+        tab1, tab2 = st.tabs(["👥 Users Table", "🛒 Orders Table"])
+        with tab1: 
+            st.markdown("**Customer information including demographics and contact details**")
+            st.dataframe(users_table, hide_index=True, use_container_width=True)
+        with tab2: 
+            st.markdown("**Order history with amounts, dates, and status tracking**")
+            st.dataframe(orders_table, hide_index=True, use_container_width=True)
     except Exception as e:
         st.error(f"Error displaying table previews: {e}")
     
-    with st.expander("📝 Quiz Ke Baare Mein"):
-        st.write(f"""
-        - Aapko {len(sql_questions)} SQL query challenges solve karne honge.
-        - Har jawaab ke baad AI Mentor se immediate feedback milega.
-        - **SQL Dialect Focus:** Standard SQL (MySQL/PostgreSQL like).
-        - Case-insensitivity for `status` and `city` columns in `WHERE =` clauses is simulated.
-        - String literals can be enclosed in single quotes (`'...'`) or double quotes (`"..."`).
-        """)
+    # Challenge Information Expander
+    with st.expander("📚 Challenge Details & Learning Path", expanded=False):
+        st.markdown(f"""
+        <div style='background: #f8fafc; padding: 1.5rem; border-radius: 12px; margin: 1rem 0;'>
+            <h4 style='color: #2d3748; margin-top: 0;'>🎯 What You'll Learn</h4>
+            <div style='display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 1.5rem;'>
+                <div>• Basic SELECT statements</div>
+                <div>• WHERE clause filtering</div>
+                <div>• JOIN operations</div>
+                <div>• Aggregate functions</div>
+                <div>• Data sorting & grouping</div>
+                <div>• Case-insensitive matching</div>
+            </div>
+            
+            <h4 style='color: #2d3748;'>📝 Challenge Structure</h4>
+            <p><strong>{len(sql_questions)} Progressive Questions</strong> - From basic queries to complex joins</p>
+            <p><strong>Instant Feedback</strong> - AI mentor provides detailed explanation for each answer</p>
+            <p><strong>Real Results</strong> - See actual query output on sample data</p>
+            
+            <div style='background: linear-gradient(135deg, #fef5e7, #fed7aa); padding: 1rem; border-radius: 8px; margin-top: 1rem;'>
+                <strong>💡 Pro Tip:</strong> Take your time to understand each question. The AI mentor will help you learn from mistakes!
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
     
-    if st.button("🚀 Start SQL Challenge!", type="primary"):
+    # Call to Action
+    st.markdown("<div style='text-align: center; margin: 3rem 0;'>", unsafe_allow_html=True)
+    if st.button("🚀 Start Your SQL Journey", type="primary"):
         st.session_state.quiz_started = True
         st.session_state.user_answers = []
         st.session_state.current_question = 0
         st.session_state.quiz_completed = False
-
-# --- Quiz In Progress Screen ---
-elif st.session_state.quiz_started and not st.session_state.quiz_completed:
-    st.title("✍️ SQL Query Challenge")
-    
-    if st.session_state.user_answers:
-        st.markdown("---")
-        st.subheader("📖 Ab Tak Ke Jawaab Aur Feedback")
-        for i, ans_data in enumerate(st.session_state.user_answers):
-            q_num = i + 1
-            is_correct = ans_data.get('is_correct', False)
-            with st.expander(f"Question {q_num}: {ans_data['question']} {get_emoji(is_correct)}", expanded=False):
-                st.write(f"**Aapka Jawaab:**")
-                st.code(ans_data.get('student_answer', '(No answer provided)'), language='sql')
-                st.write(f"**SQL Mentor Feedback:**")
-                feedback_text = ans_data.get("feedback", "_Feedback not available._")
-                st.markdown(feedback_text)
-                
-                st.markdown("---")
-                display_simulation("Simulated Result (Your Query Output)", ans_data.get("actual_result", "N/A"))
-                
-                show_expected = False
-                if not is_correct:
-                    show_expected = True
-                elif isinstance(ans_data.get("actual_result"), pd.DataFrame) and \
-                     isinstance(ans_data.get("expected_result"), pd.DataFrame) and \
-                     not ans_data["actual_result"].equals(ans_data["expected_result"]):
-                    show_expected = True
-                elif isinstance(ans_data.get("actual_result"), str) and \
-                     ans_data.get("actual_result") != ans_data.get("expected_result"):
-                    show_expected = True
-                
-                if show_expected:
-                    display_simulation("Simulated Result (Correct Query Output)", ans_data.get("expected_result", "N/A"))
-    
-    st.markdown("---")
-    
-    current_q_index = st.session_state.current_question
-    question_data = sql_questions[current_q_index]
-    
-    st.subheader(f"Question {current_q_index + 1} of {len(sql_questions)}")
-    st.markdown(f"**{question_data['question']}**")
-    
-    relevant_tables = question_data["relevant_tables"]
-    if relevant_tables:
-        st.markdown("**Sample Table Preview(s):**")
-        if len(relevant_tables) > 1:
-            tabs = st.tabs([f"{name} Preview" for name in relevant_tables])
-            for i, table_name in enumerate(relevant_tables):
-                with tabs[i]:
-                    if table_name in original_tables:
-                        st.dataframe(original_tables[table_name], hide_index=True, use_container_width=True)
-                    else:
-                        st.warning(f"Data for table '{table_name}' not found.")
-        elif len(relevant_tables) == 1:
-            table_name = relevant_tables[0]
-            if table_name in original_tables:
-                st.dataframe(original_tables[table_name], hide_index=True, use_container_width=True)
-            else:
-                st.warning(f"Data for table '{table_name}' not found.")
-    else:
-        st.info("No specific table context provided for this question.")
-    
-    user_query = st.text_area("Apna SQL Query Yahan Likhein:", height=150, key=f"query_input_{current_q_index}")
-    
-    if st.button("✅ Submit Query", key=f"submit_{current_q_index}"):
-        if user_query and user_query.strip():
-            with st.spinner("🔄 Query ko check kiya ja raha hai... AI Mentor se feedback aur simulation results generate ho rahe hain..."):
-                feedback, is_correct, expected_res, actual_res, raw_llm = evaluate_answer_with_llm(
-                    question_data,
-                    user_query,
-                    original_tables
-                )
-                
-                st.session_state.user_answers.append({
-                    "question_number": current_q_index + 1,
-                    "question": question_data["question"],
-                    "student_answer": user_query,
-                    "feedback": feedback,
-                    "is_correct": is_correct,
-                    "expected_result": expected_res,
-                    "actual_result": actual_res,
-                    "raw_llm_output": raw_llm
-                })
-                
-                if current_q_index + 1 < len(sql_questions):
-                    st.session_state.current_question += 1
-                else:
-                    st.session_state.quiz_completed = True
-                
-                st.rerun()
-        else:
-            st.warning("⚠️ Please enter your SQL query before submitting.")
-
-# --- Quiz Completed Screen ---
-elif st.session_state.quiz_completed:
-    st.balloons()
-    st.markdown(
-        """
-        <div style='text-align:center; margin-top: 30px;'>
-            <h1 style='color:#28a745;'>🎉 Congratulations!</h1>
-            <h2 style='color:#1f77b4;'>You have completed the SQL Challenge</h2>
-        </div>
-        """,
-        unsafe_allow_html=True
-    )
-    final_score = calculate_score(st.session_state.user_answers)
-
-    # --- Scoreboard Card ---
-    st.markdown(
-        f"""
-        <div style='
-            background-color:#f8f9fa;
-            border-radius:15px;
-            box-shadow:0 4px 16px rgba(0,0,0,0.08);
-            padding:30px 0;
-            margin:30px 0;
-            text-align:center;
-        '>
-            <h2 style='color:#333;'>📊 Your Final Score</h2>
-            <div style='font-size:2.5rem; font-weight:bold; color:#28a745;'>{final_score:.2f}%</div>
-            <div style='font-size:1.2rem; color:#888;'>Scoreboard</div>
-        </div>
-        """,
-        unsafe_allow_html=True
-    )
-    st.progress(final_score / 100)
-
-    # --- Certificate Button Section ---
-    if final_score >= 80:
-        st.markdown(
-            """
-            <div style='text-align:center; margin-top: 20px;'>
-                <h3 style='color:#007bff;'>🏆 Great job! You're eligible for a certificate.</h3>
-            </div>
-            """,
-            unsafe_allow_html=True
-        )
-        st.markdown(
-            """
-            <div style='display:flex; justify-content:center; margin-bottom: 30px;'>
-                <a href="https://superprofile.bio/vp/corporate-bhaiya-sql-page" target="_blank" style="
-                    background-color:#ffc107;
-                    color:#121212;
-                    font-size:1.5rem;
-                    font-weight:600;
-                    padding:18px 36px;
-                    border-radius:10px;
-                    text-decoration:none;
-                    box-shadow:0 2px 8px rgba(0,0,0,0.11);
-                    transition: background 0.2s;
-                ">🎓 Get Your Certificate</a>
-            </div>
-            """,
-            unsafe_allow_html=True
-        )
-    else:
-        st.markdown(
-            """
-            <div style='text-align:center; margin-top: 20px;'>
-                <h3 style='color:#e74c3c;'>📚 Keep practicing to earn a certificate!</h3>
-                <a href="https://www.corporatebhaiya.com/" target="_blank" style="
-                    background-color:#6c757d;
-                    color:white;
-                    font-size:1.2rem;
-                    padding:12px 28px;
-                    border-radius:8px;
-                    text-decoration:none;
-                    margin-top:10px;
-                    display:inline-block;
-                ">🚀 Book a Mentor Session</a>
-            </div>
-            """,
-            unsafe_allow_html=True
-        )
-
-    st.markdown("---")
-    if st.button("🔄 Try Again?"):
-        st.session_state.user_answers = []
-        st.session_state.current_question = 0
-        st.session_state.quiz_started = False
-        st.session_state.quiz_completed = False
-        st.session_state.show_detailed_feedback = False
         st.rerun()
+    st.markdown("</div>", unsafe_allow_html=True)
 
     
     st.markdown("---")
