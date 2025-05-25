@@ -7,35 +7,144 @@ import duckdb
 # --- Custom CSS ---
 # Updated to increase font sizes globally and for specific elements
 hide_streamlit_style = """
-    st.markdown("""
-        <style>
-        /* Hide Streamlit default header and footer */
-        #MainMenu {visibility: hidden;}
-        footer {visibility: hidden;}
-        header {visibility: hidden;}
-        
-        /* Custom container for test output */
-        .test-result {
-            background: linear-gradient(90deg, #2d2d2d, #434343);  
-            color: #fff !important;
-            padding: 1.5rem;
-            margin: 1.5rem 0;
-            border-radius: 12px;
-            box-shadow: 0 4px 24px rgba(0,0,0,0.18);
-            font-size: 1.2rem;
-            font-family: 'Segoe UI', Arial, sans-serif;
-            font-weight: 500;
-            letter-spacing: 0.5px;
+<style>
+    /* Hide Streamlit system UI */
+    header, #MainMenu, footer,
+    .viewerBadge_container__1QSob, .stDeployButton,
+    [data-testid="stToolbar"], [data-testid="stDecoration"],
+    [data-testid="stDeployButton"], .st-emotion-cache-1r8d6ul,
+    .st-emotion-cache-1jicfl2 {
+        display: none !important;
+    }
+    /* Set a soft background and modern font */
+    body {
+        background: linear-gradient(120deg, #f4f8fb 0%, #e8f0fe 100%) !important;
+        font-family: 'Segoe UI', 'Roboto', 'Arial', sans-serif !important;
+        color: #222;
+    }
+    /* Main container card */
+    .main .block-container {
+        background: #fff;
+        border-radius: 22px;
+        box-shadow: 0 8px 32px rgba(44, 62, 80, 0.12);
+        padding: 48px 32px 32px 32px;
+        margin-top: 32px;
+    }
+    /* Headings */
+    h1 {
+        font-size: 2.7rem !important;
+        font-weight: 700;
+        color: #2e5aac !important;
+        margin-bottom: 0.7em;
+    }
+    h2 {
+        font-size: 2rem !important;
+        font-weight: 600;
+        color: #4267b2 !important;
+        margin-bottom: 0.6em;
+    }
+    h3 {
+        font-size: 1.3rem !important;
+        font-weight: 500;
+        color: #4d4d4d !important;
+        margin-bottom: 0.5em;
+    }
+    /* Paragraphs and regular text */
+    .stMarkdown, .stText, .stTextArea, .stDataFrame, .stTable {
+        font-size: 1.13rem !important;
+        color: #222 !important;
+    }
+    /* Quiz progress bar/card */
+    .stProgress > div > div {
+        background: linear-gradient(90deg, #36d1c4 30%, #5b86e5 100%) !important;
+        border-radius: 10px;
+        height: 1.3rem;
+    }
+    /* Primary button (e.g., Start, Submit) */
+    button[kind="primary"], .stButton button {
+        background: linear-gradient(90deg, #36d1c4, #5b86e5);
+        color: #fff !important;
+        font-size: 1.25rem !important;
+        font-weight: 600;
+        padding: 16px 36px !important;
+        border-radius: 10px;
+        border: none;
+        box-shadow: 0 2px 8px rgba(44, 62, 80, 0.08);
+        transition: background 0.2s;
+        margin-bottom: 1em;
+    }
+    button[kind="primary"]:hover, .stButton button:hover {
+        background: linear-gradient(90deg, #5b86e5, #36d1c4);
+        color: #fff !important;
+    }
+    /* Tabs, Cards, and Table Previews */
+    .stTabs [role="tablist"] {
+        background: #f7fafc;
+        padding: 0.7em 1em;
+        border-radius: 12px;
+        box-shadow: 0 2px 12px rgba(44,62,80,0.06);
+        margin-bottom: 2em;
+    }
+    /* Feedback/Analysis Container */
+    .feedback-container {
+        background: #fdf6e3;
+        padding: 28px;
+        border-radius: 18px;
+        box-shadow: 0 4px 18px rgba(40,167,69,.07);
+        font-size: 1.13rem !important;
+        margin-bottom: 2em;
+    }
+    .feedback-header {
+        font-size: 1.5rem !important;
+        color: #2e5aac;
+        font-weight: 700;
+        margin-bottom: 0.5em;
+    }
+    .strength-item, .weakness-item {
+        font-size: 1.08rem !important;
+        margin: 7px 0;
+        padding-left: 16px;
+    }
+    .strength-item {
+        color: #20b273;
+        font-weight: 500;
+    }
+    .weakness-item {
+        color: #e74c3c;
+        font-weight: 500;
+    }
+    /* Certificate/Score Card */
+    .score-card {
+        background: #e8f0fe;
+        border-radius: 16px;
+        box-shadow: 0 4px 16px rgba(44,62,80,0.07);
+        padding: 34px 0;
+        text-align: center;
+        margin: 34px 0;
+    }
+    .score-card h2 {
+        color: #2e5aac !important;
+        font-size: 2.2rem !important;
+        margin-bottom: 0.5em;
+    }
+    .score-card .score {
+        font-size: 2.7rem;
+        font-weight: bold;
+        color: #20b273;
+    }
+    /* Responsive adjustments */
+    @media (max-width: 768px) {
+        .main .block-container {
+            padding: 22px 8px 18px 8px;
+            margin-top: 8px;
         }
-        .test-title {
-            color: #FFD600;
-            font-size: 1.5rem;
-            font-weight: bold;
-            margin-bottom: 1rem;
-            text-shadow: 1px 2px 6px #23232377;
+        .score-card {
+            padding: 18px 0;
+            margin: 14px 0;
         }
-        </style>
-        """, unsafe_allow_html=True)
+    }
+</style>
+"""
 st.markdown(hide_streamlit_style, unsafe_allow_html=True)
 
 # --- Set up Gemini API ---
