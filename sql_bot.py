@@ -1006,7 +1006,7 @@ elif st.session_state.quiz_completed:
             margin:30px 0;
             text-align:center;
         '''>
-            <h2 style='color:#333;'>📊 Your Final Score</h2>
+            <h2 style='color:#333;'> Your Final Score</h2>
             <div style='font-size:2.5rem; font-weight:bold; color:#28a745;'>{final_score:.2f}%</div>
             <div style='font-size:1.2rem; color:#888;'>Scoreboard</div>
         </div>
