@@ -727,511 +727,512 @@ elif st.session_state.quiz_completed:
 
     # Advanced Scorecard with animations, gradient border, and progress circle
     st.markdown("---")
-final_score = calculate_score(st.session_state.user_answers)
 
-# Enhanced scoring logic with more granular feedback
-def get_score_details(score):
-    if score >= 95:
-        return {
-            "grade": "A+", "color": "#00c851", "bg_gradient": "linear-gradient(135deg, #00c851, #007E33)",
-            "message": "Exceptional Mastery! 🌟", "emoji": "🏆", "title": "OUTSTANDING",
-            "description": "You've demonstrated exceptional understanding of the material!"
-        }
-    elif score >= 85:
-        return {
-            "grade": "A", "color": "#28a745", "bg_gradient": "linear-gradient(135deg, #28a745, #20c997)",
-            "message": "Excellent Performance! ⭐", "emoji": "🎯", "title": "EXCELLENT",
-            "description": "Great job! You have a strong grasp of the concepts."
-        }
-    elif score >= 75:
-        return {
-            "grade": "B+", "color": "#17a2b8", "bg_gradient": "linear-gradient(135deg, #17a2b8, #007bff)",
-            "message": "Very Good Work! 💪", "emoji": "👍", "title": "VERY GOOD",
-            "description": "Well done! You're on the right track."
-        }
-    elif score >= 65:
-        return {
-            "grade": "B", "color": "#007bff", "bg_gradient": "linear-gradient(135deg, #007bff, #6610f2)",
-            "message": "Good Effort! 📈", "emoji": "👌", "title": "GOOD",
-            "description": "Nice work! Keep building on this foundation."
-        }
-    elif score >= 50:
-        return {
-            "grade": "C", "color": "#ffc107", "bg_gradient": "linear-gradient(135deg, #ffc107, #e0a800)",
-            "message": "Keep Going! 🔥", "emoji": "💡", "title": "FAIR",
-            "description": "You're making progress! Review and try again."
-        }
-    else:
-        return {
-            "grade": "D", "color": "#dc3545", "bg_gradient": "linear-gradient(135deg, #dc3545, #c82333)",
-            "message": "More Practice Needed 📚", "emoji": "📖", "title": "NEEDS WORK",
-            "description": "Don't give up! Learning takes time and practice."
-        }
-
-score_details = get_score_details(final_score)
-
-# Advanced Scorecard with glassmorphism, 3D effects, and micro-animations
-st.markdown(
-    f"""
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
-        
-        @keyframes scoreReveal {{
-            0% {{ 
-                opacity: 0; 
-                transform: scale(0.8) rotateY(-15deg); 
-                filter: blur(10px);
-            }}
-            50% {{
-                opacity: 0.7;
-                transform: scale(1.05) rotateY(5deg);
-                filter: blur(2px);
-            }}
-            100% {{ 
-                opacity: 1; 
-                transform: scale(1) rotateY(0deg); 
-                filter: blur(0px);
-            }}
-        }}
-        
-        @keyframes progressFill {{
-            0% {{ stroke-dasharray: 0 314; }}
-            100% {{ stroke-dasharray: {final_score * 3.14} 314; }}
-        }}
-        
-        @keyframes pulseGlow {{
-            0%, 100% {{ box-shadow: 0 0 20px rgba(0,123,255,0.3), 0 15px 40px rgba(0,0,0,0.1); }}
-            50% {{ box-shadow: 0 0 40px rgba(0,123,255,0.5), 0 20px 60px rgba(0,0,0,0.15); }}
-        }}
-        
-        @keyframes floatBadge {{
-            0%, 100% {{ transform: translateY(0px) rotate(0deg); }}
-            25% {{ transform: translateY(-5px) rotate(1deg); }}
-            75% {{ transform: translateY(-2px) rotate(-1deg); }}
-        }}
-        
-        @keyframes shimmer {{
-            0% {{ background-position: -200% 0; }}
-            100% {{ background-position: 200% 0; }}
-        }}
-        
-        .scorecard-main {{
-            background: linear-gradient(145deg, rgba(255,255,255,0.95), rgba(255,255,255,0.85));
-            backdrop-filter: blur(20px);
-            border: 1px solid rgba(255,255,255,0.2);
-            border-radius: 24px;
-            padding: 40px;
-            margin: 40px auto;
-            max-width: 600px;
-            position: relative;
-            overflow: hidden;
-            animation: scoreReveal 1.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            box-shadow: 
-                0 20px 60px rgba(0,0,0,0.1),
-                0 0 0 1px rgba(255,255,255,0.5) inset;
-        }}
-        
-        .scorecard-main::before {{
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
-            animation: shimmer 2s infinite;
-        }}
-        
-        .score-header {{
-            text-align: center;
-            margin-bottom: 30px;
-            position: relative;
-            z-index: 2;
-        }}
-        
-        .score-title {{
-            font-family: 'Inter', sans-serif;
-            font-size: 1.8rem;
-            font-weight: 800;
-            background: {score_details['bg_gradient']};
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            margin-bottom: 8px;
-            letter-spacing: 1px;
-        }}
-        
-        .score-subtitle {{
-            font-family: 'Inter', sans-serif;
-            font-size: 1rem;
-            color: #6c757d;
-            font-weight: 500;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-        }}
-        
-        .score-display {{
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 40px;
-            margin: 40px 0;
-            position: relative;
-            z-index: 2;
-        }}
-        
-        .circular-progress {{
-            position: relative;
-            width: 180px;
-            height: 180px;
-        }}
-        
-        .circular-progress svg {{
-            width: 100%;
-            height: 100%;
-            transform: rotate(-90deg);
-            filter: drop-shadow(0 5px 15px rgba(0,0,0,0.1));
-        }}
-        
-        .progress-bg {{
-            fill: none;
-            stroke: #e9ecef;
-            stroke-width: 12;
-        }}
-        
-        .progress-bar {{
-            fill: none;
-            stroke: {score_details['color']};
-            stroke-width: 12;
-            stroke-linecap: round;
-            stroke-dasharray: 0 314;
-            animation: progressFill 2s ease-out 0.5s forwards;
-            filter: drop-shadow(0 0 8px {score_details['color']}40);
-        }}
-        
-        .score-center {{
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            text-align: center;
-        }}
-        
-        .score-percentage {{
-            font-family: 'Inter', sans-serif;
-            font-size: 2.5rem;
-            font-weight: 900;
-            color: {score_details['color']};
-            line-height: 1;
-            margin-bottom: 5px;
-        }}
-        
-        .score-grade {{
-            font-family: 'Inter', sans-serif;
-            font-size: 1.2rem;
-            font-weight: 700;
-            color: {score_details['color']};
-            opacity: 0.8;
-        }}
-        
-        .score-details {{
-            text-align: center;
-            flex: 1;
-        }}
-        
-        .performance-badge {{
-            display: inline-flex;
-            align-items: center;
-            gap: 10px;
-            background: {score_details['bg_gradient']};
-            color: white;
-            padding: 12px 24px;
-            border-radius: 50px;
-            font-family: 'Inter', sans-serif;
-            font-weight: 700;
-            font-size: 1.1rem;
-            margin-bottom: 20px;
-            animation: floatBadge 3s ease-in-out infinite;
-            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
-        }}
-        
-        .performance-message {{
-            font-family: 'Inter', sans-serif;
-            font-size: 1.4rem;
-            font-weight: 600;
-            color: #2c3e50;
-            margin-bottom: 12px;
-        }}
-        
-        .performance-description {{
-            font-family: 'Inter', sans-serif;
-            font-size: 1rem;
-            color: #6c757d;
-            line-height: 1.6;
-            max-width: 300px;
-            margin: 0 auto;
-        }}
-        
-        .stats-grid {{
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-            gap: 20px;
-            margin-top: 30px;
-            position: relative;
-            z-index: 2;
-        }}
-        
-        .stat-item {{
-            background: rgba(255,255,255,0.8);
-            border: 1px solid rgba(255,255,255,0.3);
-            border-radius: 16px;
-            padding: 20px;
-            text-align: center;
-            backdrop-filter: blur(10px);
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-        }}
-        
-        .stat-item:hover {{
-            transform: translateY(-5px);
-            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-        }}
-        
-        .stat-value {{
-            font-family: 'Inter', sans-serif;
-            font-size: 1.8rem;
-            font-weight: 800;
-            color: {score_details['color']};
-            margin-bottom: 5px;
-        }}
-        
-        .stat-label {{
-            font-family: 'Inter', sans-serif;
-            font-size: 0.9rem;
-            color: #6c757d;
-            font-weight: 500;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }}
-        
-        .decoration-elements {{
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            pointer-events: none;
-            z-index: 1;
-        }}
-        
-        .decoration-circle {{
-            position: absolute;
-            border-radius: 50%;
-            background: rgba(0,123,255,0.05);
-        }}
-        
-        .decoration-circle:nth-child(1) {{
-            width: 100px;
-            height: 100px;
-            top: 20px;
-            right: 30px;
-            animation: floatBadge 4s ease-in-out infinite;
-        }}
-        
-        .decoration-circle:nth-child(2) {{
-            width: 60px;
-            height: 60px;
-            bottom: 40px;
-            left: 40px;
-            animation: floatBadge 3s ease-in-out infinite reverse;
-        }}
-        
-        .decoration-circle:nth-child(3) {{
-            width: 80px;
-            height: 80px;
-            top: 50%;
-            left: 20px;
-            animation: floatBadge 5s ease-in-out infinite;
-        }}
-    </style>
+    final_score = calculate_score(st.session_state.user_answers)
     
-    <div class="scorecard-main">
-        <div class="decoration-elements">
-            <div class="decoration-circle"></div>
-            <div class="decoration-circle"></div>
-            <div class="decoration-circle"></div>
-        </div>
-        
-        <div class="score-header">
-            <div class="score-title">QUIZ RESULTS</div>
-            <div class="score-subtitle">Performance Assessment</div>
-        </div>
-        
-        <div class="score-display">
-            <div class="circular-progress">
-                <svg viewBox="0 0 120 120">
-                    <circle class="progress-bg" cx="60" cy="60" r="50"/>
-                    <circle class="progress-bar" cx="60" cy="60" r="50"/>
-                </svg>
-                <div class="score-center">
-                    <div class="score-percentage">{final_score:.0f}%</div>
-                    <div class="score-grade">{score_details['grade']}</div>
-                </div>
-            </div>
-            
-            <div class="score-details">
-                <div class="performance-badge">
-                    <span>{score_details['emoji']}</span>
-                    <span>{score_details['title']}</span>
-                </div>
-                <div class="performance-message">{score_details['message']}</div>
-                <div class="performance-description">{score_details['description']}</div>
-            </div>
-        </div>
-        
-        <div class="stats-grid">
-            <div class="stat-item">
-                <div class="stat-value">{final_score:.1f}</div>
-                <div class="stat-label">Score</div>
-            </div>
-            <div class="stat-item">
-                <div class="stat-value">{len([a for a in st.session_state.user_answers if a['is_correct']])}</div>
-                <div class="stat-label">Correct</div>
-            </div>
-            <div class="stat-item">
-                <div class="stat-value">{len(st.session_state.user_answers)}</div>
-                <div class="stat-label">Total</div>
-            </div>
-            <div class="stat-item">
-                <div class="stat-value">{score_details['grade']}</div>
-                <div class="stat-label">Grade</div>
-            </div>
-        </div>
-    </div>
-    """,
-    unsafe_allow_html=True
-)
-
-# Certificate eligibility and action buttons
-if final_score >= 80:
+    # Ensure we have user_answers data
+    if 'user_answers' not in st.session_state:
+        st.session_state.user_answers = []
+    
+    # Enhanced scoring logic with more granular feedback
+    def get_score_details(score):
+        if score >= 95:
+            return {
+                "grade": "A+", "color": "#00c851", "bg_gradient": "linear-gradient(135deg, #00c851, #007E33)",
+                "message": "Exceptional Mastery! 🌟", "emoji": "🏆", "title": "OUTSTANDING",
+                "description": "You've demonstrated exceptional understanding of the material!"
+            }
+        elif score >= 85:
+            return {
+                "grade": "A", "color": "#28a745", "bg_gradient": "linear-gradient(135deg, #28a745, #20c997)",
+                "message": "Excellent Performance! ⭐", "emoji": "🎯", "title": "EXCELLENT",
+                "description": "Great job! You have a strong grasp of the concepts."
+            }
+        elif score >= 75:
+            return {
+                "grade": "B+", "color": "#17a2b8", "bg_gradient": "linear-gradient(135deg, #17a2b8, #007bff)",
+                "message": "Very Good Work! 💪", "emoji": "👍", "title": "VERY GOOD",
+                "description": "Well done! You're on the right track."
+            }
+        elif score >= 65:
+            return {
+                "grade": "B", "color": "#007bff", "bg_gradient": "linear-gradient(135deg, #007bff, #6610f2)",
+                "message": "Good Effort! 📈", "emoji": "👌", "title": "GOOD",
+                "description": "Nice work! Keep building on this foundation."
+            }
+        elif score >= 50:
+            return {
+                "grade": "C", "color": "#ffc107", "bg_gradient": "linear-gradient(135deg, #ffc107, #e0a800)",
+                "message": "Keep Going! 🔥", "emoji": "💡", "title": "FAIR",
+                "description": "You're making progress! Review and try again."
+            }
+        else:
+            return {
+                "grade": "D", "color": "#dc3545", "bg_gradient": "linear-gradient(135deg, #dc3545, #c82333)",
+                "message": "More Practice Needed 📚", "emoji": "📖", "title": "NEEDS WORK",
+                "description": "Don't give up! Learning takes time and practice."
+            }
+    
+    score_details = get_score_details(final_score)
+    
+    # Advanced Scorecard with glassmorphism, 3D effects, and micro-animations
     st.markdown(
         f"""
-        <div style='text-align: center; margin: 30px 0;'>
-            <div style='
-                background: linear-gradient(135deg, #28a745, #20c997);
-                color: white;
-                padding: 25px;
-                border-radius: 20px;
-                margin-bottom: 25px;
-                box-shadow: 0 10px 30px rgba(40, 167, 69, 0.3);
-                animation: pulseGlow 2s ease-in-out infinite;
-            '>
-                <h2 style='margin: 0; font-family: Inter, sans-serif; font-weight: 700;'>
-                    🎉 Congratulations! You've Earned a Certificate! 🎉
-                </h2>
-                <p style='margin: 10px 0 0 0; font-size: 1.1rem; opacity: 0.9;'>
-                    Outstanding performance! You've demonstrated mastery of the material.
-                </p>
-            </div>
+        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+        <style>
             
-            <a href="https://superprofile.bio/vp/corporate-bhaiya-sql-page" target="_blank" style="
+            @keyframes scoreReveal {{
+                0% {{ 
+                    opacity: 0; 
+                    transform: scale(0.8) rotateY(-15deg); 
+                    filter: blur(10px);
+                }}
+                50% {{
+                    opacity: 0.7;
+                    transform: scale(1.05) rotateY(5deg);
+                    filter: blur(2px);
+                }}
+                100% {{ 
+                    opacity: 1; 
+                    transform: scale(1) rotateY(0deg); 
+                    filter: blur(0px);
+                }}
+            }}
+            
+            @keyframes progressFill {{
+                0% {{ stroke-dasharray: 0 314; }}
+                100% {{ stroke-dasharray: {final_score * 3.14} 314; }}
+            }}
+            
+            @keyframes pulseGlow {{
+                0%, 100% {{ box-shadow: 0 0 20px rgba(0,123,255,0.3), 0 15px 40px rgba(0,0,0,0.1); }}
+                50% {{ box-shadow: 0 0 40px rgba(0,123,255,0.5), 0 20px 60px rgba(0,0,0,0.15); }}
+            }}
+            
+            @keyframes floatBadge {{
+                0%, 100% {{ transform: translateY(0px) rotate(0deg); }}
+                25% {{ transform: translateY(-5px) rotate(1deg); }}
+                75% {{ transform: translateY(-2px) rotate(-1deg); }}
+            }}
+            
+            @keyframes shimmer {{
+                0% {{ background-position: -200% 0; }}
+                100% {{ background-position: 200% 0; }}
+            }}
+            
+            .scorecard-main {{
+                background: linear-gradient(145deg, rgba(255,255,255,0.95), rgba(255,255,255,0.85));
+                backdrop-filter: blur(20px);
+                border: 1px solid rgba(255,255,255,0.2);
+                border-radius: 24px;
+                padding: 40px;
+                margin: 40px auto;
+                max-width: 600px;
+                position: relative;
+                overflow: hidden;
+                animation: scoreReveal 1.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+                box-shadow: 
+                    0 20px 60px rgba(0,0,0,0.1),
+                    0 0 0 1px rgba(255,255,255,0.5) inset;
+            }}
+            
+            .scorecard-main::before {{
+                content: '';
+                position: absolute;
+                top: 0;
+                left: -100%;
+                width: 100%;
+                height: 100%;
+                background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+                animation: shimmer 2s infinite;
+            }}
+            
+            .score-header {{
+                text-align: center;
+                margin-bottom: 30px;
+                position: relative;
+                z-index: 2;
+            }}
+            
+            .score-title {{
+                font-family: 'Inter', sans-serif;
+                font-size: 1.8rem;
+                font-weight: 800;
+                background: {score_details['bg_gradient']};
+                -webkit-background-clip: text;
+                -webkit-text-fill-color: transparent;
+                background-clip: text;
+                margin-bottom: 8px;
+                letter-spacing: 1px;
+            }}
+            
+            .score-subtitle {{
+                font-family: 'Inter', sans-serif;
+                font-size: 1rem;
+                color: #6c757d;
+                font-weight: 500;
+                text-transform: uppercase;
+                letter-spacing: 2px;
+            }}
+            
+            .score-display {{
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                gap: 40px;
+                margin: 40px 0;
+                position: relative;
+                z-index: 2;
+            }}
+            
+            .circular-progress {{
+                position: relative;
+                width: 180px;
+                height: 180px;
+            }}
+            
+            .circular-progress svg {{
+                width: 100%;
+                height: 100%;
+                transform: rotate(-90deg);
+                filter: drop-shadow(0 5px 15px rgba(0,0,0,0.1));
+            }}
+            
+            .progress-bg {{
+                fill: none;
+                stroke: #e9ecef;
+                stroke-width: 12;
+            }}
+            
+            .progress-bar {{
+                fill: none;
+                stroke: {score_details['color']};
+                stroke-width: 12;
+                stroke-linecap: round;
+                stroke-dasharray: 0 314;
+                animation: progressFill 2s ease-out 0.5s forwards;
+                filter: drop-shadow(0 0 8px {score_details['color']}40);
+            }}
+            
+            .score-center {{
+                position: absolute;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                text-align: center;
+            }}
+            
+            .score-percentage {{
+                font-family: 'Inter', sans-serif;
+                font-size: 2.5rem;
+                font-weight: 900;
+                color: {score_details['color']};
+                line-height: 1;
+                margin-bottom: 5px;
+            }}
+            
+            .score-grade {{
+                font-family: 'Inter', sans-serif;
+                font-size: 1.2rem;
+                font-weight: 700;
+                color: {score_details['color']};
+                opacity: 0.8;
+            }}
+            
+            .score-details {{
+                text-align: center;
+                flex: 1;
+            }}
+            
+            .performance-badge {{
                 display: inline-flex;
                 align-items: center;
-                gap: 12px;
-                background: linear-gradient(135deg, #ffc107, #e0a800);
-                color: #212529;
-                font-family: 'Inter', sans-serif;
-                font-size: 1.3rem;
-                font-weight: 700;
-                padding: 18px 36px;
+                gap: 10px;
+                background: {score_details['bg_gradient']};
+                color: white;
+                padding: 12px 24px;
                 border-radius: 50px;
-                text-decoration: none;
-                box-shadow: 0 8px 25px rgba(255, 193, 7, 0.4);
-                transition: all 0.3s ease;
+                font-family: 'Inter', sans-serif;
+                font-weight: 700;
+                font-size: 1.1rem;
+                margin-bottom: 20px;
+                animation: floatBadge 3s ease-in-out infinite;
+                box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+            }}
+            
+            .performance-message {{
+                font-family: 'Inter', sans-serif;
+                font-size: 1.4rem;
+                font-weight: 600;
+                color: #2c3e50;
+                margin-bottom: 12px;
+            }}
+            
+            .performance-description {{
+                font-family: 'Inter', sans-serif;
+                font-size: 1rem;
+                color: #6c757d;
+                line-height: 1.6;
+                max-width: 300px;
+                margin: 0 auto;
+            }}
+            
+            .stats-grid {{
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+                gap: 20px;
+                margin-top: 30px;
+                position: relative;
+                z-index: 2;
+            }}
+            
+            .stat-item {{
+                background: rgba(255,255,255,0.8);
+                border: 1px solid rgba(255,255,255,0.3);
+                border-radius: 16px;
+                padding: 20px;
+                text-align: center;
+                backdrop-filter: blur(10px);
+                transition: transform 0.3s ease, box-shadow 0.3s ease;
+            }}
+            
+            .stat-item:hover {{
+                transform: translateY(-5px);
+                box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            }}
+            
+            .stat-value {{
+                font-family: 'Inter', sans-serif;
+                font-size: 1.8rem;
+                font-weight: 800;
+                color: {score_details['color']};
+                margin-bottom: 5px;
+            }}
+            
+            .stat-label {{
+                font-family: 'Inter', sans-serif;
+                font-size: 0.9rem;
+                color: #6c757d;
+                font-weight: 500;
                 text-transform: uppercase;
                 letter-spacing: 1px;
-            " onmouseover="this.style.transform='translateY(-3px) scale(1.05)'; this.style.boxShadow='0 12px 35px rgba(255, 193, 7, 0.6)';" 
-               onmouseout="this.style.transform='translateY(0) scale(1)'; this.style.boxShadow='0 8px 25px rgba(255, 193, 7, 0.4)';">
-                <span style="font-size: 1.5rem;">🏆</span>
-                <span>Claim Your Certificate</span>
-            </a>
-        </div>
-        """,
-        unsafe_allow_html=True
-    )
-else:
-    st.markdown(
-        f"""
-        <div style='text-align: center; margin: 30px 0;'>
-            <div style='
-                background: linear-gradient(135deg, #6c757d, #5a6268);
-                color: white;
-                padding: 25px;
-                border-radius: 20px;
-                margin-bottom: 25px;
-                box-shadow: 0 10px 30px rgba(108, 117, 125, 0.3);
-            '>
-                <h3 style='margin: 0; font-family: Inter, sans-serif; font-weight: 600;'>
-                    📚 Keep Learning to Earn Your Certificate!
-                </h3>
-                <p style='margin: 10px 0 0 0; font-size: 1rem; opacity: 0.9;'>
-                    You need 80% or higher to qualify for certification. Don't give up!
-                </p>
+            }}
+            
+            .decoration-elements {{
+                position: absolute;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                pointer-events: none;
+                z-index: 1;
+            }}
+            
+            .decoration-circle {{
+                position: absolute;
+                border-radius: 50%;
+                background: rgba(0,123,255,0.05);
+            }}
+            
+            .decoration-circle:nth-child(1) {{
+                width: 100px;
+                height: 100px;
+                top: 20px;
+                right: 30px;
+                animation: floatBadge 4s ease-in-out infinite;
+            }}
+            
+            .decoration-circle:nth-child(2) {{
+                width: 60px;
+                height: 60px;
+                bottom: 40px;
+                left: 40px;
+                animation: floatBadge 3s ease-in-out infinite reverse;
+            }}
+            
+            .decoration-circle:nth-child(3) {{
+                width: 80px;
+                height: 80px;
+                top: 50%;
+                left: 20px;
+                animation: floatBadge 5s ease-in-out infinite;
+            }}
+        </style>
+        
+        <div class="scorecard-main">
+            <div class="decoration-elements">
+                <div class="decoration-circle"></div>
+                <div class="decoration-circle"></div>
+                <div class="decoration-circle"></div>
             </div>
             
-            <div style='display: flex; justify-content: center; gap: 20px; flex-wrap: wrap;'>
-                <a href="https://www.corporatebhaiya.com/" target="_blank" style="
-                    display: inline-flex;
-                    align-items: center;
-                    gap: 10px;
-                    background: linear-gradient(135deg, #007bff, #0056b3);
-                    color: white;
-                    font-family: 'Inter', sans-serif;
-                    font-size: 1.1rem;
-                    font-weight: 600;
-                    padding: 14px 28px;
-                    border-radius: 25px;
-                    text-decoration: none;
-                    box-shadow: 0 6px 20px rgba(0, 123, 255, 0.3);
-                    transition: all 0.3s ease;
-                " onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 8px 25px rgba(0, 123, 255, 0.4)';" 
-                   onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 6px 20px rgba(0, 123, 255, 0.3)';">
-                    <span>🚀</span>
-                    <span>Book Mentor Session</span>
-                </a>
+            <div class="score-header">
+                <div class="score-title">QUIZ RESULTS</div>
+                <div class="score-subtitle">Performance Assessment</div>
+            </div>
+            
+            <div class="score-display">
+                <div class="circular-progress">
+                    <svg viewBox="0 0 120 120">
+                        <circle class="progress-bg" cx="60" cy="60" r="50"/>
+                        <circle class="progress-bar" cx="60" cy="60" r="50"/>
+                    </svg>
+                    <div class="score-center">
+                        <div class="score-percentage">{final_score:.0f}%</div>
+                        <div class="score-grade">{score_details['grade']}</div>
+                    </div>
+                </div>
                 
-                <a href="#" onclick="document.querySelector('[data-testid=\\\"stButton\\\"] button').click(); return false;" style="
-                    display: inline-flex;
-                    align-items: center;
-                    gap: 10px;
-                    background: linear-gradient(135deg, #17a2b8, #138496);
-                    color: white;
-                    font-family: 'Inter', sans-serif;
-                    font-size: 1.1rem;
-                    font-weight: 600;
-                    padding: 14px 28px;
-                    border-radius: 25px;
-                    text-decoration: none;
-                    box-shadow: 0 6px 20px rgba(23, 162, 184, 0.3);
-                    transition: all 0.3s ease;
-                " onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 8px 25px rgba(23, 162, 184, 0.4)';" 
-                   onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 6px 20px rgba(23, 162, 184, 0.3)';">
-                    <span>📚</span>
-                    <span>Study & Retry</span>
-                </a>
+                <div class="score-details">
+                    <div class="performance-badge">
+                        <span>{score_details['emoji']}</span>
+                        <span>{score_details['title']}</span>
+                    </div>
+                    <div class="performance-message">{score_details['message']}</div>
+                    <div class="performance-description">{score_details['description']}</div>
+                </div>
+            </div>
+            
+            <div class="stats-grid">
+                <div class="stat-item">
+                    <div class="stat-value">{final_score:.1f}</div>
+                    <div class="stat-label">Score</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value">{len([a for a in st.session_state.user_answers if a.get('is_correct', False)])}</div>
+                    <div class="stat-label">Correct</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value">{len(st.session_state.user_answers)}</div>
+                    <div class="stat-label">Total</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value">{score_details['grade']}</div>
+                    <div class="stat-label">Grade</div>
+                </div>
             </div>
         </div>
         """,
         unsafe_allow_html=True
     )
-
-# Try Again Button with enhanced styling
-st.markdown("<br>", unsafe_allow_html=True)
-col1, col2, col3 = st.columns([1, 2, 1])
-with col2:
-    if st.button("🔄 Try Again", use_container_width=True, type="primary"):
-        st.session_state.user_answers = []
-        st.session_state.current_question = 0
-        st.session_state.quiz_started = False
-        st.session_state.quiz_completed = False
-        st.session_state.show_detailed_feedback = False
-        st.rerun()
+    
+    # Certificate eligibility and action buttons
+    if final_score >= 80:
+        st.markdown(
+            f"""
+            <div style='text-align: center; margin: 30px 0;'>
+                <div style='
+                    background: linear-gradient(135deg, #28a745, #20c997);
+                    color: white;
+                    padding: 25px;
+                    border-radius: 20px;
+                    margin-bottom: 25px;
+                    box-shadow: 0 10px 30px rgba(40, 167, 69, 0.3);
+                '>
+                    <h2 style='margin: 0; font-family: Inter, -apple-system, BlinkMacSystemFont, sans-serif; font-weight: 700;'>
+                        🎉 Congratulations! You've Earned a Certificate! 🎉
+                    </h2>
+                    <p style='margin: 10px 0 0 0; font-size: 1.1rem; opacity: 0.9;'>
+                        Outstanding performance! You've demonstrated mastery of the material.
+                    </p>
+                </div>
+                
+                <a href="https://superprofile.bio/vp/corporate-bhaiya-sql-page" target="_blank" style="
+                    display: inline-flex;
+                    align-items: center;
+                    gap: 12px;
+                    background: linear-gradient(135deg, #ffc107, #e0a800);
+                    color: #212529;
+                    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+                    font-size: 1.3rem;
+                    font-weight: 700;
+                    padding: 18px 36px;
+                    border-radius: 50px;
+                    text-decoration: none;
+                    box-shadow: 0 8px 25px rgba(255, 193, 7, 0.4);
+                    transition: all 0.3s ease;
+                    text-transform: uppercase;
+                    letter-spacing: 1px;
+                ">
+                    <span style="font-size: 1.5rem;">🏆</span>
+                    <span>Claim Your Certificate</span>
+                </a>
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
+    else:
+        st.markdown(
+            f"""
+            <div style='text-align: center; margin: 30px 0;'>
+                <div style='
+                    background: linear-gradient(135deg, #6c757d, #5a6268);
+                    color: white;
+                    padding: 25px;
+                    border-radius: 20px;
+                    margin-bottom: 25px;
+                    box-shadow: 0 10px 30px rgba(108, 117, 125, 0.3);
+                '>
+                    <h3 style='margin: 0; font-family: Inter, sans-serif; font-weight: 600;'>
+                        📚 Keep Learning to Earn Your Certificate!
+                    </h3>
+                    <p style='margin: 10px 0 0 0; font-size: 1rem; opacity: 0.9;'>
+                        You need 80% or higher to qualify for certification. Don't give up!
+                    </p>
+                </div>
+                
+                <div style='display: flex; justify-content: center; gap: 20px; flex-wrap: wrap;'>
+                    <a href="https://www.corporatebhaiya.com/" target="_blank" style="
+                        display: inline-flex;
+                        align-items: center;
+                        gap: 10px;
+                        background: linear-gradient(135deg, #007bff, #0056b3);
+                        color: white;
+                        font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+                        font-size: 1.1rem;
+                        font-weight: 600;
+                        padding: 14px 28px;
+                        border-radius: 25px;
+                        text-decoration: none;
+                        box-shadow: 0 6px 20px rgba(0, 123, 255, 0.3);
+                        transition: all 0.3s ease;
+                    ">
+                        <span>🚀</span>
+                        <span>Book Mentor Session</span>
+                    </a>
+                    
+                    <a href="#" onclick="window.parent.postMessage({type: 'streamlit:setComponentValue', value: 'retry'}, '*'); return false;" style="
+                        display: inline-flex;
+                        align-items: center;
+                        gap: 10px;
+                        background: linear-gradient(135deg, #17a2b8, #138496);
+                        color: white;
+                        font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+                        font-size: 1.1rem;
+                        font-weight: 600;
+                        padding: 14px 28px;
+                        border-radius: 25px;
+                        text-decoration: none;
+                        box-shadow: 0 6px 20px rgba(23, 162, 184, 0.3);
+                        transition: all 0.3s ease;
+                    ">
+                        <span>📚</span>
+                        <span>Study & Retry</span>
+                    </a>
+                </div>
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
+    
+    # Try Again Button with enhanced styling
+    st.markdown("<br>", unsafe_allow_html=True)
+    col1, col2, col3 = st.columns([1, 2, 1])
+    with col2:
+        if st.button("🔄 Try Again", use_container_width=True, type="primary"):
+            st.session_state.user_answers = []
+            st.session_state.current_question = 0
+            st.session_state.quiz_started = False
+            st.session_state.quiz_completed = False
+            st.session_state.show_detailed_feedback = False
+            st.rerun()
