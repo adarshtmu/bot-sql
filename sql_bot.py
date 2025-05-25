@@ -527,8 +527,8 @@ if not st.session_state.quiz_started:
     st.write("### 🔍 Table Previews")
     try:
         tab1, tab2 = st.tabs(["Users Table", "Orders Table"])
-        with tab1: st.dataframe(users_table, hide_index=False, use_container_width=False)
-        with tab2: st.dataframe(orders_table, hide_index=False, use_container_width=False)
+        with tab1: st.dataframe(users_table, hide_index=False, use_container_width=True)
+        with tab2: st.dataframe(orders_table, hide_index=False, use_container_width=True)
     except Exception as e:
         st.error(f"Error displaying table previews: {e}")
     
