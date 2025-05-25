@@ -15,6 +15,7 @@ st.set_page_config(
 # --- Custom CSS: Website-Like, Not Centered ---
 hide_streamlit_style = """
 <style>
+    /* Hide Streamlit default elements */
     header, #MainMenu, footer,
     .viewerBadge_container__1QSob, .stDeployButton,
     [data-testid="stToolbar"], [data-testid="stDecoration"],
@@ -22,77 +23,127 @@ hide_streamlit_style = """
     .st-emotion-cache-1jicfl2 {
         display: none !important;
     }
+
+    /* Body styles */
     body {
-        background: #f8fafc !important;
+        background: #f8fafc !important; /* Light gray background for the page */
         font-family: 'Segoe UI', 'Roboto', 'Arial', sans-serif !important;
-        color: #222;
+        color: #222222; /* Default dark text color for readability */
     }
+
+    /* Main content container */
     .main .block-container {
-        background: #fff;
-        border-radius: 18px;
-        box-shadow: 0 8px 32px rgba(44, 62, 80, 0.10);
-        padding: 32px 24px 24px 24px;
-        margin-top: 24px;
-        max-width: 1200px;
+        background: #ffffff; /* White background for content */
+        border-radius: 16px; /* Slightly softer border radius */
+        box-shadow: 0 6px 24px rgba(44, 62, 80, 0.08); /* Softer shadow */
+        padding: 28px 24px 24px 24px; /* Adjusted padding */
+        margin-top: 20px; /* Reduced top margin */
+        max-width: 1100px; /* Reduced max-width to make it feel less stretched */
+        /* To center the block-container if you want fixed margins on sides:
+           margin-left: auto;
+           margin-right: auto;
+        */
     }
+
+    /* Headings alignment */
     h1, h2, h3 {
         text-align: left !important;
+        color: #2c3e50; /* Slightly softer black for headings */
     }
+
+    /* General text elements styling */
     .stMarkdown, .stText, .stTextArea, .stDataFrame, .stTable {
-        font-size: 1.13rem !important;
-        color: #222 !important;
+        font-size: 1.1rem !important; /* Standardized font size slightly */
+        color: #34495e !important; /* Slightly softer text color */
         text-align: left !important;
+        line-height: 1.6; /* Improved line height for readability */
     }
+
+    /* Button styling */
     .stButton button {
         background: linear-gradient(90deg, #36d1c4, #5b86e5);
-        color: #fff !important;
-        font-size: 1.1rem !important;
+        color: #ffffff !important;
+        font-size: 1.05rem !important; /* Slightly adjusted button font size */
         font-weight: 600;
-        padding: 12px 28px !important;
+        padding: 10px 24px !important; /* Adjusted button padding */
         border-radius: 8px;
         border: none;
         box-shadow: 0 2px 8px rgba(44, 62, 80, 0.08);
         margin-bottom: 1em;
         display: inline-block;
+        transition: background 0.3s ease; /* Smooth transition for hover */
     }
+
     .stButton button:hover {
         background: linear-gradient(90deg, #5b86e5, #36d1c4);
-        color: #fff !important;
+        color: #ffffff !important;
+        box-shadow: 0 4px 12px rgba(44, 62, 80, 0.12); /* Enhanced hover shadow */
     }
+
+    /* Tabs styling */
     .stTabs [role="tablist"] {
-        background: #f7fafc;
-        padding: 0.7em 1em;
-        border-radius: 12px;
-        box-shadow: 0 2px 12px rgba(44,62,80,0.06);
-        margin-bottom: 2em;
+        background: #e9ecef; /* More distinct background for tab bar */
+        padding: 0.6em 0.8em; /* Adjusted padding */
+        border-radius: 10px;
+        box-shadow: 0 1px 6px rgba(0,0,0,0.05); /* Softer, inset-like shadow */
+        margin-bottom: 1.8em; /* Adjusted margin */
     }
+
+    .stTabs [data-baseweb="tab"] { /* Target individual tab buttons */
+        font-size: 1rem;
+        padding: 8px 16px;
+        border-radius: 6px; /* Rounded corners for individual tabs */
+        transition: background-color 0.3s ease;
+    }
+    
+    .stTabs [data-baseweb="tab"]:hover {
+        background-color: #dde2e7;
+    }
+
+    .stTabs [data-baseweb="tab"][aria-selected="true"] {
+        background-color: #ffffff; /* White background for active tab */
+        color: #36d1c4; /* Accent color for active tab text */
+        box-shadow: 0 2px 4px rgba(0,0,0,0.07);
+        border-bottom: none; /* Remove default underline if any */
+    }
+
+
+    /* Feedback container styling */
     .feedback-container {
-        background: #fdf6e3;
-        padding: 24px;
-        border-radius: 14px;
-        box-shadow: 0 4px 18px rgba(40,167,69,.07);
-        font-size: 1.13rem !important;
-        margin-bottom: 2em;
+        background: #e6f9f5; /* Lighter, calming background for feedback */
+        padding: 20px; /* Adjusted padding */
+        border-radius: 12px;
+        border: 1px solid #beebe3; /* Subtle border */
+        box-shadow: 0 3px 12px rgba(40,167,69,.06);
+        font-size: 1.05rem !important; /* Adjusted font size */
+        margin-bottom: 1.8em;
         text-align: left !important;
     }
+
     .feedback-header {
-        font-size: 1.5rem !important;
-        color: #2e5aac;
-        font-weight: 700;
-        margin-bottom: 0.5em;
+        font-size: 1.4rem !important;
+        color: #28a745; /* Green for positive feedback header */
+        font-weight: 600; /* Slightly less bold */
+        margin-bottom: 0.6em;
         text-align: left !important;
     }
+
     .strength-item, .weakness-item {
-        font-size: 1.08rem !important;
-        margin: 7px 0;
-        padding-left: 16px;
+        font-size: 1.03rem !important;
+        margin: 6px 0;
+        padding-left: 14px;
         text-align: left !important;
     }
+
     /* Responsive adjustments */
     @media (max-width: 900px) {
         .main .block-container {
-            padding: 14px 2vw 14px 2vw;
-            margin-top: 8px;
+            padding: 18px 3vw 18px 3vw; /* Adjusted padding for smaller screens */
+            margin-top: 12px;
+            border-radius: 12px; /* Smaller radius on mobile */
+        }
+        .stMarkdown, .stText, .stTextArea, .stDataFrame, .stTable {
+            font-size: 1rem !important; /* Slightly smaller font on mobile */
         }
     }
 </style>
