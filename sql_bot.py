@@ -26,125 +26,335 @@ hide_streamlit_style = """
 
     /* Body styles */
     body {
-        background: #f8fafc !important; /* Light gray background for the page */
+        background: #1a1a2e !important; /* Dark blue background */
         font-family: 'Segoe UI', 'Roboto', 'Arial', sans-serif !important;
-        color: #222222; /* Default dark text color for readability */
+        color: #e0e6ed !important; /* Light text color for dark theme */
     }
 
-    /* Main content container */
+    /* Main app background */
+    .stApp {
+        background: #1a1a2e !important;
+    }
+
+    /* Main content container - constrained width */
     .main .block-container {
-        background: #ffffff; /* White background for content */
-        border-radius: 16px; /* Slightly softer border radius */
-        box-shadow: 0 6px 24px rgba(44, 62, 80, 0.08); /* Softer shadow */
-        padding: 28px 24px 24px 24px; /* Adjusted padding */
-        margin-top: 20px; /* Reduced top margin */
-        max-width: 1100px; /* Reduced max-width to make it feel less stretched */
-        /* To center the block-container if you want fixed margins on sides:
-           margin-left: auto;
-           margin-right: auto;
-        */
+        background: #16213e !important; /* Darker blue for content area */
+        border-radius: 16px;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        padding: 32px 28px;
+        margin: 20px auto; /* Center the container */
+        max-width: 1000px !important; /* Constrain maximum width */
+        width: 95% !important; /* Responsive width */
+        border: 1px solid #0f3460;
     }
 
-    /* Headings alignment */
-    h1, h2, h3 {
+    /* Headings with better contrast */
+    h1, h2, h3, h4, h5, h6 {
         text-align: left !important;
-        color: #2c3e50; /* Slightly softer black for headings */
+        color: #f8f9fa !important; /* Bright white for headings */
+        font-weight: 600;
     }
+
+    h1 { font-size: 2.2rem !important; }
+    h2 { font-size: 1.8rem !important; }
+    h3 { font-size: 1.5rem !important; }
 
     /* General text elements styling */
-    .stMarkdown, .stText, .stTextArea, .stDataFrame, .stTable {
-        font-size: 1.1rem !important; /* Standardized font size slightly */
-        color: #34495e !important; /* Slightly softer text color */
+    .stMarkdown, .stText, .stTextArea, .stDataFrame, .stTable, p, div, span {
+        font-size: 1.05rem !important;
+        color: #e0e6ed !important; /* Light gray text */
         text-align: left !important;
-        line-height: 1.6; /* Improved line height for readability */
+        line-height: 1.6;
+    }
+
+    /* Special styling for markdown content */
+    .stMarkdown div {
+        color: #e0e6ed !important;
+    }
+
+    /* Code blocks */
+    .stCodeBlock, pre, code {
+        background: #0f1419 !important;
+        color: #e0e6ed !important;
+        border: 1px solid #2d3748 !important;
+        border-radius: 8px;
     }
 
     /* Button styling */
     .stButton button {
-        background: linear-gradient(90deg, #36d1c4, #5b86e5);
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
         color: #ffffff !important;
-        font-size: 1.05rem !important; /* Slightly adjusted button font size */
+        font-size: 1.1rem !important;
         font-weight: 600;
-        padding: 10px 24px !important; /* Adjusted button padding */
-        border-radius: 8px;
+        padding: 12px 28px !important;
+        border-radius: 12px;
         border: none;
-        box-shadow: 0 2px 8px rgba(44, 62, 80, 0.08);
+        box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
         margin-bottom: 1em;
-        display: inline-block;
-        transition: background 0.3s ease; /* Smooth transition for hover */
+        transition: all 0.3s ease;
+        min-height: 48px;
     }
 
     .stButton button:hover {
-        background: linear-gradient(90deg, #5b86e5, #36d1c4);
+        background: linear-gradient(135deg, #764ba2 0%, #667eea 100%) !important;
         color: #ffffff !important;
-        box-shadow: 0 4px 12px rgba(44, 62, 80, 0.12); /* Enhanced hover shadow */
+        box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+        transform: translateY(-2px);
     }
 
     /* Tabs styling */
     .stTabs [role="tablist"] {
-        background: #e9ecef; /* More distinct background for tab bar */
-        padding: 0.6em 0.8em; /* Adjusted padding */
-        border-radius: 10px;
-        box-shadow: 0 1px 6px rgba(0,0,0,0.05); /* Softer, inset-like shadow */
-        margin-bottom: 1.8em; /* Adjusted margin */
+        background: #0f3460 !important;
+        padding: 8px 12px;
+        border-radius: 12px;
+        box-shadow: inset 0 2px 4px rgba(0,0,0,0.2);
+        margin-bottom: 2em;
+        border: 1px solid #1e4976;
     }
 
-    .stTabs [data-baseweb="tab"] { /* Target individual tab buttons */
-        font-size: 1rem;
-        padding: 8px 16px;
-        border-radius: 6px; /* Rounded corners for individual tabs */
-        transition: background-color 0.3s ease;
+    .stTabs [data-baseweb="tab"] {
+        font-size: 1rem !important;
+        padding: 10px 18px;
+        border-radius: 8px;
+        transition: all 0.3s ease;
+        color: #b0bec5 !important;
+        background: transparent;
+        border: 1px solid transparent;
     }
     
     .stTabs [data-baseweb="tab"]:hover {
-        background-color: #dde2e7;
+        background-color: #1e4976 !important;
+        color: #e0e6ed !important;
     }
 
     .stTabs [data-baseweb="tab"][aria-selected="true"] {
-        background-color: #ffffff; /* White background for active tab */
-        color: #36d1c4; /* Accent color for active tab text */
-        box-shadow: 0 2px 4px rgba(0,0,0,0.07);
-        border-bottom: none; /* Remove default underline if any */
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+        color: #ffffff !important;
+        box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+        border: 1px solid #667eea;
     }
 
+    /* DataFrame styling */
+    .stDataFrame {
+        background: #0f1419 !important;
+        border-radius: 12px;
+        overflow: hidden;
+        border: 1px solid #2d3748;
+        max-width: 100% !important;
+    }
+
+    .stDataFrame table {
+        color: #e0e6ed !important;
+        background: #0f1419 !important;
+    }
+
+    .stDataFrame th {
+        background: #1e4976 !important;
+        color: #ffffff !important;
+        font-weight: 600;
+        padding: 12px 8px !important;
+        border-bottom: 2px solid #667eea;
+    }
+
+    .stDataFrame td {
+        background: #16213e !important;
+        color: #e0e6ed !important;
+        padding: 10px 8px !important;
+        border-bottom: 1px solid #2d3748;
+    }
+
+    /* Input fields */
+    .stTextArea textarea, .stTextInput input {
+        background: #0f1419 !important;
+        color: #e0e6ed !important;
+        border: 1px solid #2d3748 !important;
+        border-radius: 8px;
+        font-size: 1rem !important;
+    }
+
+    .stTextArea textarea:focus, .stTextInput input:focus {
+        border-color: #667eea !important;
+        box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.2) !important;
+    }
+
+    /* Info, warning, success boxes */
+    .stInfo {
+        background: #0f3460 !important;
+        color: #e0e6ed !important;
+        border-left: 4px solid #667eea !important;
+    }
+
+    .stWarning {
+        background: #2d1b14 !important;
+        color: #f8d7da !important;
+        border-left: 4px solid #ffc107 !important;
+    }
+
+    .stSuccess {
+        background: #0f2027 !important;
+        color: #d4edda !important;
+        border-left: 4px solid #28a745 !important;
+    }
+
+    .stError {
+        background: #2d1b1f !important;
+        color: #f8d7da !important;
+        border-left: 4px solid #dc3545 !important;
+    }
+
+    /* Expander styling */
+    .streamlit-expanderHeader {
+        background: #0f3460 !important;
+        color: #e0e6ed !important;
+        border-radius: 8px;
+        padding: 12px 16px !important;
+        border: 1px solid #1e4976;
+    }
+
+    .streamlit-expanderContent {
+        background: #16213e !important;
+        color: #e0e6ed !important;
+        border: 1px solid #1e4976;
+        border-top: none;
+        padding: 16px !important;
+    }
+
+    /* Progress bar */
+    .stProgress .st-bo {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+    }
+
+    /* Sidebar styling */
+    .css-1d391kg {
+        background: #0f1419 !important;
+        border-right: 1px solid #2d3748;
+    }
+
+    .css-1d391kg .stMarkdown {
+        color: #e0e6ed !important;
+    }
+
+    /* Links */
+    a {
+        color: #667eea !important;
+        text-decoration: none;
+    }
+
+    a:hover {
+        color: #764ba2 !important;
+        text-decoration: underline;
+    }
 
     /* Feedback container styling */
     .feedback-container {
-        background: #e6f9f5; /* Lighter, calming background for feedback */
-        padding: 20px; /* Adjusted padding */
+        background: #0f2027 !important;
+        padding: 24px;
         border-radius: 12px;
-        border: 1px solid #beebe3; /* Subtle border */
-        box-shadow: 0 3px 12px rgba(40,167,69,.06);
-        font-size: 1.05rem !important; /* Adjusted font size */
-        margin-bottom: 1.8em;
+        border: 1px solid #28a745;
+        box-shadow: 0 4px 15px rgba(40, 167, 69, 0.1);
+        font-size: 1.05rem !important;
+        margin-bottom: 2em;
         text-align: left !important;
+        color: #e0e6ed !important;
     }
 
     .feedback-header {
         font-size: 1.4rem !important;
-        color: #28a745; /* Green for positive feedback header */
-        font-weight: 600; /* Slightly less bold */
-        margin-bottom: 0.6em;
+        color: #28a745 !important;
+        font-weight: 600;
+        margin-bottom: 0.8em;
         text-align: left !important;
     }
 
     .strength-item, .weakness-item {
         font-size: 1.03rem !important;
-        margin: 6px 0;
-        padding-left: 14px;
+        margin: 8px 0;
+        padding-left: 16px;
         text-align: left !important;
+        color: #e0e6ed !important;
     }
 
-    /* Responsive adjustments */
-    @media (max-width: 900px) {
+    /* Score card styling */
+    .score-card {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        padding: 32px;
+        border-radius: 16px;
+        text-align: center;
+        margin: 24px 0;
+        box-shadow: 0 8px 32px rgba(102, 126, 234, 0.3);
+        max-width: 400px;
+        margin-left: auto;
+        margin-right: auto;
+    }
+
+    .score-card h2 {
+        color: #ffffff !important;
+        margin-bottom: 16px;
+    }
+
+    .score {
+        font-size: 3rem;
+        font-weight: 700;
+        color: #ffffff;
+        margin: 16px 0;
+    }
+
+    /* Responsive design */
+    @media (max-width: 768px) {
         .main .block-container {
-            padding: 18px 3vw 18px 3vw; /* Adjusted padding for smaller screens */
-            margin-top: 12px;
-            border-radius: 12px; /* Smaller radius on mobile */
+            padding: 20px 16px;
+            margin: 10px 5px;
+            width: calc(100% - 10px) !important;
+            max-width: none !important;
         }
+        
         .stMarkdown, .stText, .stTextArea, .stDataFrame, .stTable {
-            font-size: 1rem !important; /* Slightly smaller font on mobile */
+            font-size: 0.95rem !important;
         }
+
+        h1 { font-size: 1.8rem !important; }
+        h2 { font-size: 1.5rem !important; }
+        h3 { font-size: 1.3rem !important; }
+
+        .score {
+            font-size: 2.5rem;
+        }
+
+        .score-card {
+            padding: 24px;
+            margin: 16px 0;
+        }
+    }
+
+    /* Table overflow handling */
+    .stDataFrame > div {
+        overflow-x: auto;
+    }
+
+    /* Ensure consistent spacing */
+    .element-container {
+        margin-bottom: 1rem;
+    }
+
+    /* Custom certificate button styling */
+    .certificate-button {
+        background: linear-gradient(135deg, #ffc107 0%, #ff8c00 100%) !important;
+        color: #000000 !important;
+        font-size: 1.3rem !important;
+        font-weight: 700 !important;
+        padding: 20px 40px !important;
+        border-radius: 12px !important;
+        text-decoration: none !important;
+        box-shadow: 0 6px 20px rgba(255, 193, 7, 0.4) !important;
+        display: inline-block !important;
+        margin: 20px 0 !important;
+        transition: all 0.3s ease !important;
+    }
+
+    .certificate-button:hover {
+        background: linear-gradient(135deg, #ff8c00 0%, #ffc107 100%) !important;
+        transform: translateY(-2px) !important;
+        box-shadow: 0 8px 25px rgba(255, 193, 7, 0.5) !important;
     }
 </style>
 """
@@ -162,7 +372,6 @@ with st.sidebar:
     st.markdown("[SQLBolt](https://sqlbolt.com/)")
     st.markdown("---")
     st.info("Earn a certificate by scoring 80%+ on the quiz!")
-
 
 # --- Set up Gemini API ---
 gemini_api_key = "AIzaSyAfzl_66GZsgaYjAM7cT2djVCBCAr86t2k"  # Replace with your Gemini API Key
