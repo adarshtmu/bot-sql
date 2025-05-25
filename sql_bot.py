@@ -6,6 +6,7 @@ import duckdb
 
 # --- Custom CSS ---
 # Updated to increase font sizes globally and for specific elements
+# --- Custom CSS ---
 hide_streamlit_style = """
     <style>
         header {visibility: hidden;}
@@ -15,21 +16,32 @@ hide_streamlit_style = """
         .stDeployButton {display: none !important;}
         [data-testid="stToolbar"] {display: none !important;}
         [data-testid="stDecoration"] {display: none !important;}
+        [data-testid="stDeployButton"] {display: none !important;}
         .st-emotion-cache-1r8d6ul {display: none !important;}
         .st-emotion-cache-1jicfl2 {display: none !important;}
-        body, .stMarkdown, .stText, .stTextArea, .stButton button {
+        /* Increase global font size */
+        body, .stMarkdown, .stText, .stTextArea, .stButton button, .stLinkButton a {
             font-size: 18px !important;
         }
         h1 {font-size: 36px !important;}
         h2 {font-size: 28px !important;}
         h3 {font-size: 24px !important;}
+        /* Style for Start SQL Challenge! button */
         button[kind="primary"] {
             font-size: 24px !important;
             padding: 15px 30px !important;
             color: white !important;
-            background-color: red;
-            border-radius: 10px;
+            background-color: #007bff !important; /* Blue color as in the image */
+            border-radius: 10px !important;
+            border: none !important;
         }
+        /* Style for other buttons (Submit, Analysis, Retry) */
+        .stButton button:not([kind="primary"]), .stLinkButton a {
+            font-size: 20px !important;
+            padding: 12px 24px !important;
+            border-radius: 8px !important;
+        }
+        /* Feedback container styling */
         .feedback-container {
             background-color: #f9f9f9;
             padding: 20px;
@@ -49,9 +61,14 @@ hide_streamlit_style = """
             font-size: 18px !important;
             margin: 5px 0;
         }
+        /* Table styling to match the image */
+        .stDataFrame {
+            border: 1px solid #e0e0e0 !important;
+            border-radius: 8px !important;
+        }
     </style>
 """
-st.markdown(hide_streamlit_style, unsafe_allow_html=True)
+
 st.markdown(hide_streamlit_style, unsafe_allow_html=True)
 
 # --- Set up Gemini API ---
