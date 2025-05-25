@@ -669,59 +669,59 @@ elif st.session_state.quiz_completed:
 
     # --- 2. Analysis Section ---
     st.markdown("---")
-    st.subheader("💡 AI Mentor Se Detailed Performance Analysis")
-    if st.button("📊 Show Detailed Analysis", key="show_analysis"):
-        st.session_state.show_detailed_feedback = not st.session_state.show_detailed_feedback
-    if st.session_state.show_detailed_feedback:
-        with st.spinner("🧠 Performance analysis generate ho raha hai..."):
-            performance_summary = analyze_performance(st.session_state.user_answers)
-            feedback_text = performance_summary.get("overall_feedback", "Analysis available nahi hai.")
-            with st.container():
-                st.markdown('<div class="feedback-container">', unsafe_allow_html=True)
-                st.markdown('<div class="feedback-header">📈 Aapki Performance Ka Vistaar Se Analysis</div>', unsafe_allow_html=True)
-                try:
-                    sections = re.split(r'(Overall Impression:|Strengths:|Areas for Improvement:|Next Steps / Encouragement:)', feedback_text)
-                    section_dict = {}
-                    for i in range(1, len(sections), 2):
-                        section_dict[sections[i].strip(':')] = sections[i+1].strip()
-                except:
-                    section_dict = {"Full Feedback": feedback_text}
-                if "Overall Impression" in section_dict:
-                    st.markdown("### 🌟 Overall Impression")
-                    st.markdown(section_dict["Overall Impression"])
-                st.markdown('<div class="feedback-section">', unsafe_allow_html=True)
-                st.markdown("### ✅ Strengths")
-                if "Strengths" in section_dict:
-                    strengths = section_dict["Strengths"].split('\n')
-                    for strength in strengths:
-                        if strength.strip():
-                            st.markdown(f'<div class="strength-item">✔ {strength.strip()}</div>', unsafe_allow_html=True)
-                elif performance_summary.get("strengths"):
-                    for strength in performance_summary["strengths"]:
-                        st.markdown(f'<div class="strength-item">✔ {strength}</div>', unsafe_allow_html=True)
-                else:
-                    st.markdown("Koi specific strengths identify nahi hue. Aur practice karo!")
-                st.markdown('</div>', unsafe_allow_html=True)
-                st.markdown('<div class="feedback-section">', unsafe_allow_html=True)
-                st.markdown("### 📝 Areas for Improvement")
-                if "Areas for Improvement" in section_dict:
-                    weaknesses = section_dict["Areas for Improvement"].split('\n')
-                    for weakness in weaknesses:
-                        if weakness.strip():
-                            st.markdown(f'<div class="weakness-item">➡ {weakness.strip()}</div>', unsafe_allow_html=True)
-                elif performance_summary.get("weaknesses"):
-                    for weakness in performance_summary["weaknesses"]:
-                        st.markdown(f'<div class="weakness-item">➡ {weakness}</div>', unsafe_allow_html=True)
-                else:
-                    st.markdown("Koi major weaknesses nahi! Bas practice jari rakho.")
-                st.markdown('</div>', unsafe_allow_html=True)
-                if "Next Steps / Encouragement" in section_dict:
-                    st.markdown("### 🚀 Next Steps")
-                    st.markdown(section_dict["Next Steps / Encouragement"])
-                if "Full Feedback" in section_dict:
-                    st.markdown("### 📋 Complete Feedback")
-                    st.markdown(section_dict["Full Feedback"])
-                st.markdown('</div>', unsafe_allow_html=True)
+    # st.subheader("💡 AI Mentor Se Detailed Performance Analysis")
+    # if st.button("📊 Show Detailed Analysis", key="show_analysis"):
+    #     st.session_state.show_detailed_feedback = not st.session_state.show_detailed_feedback
+    # if st.session_state.show_detailed_feedback:
+    #     with st.spinner("🧠 Performance analysis generate ho raha hai..."):
+    #         performance_summary = analyze_performance(st.session_state.user_answers)
+    #         feedback_text = performance_summary.get("overall_feedback", "Analysis available nahi hai.")
+    #         with st.container():
+    #             st.markdown('<div class="feedback-container">', unsafe_allow_html=True)
+    #             st.markdown('<div class="feedback-header">📈 Aapki Performance Ka Vistaar Se Analysis</div>', unsafe_allow_html=True)
+    #             try:
+    #                 sections = re.split(r'(Overall Impression:|Strengths:|Areas for Improvement:|Next Steps / Encouragement:)', feedback_text)
+    #                 section_dict = {}
+    #                 for i in range(1, len(sections), 2):
+    #                     section_dict[sections[i].strip(':')] = sections[i+1].strip()
+    #             except:
+    #                 section_dict = {"Full Feedback": feedback_text}
+    #             if "Overall Impression" in section_dict:
+    #                 st.markdown("### 🌟 Overall Impression")
+    #                 st.markdown(section_dict["Overall Impression"])
+    #             st.markdown('<div class="feedback-section">', unsafe_allow_html=True)
+    #             st.markdown("### ✅ Strengths")
+    #             if "Strengths" in section_dict:
+    #                 strengths = section_dict["Strengths"].split('\n')
+    #                 for strength in strengths:
+    #                     if strength.strip():
+    #                         st.markdown(f'<div class="strength-item">✔ {strength.strip()}</div>', unsafe_allow_html=True)
+    #             elif performance_summary.get("strengths"):
+    #                 for strength in performance_summary["strengths"]:
+    #                     st.markdown(f'<div class="strength-item">✔ {strength}</div>', unsafe_allow_html=True)
+    #             else:
+    #                 st.markdown("Koi specific strengths identify nahi hue. Aur practice karo!")
+    #             st.markdown('</div>', unsafe_allow_html=True)
+    #             st.markdown('<div class="feedback-section">', unsafe_allow_html=True)
+    #             st.markdown("### 📝 Areas for Improvement")
+    #             if "Areas for Improvement" in section_dict:
+    #                 weaknesses = section_dict["Areas for Improvement"].split('\n')
+    #                 for weakness in weaknesses:
+    #                     if weakness.strip():
+    #                         st.markdown(f'<div class="weakness-item">➡ {weakness.strip()}</div>', unsafe_allow_html=True)
+    #             elif performance_summary.get("weaknesses"):
+    #                 for weakness in performance_summary["weaknesses"]:
+    #                     st.markdown(f'<div class="weakness-item">➡ {weakness}</div>', unsafe_allow_html=True)
+    #             else:
+    #                 st.markdown("Koi major weaknesses nahi! Bas practice jari rakho.")
+    #             st.markdown('</div>', unsafe_allow_html=True)
+    #             if "Next Steps / Encouragement" in section_dict:
+    #                 st.markdown("### 🚀 Next Steps")
+    #                 st.markdown(section_dict["Next Steps / Encouragement"])
+    #             if "Full Feedback" in section_dict:
+    #                 st.markdown("### 📋 Complete Feedback")
+    #                 st.markdown(section_dict["Full Feedback"])
+    #             st.markdown('</div>', unsafe_allow_html=True)
 
     # --- 3. Advanced Scorecard & Buttons LAST ---
     st.balloons()
