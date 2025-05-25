@@ -747,16 +747,20 @@ elif st.session_state.quiz_completed:
         .score-card {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             border-radius: 24px;
-            width: 690px;
-            height: 350px;
             padding: 0;
-            margin: 2rem 0;
+            margin: 2rem auto;           /* This centers the card horizontally */
             box-shadow: 0 20px 40px rgba(102, 126, 234, 0.3);
             position: relative;
             overflow: hidden;
             animation: scoreCardFloat 6s ease-in-out infinite;
+            width: 340px;                /* Set your preferred width */
+            height: 250px;               /* Set your preferred height */
+            max-width: 95vw;             /* Responsive: not larger than viewport */
+            max-height: 60vh;            /* Responsive: not taller than viewport */
+            min-width: 220px;            /* Optional, for small screens */
+            min-height: 140px;           /* Optional, for small screens */
         }
-        
+                
         .score-card::before {
             content: '';
             position: absolute;
