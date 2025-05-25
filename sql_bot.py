@@ -6,13 +6,8 @@ import duckdb
 
 # --- Custom CSS ---
 # Updated to increase font sizes globally and for specific elements
-# Replace the existing hide_streamlit_style CSS section with this advanced version:
-
 hide_streamlit_style = """
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
-        
-        /* Hide Streamlit branding */
         header {visibility: hidden;}
         #MainMenu {visibility: hidden;}
         footer {visibility: hidden;}
@@ -23,319 +18,46 @@ hide_streamlit_style = """
         [data-testid="stDeployButton"] {display: none !important;}
         .st-emotion-cache-1r8d6ul {display: none !important;}
         .st-emotion-cache-1jicfl2 {display: none !important;}
-        
-        /* Root styling */
-        .stApp {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-        }
-        
-        /* Main container */
-        .main .block-container {
-            padding: 2rem 3rem;
-            max-width: 85%;
-            background: rgba(255, 255, 255, 0.98);
-            border-radius: 20px;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1);
-            backdrop-filter: blur(10px);
-            margin: 2rem auto;
-        }
-        
-        /* Typography enhancements */
+        /* Increase global font size */
         body, .stMarkdown, .stText, .stTextArea, .stButton button, .stLinkButton a {
-            font-family: 'Inter', sans-serif !important;
-            font-size: 16px !important;
-            line-height: 1.6;
-        }
-        
-        h1 {
-            font-size: 2.5rem !important;
-            font-weight: 700 !important;
-            background: linear-gradient(135deg, #667eea, #764ba2);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            text-align: center;
-            margin-bottom: 1.5rem !important;
-        }
-        
-        h2 {
-            font-size: 1.8rem !important;
-            font-weight: 600 !important;
-            color: #2d3748;
-            margin: 1.5rem 0 1rem 0 !important;
-        }
-        
-        h3 {
-            font-size: 1.4rem !important;
-            font-weight: 500 !important;
-            color: #4a5568;
-            margin: 1rem 0 0.5rem 0 !important;
-        }
-        
-        /* Enhanced buttons */
-        button[data-testid="baseButton-primary"] {
-            background: linear-gradient(135deg, #667eea, #764ba2) !important;
-            color: white !important;
-            border: none !important;
-            border-radius: 12px !important;
-            padding: 16px 32px !important;
             font-size: 18px !important;
-            font-weight: 600 !important;
-            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3) !important;
-            transition: all 0.3s ease !important;
-            text-transform: none !important;
         }
-        
-        button[data-testid="baseButton-primary"]:hover {
-            transform: translateY(-2px) !important;
-            box-shadow: 0 12px 30px rgba(102, 126, 234, 0.4) !important;
+        h1 {font-size: 36px !important;}
+        h2 {font-size: 28px !important;}
+        h3 {font-size: 24px !important;}
+        /* Style for Start SQL Challenge! button */
+        button[kind="primary"] {
+            font-size: 24px !important;
+            padding: 15px 30px !important;
+            color: white !important;
+            background-color: red;
+            border-radius: 10px;
         }
-        
-        .stButton button:not([data-testid="baseButton-primary"]) {
-            background: #f7fafc !important;
-            color: #2d3748 !important;
-            border: 2px solid #e2e8f0 !important;
-            border-radius: 10px !important;
+        /* Style for other buttons (Submit, Analysis, Retry) */
+        .stButton button:not([kind="primary"]), .stLinkButton a {
+            font-size: 20px !important;
             padding: 12px 24px !important;
-            font-size: 16px !important;
-            font-weight: 500 !important;
-            transition: all 0.3s ease !important;
+            border-radius: 8px;
         }
-        
-        .stButton button:not([data-testid="baseButton-primary"]):hover {
-            background: #edf2f7 !important;
-            border-color: #cbd5e0 !important;
-            transform: translateY(-1px) !important;
-        }
-        
-        /* Card-style containers */
-        .element-container {
-            background: white;
-            border-radius: 12px;
-            padding: 1.5rem;
-            margin: 1rem 0;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
-            border: 1px solid #e2e8f0;
-        }
-        
-        /* Enhanced dataframes */
-        .stDataFrame {
-            border-radius: 12px !important;
-            overflow: hidden !important;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08) !important;
-            border: 1px solid #e2e8f0 !important;
-        }
-        
-        .stDataFrame > div {
-            border-radius: 12px !important;
-        }
-        
-        /* Text areas and inputs */
-        .stTextArea textarea {
-            border-radius: 10px !important;
-            border: 2px solid #e2e8f0 !important;
-            padding: 12px 16px !important;
-            font-family: 'Monaco', 'Consolas', monospace !important;
-            font-size: 14px !important;
-            line-height: 1.5 !important;
-            background: #f8fafc !important;
-            transition: border-color 0.3s ease !important;
-        }
-        
-        .stTextArea textarea:focus {
-            border-color: #667eea !important;
-            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1) !important;
-            outline: none !important;
-        }
-        
-        /* Progress bars */
-        .stProgress .st-bo {
-            background: linear-gradient(90deg, #667eea, #764ba2) !important;
-            border-radius: 10px !important;
-        }
-        
-        .stProgress > div > div {
-            border-radius: 10px !important;
-            background: #e2e8f0 !important;
-        }
-        
-        /* Tabs enhancement */
-        .stTabs [data-baseweb="tab-list"] {
-            gap: 8px;
-            background: #f7fafc;
-            border-radius: 12px;
-            padding: 4px;
-        }
-        
-        .stTabs [data-baseweb="tab"] {
-            border-radius: 8px !important;
-            padding: 12px 20px !important;
-            font-weight: 500 !important;
-            transition: all 0.3s ease !important;
-        }
-        
-        .stTabs [aria-selected="true"] {
-            background: white !important;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1) !important;
-        }
-        
-        /* Expanders */
-        .streamlit-expanderHeader {
-            background: #f7fafc !important;
-            border-radius: 10px !important;
-            padding: 12px 16px !important;
-            font-weight: 500 !important;
-            border: 1px solid #e2e8f0 !important;
-            transition: all 0.3s ease !important;
-        }
-        
-        .streamlit-expanderHeader:hover {
-            background: #edf2f7 !important;
-        }
-        
-        .streamlit-expanderContent {
-            border: 1px solid #e2e8f0 !important;
-            border-top: none !important;
-            border-radius: 0 0 10px 10px !important;
-            padding: 16px !important;
-            background: white !important;
-        }
-        
-        /* Code blocks */
-        .stCode {
-            border-radius: 8px !important;
-            border: 1px solid #e2e8f0 !important;
-        }
-        
-        /* Alerts and messages */
-        .stAlert {
-            border-radius: 10px !important;
-            border: none !important;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05) !important;
-        }
-        
-        .stSuccess {
-            background: linear-gradient(135deg, #48bb78, #38a169) !important;
-            color: white !important;
-        }
-        
-        .stWarning {
-            background: linear-gradient(135deg, #ed8936, #dd6b20) !important;
-            color: white !important;
-        }
-        
-        .stError {
-            background: linear-gradient(135deg, #f56565, #e53e3e) !important;
-            color: white !important;
-        }
-        
-        .stInfo {
-            background: linear-gradient(135deg, #4299e1, #3182ce) !important;
-            color: white !important;
-        }
-        
-        /* Sidebar enhancements */
-        .css-1d391kg {
-            background: linear-gradient(180deg, #667eea 0%, #764ba2 100%) !important;
-        }
-        
         /* Feedback container styling */
         .feedback-container {
-            background: linear-gradient(135deg, #f7fafc, #edf2f7);
-            padding: 24px;
-            border-radius: 16px;
-            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
-            border: 1px solid #e2e8f0;
-            margin: 20px 0;
+            background-color: #f9f9f9;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            font-size: 18px !important;
         }
-        
         .feedback-header {
-            font-size: 1.5rem !important;
-            font-weight: 600 !important;
-            background: linear-gradient(135deg, #667eea, #764ba2);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            margin-bottom: 16px;
+            font-size: 24px !important;
+            color: #1f77b4;
+            margin-bottom: 10px;
         }
-        
         .feedback-section {
-            margin: 20px 0;
-            padding: 16px;
-            background: white;
-            border-radius: 12px;
-            border-left: 4px solid #667eea;
+            margin-top: 15px;
         }
-        
         .strength-item, .weakness-item {
-            font-size: 16px !important;
-            margin: 8px 0;
-            padding: 8px 12px;
-            border-radius: 8px;
-            background: rgba(102, 126, 234, 0.05);
-        }
-        
-        /* Score display enhancement */
-        .score-card {
-            background: linear-gradient(135deg, #667eea, #764ba2);
-            color: white;
-            padding: 30px;
-            border-radius: 20px;
-            text-align: center;
-            box-shadow: 0 15px 35px rgba(102, 126, 234, 0.3);
-            margin: 30px 0;
-        }
-        
-        /* Animations */
-        @keyframes fadeInUp {
-            from {
-                opacity: 0;
-                transform: translateY(20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-        
-        .element-container {
-            animation: fadeInUp 0.6s ease-out;
-        }
-        
-        /* Responsive design */
-        @media (max-width: 768px) {
-            .main .block-container {
-                padding: 1rem 1.5rem;
-                margin: 1rem;
-                border-radius: 15px;
-            }
-            
-            h1 {
-                font-size: 2rem !important;
-            }
-            
-            button[data-testid="baseButton-primary"] {
-                padding: 14px 24px !important;
-                font-size: 16px !important;
-            }
-        }
-        
-        /* Custom scrollbar */
-        ::-webkit-scrollbar {
-            width: 8px;
-        }
-        
-        ::-webkit-scrollbar-track {
-            background: #f1f1f1;
-            border-radius: 10px;
-        }
-        
-        ::-webkit-scrollbar-thumb {
-            background: linear-gradient(135deg, #667eea, #764ba2);
-            border-radius: 10px;
-        }
-        
-        ::-webkit-scrollbar-thumb:hover {
-            background: linear-gradient(135deg, #5a67d8, #6b46c1);
+            font-size: 18px !important;
+            margin: 5px 0;
         }
     </style>
 """
@@ -728,146 +450,259 @@ def display_simulation(title, result_data):
 
 # --- Start Screen ---
 # --- Start Screen ---
-# Replace the Start Screen section with this enhanced version:
-
 if not st.session_state.quiz_started:
-    # Hero Section
+    st.title("🚀 SQL Mentor - Interactive SQL Practice")
+    st.markdown("### Finish the Quiz Successfully to Unlock Your SQL Certificate")
     st.markdown("""
-        <div style='text-align: center; padding: 2rem 0; margin-bottom: 2rem;'>
-            <h1 style='font-size: 3rem; margin-bottom: 0.5rem;'>🚀 SQL Mentor</h1>
-            <p style='font-size: 1.2rem; color: #718096; margin-bottom: 1rem;'>Master SQL with Interactive Practice & AI-Powered Feedback</p>
-            <div style='background: linear-gradient(135deg, #667eea, #764ba2); color: white; padding: 12px 24px; border-radius: 50px; display: inline-block; font-weight: 500;'>
-                🎯 Earn Your SQL Certificate with 80%+ Score
-            </div>
-        </div>
-    """, unsafe_allow_html=True)
+        **📌 Important Notes:**
+        - To be eligible for a certificate, you must achieve a score of at least 80%.
+        - This quiz uses standard **SQL syntax** (similar to MySQL/PostgreSQL).
+        - String comparisons (like `WHERE city = 'new york'` or `WHERE status = "pending"`) are simulated to be **case-insensitive** for common text columns (`status`, `city`).
+        - **Both single quotes (') and double quotes (") are accepted** for string literals in this simulation.
+        - Your queries are evaluated by an AI for correctness and logic.
+        - Query simulation is powered by DuckDB to show results on sample data.
+        """)
     
-    # Features Section
-    st.markdown("""
-        <div style='display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem; margin-bottom: 2rem;'>
-            <div style='background: white; padding: 1.5rem; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.08); border-left: 4px solid #48bb78;'>
-                <h3 style='color: #48bb78; margin-top: 0;'>🎯 Interactive Learning</h3>
-                <p>Practice with real SQL queries on sample databases with instant feedback</p>
-            </div>
-            <div style='background: white; padding: 1.5rem; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.08); border-left: 4px solid #4299e1;'>
-                <h3 style='color: #4299e1; margin-top: 0;'>🤖 AI-Powered Evaluation</h3>
-                <p>Get detailed feedback on your queries from our intelligent SQL mentor</p>
-            </div>
-            <div style='background: white; padding: 1.5rem; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.08); border-left: 4px solid #ed8936;'>
-                <h3 style='color: #ed8936; margin-top: 0;'>📊 Real-time Results</h3>
-                <p>See your query results instantly with DuckDB-powered simulation</p>
-            </div>
-        </div>
-    """, unsafe_allow_html=True)
-    
-    # Important Notes Card
-    with st.container():
-        st.markdown("""
-            <div style='background: linear-gradient(135deg, #f7fafc, #edf2f7); padding: 2rem; border-radius: 16px; border: 1px solid #e2e8f0; margin-bottom: 2rem;'>
-                <h3 style='color: #2d3748; margin-top: 0; display: flex; align-items: center;'>
-                    📌 <span style='margin-left: 0.5rem;'>Quiz Guidelines</span>
-                </h3>
-                <div style='display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem;'>
-                    <div style='background: white; padding: 1rem; border-radius: 8px;'>
-                        <strong>🎯 Certificate Requirement:</strong><br>
-                        Score 80%+ to earn your SQL certificate
-                    </div>
-                    <div style='background: white; padding: 1rem; border-radius: 8px;'>
-                        <strong>💻 SQL Syntax:</strong><br>
-                        Standard SQL (MySQL/PostgreSQL style)
-                    </div>
-                    <div style='background: white; padding: 1rem; border-radius: 8px;'>
-                        <strong>🔍 Case Sensitivity:</strong><br>
-                        City & status comparisons are case-insensitive
-                    </div>
-                    <div style='background: white; padding: 1rem; border-radius: 8px;'>
-                        <strong>📝 Quote Flexibility:</strong><br>
-                        Both single (') and double (") quotes accepted
-                    </div>
-                </div>
-            </div>
-        """, unsafe_allow_html=True)
-    
-    # Tables Overview Section
-    col1, col2 = st.columns([3, 2])
-    
+    col1, col2 = st.columns([2, 1])
     with col1:
-        st.markdown("""
-            <div style='background: white; padding: 1.5rem; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.08);'>
-                <h3 style='color: #2d3748; margin-top: 0;'>🗃️ Database Overview</h3>
-                <p style='color: #718096; margin-bottom: 1.5rem;'>You'll work with two interconnected tables representing a simple e-commerce system:</p>
-                <div style='display: flex; gap: 1rem; margin-bottom: 1rem;'>
-                    <div style='flex: 1; background: #f7fafc; padding: 1rem; border-radius: 8px; border-left: 3px solid #4299e1;'>
-                        <strong>👥 Users Table</strong><br>
-                        <small>Customer information, demographics</small>
-                    </div>
-                    <div style='flex: 1; background: #f7fafc; padding: 1rem; border-radius: 8px; border-left: 3px solid #48bb78;'>
-                        <strong>🛒 Orders Table</strong><br>
-                        <small>Purchase history, order details</small>
-                    </div>
-                </div>
-            </div>
-        """, unsafe_allow_html=True)
-    
+        st.write("""
+        Is interactive quiz mein, aap do sample tables ke saath kaam karenge:
+        - **Users Table**: User details jaise ID, naam, email, umar, aur sheher.
+        - **Orders Table**: Order details jaise ID, user ID, amount, order date, aur status.
+        """)
     with col2:
-        st.markdown("#### 📊 Quick Stats")
+        st.markdown("#### Tables Overview")
         try:
-            table_overview_data = {
-                "Table": ["👥 Users", "🛒 Orders"],
-                "Rows": [len(df) for df in original_tables.values()],
-                "Columns": [len(df.columns) for df in original_tables.values()]
-            }
-            st.dataframe(pd.DataFrame(table_overview_data), hide_index=True, use_container_width=True)
+            table_overview_data = {"Table": list(original_tables.keys()),
+                                   "Rows": [len(df) for df in original_tables.values()],
+                                   "Columns": [len(df.columns) for df in original_tables.values()]}
+            st.dataframe(pd.DataFrame(table_overview_data), hide_index=True)
         except Exception as e:
             st.error(f"Error displaying table overview: {e}")
     
-    # Table Previews with Enhanced UI
-    st.markdown("### 🔍 Sample Data Preview")
+    st.write("### 🔍 Table Previews")
     try:
-        tab1, tab2 = st.tabs(["👥 Users Table", "🛒 Orders Table"])
-        with tab1: 
-            st.markdown("**Customer information including demographics and contact details**")
-            st.dataframe(users_table, hide_index=True, use_container_width=True)
-        with tab2: 
-            st.markdown("**Order history with amounts, dates, and status tracking**")
-            st.dataframe(orders_table, hide_index=True, use_container_width=True)
+        tab1, tab2 = st.tabs(["Users Table", "Orders Table"])
+        with tab1: st.dataframe(users_table, hide_index=True, use_container_width=True)
+        with tab2: st.dataframe(orders_table, hide_index=True, use_container_width=True)
     except Exception as e:
         st.error(f"Error displaying table previews: {e}")
     
-    # Challenge Information Expander
-    with st.expander("📚 Challenge Details & Learning Path", expanded=False):
-        st.markdown(f"""
-        <div style='background: #f8fafc; padding: 1.5rem; border-radius: 12px; margin: 1rem 0;'>
-            <h4 style='color: #2d3748; margin-top: 0;'>🎯 What You'll Learn</h4>
-            <div style='display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 1.5rem;'>
-                <div>• Basic SELECT statements</div>
-                <div>• WHERE clause filtering</div>
-                <div>• JOIN operations</div>
-                <div>• Aggregate functions</div>
-                <div>• Data sorting & grouping</div>
-                <div>• Case-insensitive matching</div>
-            </div>
-            
-            <h4 style='color: #2d3748;'>📝 Challenge Structure</h4>
-            <p><strong>{len(sql_questions)} Progressive Questions</strong> - From basic queries to complex joins</p>
-            <p><strong>Instant Feedback</strong> - AI mentor provides detailed explanation for each answer</p>
-            <p><strong>Real Results</strong> - See actual query output on sample data</p>
-            
-            <div style='background: linear-gradient(135deg, #fef5e7, #fed7aa); padding: 1rem; border-radius: 8px; margin-top: 1rem;'>
-                <strong>💡 Pro Tip:</strong> Take your time to understand each question. The AI mentor will help you learn from mistakes!
-            </div>
-        </div>
-        """, unsafe_allow_html=True)
+    with st.expander("📝 Quiz Ke Baare Mein"):
+        st.write(f"""
+        - Aapko {len(sql_questions)} SQL query challenges solve karne honge.
+        - Har jawaab ke baad AI Mentor se immediate feedback milega.
+        - **SQL Dialect Focus:** Standard SQL (MySQL/PostgreSQL like).
+        - Case-insensitivity for `status` and `city` columns in `WHERE =` clauses is simulated.
+        - String literals can be enclosed in single quotes (`'...'`) or double quotes (`"..."`).
+        """)
     
-    # Call to Action
-    st.markdown("<div style='text-align: center; margin: 3rem 0;'>", unsafe_allow_html=True)
-    if st.button("🚀 Start Your SQL Journey", type="primary"):
+    if st.button("🚀 Start SQL Challenge!", type="primary"):
         st.session_state.quiz_started = True
         st.session_state.user_answers = []
         st.session_state.current_question = 0
         st.session_state.quiz_completed = False
+
+# --- Quiz In Progress Screen ---
+# Replace the Quiz In Progress Screen section with this enhanced version:
+
+elif st.session_state.quiz_started and not st.session_state.quiz_completed:
+    # Progress Header
+    progress_percentage = (st.session_state.current_question / len(sql_questions)) * 100
+    st.markdown(f"""
+        <div style='background: linear-gradient(135deg, #667eea, #764ba2); color: white; padding: 1.5rem; border-radius: 16px; margin-bottom: 2rem; text-align: center;'>
+            <h2 style='color: white; margin: 0; font-size: 1.8rem;'>✍️ SQL Challenge in Progress</h2>
+            <div style='margin: 1rem 0; display: flex; align-items: center; justify-content: center; gap: 1rem;'>
+                <div style='background: rgba(255,255,255,0.2); padding: 0.5rem 1rem; border-radius: 20px;'>
+                    Question {st.session_state.current_question + 1} of {len(sql_questions)}
+                </div>
+                <div style='background: rgba(255,255,255,0.2); padding: 0.5rem 1rem; border-radius: 20px;'>
+                    {progress_percentage:.0f}% Complete
+                </div>
+            </div>
+        </div>
+    """, unsafe_allow_html=True)
+    
+    st.progress(progress_percentage / 100)
+    
+    # Previous Answers Section (if any)
+    if st.session_state.user_answers:
+        st.markdown("""
+            <div style='background: #f8fafc; padding: 1.5rem; border-radius: 12px; margin: 2rem 0; border-left: 4px solid #4299e1;'>
+                <h3 style='color: #2d3748; margin-top: 0; display: flex; align-items: center;'>
+                    📖 <span style='margin-left: 0.5rem;'>Your Progress So Far</span>
+                </h3>
+            </div>
+        """, unsafe_allow_html=True)
+        
+        for i, ans_data in enumerate(st.session_state.user_answers):
+            q_num = i + 1
+            is_correct = ans_data.get('is_correct', False)
+            status_color = "#48bb78" if is_correct else "#f56565"
+            status_icon = "✅" if is_correct else "❌"
+            
+            with st.expander(f"{status_icon} Question {q_num}: {ans_data['question'][:60]}{'...' if len(ans_data['question']) > 60 else ''}", expanded=False):
+                st.markdown(f"""
+                    <div style='background: {"#f0fff4" if is_correct else "#fef5e7"}; padding: 1rem; border-radius: 8px; border-left: 4px solid {status_color}; margin-bottom: 1rem;'>
+                        <strong style='color: {status_color};'>Status: {"Correct! 🎉" if is_correct else "Needs Improvement 📚"}</strong>
+                    </div>
+                """, unsafe_allow_html=True)
+                
+                st.markdown("**Your SQL Query:**")
+                st.code(ans_data.get('student_answer', '(No answer provided)'), language='sql')
+                
+                st.markdown("**AI Mentor Feedback:**")
+                st.markdown(f"<div style='background: white; padding: 1rem; border-radius: 8px; border: 1px solid #e2e8f0;'>{ans_data.get('feedback', '_Feedback not available._')}</div>", unsafe_allow_html=True)
+                
+                st.markdown("---")
+                display_simulation("🔍 Your Query Results", ans_data.get("actual_result", "N/A"))
+                
+                if not is_correct or (isinstance(ans_data.get("actual_result"), pd.DataFrame) and isinstance(ans_data.get("expected_result"), pd.DataFrame) and not ans_data["actual_result"].equals(ans_data["expected_result"])):
+                    display_simulation("🎯 Expected Results", ans_data.get("expected_result", "N/A"))
+    
+    st.markdown("---")
+    
+    # Current Question Section
+    current_q_index = st.session_state.current_question
+    question_data = sql_questions[current_q_index]
+    
+    st.markdown(f"""
+        <div style='background: white; padding: 2rem; border-radius: 16px; box-shadow: 0 8px 25px rgba(0,0,0,0.08); margin-bottom: 2rem;'>
+            <div style='text-align: center; margin-bottom: 1.5rem;'>
+                <div style='background: linear-gradient(135deg, #667eea, #764ba2); color: white; padding: 0.5rem 1.5rem; border-radius: 20px; display: inline-block; font-weight: 600;'>
+                    Question {current_q_index + 1} of {len(sql_questions)}
+                </div>
+            </div>
+            <h3 style='color: #2d3748; text-align: center; font-size: 1.3rem; line-height: 1.6;'>{question_data['question']}</h3>
+        </div>
+    """, unsafe_allow_html=True)
+    
+    # Table Preview Section
+    relevant_tables = question_data["relevant_tables"]
+    if relevant_tables:
+        st.markdown("""
+            <div style='background: #f8fafc; padding: 1.5rem; border-radius: 12px; margin-bottom: 2rem;'>
+                <h4 style='color: #2d3748; margin-top: 0; display: flex; align-items: center;'>
+                    🗃️ <span style='margin-left: 0.5rem;'>Relevant Tables for This Question</span>
+                </h4>
+            </div>
+        """, unsafe_allow_html=True)
+        
+        if len(relevant_tables) > 1:
+            tabs = st.tabs([f"📊 {name.title()}" for name in relevant_tables])
+            for i, table_name in enumerate(relevant_tables):
+                with tabs[i]:
+                    if table_name in original_tables:
+                        st.markdown(f"**Schema:** {', '.join(original_tables[table_name].columns.tolist())}")
+                        st.dataframe(original_tables[table_name], hide_index=True, use_container_width=True)
+                    else:
+                        st.warning(f"Data for table '{table_name}' not found.")
+        elif len(relevant_tables) == 1:
+            table_name = relevant_tables[0]
+            if table_name in original_tables:
+                st.markdown(f"**📋 {table_name.title()} Table Schema:** {', '.join(original_tables[table_name].columns.tolist())}")
+                st.dataframe(original_tables[table_name], hide_index=True, use_container_width=True)
+            else:
+                st.warning(f"Data for table '{table_name}' not found.")
+    
+    # Query Input Section
+    st.markdown("""
+        <div style='margin: 2rem 0 1rem 0;'>
+            <h4 style='color: #2d3748; display: flex; align-items: center;'>
+                💻 <span style='margin-left: 0.5rem;'>Write Your SQL Query</span>
+            </h4>
+            <p style='color: #
+            
+# --- Quiz Completed Screen ---
+elif st.session_state.quiz_completed:
+    st.balloons()
+    st.markdown(
+        """
+        <div style='text-align:center; margin-top: 30px;'>
+            <h1 style='color:#28a745;'>🎉 Congratulations!</h1>
+            <h2 style='color:#1f77b4;'>You have completed the SQL Challenge</h2>
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
+    final_score = calculate_score(st.session_state.user_answers)
+
+    # --- Scoreboard Card ---
+    st.markdown(
+        f"""
+        <div style='
+            background-color:#f8f9fa;
+            border-radius:15px;
+            box-shadow:0 4px 16px rgba(0,0,0,0.08);
+            padding:30px 0;
+            margin:30px 0;
+            text-align:center;
+        '>
+            <h2 style='color:#333;'>📊 Your Final Score</h2>
+            <div style='font-size:2.5rem; font-weight:bold; color:#28a745;'>{final_score:.2f}%</div>
+            <div style='font-size:1.2rem; color:#888;'>Scoreboard</div>
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
+    st.progress(final_score / 100)
+
+    # --- Certificate Button Section ---
+    if final_score >= 80:
+        st.markdown(
+            """
+            <div style='text-align:center; margin-top: 20px;'>
+                <h3 style='color:#007bff;'>🏆 Great job! You're eligible for a certificate.</h3>
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
+        st.markdown(
+            """
+            <div style='display:flex; justify-content:center; margin-bottom: 30px;'>
+                <a href="https://superprofile.bio/vp/corporate-bhaiya-sql-page" target="_blank" style="
+                    background-color:#ffc107;
+                    color:#121212;
+                    font-size:1.5rem;
+                    font-weight:600;
+                    padding:18px 36px;
+                    border-radius:10px;
+                    text-decoration:none;
+                    box-shadow:0 2px 8px rgba(0,0,0,0.11);
+                    transition: background 0.2s;
+                ">🎓 Get Your Certificate</a>
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
+    else:
+        st.markdown(
+            """
+            <div style='text-align:center; margin-top: 20px;'>
+                <h3 style='color:#e74c3c;'>📚 Keep practicing to earn a certificate!</h3>
+                <a href="https://www.corporatebhaiya.com/" target="_blank" style="
+                    background-color:#6c757d;
+                    color:white;
+                    font-size:1.2rem;
+                    padding:12px 28px;
+                    border-radius:8px;
+                    text-decoration:none;
+                    margin-top:10px;
+                    display:inline-block;
+                ">🚀 Book a Mentor Session</a>
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
+
+    st.markdown("---")
+    if st.button("🔄 Try Again?"):
+        st.session_state.user_answers = []
+        st.session_state.current_question = 0
+        st.session_state.quiz_started = False
+        st.session_state.quiz_completed = False
+        st.session_state.show_detailed_feedback = False
         st.rerun()
-    st.markdown("</div>", unsafe_allow_html=True)
 
     
     st.markdown("---")
