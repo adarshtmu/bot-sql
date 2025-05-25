@@ -604,6 +604,12 @@ elif st.session_state.quiz_started and not st.session_state.quiz_completed:
 # --- Quiz Completed Screen ---
 elif st.session_state.quiz_completed:
     st.balloons()
+    # --- Scroll to Top when Quiz is Completed ---
+    st.markdown("""
+        <script>
+        window.parent.scrollTo({top: 0, behavior: 'smooth'});
+        </script>
+    """, unsafe_allow_html=True)
     st.markdown(
         """
         <div style='text-align:center; margin-top: 30px;'>
@@ -614,6 +620,7 @@ elif st.session_state.quiz_completed:
         unsafe_allow_html=True
     )
     final_score = calculate_score(st.session_state.user_answers)
+    
 
     # --- Scoreboard Card ---
     st.markdown(
