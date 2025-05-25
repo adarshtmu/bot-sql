@@ -8,62 +8,48 @@ import time
 # --- Custom CSS ---
 # Updated to increase font sizes globally and for specific elements
 # --- Custom CSS ---
+# --- Custom CSS ---
+# Remove duplicate comment and fix CSS structure
 hide_streamlit_style = """
     <style>
         /* Apply zoom-out effect to the entire app */
         html, body, .stApp {
-            zoom: 1.15 !important; /* Adjust this value to control zoom level (e.g., 0.85 = 85% zoom) */
+            zoom: 1.15 !important;
         }
         header {visibility: hidden;}
-        #MainMenu {visibility: hidden;}
-        footer {visibility: hidden;}
-        .viewerBadge_container__1QSob {display: none !important;}
-        .stDeployButton {display: none !important;}
-        [data-testid="stToolbar"] {display: none !important;}
-        [data-testid="stDecoration"] {display: none !important;}
-        [data-testid="stDeployButton"] {display: none !important;}
-        .st-emotion-cache-1r8d6ul {display: none !important;}
-        .st-emotion-cache-1jicfl2 {display: none !important;}
-        /* Increase global font size */
-        body, .stMarkdown, .stText, .stTextArea, .stButton button, .stLinkButton a {
-            font-size: 18px !important;
+        /* ... (keep other existing styles) ... */
+
+        /* Progress Circle Animation Fix */
+        .progress-circle {
+            width: 200px;
+            height: 200px;
+            margin: 0 auto;
         }
-        h1 {font-size: 48px !important;}
-        h2 {font-size: 36px !important;}
-        h3 {font-size: 30px !important;}
-        /* Style for Start SQL Challenge! button */
-        button[kind="primary"] {
-            font-size: 24px !important;
-            padding: 15px 30px !important;
-            color: white !important;
-            background-color: red;
-            border-radius: 10px;
+        
+        .progress-svg {
+            transform: rotate(-90deg);
         }
-        /* Style for other buttons (Submit, Analysis, Retry) */
-        .stButton button:not([kind="primary"]), .stLinkButton a {
-            font-size: 20px !important;
-            padding: 12px 24px !important;
-            border-radius: 8px;
+        
+        .progress-bg {
+            fill: none;
+            stroke: #e9ecef;
+            stroke-width: 12;
         }
-        /* Feedback container styling */
-        .feedback-container {
-            background-color: #f9f9f9;
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-            font-size: 18px !important;
+        
+        .progress-bar {
+            fill: none;
+            stroke: #00C851;
+            stroke-width: 12;
+            stroke-linecap: round;
         }
-        .feedback-header {
-            font-size: 24px !important;
-            color: #1f77b4;
-            margin-bottom: 10px;
-        }
-        .feedback-section {
-            margin-top: 15px;
-        }
-        .strength-item, .weakness-item {
-            font-size: 18px !important;
-            margin: 5px 0;
+
+        /* Score Text Alignment */
+        .score-text {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
         }
     </style>
 """
