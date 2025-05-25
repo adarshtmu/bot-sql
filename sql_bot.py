@@ -718,171 +718,440 @@ elif st.session_state.quiz_completed:
         unsafe_allow_html=True
     )
     st.markdown("---")
-    final_score = calculate_score(st.session_state.user_answers)
+final_score = calculate_score(st.session_state.user_answers)
 
-    # Determine dynamic colors and messages based on score
-    score_color = "#28a745" if final_score >= 80 else "#ff9800" if final_score >= 50 else "#e74c3c"
-    score_message = "Outstanding Performance! 🌟" if final_score >= 80 else "Good Effort! Keep Going! 💪" if final_score >= 50 else "Needs Improvement! 📚"
-    border_gradient = "linear-gradient(45deg, #28a745, #1f77b4)" if final_score >= 80 else "linear-gradient(45deg, #ff9800, #e74c3c)"
+# Advanced scoring system with multiple metrics
+correct_answers = sum(1 for answer in st.session_state.user_answers if answer.get('correct', False))
+total_questions = len(st.session_state.user_answers)
+accuracy = (correct_answers / total_questions) * 100 if total_questions > 0 else 0
+time_bonus = min(20, max(0, 100 - (len(st.session_state.user_answers) * 2)))  # Time-based bonus
+final_score_with_bonus = min(100, final_score + time_bonus)
 
-    # Advanced Scorecard with animations, gradient border, and progress circle
-    st.markdown(
-        f"""
-        <style>
-            @keyframes fadeIn {{
-                0% {{ opacity: 0; transform: scale(0.95); }}
-                100% {{ opacity: 1; transform: scale(1); }}
+# Dynamic performance metrics
+performance_level = "Exceptional" if final_score >= 90 else "Excellent" if final_score >= 80 else "Good" if final_score >= 70 else "Fair" if final_score >= 60 else "Needs Improvement"
+performance_color = "#00d4aa" if final_score >= 90 else "#28a745" if final_score >= 80 else "#17a2b8" if final_score >= 70 else "#ffc107" if final_score >= 60 else "#dc3545"
+performance_emoji = "🚀" if final_score >= 90 else "🌟" if final_score >= 80 else "💪" if final_score >= 70 else "📈" if final_score >= 60 else "📚"
+
+# Advanced glassmorphism scoreboard with multiple sections
+st.markdown(
+    f"""
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+        
+        @keyframes scoreReveal {{
+            0% {{ 
+                opacity: 0; 
+                transform: scale(0.8) rotateY(-15deg);
+                filter: blur(10px);
             }}
-            @keyframes progressCircle {{
-                0% {{ stroke-dasharray: 0 100; }}
+            50% {{
+                opacity: 0.7;
+                transform: scale(1.05) rotateY(0deg);
+                filter: blur(2px);
             }}
-            .scorecard-container {{
-                background: linear-gradient(135deg, #ffffff, #f1f5f9);
-                border: 4px solid transparent;
-                border-radius: 20px;
-                padding: 30px;
-                margin: 30px 0;
-                text-align: center;
-                position: relative;
-                box-shadow: 0 8px 24px rgba(0,0,0,0.1);
-                animation: fadeIn 0.8s ease-in-out;
-                background-clip: padding-box;
-                border-image: {border_gradient} 1;
+            100% {{ 
+                opacity: 1; 
+                transform: scale(1) rotateY(0deg);
+                filter: blur(0px);
             }}
-            .scorecard-container::before {{
-                content: '';
-                position: absolute;
-                top: -4px; bottom: -4px; left: -4px; right: -4px;
-                background: {border_gradient};
-                z-index: -1;
-                border-radius: 24px;
+        }}
+        
+        @keyframes progressRing {{
+            0% {{ 
+                stroke-dasharray: 0 314;
+                stroke-dashoffset: 0;
             }}
-            .scorecard-header {{
-                font-size: 2rem;
-                font-weight: 700;
-                color: #1f77b4;
-                margin-bottom: 10px;
-                display: flex;
+            100% {{ 
+                stroke-dasharray: {int(final_score * 3.14)} 314;
+                stroke-dashoffset: 0;
+            }}
+        }}
+        
+        @keyframes glowPulse {{
+            0%, 100% {{ 
+                box-shadow: 
+                    0 0 20px rgba(0, 212, 255, 0.3),
+                    0 0 40px rgba(0, 212, 255, 0.2),
+                    0 0 60px rgba(0, 212, 255, 0.1),
+                    inset 0 0 20px rgba(255, 255, 255, 0.1);
+            }}
+            50% {{ 
+                box-shadow: 
+                    0 0 30px rgba(0, 212, 255, 0.5),
+                    0 0 60px rgba(0, 212, 255, 0.3),
+                    0 0 90px rgba(0, 212, 255, 0.2),
+                    inset 0 0 30px rgba(255, 255, 255, 0.2);
+            }}
+        }}
+        
+        @keyframes floatAnimation {{
+            0%, 100% {{ transform: translateY(0px) rotate(0deg); }}
+            25% {{ transform: translateY(-5px) rotate(1deg); }}
+            50% {{ transform: translateY(-10px) rotate(0deg); }}
+            75% {{ transform: translateY(-5px) rotate(-1deg); }}
+        }}
+        
+        @keyframes sparkle {{
+            0%, 100% {{ opacity: 0; transform: scale(0) rotate(0deg); }}
+            50% {{ opacity: 1; transform: scale(1) rotate(180deg); }}
+        }}
+        
+        .advanced-scoreboard {{
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: linear-gradient(135deg, 
+                rgba(255, 255, 255, 0.25) 0%,
+                rgba(255, 255, 255, 0.15) 50%,
+                rgba(255, 255, 255, 0.05) 100%);
+            backdrop-filter: blur(20px) saturate(180%);
+            -webkit-backdrop-filter: blur(20px) saturate(180%);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 24px;
+            padding: 40px;
+            margin: 40px 0;
+            position: relative;
+            overflow: hidden;
+            animation: scoreReveal 1.2s cubic-bezier(0.4, 0, 0.2, 1) forwards,
+                       glowPulse 3s ease-in-out infinite;
+        }}
+        
+        .advanced-scoreboard::before {{
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: conic-gradient(
+                from 0deg,
+                transparent 0deg,
+                rgba(0, 212, 255, 0.1) 60deg,
+                rgba(40, 167, 69, 0.1) 120deg,
+                rgba(255, 193, 7, 0.1) 180deg,
+                rgba(220, 53, 69, 0.1) 240deg,
+                rgba(111, 66, 193, 0.1) 300deg,
+                transparent 360deg
+            );
+            animation: rotate 20s linear infinite;
+            z-index: -1;
+        }}
+        
+        @keyframes rotate {{
+            0% {{ transform: rotate(0deg); }}
+            100% {{ transform: rotate(360deg); }}
+        }}
+        
+        .score-header {{
+            text-align: center;
+            margin-bottom: 30px;
+            position: relative;
+        }}
+        
+        .score-title {{
+            font-size: 2.5rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 10px;
+            letter-spacing: -1px;
+        }}
+        
+        .score-subtitle {{
+            font-size: 1.1rem;
+            color: #6b7280;
+            font-weight: 500;
+        }}
+        
+        .score-main-section {{
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin: 30px 0;
+            gap: 40px;
+        }}
+        
+        .score-circle-container {{
+            position: relative;
+            flex-shrink: 0;
+        }}
+        
+        .score-circle {{
+            width: 200px;
+            height: 200px;
+            position: relative;
+            animation: floatAnimation 6s ease-in-out infinite;
+        }}
+        
+        .score-circle svg {{
+            transform: rotate(-90deg);
+            width: 100%;
+            height: 100%;
+            filter: drop-shadow(0 10px 20px rgba(0,0,0,0.2));
+        }}
+        
+        .score-circle .bg-ring {{
+            fill: none;
+            stroke: rgba(255, 255, 255, 0.1);
+            stroke-width: 12;
+            stroke-linecap: round;
+        }}
+        
+        .score-circle .progress-ring {{
+            fill: none;
+            stroke: url(#scoreGradient);
+            stroke-width: 12;
+            stroke-linecap: round;
+            stroke-dasharray: 0 314;
+            animation: progressRing 2s cubic-bezier(0.4, 0, 0.2, 1) 0.5s forwards;
+        }}
+        
+        .score-value {{
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+        }}
+        
+        .score-number {{
+            font-size: 3rem;
+            font-weight: 900;
+            color: {performance_color};
+            line-height: 1;
+            margin-bottom: 5px;
+        }}
+        
+        .score-percent {{
+            font-size: 1.2rem;
+            color: #6b7280;
+            font-weight: 600;
+        }}
+        
+        .score-details {{
+            flex: 1;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }}
+        
+        .score-metric {{
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 16px;
+            padding: 20px;
+            text-align: center;
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+        }}
+        
+        .score-metric:hover {{
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            border-color: rgba(255, 255, 255, 0.4);
+        }}
+        
+        .metric-value {{
+            font-size: 2rem;
+            font-weight: 700;
+            color: {performance_color};
+            margin-bottom: 5px;
+        }}
+        
+        .metric-label {{
+            font-size: 0.9rem;
+            color: #6b7280;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }}
+        
+        .performance-badge {{
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            background: linear-gradient(135deg, {performance_color}20, {performance_color}10);
+            border: 2px solid {performance_color}40;
+            color: {performance_color};
+            padding: 15px 25px;
+            border-radius: 50px;
+            font-size: 1.2rem;
+            font-weight: 700;
+            margin: 20px auto;
+            animation: floatAnimation 4s ease-in-out infinite;
+        }}
+        
+        .sparkle {{
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            background: radial-gradient(circle, #ffd700, #ffed4a);
+            border-radius: 50%;
+            animation: sparkle 2s ease-in-out infinite;
+        }}
+        
+        .sparkle:nth-child(1) {{ top: 10%; left: 15%; animation-delay: 0s; }}
+        .sparkle:nth-child(2) {{ top: 20%; right: 10%; animation-delay: 0.5s; }}
+        .sparkle:nth-child(3) {{ bottom: 15%; left: 20%; animation-delay: 1s; }}
+        .sparkle:nth-child(4) {{ bottom: 25%; right: 15%; animation-delay: 1.5s; }}
+        
+        .achievement-section {{
+            margin-top: 30px;
+            text-align: center;
+        }}
+        
+        .achievement-message {{
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #374151;
+            margin-bottom: 20px;
+        }}
+        
+        .action-buttons {{
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-top: 25px;
+        }}
+        
+        .btn-primary {{
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px 30px;
+            border-radius: 12px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 1.1rem;
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.3);
+        }}
+        
+        .btn-primary:hover {{
+            transform: translateY(-3px);
+            box-shadow: 0 15px 35px rgba(102, 126, 234, 0.4);
+        }}
+        
+        .btn-secondary {{
+            background: rgba(255, 255, 255, 0.2);
+            color: #374151;
+            padding: 15px 30px;
+            border-radius: 12px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 1.1rem;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            transition: all 0.3s ease;
+        }}
+        
+        .btn-secondary:hover {{
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateY(-2px);
+        }}
+        
+        @media (max-width: 768px) {{
+            .score-main-section {{
+                flex-direction: column;
+                gap: 30px;
+            }}
+            
+            .score-details {{
+                grid-template-columns: 1fr;
+            }}
+            
+            .action-buttons {{
+                flex-direction: column;
                 align-items: center;
-                justify-content: center;
-                gap: 10px;
             }}
-            .score-value {{
-                font-size: 3rem;
-                font-weight: 900;
-                color: {score_color};
-                margin: 15px 0;
-                letter-spacing: 2px;
-            }}
-            .score-message {{
-                font-size: 1.3rem;
-                color: #555;
-                margin-bottom: 20px;
-            }}
-            .progress-circle {{
-                position: relative;
-                width: 120px;
-                height: 120px;
-                margin: 0 auto 20px;
-            }}
-            .progress-circle svg {{
-                transform: rotate(-90deg);
-            }}
-            .progress-circle circle {{
-                fill: none;
-                stroke-width: 10;
-                stroke-linecap: round;
-            }}
-            .progress-circle .bg-circle {{
-                stroke: #e0e0e0;
-            }}
-            .progress-circle .progress-ring {{
-                stroke: {score_color};
-                stroke-dasharray: {final_score} 100;
-                animation: progressCircle 1.5s ease-in-out;
-            }}
-            .progress-circle .percent-text {{
-                position: absolute;
-                top: 50%;
-                left: 50%;
-                transform: translate(-50%, -50%);
-                font-size: 1.5rem;
-                font-weight: bold;
-                color: {score_color};
-            }}
-            .scoreboard-label {{
-                font-size: 1.1rem;
-                color: #888;
-                margin-top: 10px;
-            }}
-        </style>
-        <div class="scorecard-container">
-            <div class="scorecard-header">
-                <span>📊 Your Final Score</span>
-                <span style="font-size: 1.5rem;">🏆</span>
-            </div>
-            <div class="progress-circle">
-                <svg width="120" height="120">
-                    <circle class="bg-circle" cx="60" cy="60" r="50"/>
-                    <circle class="progress-ring" cx="60" cy="60" r="50"/>
-                </svg>
-                <div class="percent-text">{final_score:.1f}%</div>
-            </div>
-            <div class="score-value">{final_score:.2f}%</div>
-            <div class="score-message">{score_message}</div>
-            <div class="scoreboard-label">Scoreboard</div>
+        }}
+    </style>
+    
+    <div class="advanced-scoreboard">
+        {'<div class="sparkle"></div>' * 4 if final_score >= 80 else ''}
+        
+        <div class="score-header">
+            <h1 class="score-title">Assessment Complete</h1>
+            <p class="score-subtitle">Your learning journey continues</p>
         </div>
-        """,
-        unsafe_allow_html=True
-    )
-
-    if final_score >= 80:
-        st.markdown(
-            """
-            <div style='text-align:center; margin-top: 20px;'>
-                <h3 style='color:#007bff;'>🏆 Great job! You're eligible for a certificate.</h3>
+        
+        <div class="score-main-section">
+            <div class="score-circle-container">
+                <div class="score-circle">
+                    <svg viewBox="0 0 120 120">
+                        <defs>
+                            <linearGradient id="scoreGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                                <stop offset="0%" style="stop-color:{performance_color};stop-opacity:1" />
+                                <stop offset="100%" style="stop-color:{performance_color};stop-opacity:0.7" />
+                            </linearGradient>
+                        </defs>
+                        <circle class="bg-ring" cx="60" cy="60" r="50"/>
+                        <circle class="progress-ring" cx="60" cy="60" r="50"/>
+                    </svg>
+                    <div class="score-value">
+                        <div class="score-number">{final_score:.0f}</div>
+                        <div class="score-percent">%</div>
+                    </div>
+                </div>
             </div>
-            """,
-            unsafe_allow_html=True
-        )
-        st.markdown(
-            """
-            <div style='display:flex; justify-content:center; margin-bottom: 30px;'>
-                <a href="https://superprofile.bio/vp/corporate-bhaiya-sql-page" target="_blank" style="
-                    background-color:#ffc107;
-                    color:#121212;
-                    font-size:1.5rem;
-                    font-weight:600;
-                    padding:18px 36px;
-                    border-radius:10px;
-                    text-decoration:none;
-                    box-shadow:0 2px 8px rgba(0,0,0,0.11);
-                    transition: background 0.2s;
-                ">🎓 Get Your Certificate</a>
+            
+            <div class="score-details">
+                <div class="score-metric">
+                    <div class="metric-value">{correct_answers}/{total_questions}</div>
+                    <div class="metric-label">Correct Answers</div>
+                </div>
+                <div class="score-metric">
+                    <div class="metric-value">{accuracy:.0f}%</div>
+                    <div class="metric-label">Accuracy Rate</div>
+                </div>
+                <div class="score-metric">
+                    <div class="metric-value">{performance_level}</div>
+                    <div class="metric-label">Performance</div>
+                </div>
+                <div class="score-metric">
+                    <div class="metric-value">+{time_bonus:.0f}</div>
+                    <div class="metric-label">Time Bonus</div>
+                </div>
             </div>
-            """,
-            unsafe_allow_html=True
-        )
-    else:
-        st.markdown(
-            """
-            <div style='text-align:center; margin-top: 20px;'>
-                <h3 style='color:#e74c3c;'>📚 Keep practicing to earn a certificate!</h3>
-                <a href="https://www.corporatebhaiya.com/" target="_blank" style="
-                    background-color:#6c757d;
-                    color:white;
-                    font-size:1.2rem;
-                    padding:12px 28px;
-                    border-radius:8px;
-                    text-decoration:none;
-                    margin-top:10px;
-                    display:inline-block;
-                ">🚀 Book a Mentor Session</a>
+        </div>
+        
+        <div class="performance-badge">
+            <span>{performance_emoji}</span>
+            <span>{performance_level} Performance!</span>
+        </div>
+        
+        <div class="achievement-section">
+            {f'''
+            <div class="achievement-message">
+                🏆 Outstanding! You've earned your certificate!
             </div>
-            """,
-            unsafe_allow_html=True
-        )
-
+            <div class="action-buttons">
+                <a href="https://superprofile.bio/vp/corporate-bhaiya-sql-page" target="_blank" class="btn-primary">
+                    🎓 Claim Certificate
+                </a>
+                <a href="https://www.corporatebhaiya.com/" target="_blank" class="btn-secondary">
+                    🚀 Advanced Training
+                </a>
+            </div>
+            ''' if final_score >= 80 else f'''
+            <div class="achievement-message">
+                📈 Keep learning to unlock your certificate!
+            </div>
+            <div class="action-buttons">
+                <a href="https://www.corporatebhaiya.com/" target="_blank" class="btn-primary">
+                    💪 Get Mentorship
+                </a>
+                <a href="#" onclick="location.reload()" class="btn-secondary">
+                    🔄 Try Again
+                </a>
+            </div>
+            '''}
+        </div>
+    </div>
+    """,
+    unsafe_allow_html=True
+)
     # --- Try Again Button LAST ---
     if st.button("🔄 Try Again?"):
         st.session_state.user_answers = []
