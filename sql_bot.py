@@ -1057,9 +1057,9 @@ elif st.session_state.quiz_completed:
         """, unsafe_allow_html=True)
         
     def get_correct_wrong_counts(user_answers):
-    correct = sum(1 for ans in user_answers if ans.get("is_correct", False))
-    wrong = len(user_answers) - correct
-    return correct, wrong
+        correct = sum(1 for ans in user_answers if ans.get("is_correct", False))
+        wrong = len(user_answers) - correct
+        return correct, wrong
     correct_count, wrong_count = get_correct_wrong_counts(st.session_state.user_answers)
     
     def display_advanced_scorecard(final_score, correct_count, wrong_count):
