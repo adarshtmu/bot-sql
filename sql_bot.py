@@ -5,6 +5,7 @@ import re
 import duckdb
 
 # --- Custom CSS ---
+# Updated to increase font sizes globally and for specific elements
 # --- Custom CSS ---
 hide_streamlit_style = """
     <style>
@@ -63,41 +64,8 @@ hide_streamlit_style = """
             font-size: 18px !important;
             margin: 5px 0;
         }
-        /* Ensure tables fit within container without horizontal scrolling */
-        .stDataFrame {
-            width: 100% !important;
-            max-width: 100% !important; /* Ensure it doesn't exceed container */
-            overflow-x: hidden !important; /* Disable horizontal scrolling */
-        }
-        /* Style the dataframe container to prevent overflow */
-        [data-testid="stDataFrame"] {
-            width: 100% !important;
-            max-width: 100% !important; /* Fit within the container */
-            overflow-x: hidden !important; /* No horizontal scroll */
-            box-sizing: border-box !important;
-        }
-        /* Style the table itself to adjust dynamically */
-        [data-testid="stDataFrame"] table {
-            width: 100% !important;
-            max-width: 100% !important; /* Ensure table fits container */
-            table-layout: auto !important; /* Allow columns to resize dynamically */
-            border-collapse: collapse !important;
-        }
-        [data-testid="stDataFrame"] th, [data-testid="stDataFrame"] td {
-            white-space: normal !important; /* Allow text to wrap in cells */
-            word-wrap: break-word !important; /* Ensure long text wraps */
-            padding: 8px !important;
-            text-align: left !important;
-            font-size: 14px !important; /* Reduce font size slightly to help fit */
-        }
-        /* Ensure columns adjust proportionally */
-        [data-testid="stDataFrame"] th {
-            width: auto !important; /* Allow columns to resize */
-        }
     </style>
 """
-st.markdown(hide_streamlit_style, unsafe_allow_html=True)
-st.markdown(hide_streamlit_style, unsafe_allow_html=True)
 st.markdown(hide_streamlit_style, unsafe_allow_html=True)
 
 # --- Set up Gemini API ---
@@ -487,7 +455,7 @@ def display_simulation(title, result_data):
         if result_data.empty:
             st.info("_(Simulation resulted in an empty table)_")
         else:
-            st.dataframe(result_data.reset_index(drop=True), hide_index=True, use_container_width=True)
+            st.dataframe(result_data.reset_index(drop=True), hide_index=False, use_container_width=True)
     elif isinstance(result_data, str) and "Simulation Error" in result_data:
         st.warning(result_data, icon="⚠️")
     elif result_data == "N/A":
@@ -535,8 +503,8 @@ if not st.session_state.quiz_started:
     st.write("### 🔍 Table Previews")
     try:
         tab1, tab2 = st.tabs(["Users Table", "Orders Table"])
-        with tab1: st.dataframe(users_table, hide_index=True, use_container_width=True)
-        with tab2: st.dataframe(orders_table, hide_index=True, use_container_width=True)
+        with tab1: st.dataframe(users_table, hide_index=True, use_container_width=False)
+        with tab2: st.dataframe(orders_table, hide_index=True, use_container_width=False)
     except Exception as e:
         st.error(f"Error displaying table previews: {e}")
     
@@ -822,3 +790,5 @@ elif st.session_state.quiz_completed:
         st.session_state.quiz_completed = False
         st.session_state.show_detailed_feedback = False
         st.rerun()
+
+
