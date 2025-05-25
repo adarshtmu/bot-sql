@@ -717,6 +717,8 @@ elif st.session_state.quiz_completed:
 
     st.markdown("---")
     final_score = calculate_score(st.session_state.user_answers)
+    score = (correct_count / total_questions) * 100
+
 
     # Determine dynamic colors and messages based on score
     score_color = "#28a745" if final_score >= 80 else "#ff9800" if final_score >= 50 else "#e74c3c"
