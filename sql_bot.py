@@ -998,14 +998,14 @@ elif st.session_state.quiz_completed:
     # --- Scoreboard Card ---
     st.markdown(
         f"""
-        <div style='
+        <div style='''
             background-color:#f8f9fa;
             border-radius:15px;
             box-shadow:0 4px 16px rgba(0,0,0,0.08);
             padding:30px 0;
             margin:30px 0;
             text-align:center;
-        '>
+        '''>
             <h2 style='color:#333;'>📊 Your Final Score</h2>
             <div style='font-size:2.5rem; font-weight:bold; color:#28a745;'>{final_score:.2f}%</div>
             <div style='font-size:1.2rem; color:#888;'>Scoreboard</div>
