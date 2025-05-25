@@ -721,16 +721,36 @@ st.markdown("---")
 final_score = calculate_score(st.session_state.user_answers)
 
 # Advanced scoring system with multiple metrics
-correct_answers = sum(1 for answer in st.session_state.user_answers if answer.get('correct', False))
-total_questions = len(st.session_state.user_answers)
-accuracy = (correct_answers / total_questions) * 100 if total_questions > 0 else 0
-time_bonus = min(20, max(0, 100 - (len(st.session_state.user_answers) * 2)))  # Time-based bonus
-final_score_with_bonus = min(100, final_score + time_bonus)
+total_questions = len(st.session_state.user_answers) if st.session_state.user_answers else 1
+correct_answers = 0
+attempt_time = 0
 
-# Dynamic performance metrics
-performance_level = "Exceptional" if final_score >= 90 else "Excellent" if final_score >= 80 else "Good" if final_score >= 70 else "Fair" if final_score >= 60 else "Needs Improvement"
-performance_color = "#00d4aa" if final_score >= 90 else "#28a745" if final_score >= 80 else "#17a2b8" if final_score >= 70 else "#ffc107" if final_score >= 60 else "#dc3545"
-performance_emoji = "🚀" if final_score >= 90 else "🌟" if final_score >= 80 else "💪" if final_score >= 70 else "📈" if final_score >= 60 else "📚"
+# Calculate correct answers and attempt time if user_answers exists
+if st.session_state.user_answers:
+    correct_answers = sum(1 for answer in st.session_state.user_answers if answer.get('correct', False))
+    attempt_time = sum(answer.get('time_taken', 30) for answer in st.session_state.user_answers if 'time_taken' in answer)
+
+# Calculate base accuracy from correct answers
+base_accuracy = (correct_answers / total_questions) * 100 if total_questions > 0 else 0
+
+# Use the calculated final_score from your existing calculate_score function
+# If final_score doesn't match base_accuracy, prioritize the calculate_score result
+display_score = final_score
+
+# Calculate time bonus (faster completion = higher bonus)
+avg_time_per_question = attempt_time / total_questions if total_questions > 0 and attempt_time > 0 else 30
+time_bonus = max(0, min(20, (60 - avg_time_per_question) / 2)) if avg_time_per_question < 60 else 0
+
+# Final score with bonus (cap at 100)
+final_score_with_bonus = min(100, display_score + time_bonus)
+
+# Dynamic performance metrics based on final score
+performance_level = "Exceptional" if display_score >= 90 else "Excellent" if display_score >= 80 else "Good" if display_score >= 70 else "Fair" if display_score >= 60 else "Needs Improvement"
+performance_color = "#00d4aa" if display_score >= 90 else "#28a745" if display_score >= 80 else "#17a2b8" if display_score >= 70 else "#ffc107" if display_score >= 60 else "#dc3545"
+performance_emoji = "🚀" if display_score >= 90 else "🌟" if display_score >= 80 else "💪" if display_score >= 70 else "📈" if display_score >= 60 else "📚"
+
+# Ensure accuracy display matches the final score logic
+display_accuracy = base_accuracy if base_accuracy > 0 else display_score
 
 # Advanced glassmorphism scoreboard with multiple sections
 st.markdown(
@@ -762,7 +782,7 @@ st.markdown(
                 stroke-dashoffset: 0;
             }}
             100% {{ 
-                stroke-dasharray: {int(final_score * 3.14)} 314;
+                                            stroke-dasharray: {int(display_score * 3.14)} 314;
                 stroke-dashoffset: 0;
             }}
         }}
@@ -1069,7 +1089,7 @@ st.markdown(
     </style>
     
     <div class="advanced-scoreboard">
-        {'<div class="sparkle"></div>' * 4 if final_score >= 80 else ''}
+        {'<div class="sparkle"></div>' * 4 if display_score >= 80 else ''}
         
         <div class="score-header">
             <h1 class="score-title">Assessment Complete</h1>
@@ -1090,7 +1110,7 @@ st.markdown(
                         <circle class="progress-ring" cx="60" cy="60" r="50"/>
                     </svg>
                     <div class="score-value">
-                        <div class="score-number">{final_score:.0f}</div>
+                        <div class="score-number">{display_score:.0f}</div>
                         <div class="score-percent">%</div>
                     </div>
                 </div>
@@ -1102,7 +1122,7 @@ st.markdown(
                     <div class="metric-label">Correct Answers</div>
                 </div>
                 <div class="score-metric">
-                    <div class="metric-value">{accuracy:.0f}%</div>
+                    <div class="metric-value">{display_accuracy:.0f}%</div>
                     <div class="metric-label">Accuracy Rate</div>
                 </div>
                 <div class="score-metric">
@@ -1134,7 +1154,7 @@ st.markdown(
                     🚀 Advanced Training
                 </a>
             </div>
-            ''' if final_score >= 80 else f'''
+            ''' if display_score >= 80 else f'''
             <div class="achievement-message">
                 📈 Keep learning to unlock your certificate!
             </div>
