@@ -7,6 +7,7 @@ import duckdb
 # --- Custom CSS ---
 # Updated to increase font sizes globally and for specific elements
 # --- Custom CSS ---
+# --- Custom CSS ---
 hide_streamlit_style = """
     <style>
         /* Apply zoom-out effect to the entire app */
@@ -64,8 +65,31 @@ hide_streamlit_style = """
             font-size: 18px !important;
             margin: 5px 0;
         }
+        /* Ensure tables fit within container and are scrollable if needed */
+        .stDataFrame {
+            width: 100% !important;
+            overflow-x: auto !important; /* Enable horizontal scrolling */
+        }
+        /* Style the dataframe container to prevent overflow */
+        [data-testid="stDataFrame"] {
+            max-width: 100% !important;
+            overflow-x: auto !important; /* Horizontal scroll for overflow */
+            box-sizing: border-box !important;
+        }
+        /* Optional: Style the table itself for better readability */
+        [data-testid="stDataFrame"] table {
+            width: 100% !important;
+            min-width: 600px; /* Optional: Set a minimum width for readability */
+            border-collapse: collapse !important;
+        }
+        [data-testid="stDataFrame"] th, [data-testid="stDataFrame"] td {
+            white-space: nowrap !important; /* Prevent text wrapping in cells */
+            padding: 8px !important;
+            text-align: left !important;
+        }
     </style>
 """
+st.markdown(hide_streamlit_style, unsafe_allow_html=True)
 st.markdown(hide_streamlit_style, unsafe_allow_html=True)
 
 # --- Set up Gemini API ---
