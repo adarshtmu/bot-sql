@@ -705,302 +705,190 @@ elif st.session_state.quiz_completed:
                 st.markdown('</div>', unsafe_allow_html=True)
 
     # --- 3. Advanced Scorecard & Buttons LAST ---
-
     st.balloons()
     # Optional: Show congratulations at top
-    st.markdown("""
-<div style='text-align:center; margin-top: 30px;'>
-    <h1 style='color:#28a745;'>🎉 Congratulations!</h1>
-    <h2 style='color:#1f77b4;'>You have completed the SQL Challenge</h2>
-</div>
-""", unsafe_allow_html=True)
-
-st.markdown("---")
-
-final_score = calculate_score(st.session_state.user_answers)
-score_color = "#28a745" if final_score >= 80 else "#ff9800" if final_score >= 50 else "#e74c3c"
-score_message = "Outstanding Performance! 🌟" if final_score >= 80 else "Good Effort! Keep Going! 💪" if final_score >= 50 else "Needs Improvement! 📚"
-border_gradient = "linear-gradient(45deg, #28a745, #1f77b4)" if final_score >= 80 else "linear-gradient(45deg, #ff9800, #e74c3c)"
-glow_color = "rgba(40, 167, 69, 0.3)" if final_score >= 80 else "rgba(255, 152, 0, 0.3)" if final_score >= 50 else "rgba(231, 76, 60, 0.3)"
-
-sparkle_html = """
-<div class="sparkle s1">✨</div>
-<div class="sparkle s2">✨</div>
-<div class="sparkle s3">✨</div>
-""" if final_score >= 80 else ""
-
-import streamlit as st
-from datetime import datetime
-
-# Advanced 3D Scorecard UI
-st.markdown(f"""
-<style>
-    @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&display=swap');
-
-    :root {{
-        --primary-glow: conic-gradient(
-            from 180deg at 50% 50%,
-            {score_color} 0deg,
-            #{''.join(f'{int(15.9 * (100 - final_score)):02x}' for _ in range(3))} 360deg
-        );
-    }}
-
-    .cyber-card {{
-        position: relative;
-        background: rgba(16, 18, 27, 0.95);
-        border-radius: 20px;
-        padding: 2rem;
-        margin: 2rem 0;
-        transform-style: preserve-3d;
-        perspective: 1000px;
-        backdrop-filter: blur(20px);
-        border: 2px solid {score_color};
-        box-shadow: 0 0 40px {glow_color},
-                    inset 0 0 20px rgba({','.join(str(int(c*255)) for c in mcolors.to_rgb(score_color))}, 0.2);
-        font-family: 'Space Grotesk', sans-serif;
-        animation: cardEntrance 1.2s cubic-bezier(0.34, 1.56, 0.64, 1);
-    }}
-
-    @keyframes cardEntrance {{
-        0% {{ 
-            transform: rotateX(15deg) translateZ(-100px);
-            opacity: 0;
-        }}
-        100% {{ 
-            transform: rotateX(0) translateZ(0);
-            opacity: 1;
-        }}
-    }}
-
-    .holographic-effect {{
-        position: absolute;
-        top: -2px;
-        left: -2px;
-        right: -2px;
-        bottom: -2px;
-        background: var(--primary-glow);
-        z-index: -1;
-        border-radius: 22px;
-        animation: hologram 8s infinite linear;
-        opacity: 0.3;
-    }}
-
-    @keyframes hologram {{
-        0% {{ background-position: 0% 0%; }}
-        100% {{ background-position: 300% 300%; }}
-    }}
-
-    .neuro-chip {{
-        display: inline-block;
-        padding: 8px 16px;
-        background: linear-gradient(145deg, #1a1e29, #2d3243);
-        border-radius: 8px;
-        border: 1px solid {score_color};
-        box-shadow: 4px 4px 10px rgba(0,0,0,0.3),
-                   -2px -2px 5px rgba(255,255,255,0.05);
-    }}
-
-    .particle-container {{
-        position: absolute;
-        width: 100%;
-        height: 100%;
-        pointer-events: none;
-    }}
-
-    .particle {{
-        position: absolute;
-        background: {score_color};
-        border-radius: 50%;
-        animation: particle-float 3s infinite;
-    }}
-
-    @keyframes particle-float {{
-        0%, 100% {{ transform: translateY(0) scale(1); opacity: 0.6; }}
-        50% {{ transform: translateY(-20px) scale(1.2); opacity: 0.8; }}
-    }}
-
-    .radar-scan {{
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background: linear-gradient(transparent 60%, rgba({','.join(str(int(c*255)) for c in mcolors.to_rgb(score_color))}, 0.1));
-        animation: radar 4s linear infinite;
-        clip-path: polygon(0 0, 100% 0, 100% 20%, 0 20%);
-    }}
-
-    @keyframes radar {{
-        0% {{ transform: translateY(-100%); }}
-        100% {{ transform: translateY(200%); }}
-    }}
-
-</style>
-
-<div class="cyber-card">
-    <div class="holographic-effect"></div>
-    <div class="particle-container">
-        {' '.join([f'<div class="particle" style="left:{random.randint(10,90)}%;top:{random.randint(10,90)}%;width:{random.randint(2,4)}px;height:{random.randint(2,4)}px;animation-delay:{random.random()*2}s;"></div>' for _ in range(50)])}
-    </div>
-    <div class="radar-scan"></div>
-    
-    <div style="position: relative; z-index: 2;">
-        <div class="neuro-chip" style="margin-bottom: 1.5rem;">
-            🚀 PERFORMANCE ANALYSIS REPORT • {datetime.now().strftime('%Y-%m-%d %H:%M')}
+    st.markdown(
+        """
+        <div style='text-align:center; margin-top: 30px;'>
+            <h1 style='color:#28a745;'>🎉 Congratulations!</h1>
+            <h2 style='color:#1f77b4;'>You have completed the SQL Challenge</h2>
         </div>
-        
-        <div style="display: grid; grid-template-columns: 1fr 2fr 1fr; gap: 2rem;">
-            <!-- 3D Progress Sphere -->
-            <div style="position: relative; perspective: 1000px;">
-                <div class="progress-sphere" style="
-                    width: 180px;
-                    height: 180px;
-                    background: radial-gradient(circle at 30% 30%, {score_color}, #121212);
-                    border-radius: 50%;
-                    box-shadow: 0 0 40px {glow_color},
-                                inset 0 0 20px rgba(255,255,255,0.1);
-                    transform: rotateX(15deg) rotateY(15deg);
-                    animation: sphere-rotate 20s infinite linear;
-                ">
-                    <div style="
-                        position: absolute;
-                        top: 50%;
-                        left: 50%;
-                        transform: translate(-50%, -50%);
-                        font-size: 2.5rem;
-                        font-weight: bold;
-                        color: white;
-                        text-shadow: 0 0 15px {score_color};
-                    ">
-                        {final_score}%
-                    </div>
-                </div>
+        """,
+        unsafe_allow_html=True
+    )
+    st.markdown("---")
+    final_score = calculate_score(st.session_state.user_answers)
+
+    # Determine dynamic colors and messages based on score
+    score_color = "#28a745" if final_score >= 80 else "#ff9800" if final_score >= 50 else "#e74c3c"
+    score_message = "Outstanding Performance! 🌟" if final_score >= 80 else "Good Effort! Keep Going! 💪" if final_score >= 50 else "Needs Improvement! 📚"
+    border_gradient = "linear-gradient(45deg, #28a745, #1f77b4)" if final_score >= 80 else "linear-gradient(45deg, #ff9800, #e74c3c)"
+
+    # Advanced Scorecard with animations, gradient border, and progress circle
+    st.markdown(
+        f"""
+        <style>
+            @keyframes fadeIn {{
+                0% {{ opacity: 0; transform: scale(0.95); }}
+                100% {{ opacity: 1; transform: scale(1); }}
+            }}
+            @keyframes progressCircle {{
+                0% {{ stroke-dasharray: 0 100; }}
+            }}
+            .scorecard-container {{
+                background: linear-gradient(135deg, #ffffff, #f1f5f9);
+                border: 4px solid transparent;
+                border-radius: 20px;
+                padding: 30px;
+                margin: 30px 0;
+                text-align: center;
+                position: relative;
+                box-shadow: 0 8px 24px rgba(0,0,0,0.1);
+                animation: fadeIn 0.8s ease-in-out;
+                background-clip: padding-box;
+                border-image: {border_gradient} 1;
+            }}
+            .scorecard-container::before {{
+                content: '';
+                position: absolute;
+                top: -4px; bottom: -4px; left: -4px; right: -4px;
+                background: {border_gradient};
+                z-index: -1;
+                border-radius: 24px;
+            }}
+            .scorecard-header {{
+                font-size: 2rem;
+                font-weight: 700;
+                color: #1f77b4;
+                margin-bottom: 10px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                gap: 10px;
+            }}
+            .score-value {{
+                font-size: 3rem;
+                font-weight: 900;
+                color: {score_color};
+                margin: 15px 0;
+                letter-spacing: 2px;
+            }}
+            .score-message {{
+                font-size: 1.3rem;
+                color: #555;
+                margin-bottom: 20px;
+            }}
+            .progress-circle {{
+                position: relative;
+                width: 120px;
+                height: 120px;
+                margin: 0 auto 20px;
+            }}
+            .progress-circle svg {{
+                transform: rotate(-90deg);
+            }}
+            .progress-circle circle {{
+                fill: none;
+                stroke-width: 10;
+                stroke-linecap: round;
+            }}
+            .progress-circle .bg-circle {{
+                stroke: #e0e0e0;
+            }}
+            .progress-circle .progress-ring {{
+                stroke: {score_color};
+                stroke-dasharray: {final_score} 100;
+                animation: progressCircle 1.5s ease-in-out;
+            }}
+            .progress-circle .percent-text {{
+                position: absolute;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                font-size: 1.5rem;
+                font-weight: bold;
+                color: {score_color};
+            }}
+            .scoreboard-label {{
+                font-size: 1.1rem;
+                color: #888;
+                margin-top: 10px;
+            }}
+        </style>
+        <div class="scorecard-container">
+            <div class="scorecard-header">
+                <span>📊 Your Final Score</span>
+                <span style="font-size: 1.5rem;">🏆</span>
             </div>
-            
-            <!-- AI Insights Panel -->
-            <div style="
-                background: linear-gradient(145deg, rgba(16, 18, 27, 0.8), rgba(32, 35, 48, 0.8));
-                padding: 1.5rem;
-                border-radius: 12px;
-                border: 1px solid rgba(255,255,255,0.1);
-            ">
-                <h3 style="color: {score_color}; margin-bottom: 1rem;">🧠 AI Performance Insights</h3>
-                <div style="
-                    background: rgba(0,0,0,0.3);
-                    padding: 1rem;
-                    border-radius: 8px;
-                    margin-bottom: 1rem;
-                ">
-                    {generate_ai_insight(final_score)}  <!-- Your AI insight generator function -->
-                </div>
-                <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem;">
-                    <div class="neuro-chip">📈 Accuracy: {st.session_state.accuracy}%</div>
-                    <div class="neuro-chip">⏱ Speed: {st.session_state.speed_percentile}%ile</div>
-                    <div class="neuro-chip">🎯 Precision: {st.session_state.precision}/10</div>
-                    <div class="neuro-chip">💡 Concept Mastery: {st.session_state.mastery_level}</div>
-                </div>
+            <div class="progress-circle">
+                <svg width="120" height="120">
+                    <circle class="bg-circle" cx="60" cy="60" r="50"/>
+                    <circle class="progress-ring" cx="60" cy="60" r="50"/>
+                </svg>
+                <div class="percent-text">{final_score:.1f}%</div>
             </div>
-            
-            <!-- Skill Matrix -->
-            <div style="
-                background: rgba(0,0,0,0.3);
-                padding: 1.5rem;
-                border-radius: 12px;
-            ">
-                <h3 style="color: {score_color}; margin-bottom: 1rem;">📊 Skill Matrix</h3>
-                <div style="position: relative; height: 200px;">
-                    <canvas id="radarChart"></canvas>
-                </div>
-            </div>
+            <div class="score-value">{final_score:.2f}%</div>
+            <div class="score-message">{score_message}</div>
+            <div class="scoreboard-label">Scoreboard</div>
         </div>
-        
-        <!-- Time Series Graph -->
-        <div style="margin-top: 2rem; height: 150px;">
-            <canvas id="performanceTimeline"></canvas>
-        </div>
-    </div>
-</div>
+        """,
+        unsafe_allow_html=True
+    )
 
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script>
-    // 3D Radar Chart
-    const radarCtx = document.getElementById('radarChart').getContext('2d');
-    new Chart(radarCtx, {{
-        type: 'radar',
-        data: {{
-            labels: ['Syntax', 'Optimization', 'Theory', 'Practice', 'Analysis'],
-            datasets: [{{
-                data: {st.session_state.skill_matrix},
-                backgroundColor: rgba({','.join(str(int(c*255)) for c in mcolors.to_rgb(score_color))}, 0.2),
-                borderColor: '{score_color}',
-                pointBackgroundColor: '{score_color}',
-            }}]
-        }},
-        options: {{
-            scales: {{ r: {{ beginAtZero: true, max: 100 }} }},
-            plugins: {{ legend: {{ display: false }} }}
-        }}
-    }});
+    if final_score >= 80:
+        st.markdown(
+            """
+            <div style='text-align:center; margin-top: 20px;'>
+                <h3 style='color:#007bff;'>🏆 Great job! You're eligible for a certificate.</h3>
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
+        st.markdown(
+            """
+            <div style='display:flex; justify-content:center; margin-bottom: 30px;'>
+                <a href="https://superprofile.bio/vp/corporate-bhaiya-sql-page" target="_blank" style="
+                    background-color:#ffc107;
+                    color:#121212;
+                    font-size:1.5rem;
+                    font-weight:600;
+                    padding:18px 36px;
+                    border-radius:10px;
+                    text-decoration:none;
+                    box-shadow:0 2px 8px rgba(0,0,0,0.11);
+                    transition: background 0.2s;
+                ">🎓 Get Your Certificate</a>
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
+    else:
+        st.markdown(
+            """
+            <div style='text-align:center; margin-top: 20px;'>
+                <h3 style='color:#e74c3c;'>📚 Keep practicing to earn a certificate!</h3>
+                <a href="https://www.corporatebhaiya.com/" target="_blank" style="
+                    background-color:#6c757d;
+                    color:white;
+                    font-size:1.2rem;
+                    padding:12px 28px;
+                    border-radius:8px;
+                    text-decoration:none;
+                    margin-top:10px;
+                    display:inline-block;
+                ">🚀 Book a Mentor Session</a>
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
 
-    // Performance Timeline
-    const timelineCtx = document.getElementById('performanceTimeline').getContext('2d');
-    new Chart(timelineCtx, {{
-        type: 'line',
-        data: {{
-            labels: {st.session_state.attempt_dates},
-            datasets: [{{
-                data: {st.session_state.historic_scores},
-                borderColor: '{score_color}',
-                tension: 0.4,
-                borderWidth: 2,
-                pointRadius: 0,
-            }}]
-        }},
-        options: {{
-            responsive: true,
-            plugins: {{ legend: {{ display: false }} }},
-            scales: {{ y: {{ max: 100 }}, x: {{ display: false }} }}
-        }}
-    }});
-</script>
-""", unsafe_allow_html=True)
+    # --- Try Again Button LAST ---
+    if st.button("🔄 Try Again?"):
+        st.session_state.user_answers = []
+        st.session_state.current_question = 0
+        st.session_state.quiz_started = False
+        st.session_state.quiz_completed = False
+        st.session_state.show_detailed_feedback = False
+        st.rerun()
 
-# Certificate Section
-if final_score >= 80:
-    st.markdown("""
-    <div style='text-align:center; margin-top:20px;'>
-        <h3 style='color:#007bff;'>🏆 Great job! You're eligible for a certificate.</h3>
-    </div>
-    """, unsafe_allow_html=True)
-    
-    st.markdown(f"""
-    <div style='display:flex; justify-content:center; margin-bottom:30px;'>
-        <a href="https://superprofile.bio/vp/corporate-bhaiya-sql-page" target="_blank" 
-           class="certificate-btn"
-           style="font-size:1.5rem; font-weight:600; padding:18px 36px; border-radius:10px; 
-                  text-decoration:none; box-shadow:0 2px 8px rgba(0,0,0,0.11);">
-           🎓 Get Your Certificate
-        </a>
-    </div>
-    """, unsafe_allow_html=True)
-else:
-    st.markdown(f"""
-    <div style='text-align:center; margin-top:20px;'>
-        <h3 style='color:#e74c3c;'>📚 Keep practicing to earn a certificate!</h3>
-        <a href="https://www.corporatebhaiya.com/" target="_blank" 
-           style="background-color:#6c757d; color:white; font-size:1.2rem; padding:12px 28px; 
-                  border-radius:8px; text-decoration:none; margin-top:10px; display:inline-block;
-                  transition: all 0.3s ease;">
-           🚀 Book a Mentor Session
-        </a>
-    </div>
-    """, unsafe_allow_html=True)
 
-# Try Again Button
-if st.button("🔄 Try Again?"):
-    st.session_state.user_answers = []
-    st.session_state.current_question = 0
-    st.session_state.quiz_started = False
-    st.session_state.quiz_completed = False
-    st.session_state.show_detailed_feedback = False
-    st.rerun()
