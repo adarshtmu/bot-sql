@@ -5,7 +5,7 @@ import re
 import duckdb
 
 # --- Adjustable Content Width (in percentage) ---
-CONTENT_WIDTH_PERCENTAGE = 60  # Adjust this value to change the width (e.g., 50 for 50%, 70 for 70%)
+CONTENT_WIDTH_PERCENTAGE = 30  # Adjust this value to change the width (e.g., 50 for 50%, 70 for 70%)
 
 # --- Set Streamlit Page Configuration ---
 st.set_page_config(layout="wide", initial_sidebar_state="collapsed")
