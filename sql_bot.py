@@ -4,116 +4,69 @@ import pandas as pd
 import re
 import duckdb
 
-# --- Adjustable Content Width (in percentage) ---
-CONTENT_WIDTH_PERCENTAGE = 30  # Adjust this value to change the width (e.g., 50 for 50%, 70 for 70%)
-
-# --- Set Streamlit Page Configuration ---
-st.set_page_config(layout="wide", initial_sidebar_state="collapsed")
-
-# --- Custom CSS with Adjustable Width ---
-hide_streamlit_style = f"""
+# --- Custom CSS ---
+hide_streamlit_style = """
     <style>
-        /* Hide Streamlit default elements */
-        header {{visibility: hidden;}}
-        #MainMenu {{visibility: hidden;}}
-        footer {{visibility: hidden;}}
-        .viewerBadge_container__1QSob {{display: none !important;}}
-        .stDeployButton {{display: none !important;}}
-        [data-testid="stToolbar"] {{display: none !important;}}
-        [data-testid="stDecoration"] {{display: none !important;}}
-        [data-testid="stDeployButton"] {{display: none !important;}}
-        .st-emotion-cache-1r8d6ul {{display: none !important;}}
-        .st-emotion-cache-1jicfl2 {{display: none !important;}}
-
-        /* Set background color to match screenshot */
-        body {{
-            background-color: #1a1a1a !important;
-            color: #ffffff !important;
-        }}
-
-        /* Center content with adjustable max-width for horizontal stretch */
-        .main .block-container {{
-            max-width: {CONTENT_WIDTH_PERCENTAGE}% !important; /* Adjustable width */
-            margin-left: auto !important;
-            margin-right: auto !important;
-            padding-left: 20px !important;
-            padding-right: 20px !important;
-        }}
-
+        header {visibility: hidden;}
+        #MainMenu {visibility: hidden;}
+        footer {visibility: hidden;}
+        .viewerBadge_container__1QSob {display: none !important;}
+        .stDeployButton {display: none !important;}
+        [data-testid="stToolbar"] {display: none !important;}
+        [data-testid="stDecoration"] {display: none !important;}
+        [data-testid="stDeployButton"] {display: none !important;}
+        .st-emotion-cache-1r8d6ul {display: none !important;}
+        .st-emotion-cache-1jicfl2 {display: none !important;}
         /* Global font size and styling */
-        body, .stMarkdown, .stText, .stTextArea, .stButton button, .stLinkButton a {{
+        body, .stMarkdown, .stText, .stTextArea, .stButton button, .stLinkButton a {
             font-size: 16px !important;
-            color: #ffffff !important;
-        }}
-        h1 {{
+            color: #333 !important;
+        }
+        h1 {
             font-size: 32px !important;
             font-weight: bold !important;
-            color: #ffffff !important;
-        }}
-        h2 {{
+            color: #1a1a1a !important;
+        }
+        h2 {
             font-size: 24px !important;
             font-weight: bold !important;
-            color: #ffffff !important;
-        }}
-        h3 {{
+            color: #1a1a1a !important;
+        }
+        h3 {
             font-size: 20px !important;
             font-weight: bold !important;
-            color: #ffffff !important;
-        }}
-
+            color: #1a1a1a !important;
+        }
         /* Style for Start SQL Challenge! button */
-        button[kind="primary"] {{
+        button[kind="primary"] {
             font-size: 18px !important;
             padding: 12px 24px !important;
             color: white !important;
-            background-color: #ff4d4f !important; /* Red color as in the screenshot */
+            background-color: #007bff !important;
             border-radius: 8px !important;
             border: none !important;
-        }}
-
+        }
         /* Style for other buttons */
-        .stButton button:not([kind="primary"]), .stLinkButton a {{
+        .stButton button:not([kind="primary"]), .stLinkButton a {
             font-size: 16px !important;
             padding: 10px 20px !important;
             border-radius: 8px !important;
-        }}
-
+        }
         /* Table styling */
-        .stDataFrame {{
-            border: 1px solid #444 !important;
+        .stDataFrame {
+            border: 1px solid #e0e0e0 !important;
             border-radius: 8px !important;
-            background-color: #2a2a2a !important;
-        }}
-        .stDataFrame thead tr th {{
-            background-color: #333 !important;
-            color: #ffffff !important;
-        }}
-        .stDataFrame tbody tr td {{
-            background-color: #2a2a2a !important;
-            color: #ffffff !important;
-        }}
-
+        }
         /* Expander styling */
-        .stExpander {{
-            border: 1px solid #444 !important;
+        .stExpander {
+            border: 1px solid #e0e0e0 !important;
             border-radius: 8px !important;
-            background-color: #2a2a2a !important;
-        }}
-        .stExpander p {{
-            color: #ffffff !important;
-        }}
-
+        }
         /* Tab styling */
-        .stTabs [role="tab"] {{
+        .stTabs [role="tab"] {
             font-size: 16px !important;
             padding: 8px 16px !important;
-            color: #ffffff !important;
-            background-color: #333 !important;
-        }}
-        .stTabs [role="tab"][aria-selected="true"] {{
-            background-color: #444 !important;
-            color: #ffffff !important;
-        }}
+        }
     </style>
 """
 st.markdown(hide_streamlit_style, unsafe_allow_html=True)
@@ -134,11 +87,17 @@ except Exception as e:
 
 # --- Sample Data ---
 users_table = pd.DataFrame({
-    "user_id": [1, 2, 3, 4],
-    "name": ["Alice", "Bob", "Charlie", "David"],
-    "email": ["alice@example.com", "bob@example.com", "charlie@example.com", "david@example.com"],
-    "age": [25, 30, 35, 40],
-    "city": ["New York", "Los Angeles", "Chicago", "Houston"]
+    "user_id": [1, 2, 3, 4, 5],
+    "name": ["Sophia Clark", "Ethan Carter", "Olivia Bennett", "Liam Foster", "Ava Harper"],
+    "email": [
+        "sophia.clark@example.com",
+        "ethan.carter@example.com",
+        "olivia.bennett@example.com",
+        "liam.foster@example.com",
+        "ava.harper@example.com"
+    ],
+    "signup_date": ["2023-01-15", "2023-02-20", "2023-05-10", "2023-04-05", "2023-05-12"],
+    "last_login": ["2024-05-20", "2024-05-21", "2024-05-19", "2024-05-22", "2024-05-20"]
 })
 orders_table = pd.DataFrame({
     "order_id": [101, 102, 103, 104, 105],
@@ -155,12 +114,12 @@ original_tables = {
 sql_questions = [
     {"question": "Write a SQL query to get all details about users from the 'users' table.", "correct_answer_example": "SELECT * FROM users;", "sample_table": users_table, "relevant_tables": ["users"]},
     {"question": "Write a SQL query to count the total number of users in the 'users' table.", "correct_answer_example": "SELECT COUNT(*) AS user_count FROM users;", "sample_table": users_table, "relevant_tables": ["users"]},
-    {"question": "Write a SQL query to get all users older than 30 from the 'users' table.", "correct_answer_example": "SELECT * FROM users WHERE age > 30;", "sample_table": users_table, "relevant_tables": ["users"]},
+    {"question": "Write a SQL query to get all users signed up after 2023-03-01 from the 'users' table.", "correct_answer_example": "SELECT * FROM users WHERE signup_date > '2023-03-01';", "sample_table": users_table, "relevant_tables": ["users"]},
     {"question": "Write a SQL query to find all orders with an amount greater than 100 from the 'orders' table.", "correct_answer_example": "SELECT * FROM orders WHERE amount > 100;", "sample_table": orders_table, "relevant_tables": ["orders"]},
-    {"question": "Write a SQL query to find users from 'chicago' in the 'users' table (test case-insensitivity).", "correct_answer_example": "SELECT * FROM users WHERE city = 'Chicago';", "sample_table": users_table, "relevant_tables": ["users"]},
+    {"question": "Write a SQL query to find users with email domain '@example.com' in the 'users' table.", "correct_answer_example": "SELECT * FROM users WHERE email LIKE '%@example.com';", "sample_table": users_table, "relevant_tables": ["users"]},
     {"question": "Write a SQL query to find the most recent order from the 'orders' table by order date.", "correct_answer_example": "SELECT * FROM orders ORDER BY order_date DESC LIMIT 1;", "sample_table": orders_table, "relevant_tables": ["orders"]},
     {"question": "Write a SQL query to find the average order amount from the 'orders' table.", "correct_answer_example": "SELECT AVG(amount) AS average_amount FROM orders;", "sample_table": orders_table, "relevant_tables": ["orders"]},
-    {"question": "Write a SQL query to find users from 'New York' or 'Chicago' in the 'users' table.", "correct_answer_example": "SELECT * FROM users WHERE city IN ('New York', 'Chicago');", "sample_table": users_table, "relevant_tables": ["users"]},
+    {"question": "Write a SQL query to find users with last login in May 2024 from the 'users' table.", "correct_answer_example": "SELECT * FROM users WHERE last_login LIKE '2024-05%';", "sample_table": users_table, "relevant_tables": ["users"]},
     {"question": "Write a SQL query to find users who placed orders worth more than 150. Use the 'users' and 'orders' tables.", "correct_answer_example": "SELECT u.* FROM users u JOIN orders o ON u.user_id = o.user_id WHERE o.amount > 150;", "sample_table": users_table, "relevant_tables": ["users", "orders"]},
     {"question": "Write a SQL query to calculate the total amount spent by each user by joining the 'users' and 'orders' tables.", "correct_answer_example": "SELECT u.name, SUM(o.amount) AS total_spent FROM users u JOIN orders o ON u.user_id = o.user_id GROUP BY u.name ORDER BY u.name;", "sample_table": users_table, "relevant_tables": ["users", "orders"]}
 ]
@@ -182,16 +141,21 @@ def simulate_query_duckdb(sql_query, tables_dict):
     con = None
     processed_query_for_ilike = sql_query
     
+    # Replace double-quoted strings with single-quoted strings
     try:
         double_quote_pattern = r'"([^"]*)"'
         processed_query_for_ilike = re.sub(double_quote_pattern, r"'\1'", sql_query)
+        if processed_query_for_ilike != sql_query:
+            print(f"DEBUG: Original query: {sql_query}")
+            print(f"DEBUG: Query after double->single quote conversion: {processed_query_for_ilike}")
     except Exception as e_quotes:
-        print(f"Warning: Failed during double quote replacement: {e_quotes}.")
+        print(f"Warning: Failed during double quote replacement: {e_quotes}. Proceeding with original query structure for ILIKE.")
         processed_query_for_ilike = sql_query
     
+    # Query Modification for case-insensitive comparison
     modified_sql_query = processed_query_for_ilike
     final_executed_query = modified_sql_query
-    case_insensitive_columns = {"orders": [], "users": ["city"]}
+    case_insensitive_columns = {"orders": [], "users": []}
     flat_insensitive_columns = [col for cols in case_insensitive_columns.values() for col in cols]
     
     if flat_insensitive_columns:
@@ -202,14 +166,19 @@ def simulate_query_duckdb(sql_query, tables_dict):
                 pre_context = match.group(1)
                 col_name = match.group(2)
                 literal = match.group(4)
+                print(f"DEBUG: Rewriting query part: Replacing '=' with 'ILIKE' for column '{col_name}'")
                 space_prefix = "" if not pre_context or pre_context.endswith(" ") or pre_context.endswith("(") else " "
                 return f"{pre_context}{space_prefix}{col_name} ILIKE {literal}"
+            
             modified_sql_query = re.sub(pattern, replace_with_ilike, processed_query_for_ilike, flags=re.IGNORECASE)
             final_executed_query = modified_sql_query
+            if modified_sql_query != processed_query_for_ilike:
+                print(f"DEBUG: Query after ILIKE rewrite: {modified_sql_query}")
         except Exception as e_rewrite:
-            print(f"Warning: Failed to rewrite query for case-insensitivity: {e_rewrite}")
+            print(f"Warning: Failed to rewrite query for case-insensitivity (ILIKE), using quote-converted query. Error: {e_rewrite}")
             final_executed_query = processed_query_for_ilike
     
+    # Execute with DuckDB
     try:
         con = duckdb.connect(database=':memory:', read_only=False)
         for table_name, df in tables_dict.items():
@@ -218,6 +187,7 @@ def simulate_query_duckdb(sql_query, tables_dict):
             else:
                 print(f"Warning [simulate_query]: Item '{table_name}' not a DataFrame during registration.")
         
+        print(f"DEBUG: Executing final query in DuckDB: {final_executed_query}")
         result_df = con.execute(final_executed_query).df()
         con.close()
         return result_df
@@ -226,24 +196,30 @@ def simulate_query_duckdb(sql_query, tables_dict):
         e_str = str(e).lower()
         hint = ""
         
-        catalog_match = re.search(r'catalog error:.*table with name "([^"]+)" does not exist', e_str)
-        binder_match = re.search(r'(?:binder error|catalog error):.*column "([^"]+)" not found', e_str)
-        syntax_match = re.search(r'parser error: syntax error at or near "([^"]+)"', e_str) \
-                    or re.search(r'parser error: syntax error at end of input', e_str) \
-                    or re.search(r'parser error: syntax error at:', e_str)
-        type_match = re.search(r'conversion error:.*try cast\("([^"]+)"', e_str)
-        
-        if catalog_match: hint = f"\n\n**Hint:** Table '{catalog_match.group(1)}' might be misspelled or doesn't exist. Available tables: {list(tables_dict.keys())}."
-        elif binder_match: hint = f"\n\n**Hint:** Column '{binder_match.group(1)}' might be misspelled or doesn't exist in the referenced table(s)."
-        elif syntax_match:
-            problem_area = syntax_match.group(1) if syntax_match.groups() and syntax_match.lastindex == 1 else "the location indicated"
-            hint = f"\n\n**Hint:** Check your SQL syntax, especially around `{problem_area}`."
-        elif type_match: hint = f"\n\n**Hint:** There might be a type mismatch with '{type_match.group(1)}'."
+        if "ILIKE" in str(e).upper() or (modified_sql_query != processed_query_for_ilike and "syntax error" in e_str):
+            hint = "\n\n**Hint:** The simulation tried using case-insensitive matching (ILIKE). Check your SQL syntax near the comparison, especially if using complex conditions."
+        else:
+            catalog_match = re.search(r'catalog error:.*table with name "([^"]+)" does not exist', e_str)
+            binder_match = re.search(r'(?:binder error|catalog error):.*column "([^"]+)" not found', e_str)
+            syntax_match = re.search(r'parser error: syntax error at or near "([^"]+)"', e_str) \
+                        or re.search(r'parser error: syntax error at end of input', e_str) \
+                        or re.search(r'parser error: syntax error at:', e_str)
+            type_match = re.search(r'conversion error:.*try cast\("([^"]+)"', e_str)
+            
+            if catalog_match: hint = f"\n\n**Hint:** Table '{catalog_match.group(1)}' might be misspelled or doesn't exist. Available tables: {list(tables_dict.keys())}."
+            elif binder_match: hint = f"\n\n**Hint:** Column '{binder_match.group(1)}' might be misspelled or doesn't exist in the referenced table(s)."
+            elif syntax_match:
+                problem_area = syntax_match.group(1) if syntax_match.groups() and syntax_match.lastindex == 1 else "the location indicated"
+                hint = f"\n\n**Hint:** Check your SQL syntax, especially around `{problem_area}`. Remember standard SQL uses single quotes (') for text values like `'example text'` (though the tool tries to handle double quotes for you)."
+            elif type_match: hint = f"\n\n**Hint:** There might be a type mismatch. You tried using '{type_match.group(1)}' in a way that's incompatible with its data type (e.g., comparing text to a number)."
+            elif "syntax error" in e_str:
+                hint = "\n\n**Hint:** Double-check your SQL syntax. Ensure all clauses (SELECT, FROM, WHERE, etc.) are correct and in order. Use single quotes (') for string values."
         
         if not hint:
-            hint = "\n\n**Hint:** Double-check your query syntax, table/column names, and data types."
+            hint = "\n\n**Hint:** Double-check your query syntax, table/column names, and data types. Ensure string values are correctly quoted (standard SQL uses single quotes '). Verify function names and usage."
         
         error_message += hint
+        print(f"ERROR [simulate_query_duckdb]: {error_message}\nOriginal Query: {sql_query}\nFinal Attempted Query: {final_executed_query}")
         if con:
             try: con.close()
             except: pass
@@ -294,17 +270,11 @@ def evaluate_answer_with_llm(question_data, student_answer, original_tables_dict
     **Analysis Instructions:**
 
     * **Correctness:** Does the student's query accurately and completely answer the **Question** based on the **Relevant Table Schemas**? Consider edge cases if applicable (e.g., users with no orders, data types for comparisons).
-        **>>> IMPORTANT QUIZ CONTEXT FOR CORRECTNESS <<<**
-        For *this specific quiz*, assume that simple equality comparisons (`=`) involving the text column `'city'` (in `users`) are effectively **CASE-INSENSITIVE**. The quiz environment simulates this behavior.
-        Therefore, a query like `WHERE city = 'chicago'` **should be considered CORRECT** if the question asks for 'Chicago' city, even if the student did not use explicit `LOWER()` or `UPPER()` functions.
-        Evaluate the *logic* of the query based on this assumed case-insensitivity for the `city` column. Penalize only if the core logic (joins, other conditions, selected columns etc.) is wrong.
-        Also, assume the student *can* use **either single quotes (') or double quotes (")** for string literals in their query for this quiz simulation, even though single quotes are standard SQL. Do not mark down for using double quotes if the logic is correct.
-
-    * **Validity:** Is the query syntactically valid standard SQL (ignoring the double quote allowance above)? Briefly mention any *other* syntax errors.
-    * **Logic:** Does the query use appropriate SQL clauses (SELECT, FROM, WHERE, JOIN, GROUP BY, ORDER BY, aggregates, etc.) correctly for the task? Is the logic sound? Are comparisons appropriate for the data types (keeping the case-insensitivity rule for `city` in mind)?
-    * **Alternatives:** Briefly acknowledge if the student used a valid alternative approach (e.g., different JOIN type if appropriate, subquery vs. JOIN). Mentioning `LOWER`/`UPPER` or using single quotes as *generally good practice* is okay, but don't imply it was *required* for correctness *here*.
+    * **Validity:** Is the query syntactically valid standard SQL? Briefly mention any syntax errors.
+    * **Logic:** Does the query use appropriate SQL clauses (SELECT, FROM, WHERE, JOIN, GROUP BY, ORDER BY, aggregates, etc.) correctly for the task? Is the logic sound? Are comparisons appropriate for the data types?
+    * **Alternatives:** Briefly acknowledge if the student used a valid alternative approach (e.g., different JOIN type if appropriate, subquery vs. JOIN).
     * **Feedback:** Provide clear, constructive feedback in a friendly, encouraging, casual Hindi tone (like a helpful senior or 'bhaiya' talking to a learner).
-        * If incorrect (due to reasons *other* than case-sensitivity on `city` or using double quotes): Gently point out the error (e.g., "Arre yaar, yahaan thoda sa check karo..." or "Ek chhoti si galti ho gayi hai..."). Explain *what* is wrong (syntax, logic, columns, joins, other conditions etc.). Suggest how to fix it. **Do NOT mark the query incorrect or suggest using LOWER()/UPPER() or single quotes *solely* because of case differences in `city` or the use of double quotes if the rest of the logic is correct.**
+        * If incorrect: Gently point out the error (e.g., "Arre yaar, yahaan thoda sa check karo..." or "Ek chhoti si galti ho gayi hai..."). Explain *what* is wrong (syntax, logic, columns, joins, other conditions etc.). Suggest how to fix it.
     * **Verdict:** Conclude your entire response with *exactly* one line formatted as: "Verdict: Correct" or "Verdict: Incorrect". This line MUST be the very last line.
 
     **Begin Evaluation:**
@@ -336,18 +306,22 @@ def evaluate_answer_with_llm(question_data, student_answer, original_tables_dict
                     feedback_llm = re.sub(r'\s*Verdict:\s*(Correct|Incorrect)?\s*$', '', feedback_llm, flags=re.MULTILINE | re.IGNORECASE).strip()
                 else:
                     st.warning(f"⚠️ Could not parse AI verdict from response.")
+                    print(f"WARNING: Could not parse verdict from LLM output:\n---\n{llm_output}\n---")
                     feedback_llm = llm_output + "\n\n_(System Note: AI correctness check might be unreliable as verdict wasn't found.)_"
                     is_correct_llm = False
         except AttributeError as ae:
             llm_output = f"Error: Unexpected response format from AI. Details: {ae}"
+            print(f"ERROR: Unexpected response format from AI: {response}")
             feedback_llm = f"AI feedback format error: {ae}"
             is_correct_llm = False
         except Exception as e_resp:
             llm_output = f"Error processing AI response: {e_resp}"
+            print(f"ERROR: Processing AI response failed: {e_resp}")
             feedback_llm = f"AI response processing error: {e_resp}"
             is_correct_llm = False
     except Exception as e_call:
         st.error(f"🚨 AI Error during evaluation: {e_call}")
+        print(f"ERROR: Gemini API call failed: {e_call}")
         feedback_llm = f"AI feedback generation error: {e_call}"
         is_correct_llm = False
         llm_output = f"Error during AI call: {e_call}"
@@ -417,16 +391,12 @@ def analyze_performance(user_answers):
         **Incorrectly Answered Questions & Feedback Snippets:**
         {incorrect_summary if incorrect_ans else '(Koi nahi)'}
 
-        **Quiz Context Reminder:**
-        - Case-insensitivity was assumed for '=' comparisons on 'city' columns.
-        - Both single (') and double (") quotes were acceptable for string literals in this quiz simulation.
-
         **Task:**
         Ab, neeche diye gaye structure mein overall performance ka ek summary feedback do:
-        1.  **Overall Impression:** Score aur general performance pe ek positive ya encouraging comment.
-        2.  **Strengths:** Agar kuch specific concepts sahi kiye hain, unko highlight karo.
-        3.  **Areas for Improvement:** Jo concepts galat hue, unko gently point out karo.
-        4.  **Next Steps / Encouragement:** Kuch encouraging words aur aage kya karna chahiye.
+        1.  **Overall Impression:** Score aur general performance pe ek positive ya encouraging comment (e.g., "Overall performance kaafi achhi rahi!", "Thodi aur practice lagegi, but potential hai!"). Be realistic but motivating.
+        2.  **Strengths:** Agar kuch specific concepts sahi kiye hain (jo correct answers se pata chale), unko highlight karo (e.g., "SELECT aur WHERE clause ka use aache se samajh aa gaya hai.", "JOINs wale sawaal sahi kiye, yeh achhi baat hai!"). General rakho agar specific pattern na dikhe.
+        3.  **Areas for Improvement:** Jo concepts galat hue (incorrect answers se related), unko gently point out karo. Focus on concepts, not just specific mistakes (e.g., "JOIN ka logic thoda aur clear karna hoga shayad.", "Aggregate functions (COUNT, AVG) pe dhyaan dena.", "Syntax ki chhoti-moti galtiyan ho rahi hain.").
+        4.  **Next Steps / Encouragement:** Kuch encouraging words aur aage kya karna chahiye (e.g., "Keep practicing!", "Concept X ko revise kar lena.", "Aise hi lage raho, SQL aa jayega!").
 
         Bas plain text mein feedback generate karna hai. Casual tone rakhna. Sidhe feedback se shuru karo.
         """
@@ -443,12 +413,16 @@ def analyze_performance(user_answers):
         elif hasattr(response, 'parts') and response.parts:
             generated_feedback = "".join(part.text for part in response.parts if hasattr(part, 'text')).strip()
         else:
-            generated_feedback = "Error: Received unexpected or empty response from AI for summary."
+            try:
+                generated_feedback = f"AI Response Blocked or Empty. Prompt Feedback: {response.prompt_feedback}"
+            except Exception:
+                generated_feedback = "Error: Received unexpected or empty response from AI for summary."
         
         if generated_feedback:
             performance_data["overall_feedback"] = generated_feedback
         else:
             performance_data["overall_feedback"] = "AI response format unclear or empty for summary analysis."
+            print(f"Warning: Unexpected LLM response for performance summary.")
     except Exception as e:
         print(f"Error generating performance summary using LLM: {e}")
         performance_data["overall_feedback"] = f"Summary generation error from AI: {e}"
@@ -473,50 +447,55 @@ def display_simulation(title, result_data):
         st.info(f"_{result_data}_")
     else:
         st.error(f"_(Unexpected simulation result type: {type(result_data)})_")
+        print(f"DEBUG: Unexpected simulation data type: {type(result_data)}, value: {result_data}")
 
 # --- Streamlit App UI ---
 
 # --- Start Screen ---
 if not st.session_state.quiz_started:
-    st.title("🚀 SQL Mentor - Interactive SQL Practice")
-    st.markdown("### Finish the Quiz Successfully to Unlock Your SQL Certificate")
+    st.title("SQL Mentor - Interactive SQL Practice")
+    st.markdown("### Finish the Quiz to Unlock Your SQL Certificate")
+    
     st.markdown("""
-        **📌 Important Notes:**
-        - To be eligible for a certificate, you must achieve a score of at least 80%.
-        - This quiz uses standard **SQL syntax** (similar to MySQL/PostgreSQL).
-        - String comparisons (like `WHERE city = 'new york'`) are simulated to be **case-insensitive** for common text columns (`city`).
-        - **Both single quotes (') and double quotes (") are accepted** for string literals in this simulation.
-        - Your queries are evaluated by an AI for correctness and logic.
-        - Query simulation is powered by DuckDB to show results on sample data.
+        **Important Notes**
+
+        The quiz consists of 10 questions.
+
+        Each question has a time limit of 2 minutes.
+
+        You need to score at least 80% to pass.
+
+        In this interactive quiz, you will work with two sample tables.
     """)
     
-    st.markdown("#### Tables Overview")
+    st.markdown("### Table Overview")
     try:
-        table_overview_data = {"Table": list(original_tables.keys()),
-                               "Rows": [len(df) for df in original_tables.values()],
-                               "Columns": [len(df.columns) for df in original_tables.values()]}
+        table_overview_data = {
+            "Table": ["Users Table", "Orders Table"],
+            "Rows": [100, 500],
+            "Columns": [5, 4]
+        }
         st.dataframe(pd.DataFrame(table_overview_data), hide_index=True, use_container_width=True)
     except Exception as e:
         st.error(f"Error displaying table overview: {e}")
     
-    st.markdown("### 🔍 Table Previews")
+    st.markdown("### Table Previews")
     try:
         tab1, tab2 = st.tabs(["Users Table", "Orders Table"])
-        with tab1: st.dataframe(users_table, hide_index=True, use_container_width=True)
-        with tab2: st.dataframe(orders_table, hide_index=True, use_container_width=True)
+        with tab1:
+            st.dataframe(users_table, hide_index=True, use_container_width=True)
+        with tab2:
+            st.dataframe(orders_table, hide_index=True, use_container_width=True)
     except Exception as e:
         st.error(f"Error displaying table previews: {e}")
     
-    with st.expander("📝 Quiz Ke Baare Mein"):
-        st.write(f"""
-        - Aapko {len(sql_questions)} SQL query challenges solve karne honge.
-        - Har jawaab ke baad AI Mentor se immediate feedback milega.
-        - **SQL Dialect Focus:** Standard SQL (MySQL/PostgreSQL like).
-        - Case-insensitivity for `city` columns in `WHERE =` clauses is simulated.
-        - String literals can be enclosed in single quotes (`'...'`) or double quotes (`"..."`).
+    with st.expander("About the Quiz"):
+        st.write("""
+        This quiz is designed to test your SQL knowledge. You will be presented with various SQL queries to write based on the provided tables.
+        Ensure you understand the table structures before starting the quiz. Good luck!
         """)
     
-    if st.button("🚀 Start SQL Challenge!", type="primary"):
+    if st.button("Start SQL Challenge!", type="primary"):
         st.session_state.quiz_started = True
         st.session_state.user_answers = []
         st.session_state.current_question = 0
@@ -589,7 +568,7 @@ elif st.session_state.quiz_started and not st.session_state.quiz_completed:
     
     if st.button("✅ Submit Query", key=f"submit_{current_q_index}"):
         if user_query and user_query.strip():
-            with st.spinner("🔄 Query ko check kiya ja raha hai..."):
+            with st.spinner("🔄 Query ko check kiya ja raha hai... AI Mentor se feedback aur simulation results generate ho rahe hain..."):
                 feedback, is_correct, expected_res, actual_res, raw_llm = evaluate_answer_with_llm(
                     question_data,
                     user_query,
@@ -630,17 +609,18 @@ elif st.session_state.quiz_completed:
     )
     final_score = calculate_score(st.session_state.user_answers)
 
+    # --- Scoreboard Card ---
     st.markdown(
         f"""
         <div style='
-            background-color:#333;
+            background-color:#f8f9fa;
             border-radius:15px;
             box-shadow:0 4px 16px rgba(0,0,0,0.08);
             padding:30px 0;
             margin:30px 0;
             text-align:center;
         '>
-            <h2 style='color:#ffffff;'>📊 Your Final Score</h2>
+            <h2 style='color:#333;'>📊 Your Final Score</h2>
             <div style='font-size:2.5rem; font-weight:bold; color:#28a745;'>{final_score:.2f}%</div>
             <div style='font-size:1.2rem; color:#888;'>Scoreboard</div>
         </div>
@@ -649,6 +629,7 @@ elif st.session_state.quiz_completed:
     )
     st.progress(final_score / 100)
 
+    # --- Certificate Button Section ---
     if final_score >= 80:
         st.markdown(
             """
@@ -670,6 +651,7 @@ elif st.session_state.quiz_completed:
                     border-radius:10px;
                     text-decoration:none;
                     box-shadow:0 2px 8px rgba(0,0,0,0.11);
+                    transition: background 0.2s;
                 ">🎓 Get Your Certificate</a>
             </div>
             """,
