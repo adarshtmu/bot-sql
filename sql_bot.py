@@ -604,15 +604,7 @@ elif st.session_state.quiz_started and not st.session_state.quiz_completed:
 # --- Quiz Completed Screen ---
 elif st.session_state.quiz_completed:
     st.balloons()
-    # --- Always scroll to top on quiz complete (optional but recommended) ---
-    st.markdown("""
-        <script>
-        window.parent.scrollTo({top: 0, behavior: 'smooth'});
-        </script>
-    """, unsafe_allow_html=True)
-
-    # --- Score Card & Try Again at the top ---
-    final_score = calculate_score(st.session_state.user_answers)
+    # Optional: Show congratulations at top
     st.markdown(
         """
         <div style='text-align:center; margin-top: 30px;'>
@@ -622,84 +614,8 @@ elif st.session_state.quiz_completed:
         """,
         unsafe_allow_html=True
     )
-    st.markdown(
-        f"""
-        <div style='
-            background-color:#f8f9fa;
-            border-radius:15px;
-            box-shadow:0 4px 16px rgba(0,0,0,0.08);
-            padding:30px 0;
-            margin:30px 0;
-            text-align:center;
-        '>
-            <h2 style='color:#333;'>📊 Your Final Score</h2>
-            <div style='font-size:2.5rem; font-weight:bold; color:#28a745;'>{final_score:.2f}%</div>
-            <div style='font-size:1.2rem; color:#888;'>Scoreboard</div>
-        </div>
-        """,
-        unsafe_allow_html=True
-    )
-    st.progress(final_score / 100)
 
-    # --- Certificate and Try Again Buttons ---
-    if final_score >= 80:
-        st.markdown(
-            """
-            <div style='text-align:center; margin-top: 20px;'>
-                <h3 style='color:#007bff;'>🏆 Great job! You're eligible for a certificate.</h3>
-            </div>
-            """,
-            unsafe_allow_html=True
-        )
-        st.markdown(
-            """
-            <div style='display:flex; justify-content:center; margin-bottom: 30px;'>
-                <a href="https://superprofile.bio/vp/corporate-bhaiya-sql-page" target="_blank" style="
-                    background-color:#ffc107;
-                    color:#121212;
-                    font-size:1.5rem;
-                    font-weight:600;
-                    padding:18px 36px;
-                    border-radius:10px;
-                    text-decoration:none;
-                    box-shadow:0 2px 8px rgba(0,0,0,0.11);
-                    transition: background 0.2s;
-                ">🎓 Get Your Certificate</a>
-            </div>
-            """,
-            unsafe_allow_html=True
-        )
-    else:
-        st.markdown(
-            """
-            <div style='text-align:center; margin-top: 20px;'>
-                <h3 style='color:#e74c3c;'>📚 Keep practicing to earn a certificate!</h3>
-                <a href="https://www.corporatebhaiya.com/" target="_blank" style="
-                    background-color:#6c757d;
-                    color:white;
-                    font-size:1.2rem;
-                    padding:12px 28px;
-                    border-radius:8px;
-                    text-decoration:none;
-                    margin-top:10px;
-                    display:inline-block;
-                ">🚀 Book a Mentor Session</a>
-            </div>
-            """,
-            unsafe_allow_html=True
-        )
-
-    # --- Try Again Button ---
-    st.markdown("---")
-    if st.button("🔄 Try Again?"):
-        st.session_state.user_answers = []
-        st.session_state.current_question = 0
-        st.session_state.quiz_started = False
-        st.session_state.quiz_completed = False
-        st.session_state.show_detailed_feedback = False
-        st.rerun()
-
-    # --- Answers/Feedback Below ---
+    # --- 1. Answer/Feedback Summary first ---
     st.markdown("---")
     st.subheader("📝 Aapke Jawaab Aur Feedback Ka Summary")
     for i, ans_data in enumerate(st.session_state.user_answers):
@@ -726,7 +642,7 @@ elif st.session_state.quiz_completed:
             if show_expected_final:
                 display_simulation("Simulated Result (Correct Query Output)", ans_data.get("expected_result", "N/A"))
 
-    # --- Analysis at the very bottom ---
+    # --- 2. Analysis Section ---
     st.markdown("---")
     st.subheader("💡 AI Mentor Se Detailed Performance Analysis")
     if st.button("📊 Show Detailed Analysis", key="show_analysis"):
@@ -782,9 +698,77 @@ elif st.session_state.quiz_completed:
                     st.markdown(section_dict["Full Feedback"])
                 st.markdown('</div>', unsafe_allow_html=True)
 
-    # --- Option to Try Again at the very end (if you want) ---
+    # --- 3. Scorecard & Buttons LAST ---
     st.markdown("---")
-    if st.button("🔄 Dobara Try Karein?"):
+    final_score = calculate_score(st.session_state.user_answers)
+    st.markdown(
+        f"""
+        <div style='
+            background-color:#f8f9fa;
+            border-radius:15px;
+            box-shadow:0 4px 16px rgba(0,0,0,0.08);
+            padding:30px 0;
+            margin:30px 0;
+            text-align:center;
+        '>
+            <h2 style='color:#333;'>📊 Your Final Score</h2>
+            <div style='font-size:2.5rem; font-weight:bold; color:#28a745;'>{final_score:.2f}%</div>
+            <div style='font-size:1.2rem; color:#888;'>Scoreboard</div>
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
+    st.progress(final_score / 100)
+
+    if final_score >= 80:
+        st.markdown(
+            """
+            <div style='text-align:center; margin-top: 20px;'>
+                <h3 style='color:#007bff;'>🏆 Great job! You're eligible for a certificate.</h3>
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
+        st.markdown(
+            """
+            <div style='display:flex; justify-content:center; margin-bottom: 30px;'>
+                <a href="https://superprofile.bio/vp/corporate-bhaiya-sql-page" target="_blank" style="
+                    background-color:#ffc107;
+                    color:#121212;
+                    font-size:1.5rem;
+                    font-weight:600;
+                    padding:18px 36px;
+                    border-radius:10px;
+                    text-decoration:none;
+                    box-shadow:0 2px 8px rgba(0,0,0,0.11);
+                    transition: background 0.2s;
+                ">🎓 Get Your Certificate</a>
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
+    else:
+        st.markdown(
+            """
+            <div style='text-align:center; margin-top: 20px;'>
+                <h3 style='color:#e74c3c;'>📚 Keep practicing to earn a certificate!</h3>
+                <a href="https://www.corporatebhaiya.com/" target="_blank" style="
+                    background-color:#6c757d;
+                    color:white;
+                    font-size:1.2rem;
+                    padding:12px 28px;
+                    border-radius:8px;
+                    text-decoration:none;
+                    margin-top:10px;
+                    display:inline-block;
+                ">🚀 Book a Mentor Session</a>
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
+
+    # --- Try Again Button LAST ---
+    if st.button("🔄 Try Again?"):
         st.session_state.user_answers = []
         st.session_state.current_question = 0
         st.session_state.quiz_started = False
