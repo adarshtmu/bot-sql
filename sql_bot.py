@@ -345,13 +345,11 @@ def evaluate_answer_with_llm(question_data, student_answer, original_tables_dict
     return feedback_llm, is_correct_llm, expected_result_sim, actual_result_sim, llm_output
 
 def calculate_score(user_answers):
-    if not user_answers: return 0.0
-    correct_count = sum(1 for ans in st.session_state.user_answers if ans.get("is_correct", False))
-    total_attempted = len(st.session_state.user_answers)
-    score_percent = (correct_count / total_attempted) * 100 if total_attempted > 0 else 0
-    st.markdown(f"### Your Score: {score_percent:.1f}% ({correct_count} out of {total_attempted} correct)")
-    return score
-
+    if not user_answers or len(user_answers) == 0:
+        return 0.0
+    correct_count = sum(1 for ans in user_answers if ans.get("is_correct", False))
+    total_questions_answered = len(user_answers)
+    return (correct_count / total_questions_answered) * 100
 def analyze_performance(user_answers):
     performance_data = {
         "strengths": [], "weaknesses": [],
