@@ -4,113 +4,116 @@ import pandas as pd
 import re
 import duckdb
 
+# --- Adjustable Content Width (in percentage) ---
+CONTENT_WIDTH_PERCENTAGE = 60  # Adjust this value to change the width (e.g., 50 for 50%, 70 for 70%)
+
 # --- Set Streamlit Page Configuration ---
 st.set_page_config(layout="wide", initial_sidebar_state="collapsed")
 
-# --- Custom CSS for Dark Theme and Layout ---
-hide_streamlit_style = """
+# --- Custom CSS with Adjustable Width ---
+hide_streamlit_style = f"""
     <style>
         /* Hide Streamlit default elements */
-        header {visibility: hidden;}
-        #MainMenu {visibility: hidden;}
-        footer {visibility: hidden;}
-        .viewerBadge_container__1QSob {display: none !important;}
-        .stDeployButton {display: none !important;}
-        [data-testid="stToolbar"] {display: none !important;}
-        [data-testid="stDecoration"] {display: none !important;}
-        [data-testid="stDeployButton"] {display: none !important;}
-        .st-emotion-cache-1r8d6ul {display: none !important;}
-        .st-emotion-cache-1jicfl2 {display: none !important;}
+        header {{visibility: hidden;}}
+        #MainMenu {{visibility: hidden;}}
+        footer {{visibility: hidden;}}
+        .viewerBadge_container__1QSob {{display: none !important;}}
+        .stDeployButton {{display: none !important;}}
+        [data-testid="stToolbar"] {{display: none !important;}}
+        [data-testid="stDecoration"] {{display: none !important;}}
+        [data-testid="stDeployButton"] {{display: none !important;}}
+        .st-emotion-cache-1r8d6ul {{display: none !important;}}
+        .st-emotion-cache-1jicfl2 {{display: none !important;}}
 
         /* Set background color to match screenshot */
-        body {
+        body {{
             background-color: #1a1a1a !important;
             color: #ffffff !important;
-        }
+        }}
 
-        /* Center content with max-width for horizontal stretch */
-        .main .block-container {
-            max-width: 80% !important; /* Stretch to 80% of viewport width */
+        /* Center content with adjustable max-width for horizontal stretch */
+        .main .block-container {{
+            max-width: {CONTENT_WIDTH_PERCENTAGE}% !important; /* Adjustable width */
             margin-left: auto !important;
             margin-right: auto !important;
             padding-left: 20px !important;
             padding-right: 20px !important;
-        }
+        }}
 
         /* Global font size and styling */
-        body, .stMarkdown, .stText, .stTextArea, .stButton button, .stLinkButton a {
+        body, .stMarkdown, .stText, .stTextArea, .stButton button, .stLinkButton a {{
             font-size: 16px !important;
             color: #ffffff !important;
-        }
-        h1 {
+        }}
+        h1 {{
             font-size: 32px !important;
             font-weight: bold !important;
             color: #ffffff !important;
-        }
-        h2 {
+        }}
+        h2 {{
             font-size: 24px !important;
             font-weight: bold !important;
             color: #ffffff !important;
-        }
-        h3 {
+        }}
+        h3 {{
             font-size: 20px !important;
             font-weight: bold !important;
             color: #ffffff !important;
-        }
+        }}
 
         /* Style for Start SQL Challenge! button */
-        button[kind="primary"] {
+        button[kind="primary"] {{
             font-size: 18px !important;
             padding: 12px 24px !important;
             color: white !important;
             background-color: #ff4d4f !important; /* Red color as in the screenshot */
             border-radius: 8px !important;
             border: none !important;
-        }
+        }}
 
         /* Style for other buttons */
-        .stButton button:not([kind="primary"]), .stLinkButton a {
+        .stButton button:not([kind="primary"]), .stLinkButton a {{
             font-size: 16px !important;
             padding: 10px 20px !important;
             border-radius: 8px !important;
-        }
+        }}
 
         /* Table styling */
-        .stDataFrame {
+        .stDataFrame {{
             border: 1px solid #444 !important;
             border-radius: 8px !important;
             background-color: #2a2a2a !important;
-        }
-        .stDataFrame thead tr th {
+        }}
+        .stDataFrame thead tr th {{
             background-color: #333 !important;
             color: #ffffff !important;
-        }
-        .stDataFrame tbody tr td {
+        }}
+        .stDataFrame tbody tr td {{
             background-color: #2a2a2a !important;
             color: #ffffff !important;
-        }
+        }}
 
         /* Expander styling */
-        .stExpander {
+        .stExpander {{
             border: 1px solid #444 !important;
             border-radius: 8px !important;
             background-color: #2a2a2a !important;
-        }
-        .stExpander p {
+        }}
+        .stExpander p {{
             color: #ffffff !important;
-        }
+        }}
 
         /* Tab styling */
-        .stTabs [role="tab"] {
+        .stTabs [role="tab"] {{
             font-size: 16px !important;
             padding: 8px 16px !important;
             color: #ffffff !important;
             background-color: #333 !important;
-        }
-        .stTabs [role="tab"][aria-selected="true"] {
+        }}
+        .stTabs [role="tab"][aria-selected="true"] {{
             background-color: #444 !important;
             color: #ffffff !important;
-        }
+        }}
     </style>
 """
 st.markdown(hide_streamlit_style, unsafe_allow_html=True)
@@ -151,15 +154,15 @@ original_tables = {
 # --- SQL Questions List ---
 sql_questions = [
     {"question": "Write a SQL query to get all details about users from the 'users' table.", "correct_answer_example": "SELECT * FROM users;", "sample_table": users_table, "relevant_tables": ["users"]},
-    # {"question": "Write a SQL query to count the total number of users in the 'users' table.", "correct_answer_example": "SELECT COUNT(*) AS user_count FROM users;", "sample_table": users_table, "relevant_tables": ["users"]},
-    # {"question": "Write a SQL query to get all users older than 30 from the 'users' table.", "correct_answer_example": "SELECT * FROM users WHERE age > 30;", "sample_table": users_table, "relevant_tables": ["users"]},
-    # {"question": "Write a SQL query to find all orders with an amount greater than 100 from the 'orders' table.", "correct_answer_example": "SELECT * FROM orders WHERE amount > 100;", "sample_table": orders_table, "relevant_tables": ["orders"]},
-    # {"question": "Write a SQL query to find users from 'chicago' in the 'users' table (test case-insensitivity).", "correct_answer_example": "SELECT * FROM users WHERE city = 'Chicago';", "sample_table": users_table, "relevant_tables": ["users"]},
-    # {"question": "Write a SQL query to find the most recent order from the 'orders' table by order date.", "correct_answer_example": "SELECT * FROM orders ORDER BY order_date DESC LIMIT 1;", "sample_table": orders_table, "relevant_tables": ["orders"]},
-    # {"question": "Write a SQL query to find the average order amount from the 'orders' table.", "correct_answer_example": "SELECT AVG(amount) AS average_amount FROM orders;", "sample_table": orders_table, "relevant_tables": ["orders"]},
-    # {"question": "Write a SQL query to find users from 'New York' or 'Chicago' in the 'users' table.", "correct_answer_example": "SELECT * FROM users WHERE city IN ('New York', 'Chicago');", "sample_table": users_table, "relevant_tables": ["users"]},
-    # {"question": "Write a SQL query to find users who placed orders worth more than 150. Use the 'users' and 'orders' tables.", "correct_answer_example": "SELECT u.* FROM users u JOIN orders o ON u.user_id = o.user_id WHERE o.amount > 150;", "sample_table": users_table, "relevant_tables": ["users", "orders"]},
-    # {"question": "Write a SQL query to calculate the total amount spent by each user by joining the 'users' and 'orders' tables.", "correct_answer_example": "SELECT u.name, SUM(o.amount) AS total_spent FROM users u JOIN orders o ON u.user_id = o.user_id GROUP BY u.name ORDER BY u.name;", "sample_table": users_table, "relevant_tables": ["users", "orders"]}
+    {"question": "Write a SQL query to count the total number of users in the 'users' table.", "correct_answer_example": "SELECT COUNT(*) AS user_count FROM users;", "sample_table": users_table, "relevant_tables": ["users"]},
+    {"question": "Write a SQL query to get all users older than 30 from the 'users' table.", "correct_answer_example": "SELECT * FROM users WHERE age > 30;", "sample_table": users_table, "relevant_tables": ["users"]},
+    {"question": "Write a SQL query to find all orders with an amount greater than 100 from the 'orders' table.", "correct_answer_example": "SELECT * FROM orders WHERE amount > 100;", "sample_table": orders_table, "relevant_tables": ["orders"]},
+    {"question": "Write a SQL query to find users from 'chicago' in the 'users' table (test case-insensitivity).", "correct_answer_example": "SELECT * FROM users WHERE city = 'Chicago';", "sample_table": users_table, "relevant_tables": ["users"]},
+    {"question": "Write a SQL query to find the most recent order from the 'orders' table by order date.", "correct_answer_example": "SELECT * FROM orders ORDER BY order_date DESC LIMIT 1;", "sample_table": orders_table, "relevant_tables": ["orders"]},
+    {"question": "Write a SQL query to find the average order amount from the 'orders' table.", "correct_answer_example": "SELECT AVG(amount) AS average_amount FROM orders;", "sample_table": orders_table, "relevant_tables": ["orders"]},
+    {"question": "Write a SQL query to find users from 'New York' or 'Chicago' in the 'users' table.", "correct_answer_example": "SELECT * FROM users WHERE city IN ('New York', 'Chicago');", "sample_table": users_table, "relevant_tables": ["users"]},
+    {"question": "Write a SQL query to find users who placed orders worth more than 150. Use the 'users' and 'orders' tables.", "correct_answer_example": "SELECT u.* FROM users u JOIN orders o ON u.user_id = o.user_id WHERE o.amount > 150;", "sample_table": users_table, "relevant_tables": ["users", "orders"]},
+    {"question": "Write a SQL query to calculate the total amount spent by each user by joining the 'users' and 'orders' tables.", "correct_answer_example": "SELECT u.name, SUM(o.amount) AS total_spent FROM users u JOIN orders o ON u.user_id = o.user_id GROUP BY u.name ORDER BY u.name;", "sample_table": users_table, "relevant_tables": ["users", "orders"]}
 ]
 
 # --- Session State Initialization ---
