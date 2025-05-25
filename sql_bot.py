@@ -455,7 +455,7 @@ def display_simulation(title, result_data):
         if result_data.empty:
             st.info("_(Simulation resulted in an empty table)_")
         else:
-            st.dataframe(result_data.reset_index(drop=True), hide_index=False, use_container_width=True)
+            st.dataframe(result_data.reset_index(drop=True), hide_index=False, use_container_width=False)
     elif isinstance(result_data, str) and "Simulation Error" in result_data:
         st.warning(result_data, icon="⚠️")
     elif result_data == "N/A":
@@ -573,13 +573,13 @@ elif st.session_state.quiz_started and not st.session_state.quiz_completed:
             for i, table_name in enumerate(relevant_tables):
                 with tabs[i]:
                     if table_name in original_tables:
-                        st.dataframe(original_tables[table_name], hide_index=True, use_container_width=True)
+                        st.dataframe(original_tables[table_name], hide_index=True, use_container_width=False)
                     else:
                         st.warning(f"Data for table '{table_name}' not found.")
         elif len(relevant_tables) == 1:
             table_name = relevant_tables[0]
             if table_name in original_tables:
-                st.dataframe(original_tables[table_name], hide_index=True, use_container_width=True)
+                st.dataframe(original_tables[table_name], hide_index=True, use_container_width=False)
             else:
                 st.warning(f"Data for table '{table_name}' not found.")
     else:
