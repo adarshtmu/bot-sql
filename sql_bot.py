@@ -474,7 +474,7 @@ if not st.session_state.quiz_started:
     st.markdown("### Finish the Quiz Successfully to Unlock Your SQL Certificate")
     st.markdown("""
         **📌 Important Notes:**
-        - To be eligible for a certificate, you must achieve a score of at least 80%.
+        - To be eligible for a certificate, you must achieve a score of at least 50%.
         - This quiz uses standard **SQL syntax** (similar to MySQL/PostgreSQL).
         - String comparisons (like `WHERE city = 'new york'` or `WHERE status = "pending"`) are simulated to be **case-insensitive** for common text columns (`status`, `city`).
         - **Both single quotes (') and double quotes (") are accepted** for string literals in this simulation.
@@ -1109,7 +1109,7 @@ elif st.session_state.quiz_completed:
     
     def display_certificate_section(final_score):
         """Display certificate eligibility section"""
-        if final_score >= 80:
+        if final_score >= 50:
             st.markdown("""
             <div class="certificate-section">
                 <h2 style='color:#2c3e50; margin-bottom: 1rem;'>🏆 Outstanding Performance!</h2>
@@ -1122,7 +1122,7 @@ elif st.session_state.quiz_completed:
             </div>
             """, unsafe_allow_html=True)
         else:
-            score_needed = 80 - final_score
+            score_needed = 50 - final_score
             st.markdown(f"""
             <div class="retry-section">
                 <h3 style='color:#2c3e50; margin-bottom: 1rem;'>📚 Keep Learning & Growing!</h3>
