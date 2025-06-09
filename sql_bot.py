@@ -588,7 +588,7 @@ elif st.session_state.quiz_started and not st.session_state.quiz_completed:
     else:
         st.info("No specific table context provided for this question.")
     
-    user_query = st.text_area("Apna SQL Query Yahan Likhein:", height=150, key=f"query_input_{current_q_index}")
+    user_query = st.text_area("Write your SQL query here:", height=150, key=f"query_input_{current_q_index}")
     
     if st.button("✅ Submit Query", key=f"submit_{current_q_index}"):
         if user_query and user_query.strip():
