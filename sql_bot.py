@@ -483,6 +483,49 @@ if not st.session_state.quiz_started:
         margin-bottom: 1.5rem;
         opacity: 0.95;
     }
+    .stats-row {
+        display: flex;
+        justify-content: center;
+        gap: 2rem;
+        background: rgba(255,255,255,0.15);
+        padding: 1.2rem;
+        border-radius: 15px;
+        backdrop-filter: blur(10px);
+    }
+    .stat-box {
+        text-align: center;
+        min-width: 80px;
+    }
+    .stat-number {
+        font-size: 1.8rem;
+        font-weight: bold;
+        display: block;
+    }
+    .stat-label {
+        font-size: 0.9rem;
+        opacity: 0.9;
+        margin-top: 0.2rem;
+    }
+    .features-container {
+        background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        padding: 2rem;
+        border-radius: 15px;
+        color: white;
+        margin: 1.5rem 0;
+        text-align: center;
+    }
+    .features-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1rem;
+        margin-top: 1rem;
+    }
+    .feature-item {
+        background: rgba(255,255,255,0.2);
+        padding: 1rem;
+        border-radius: 10px;
+        backdrop-filter: blur(5px);
+    }
     .cta-container {
         background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
         padding: 2rem;
@@ -501,6 +544,24 @@ if not st.session_state.quiz_started:
     <div class="hero-container">
         <div class="hero-title">🚀 SQL Mastery Challenge</div>
         <div class="hero-subtitle">Master SQL with AI-powered feedback and earn your professional certificate</div>
+        <div class="stats-row">
+            <div class="stat-box">
+                <span class="stat-number">{len(sql_questions)}</span>
+                <div class="stat-label">Questions</div>
+            </div>
+            <div class="stat-box">
+                <span class="stat-number">15-20</span>
+                <div class="stat-label">Minutes</div>
+            </div>
+            <div class="stat-box">
+                <span class="stat-number">50%</span>
+                <div class="stat-label">To Pass</div>
+            </div>
+            <div class="stat-box">
+                <span class="stat-number">🏆</span>
+                <div class="stat-label">Certificate</div>
+            </div>
+        </div>
     </div>
     """, unsafe_allow_html=True)
     
