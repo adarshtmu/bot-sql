@@ -885,6 +885,18 @@ if not st.session_state.quiz_started:
     # Stats Section using Streamlit columns (Alternative approach)
     st.markdown('<div class="stats-container">', unsafe_allow_html=True)
     col1, col2, col3, col4 = st.columns(4)
+
+        # Start Button
+    col1, col2, col3 = st.columns([1, 2, 1])
+    with col2:
+        if st.button("🚀 Start Your SQL Journey", type="primary", use_container_width=True, key="start_quiz"):
+            st.session_state.quiz_started = True
+            st.session_state.user_answers = []
+            st.session_state.current_question = 0
+            st.session_state.quiz_completed = False
+            st.success("🎉 Welcome to your SQL mastery journey!")
+            st.balloons()
+            st.rerun()
     
     with col1:
         st.markdown("""
@@ -924,17 +936,7 @@ if not st.session_state.quiz_started:
     
     st.markdown('</div>', unsafe_allow_html=True)
     
-    # Start Button
-    col1, col2, col3 = st.columns([1, 2, 1])
-    with col2:
-        if st.button("🚀 Start Your SQL Journey", type="primary", use_container_width=True, key="start_quiz"):
-            st.session_state.quiz_started = True
-            st.session_state.user_answers = []
-            st.session_state.current_question = 0
-            st.session_state.quiz_completed = False
-            st.success("🎉 Welcome to your SQL mastery journey!")
-            st.balloons()
-            st.rerun()
+
     
     # Features Section
     st.markdown("""
