@@ -458,228 +458,189 @@ def display_simulation(title, result_data):
 # --- Streamlit App UI ---
 
 # --- Advanced Start Screen ---
-# --- Compact Advanced Start Screen ---
+# --- Minimal Advanced Start Screen ---
 if not st.session_state.quiz_started:
-    # Custom CSS for compact advanced styling
+    # Custom CSS for minimal advanced styling
     st.markdown("""
     <style>
-    .hero-section {
+    .hero-container {
         background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        padding: 1.5rem;
-        border-radius: 15px;
+        padding: 2.5rem;
+        border-radius: 20px;
         color: white;
         text-align: center;
-        margin-bottom: 1.5rem;
-        box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+        margin-bottom: 2rem;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.2);
     }
-    .quick-stats {
+    .hero-title {
+        font-size: 2.5rem;
+        font-weight: bold;
+        margin-bottom: 1rem;
+        text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+    }
+    .hero-subtitle {
+        font-size: 1.3rem;
+        margin-bottom: 1.5rem;
+        opacity: 0.95;
+    }
+    .stats-row {
         display: flex;
-        justify-content: space-around;
-        background: rgba(255,255,255,0.1);
-        padding: 1rem;
-        border-radius: 10px;
+        justify-content: center;
+        gap: 2rem;
+        background: rgba(255,255,255,0.15);
+        padding: 1.2rem;
+        border-radius: 15px;
+        backdrop-filter: blur(10px);
+    }
+    .stat-box {
+        text-align: center;
+        min-width: 80px;
+    }
+    .stat-number {
+        font-size: 1.8rem;
+        font-weight: bold;
+        display: block;
+    }
+    .stat-label {
+        font-size: 0.9rem;
+        opacity: 0.9;
+        margin-top: 0.2rem;
+    }
+    .features-container {
+        background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        padding: 2rem;
+        border-radius: 15px;
+        color: white;
+        margin: 1.5rem 0;
+        text-align: center;
+    }
+    .features-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1rem;
         margin-top: 1rem;
     }
-    .stat-item {
-        text-align: center;
-        color: white;
-    }
-    .feature-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-        gap: 1rem;
-        margin: 1rem 0;
-    }
-    .feature-card {
-        background: white;
-        padding: 1.2rem;
-        border-radius: 12px;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-        border-left: 4px solid #667eea;
-        transition: all 0.3s ease;
-    }
-    .feature-card:hover {
-        transform: translateY(-3px);
-        box-shadow: 0 8px 20px rgba(0,0,0,0.12);
-    }
-    .compact-info {
-        background: #f8f9fa;
+    .feature-item {
+        background: rgba(255,255,255,0.2);
         padding: 1rem;
         border-radius: 10px;
-        margin: 1rem 0;
+        backdrop-filter: blur(5px);
     }
-    .action-section {
+    .cta-container {
         background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
-        padding: 1.5rem;
+        padding: 2rem;
         border-radius: 15px;
         text-align: center;
-        margin: 1.5rem 0;
+        margin: 2rem 0;
     }
-    .table-preview-compact {
-        max-height: 200px;
-        overflow-y: auto;
-        border: 1px solid #ddd;
-        border-radius: 8px;
+    .start-button-container {
+        margin: 2rem 0;
     }
     </style>
     """, unsafe_allow_html=True)
     
-    # Compact Hero Section
-    st.markdown("""
-    <div class="hero-section">
-        <h1>🚀 SQL Mastery Challenge</h1>
-        <p style="font-size: 1.1rem; margin: 0.5rem 0;">Master SQL with AI feedback • Earn your certificate • 15-20 minutes</p>
-        <div class="quick-stats">
-            <div class="stat-item">
-                <div style="font-size: 1.5rem; font-weight: bold;">""" + str(len(sql_questions)) + """</div>
-                <div style="font-size: 0.9rem;">Questions</div>
+    # Main Hero Section
+    st.markdown(f"""
+    <div class="hero-container">
+        <div class="hero-title">🚀 SQL Mastery Challenge</div>
+        <div class="hero-subtitle">Master SQL with AI-powered feedback and earn your professional certificate</div>
+        <div class="stats-row">
+            <div class="stat-box">
+                <span class="stat-number">{len(sql_questions)}</span>
+                <div class="stat-label">Questions</div>
             </div>
-            <div class="stat-item">
-                <div style="font-size: 1.5rem; font-weight: bold;">50%</div>
-                <div style="font-size: 0.9rem;">To Pass</div>
+            <div class="stat-box">
+                <span class="stat-number">15-20</span>
+                <div class="stat-label">Minutes</div>
             </div>
-            <div class="stat-item">
-                <div style="font-size: 1.5rem; font-weight: bold;">✨</div>
-                <div style="font-size: 0.9rem;">AI Feedback</div>
+            <div class="stat-box">
+                <span class="stat-number">50%</span>
+                <div class="stat-label">To Pass</div>
             </div>
-            <div class="stat-item">
-                <div style="font-size: 1.5rem; font-weight: bold;">🏆</div>
-                <div style="font-size: 0.9rem;">Certificate</div>
+            <div class="stat-box">
+                <span class="stat-number">🏆</span>
+                <div class="stat-label">Certificate</div>
             </div>
         </div>
     </div>
     """, unsafe_allow_html=True)
     
-    # Compact What You'll Master Section
-    st.markdown("## 🎯 What You'll Master")
-    
+    # Key Features Section
     st.markdown("""
-    <div class="feature-grid">
-        <div class="feature-card">
-            <h4>🔍 Query Essentials</h4>
-            <p>SELECT, WHERE, ORDER BY, filtering & sorting data efficiently</p>
-        </div>
-        <div class="feature-card">
-            <h4>📊 Data Analysis</h4>
-            <p>COUNT, SUM, AVG, GROUP BY for business insights</p>
-        </div>
-        <div class="feature-card">
-            <h4>🔗 Table JOINs</h4>
-            <p>Connect multiple tables, foreign keys, relationships</p>
-        </div>
-        <div class="feature-card">
-            <h4>🧠 AI-Powered Learning</h4>
-            <p>Instant feedback, optimization tips, best practices</p>
+    <div class="features-container">
+        <h2 style="margin-bottom: 1rem;">🎯 What You'll Master</h2>
+        <div class="features-grid">
+            <div class="feature-item">
+                <div style="font-size: 1.5rem; margin-bottom: 0.5rem;">🔍</div>
+                <strong>Query Essentials</strong>
+                <div style="font-size: 0.9rem; margin-top: 0.3rem;">SELECT, WHERE, ORDER BY</div>
+            </div>
+            <div class="feature-item">
+                <div style="font-size: 1.5rem; margin-bottom: 0.5rem;">📊</div>
+                <strong>Data Analysis</strong>
+                <div style="font-size: 0.9rem; margin-top: 0.3rem;">COUNT, SUM, GROUP BY</div>
+            </div>
+            <div class="feature-item">
+                <div style="font-size: 1.5rem; margin-bottom: 0.5rem;">🔗</div>
+                <strong>Table JOINs</strong>
+                <div style="font-size: 0.9rem; margin-top: 0.3rem;">Connect multiple tables</div>
+            </div>
+            <div class="feature-item">
+                <div style="font-size: 1.5rem; margin-bottom: 0.5rem;">🧠</div>
+                <strong>AI Feedback</strong>
+                <div style="font-size: 0.9rem; margin-top: 0.3rem;">Instant optimization tips</div>
+            </div>
         </div>
     </div>
     """, unsafe_allow_html=True)
     
-    # Compact Database Overview & Process in Tabs
-    tab1, tab2, tab3 = st.tabs(["📚 Database Tables", "🛠️ How It Works", "📋 Quick Rules"])
+    # How It Works - Super Compact
+    col1, col2, col3 = st.columns(3)
+    with col1:
+        st.markdown("""
+        **1️⃣ Solve Challenges**  
+        Write SQL queries for real business problems
+        """)
+    with col2:
+        st.markdown("""
+        **2️⃣ Get AI Feedback**  
+        Receive instant tips and best practices
+        """)
+    with col3:
+        st.markdown("""
+        **3️⃣ Earn Certificate**  
+        Score 50%+ to get your professional credential
+        """)
     
-    with tab1:
-        col1, col2 = st.columns(2)
-        with col1:
-            st.markdown("**👥 Users Table** - Customer data")
-            try:
-                st.dataframe(users_table.head(3), use_container_width=True, hide_index=True)
-                st.caption(f"📊 {len(users_table)} total users | Fields: user_id, name, email, city, age")
-            except:
-                st.error("Preview unavailable")
-        
-        with col2:
-            st.markdown("**🛒 Orders Table** - Transaction data") 
-            try:
-                st.dataframe(orders_table.head(3), use_container_width=True, hide_index=True)
-                st.caption(f"📊 {len(orders_table)} total orders | Fields: order_id, user_id, product, amount, date")
-            except:
-                st.error("Preview unavailable")
-    
-    with tab2:
-        process_col1, process_col2, process_col3 = st.columns(3)
-        with process_col1:
-            st.markdown("""
-            **1️⃣ Solve**
-            - Read SQL challenges
-            - Write your queries
-            - Test with real data
-            """)
-        with process_col2:
-            st.markdown("""
-            **2️⃣ Learn**
-            - Get AI feedback
-            - See optimization tips
-            - Learn best practices
-            """)
-        with process_col3:
-            st.markdown("""
-            **3️⃣ Earn**
-            - Score 50%+ to pass
-            - Download certificate
-            - Share achievements
-            """)
-    
-    with tab3:
-        rule_col1, rule_col2 = st.columns(2)
-        with rule_col1:
-            st.markdown("""
-            **✅ Allowed:**
-            - Case-insensitive SQL
-            - Single/double quotes
-            - Standard SQL functions
-            - Multiple solution approaches
-            """)
-        with rule_col2:
-            st.markdown("""
-            **💡 Tips:**
-            - Read questions carefully
-            - Test step by step
-            - Use table aliases
-            - Check data types
-            """)
-    
-    # Sample Query (Compact)
-    with st.expander("🔍 Sample Query Preview"):
-        st.markdown("**Find Chicago users with orders over $100:**")
-        st.code("""SELECT u.name, o.product, o.amount FROM users u 
-JOIN orders o ON u.user_id = o.user_id 
-WHERE u.city = 'Chicago' AND o.amount > 100;""", language="sql")
-    
-    # Call to Action Section
+    # Call to Action
     st.markdown("""
-    <div class="action-section">
-        <h3>🚀 Ready to Master SQL?</h3>
-        <p>Join thousands of developers • Real queries • AI feedback • Professional certificate</p>
+    <div class="cta-container">
+        <h3 style="margin-bottom: 0.5rem;">🚀 Ready to Become an SQL Expert?</h3>
+        <p style="margin-bottom: 0; font-size: 1.1rem;">Join thousands of developers mastering SQL through AI-powered learning</p>
     </div>
     """, unsafe_allow_html=True)
     
     # Prominent Start Button
+    st.markdown('<div class="start-button-container">', unsafe_allow_html=True)
     col1, col2, col3 = st.columns([1, 2, 1])
     with col2:
-        if st.button("🚀 Start SQL Challenge Now!", type="primary", use_container_width=True):
+        if st.button("🚀 Start SQL Challenge Now!", type="primary", use_container_width=True, key="start_quiz"):
             st.session_state.quiz_started = True
             st.session_state.user_answers = []
             st.session_state.current_question = 0
             st.session_state.quiz_completed = False
+            st.success("🎉 Challenge started! Good luck!")
             st.balloons()
             st.rerun()
-    
-    # Compact Footer Info
-    st.markdown("---")
-    footer_col1, footer_col2, footer_col3 = st.columns(3)
-    with footer_col1:
-        st.markdown("**🎓 Learning** • Beginner to Pro • Real scenarios")
-    with footer_col2:
-        st.markdown("**⚡ Features** • Instant feedback • Progress tracking")
-    with footer_col3:
-        st.markdown("**🏆 Certificate** • Professional • LinkedIn ready")
+    st.markdown('</div>', unsafe_allow_html=True)
     
     # Minimal Footer
+    st.markdown("---")
     st.markdown("""
-    <div style='text-align: center; margin-top: 1rem; padding: 1rem; background: #667eea; border-radius: 10px; color: white;'>
-        <strong>🎓 Corporate Mentor Learning Platform</strong> | 
-        📧 support@corporatementor.com | 
-        © 2025 All rights reserved
+    <div style='text-align: center; padding: 1.5rem; background: linear-gradient(135deg, #667eea, #764ba2); border-radius: 12px; color: white;'>
+        <strong>🎓 Corporate Mentor Learning Platform</strong><br>
+        <span style="opacity: 0.9;">Empowering careers through expert mentorship</span><br>
+        <span style="opacity: 0.7; font-size: 0.9rem;">© 2025 All rights reserved</span>
     </div>
     """, unsafe_allow_html=True)
 
