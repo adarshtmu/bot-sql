@@ -755,14 +755,14 @@ if not st.session_state.quiz_started:
         st.markdown(
             """<div class="stat-card">
                 <div class="stat-icon">📊</div>
-                <span class="stat-number">25</span>
+                <span class="stat-number">5</span>
                 <div class="stat-label">Expert Questions</div>
             </div>""", unsafe_allow_html=True)
     with col2:
         st.markdown(
             """<div class="stat-card">
                 <div class="stat-icon">⏰</div>
-                <span class="stat-number">15-20</span>
+                <span class="stat-number">5-10</span>
                 <div class="stat-label">Minutes Avg.</div>
             </div>""", unsafe_allow_html=True)
     with col3:
