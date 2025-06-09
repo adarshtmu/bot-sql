@@ -531,7 +531,7 @@ elif st.session_state.quiz_started and not st.session_state.quiz_completed:
     
     if st.session_state.user_answers:
         st.markdown("---")
-        st.subheader("📖 Ab Tak Ke Jawaab Aur Feedback")
+        st.subheader("📖 Your Answers and Feedback So Far")
         for i, ans_data in enumerate(st.session_state.user_answers):
             q_num = i + 1
             is_correct = ans_data.get('is_correct', False)
