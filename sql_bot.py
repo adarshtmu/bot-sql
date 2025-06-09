@@ -527,14 +527,37 @@ if not st.session_state.quiz_started:
         backdrop-filter: blur(5px);
     }
     .cta-container {
-        background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+        background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
         padding: 2rem;
         border-radius: 15px;
         text-align: center;
         margin: 2rem 0;
+        color: white;
+        box-shadow: 0 8px 25px rgba(79, 172, 254, 0.3);
+    }
+    .cta-container h3 {
+        color: white !important;
+        font-size: 1.5rem;
+        font-weight: bold;
+        margin-bottom: 0.5rem;
+        text-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    }
+    .cta-container p {
+        color: white !important;
+        font-size: 1.1rem;
+        margin-bottom: 0;
+        opacity: 0.95;
+        text-shadow: 0 1px 2px rgba(0,0,0,0.1);
     }
     .start-button-container {
         margin: 2rem 0;
+    }
+    .how-it-works {
+        background: rgba(255,255,255,0.05);
+        padding: 1.5rem;
+        border-radius: 12px;
+        margin: 1.5rem 0;
+        border: 1px solid rgba(255,255,255,0.1);
     }
     </style>
     """, unsafe_allow_html=True)
@@ -581,7 +604,8 @@ if not st.session_state.quiz_started:
             st.rerun()
     st.markdown('</div>', unsafe_allow_html=True)
     
-    # How It Works - Super Compact
+    # How It Works - Super Compact with better styling
+    st.markdown('<div class="how-it-works">', unsafe_allow_html=True)
     col1, col2, col3 = st.columns(3)
     with col1:
         st.markdown("""
@@ -598,12 +622,13 @@ if not st.session_state.quiz_started:
         **3️⃣ Earn Certificate**  
         Score 50%+ to get your professional credential
         """)
+    st.markdown('</div>', unsafe_allow_html=True)
     
-    # Call to Action
+    # Call to Action - Fixed with better contrast
     st.markdown("""
     <div class="cta-container">
-        <h3 style="margin-bottom: 0.5rem;">🚀 Ready to Become an SQL Expert?</h3>
-        <p style="margin-bottom: 0; font-size: 1.1rem;">Join thousands of developers mastering SQL through AI-powered learning</p>
+        <h3>🚀 Ready to Become an SQL Expert?</h3>
+        <p>Join thousands of developers mastering SQL through AI-powered learning</p>
     </div>
     """, unsafe_allow_html=True)
     
