@@ -605,7 +605,7 @@ if not st.session_state.quiz_started:
         <h3 style="margin-bottom: 0.5rem;">🚀 Ready to Become an SQL Expert?</h3>
         <p style="margin-bottom: 0; font-size: 1.1rem;">Join thousands of developers mastering SQL through AI-powered learning</p>
     </div>
-    """)
+    """, unsafe_allow_html=True)
     
     # Minimal Footer
     st.markdown("---")
