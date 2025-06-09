@@ -290,10 +290,12 @@ def evaluate_answer_with_llm(question_data, student_answer, original_tables_dict
     * **Validity:** Is the query syntactically valid standard SQL (ignoring the double quote allowance above)? Briefly mention any *other* syntax errors.
     * **Logic:** Does the query use appropriate SQL clauses (SELECT, FROM, WHERE, JOIN, GROUP BY, ORDER BY, aggregates, etc.) correctly for the task? Is the logic sound? Are comparisons appropriate for the data types (keeping the case-insensitivity rule for `status`/`city` in mind)?
     * **Alternatives:** Briefly acknowledge if the student used a valid alternative approach (e.g., different JOIN type if appropriate, subquery vs. JOIN). Mentioning `LOWER`/`UPPER` or using single quotes as *generally good practice* is okay, but don't imply it was *required* for correctness *here*.
-    * **Feedback:** Provide concise, clear, and constructive feedback in simple English. Limit your feedback to 2-3 sentences. Avoid unnecessary details and keep it easy to read.
-        * If incorrect: Gently point out the error (e.g., "Please take a closer look at your WHERE clause..." or "There's a small mistake in your JOIN condition.").
-        **Begin Evaluation:**
-        """
+    * **Feedback:** Provide clear, constructive feedback in a friendly, encouraging, casual Hindi tone (like a helpful senior or 'bhaiya' talking to a learner).
+        * If incorrect (due to reasons *other* than case-sensitivity on `status`/`city` or using double quotes): Gently point out the error (e.g., "Arre yaar, yahaan thoda sa check karo..." or "Ek chhoti si galti ho gayi hai..."). Explain *what* is wrong (syntax, logic, columns, joins, other conditions etc.). Suggest how to fix it. **Do NOT mark the query incorrect or suggest using LOWER()/UPPER() or single quotes *solely* because of case differences in `status`/`city` or the use of double quotes if the rest of the logic is correct.**
+    * **Verdict:** Conclude your entire response with *exactly* one line formatted as: "Verdict: Correct" or "Verdict: Incorrect". This line MUST be the very last line.
+
+    **Begin Evaluation:**
+    """
     
     feedback_llm = "AI feedback generation failed."; is_correct_llm = False; llm_output = "Error: No LLM response received."
     try:
@@ -358,7 +360,7 @@ def analyze_performance(user_answers):
         "overall_feedback": "Performance analysis could not be completed."
     }
     if not user_answers:
-        performance_data["overall_feedback"] = "No answers were provided. Analysis is not possible."
+        performance_data["overall_feedback"] = "Koi jawaab nahi diya gaya. Analysis possible nahi hai."
         return performance_data
     
     try:
@@ -374,25 +376,25 @@ def analyze_performance(user_answers):
         
         incorrect_summary = ""
         if incorrect_ans:
-            incorrect_summary = "There were some mistakes in these questions:\n"
+            incorrect_summary = "In sawaalon mein thodi galti hui:\n"
             for idx, item in enumerate(incorrect_ans):
                 feedback_snippet = item['feedback_received'][:150].strip() + ('...' if len(item['feedback_received']) > 150 else '')
                 incorrect_summary += f"  {idx+1}. Sawaal: {item['question']}\n     Aapka Jawaab: `{item['your_answer']}`\n     Feedback Mila: {feedback_snippet}\n"
             incorrect_summary = incorrect_summary.strip()
         else:
-            incorrect_summary = "No incorrect answers! Well done!"
+            incorrect_summary = "Koi galat jawaab nahi! Bahut badhiya!"
         
         correct_summary = ""
         if correct_q:
-            correct_summary = "These questions were answered correctly:\n"
+            correct_summary = "Yeh sawaal bilkul sahi kiye:\n"
             for idx, q_text in enumerate(correct_q):
                 correct_summary += f"  - {q_text}\n"
             correct_summary = correct_summary.strip()
         else:
-            correct_summary = "No correct answers this time."
+            correct_summary = "Is baar koi jawaab sahi nahi hua."
         
         prompt = f"""
-        A SQL learner has completed a practice quiz. Please analyze their performance and provide a friendly, motivating summary feedback in casual, approachable English (like a helpful mentor or senior).
+        Ek SQL learner ne ek practice quiz complete kiya hai. Unki performance ka analysis karke ek friendly, motivating summary feedback casual Hindi mein (jaise ek senior/mentor deta hai) provide karo.
 
         **Quiz Performance Summary:**
         - Total Questions Attempted: {total_q}
@@ -410,13 +412,13 @@ def analyze_performance(user_answers):
         - Both single (') and double (") quotes were acceptable for string literals in this quiz simulation.
 
         **Task:**
-        Using the structure below, provide an overall summary feedback on the learner's performance:
-        1.  **Overall Impression:** Give a positive or encouraging comment based on the score and general performance (e.g., "Overall performance was quite good!", "A bit more practice is needed, but there's great potential!"). Be realistic but motivating.
-        2.  **Strengths:** Highlight any specific concepts the learner did well with (as seen from the correct answers), such as "You have a good understanding of the SELECT and WHERE clauses," or "Your answers to JOIN questions were correct, which is great!" If no specific pattern is found, keep it general.
-        3.  **Areas for Improvement:** Gently point out concepts related to the incorrect answers that need improvement. Focus on concepts, not just specific mistakes (e.g., "You may need to clarify your approach to JOIN logic," "Pay attention to aggregate functions like COUNT and AVG," "There were some minor syntax mistakes."). Briefly mention standard practices (like using single quotes for strings in real databases) as a learning point, without implying it was wrong *in this quiz*.
-        4.  **Next Steps / Encouragement:** Give some encouraging words and suggest next steps (e.g., "Keep practicing!", "Consider reviewing concept X.", "Keep it up, you'll master SQL soon! It's important to keep learning standard SQL practices, such as using single quotes, for real-world use.").
+        Ab, neeche diye gaye structure mein overall performance ka ek summary feedback do:
+        1.  **Overall Impression:** Score aur general performance pe ek positive ya encouraging comment (e.g., "Overall performance kaafi achhi rahi!", "Thodi aur practice lagegi, but potential hai!"). Be realistic but motivating.
+        2.  **Strengths:** Agar kuch specific concepts sahi kiye hain (jo correct answers se pata chale), unko highlight karo (e.g., "SELECT aur WHERE clause ka use aache se samajh aa gaya hai.", "JOINs wale sawaal sahi kiye, yeh achhi baat hai!"). General rakho agar specific pattern na dikhe.
+        3.  **Areas for Improvement:** Jo concepts galat hue (incorrect answers se related), unko gently point out karo. Focus on concepts, not just specific mistakes (e.g., "JOIN ka logic thoda aur clear karna hoga shayad.", "Aggregate functions (COUNT, AVG) pe dhyaan dena.", "Syntax ki chhoti-moti galtiyan ho rahi hain."). Briefly mention standard practices (like single quotes for strings in real DBs) as a learning point, without implying it was wrong *in this quiz*.
+        4.  **Next Steps / Encouragement:** Kuch encouraging words aur aage kya karna chahiye (e.g., "Keep practicing!", "Concept X ko revise kar lena.", "Aise hi lage raho, SQL aa jayega! Real-world ke liye standard SQL practices (jaise single quotes) seekhte rehna important hai.").
 
-        Generate the feedback in plain English only. Start directly with the feedback.
+        Bas plain text mein feedback generate karna hai. Casual tone rakhna. Sidhe feedback se shuru karo.
         """
     except Exception as data_prep_error:
         print(f"Error preparing data for performance analysis: {data_prep_error}")
@@ -487,9 +489,9 @@ if not st.session_state.quiz_started:
     col1, col2 = st.columns([2, 1])
     with col1:
         st.write("""
-        In this interactive quiz, you will work with two sample tables:
-        - **Users Table**: Contains user details such as ID, name, email, age, and city.
-        - **Orders Table**: Contains order details such as ID, user ID, amount, order date, and status.
+        Is interactive quiz mein, aap do sample tables ke saath kaam karenge:
+        - **Users Table**: User details jaise ID, naam, email, umar, aur sheher.
+        - **Orders Table**: Order details jaise ID, user ID, amount, order date, aur status.
         """)
     with col2:
         st.markdown("#### Tables Overview")
@@ -542,12 +544,12 @@ elif st.session_state.quiz_started and not st.session_state.quiz_completed:
     
     if st.session_state.user_answers:
         st.markdown("---")
-        st.subheader("📖 Answers and Feedback So Far")
+        st.subheader("📖 Ab Tak Ke Jawaab Aur Feedback")
         for i, ans_data in enumerate(st.session_state.user_answers):
             q_num = i + 1
             is_correct = ans_data.get('is_correct', False)
             with st.expander(f"Question {q_num}: {ans_data['question']} {get_emoji(is_correct)}", expanded=False):
-                st.write(f"**Your Answere:**")
+                st.write(f"**Aapka Jawaab:**")
                 st.code(ans_data.get('student_answer', '(No answer provided)'), language='sql')
                 st.write(f"**SQL Mentor Feedback:**")
                 feedback_text = ans_data.get("feedback", "_Feedback not available._")
@@ -599,11 +601,11 @@ elif st.session_state.quiz_started and not st.session_state.quiz_completed:
     else:
         st.info("No specific table context provided for this question.")
     
-    user_query = st.text_area("Write your SQL query here:", height=150, key=f"query_input_{current_q_index}")
+    user_query = st.text_area("Apna SQL Query Yahan Likhein:", height=150, key=f"query_input_{current_q_index}")
     
     if st.button("✅ Submit Query", key=f"submit_{current_q_index}"):
         if user_query and user_query.strip():
-            with st.spinner("🔄 Checking your query... Getting feedback and simulation results from the AI Mentor..."):
+            with st.spinner("🔄 Query ko check kiya ja raha hai... AI Mentor se feedback aur simulation results generate ho rahe hain..."):
                 feedback, is_correct, expected_res, actual_res, raw_llm = evaluate_answer_with_llm(
                     question_data,
                     user_query,
@@ -644,12 +646,12 @@ elif st.session_state.quiz_completed:
 
     # --- 1. Answer/Feedback Summary first ---
     st.markdown("---")
-    st.subheader("📝 Summary of Your Answers and Feedback")
+    st.subheader("📝 Aapke Jawaab Aur Feedback Ka Summary")
     for i, ans_data in enumerate(st.session_state.user_answers):
         q_num = i + 1
         is_correct = ans_data.get('is_correct', False)
         with st.expander(f"Question {q_num}: {ans_data['question']} {get_emoji(is_correct)}", expanded=False):
-            st.write(f"**Your Answere:**")
+            st.write(f"**Aapka Jawaab:**")
             st.code(ans_data.get('student_answer', '(No answer provided)'), language='sql')
             st.write(f"**SQL Mentor Feedback:**")
             feedback_text = ans_data.get("feedback", "_Feedback not available._")
