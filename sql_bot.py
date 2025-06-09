@@ -895,34 +895,23 @@ if not st.session_state.quiz_started:
     </div>
     """, unsafe_allow_html=True)
     
-    # Main Hero Section
+    # Main Hero Section with everything in correct order
     st.markdown("""
     <div class="hero-container">
         <div class="hero-badge">🚀 AI-Powered Learning Experience</div>
         <h1 class="hero-title">Master SQL Like a Pro</h1>
+        
+        <div class="start-button-container">
+            <button class="cta-button" onclick="document.querySelector('[data-testid=\"stButton\"] button').click()">
+                🚀 Start Your SQL Journey
+            </button>
+        </div>
+        
+        <p class="hero-subtitle">Join 50,000+ developers who've accelerated their careers with our AI-powered SQL mastery program. Get personalized feedback, earn industry-recognized certificates, and land your dream job.</p>
     </div>
     """, unsafe_allow_html=True)
     
-    # Start Button - Moved up right after the title
-    col1, col2, col3 = st.columns([1, 2, 1])
-    with col2:
-        if st.button("🚀 Start Your SQL Journey", type="primary", use_container_width=True, key="start_quiz"):
-            st.session_state.quiz_started = True
-            st.session_state.user_answers = []
-            st.session_state.current_question = 0
-            st.session_state.quiz_completed = False
-            st.success("🎉 Welcome to your SQL mastery journey!")
-            st.balloons()
-            st.rerun()
-    
-    # Hero subtitle - moved after the button
-    st.markdown("""
-    <div class="hero-container" style="margin-top: 1rem; padding: 2rem 3rem;">
-        <p class="hero-subtitle" style="margin-bottom: 0;">Join 50,000+ developers who've accelerated their careers with our AI-powered SQL mastery program. Get personalized feedback, earn industry-recognized certificates, and land your dream job.</p>
-    </div>
-    """, unsafe_allow_html=True)
-    
-    # Stats Section using Streamlit columns (Alternative approach)
+    # Stats Section using Streamlit columns
     st.markdown('<div class="stats-container">', unsafe_allow_html=True)
     col1, col2, col3, col4 = st.columns(4)
     
@@ -963,6 +952,18 @@ if not st.session_state.quiz_started:
         """, unsafe_allow_html=True)
     
     st.markdown('</div>', unsafe_allow_html=True)
+    
+    # Hidden Streamlit button for functionality
+    col1, col2, col3 = st.columns([1, 2, 1])
+    with col2:
+        if st.button("🚀 Start Your SQL Journey", type="primary", use_container_width=True, key="start_quiz", help="Click to start"):
+            st.session_state.quiz_started = True
+            st.session_state.user_answers = []
+            st.session_state.current_question = 0
+            st.session_state.quiz_completed = False
+            st.success("🎉 Welcome to your SQL mastery journey!")
+            st.balloons()
+            st.rerun()
     
     # Features Section
     st.markdown("""
