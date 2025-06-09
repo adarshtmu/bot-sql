@@ -290,7 +290,7 @@ def evaluate_answer_with_llm(question_data, student_answer, original_tables_dict
     * **Validity:** Is the query syntactically valid standard SQL (ignoring the double quote allowance above)? Briefly mention any *other* syntax errors.
     * **Logic:** Does the query use appropriate SQL clauses (SELECT, FROM, WHERE, JOIN, GROUP BY, ORDER BY, aggregates, etc.) correctly for the task? Is the logic sound? Are comparisons appropriate for the data types (keeping the case-insensitivity rule for `status`/`city` in mind)?
     * **Alternatives:** Briefly acknowledge if the student used a valid alternative approach (e.g., different JOIN type if appropriate, subquery vs. JOIN). Mentioning `LOWER`/`UPPER` or using single quotes as *generally good practice* is okay, but don't imply it was *required* for correctness *here*.
-    * **Feedback:** Provide clear, constructive feedback in a friendly, encouraging, and approachable English tone (like a helpful mentor talking to a learner).
+    * **Feedback:** Provide concise, clear, and constructive feedback in simple English. Limit your feedback to 2-3 sentences. Avoid unnecessary details and keep it easy to read.
         * If incorrect: Gently point out the error (e.g., "Please take a closer look at your WHERE clause..." or "There's a small mistake in your JOIN condition.").
         **Begin Evaluation:**
         """
@@ -358,7 +358,7 @@ def analyze_performance(user_answers):
         "overall_feedback": "Performance analysis could not be completed."
     }
     if not user_answers:
-        performance_data["overall_feedback"] = "Koi jawaab nahi diya gaya. Analysis possible nahi hai."
+        performance_data["overall_feedback"] = "No answers were provided. Analysis is not possible."
         return performance_data
     
     try:
@@ -374,22 +374,22 @@ def analyze_performance(user_answers):
         
         incorrect_summary = ""
         if incorrect_ans:
-            incorrect_summary = "In sawaalon mein thodi galti hui:\n"
+            incorrect_summary = "There were some mistakes in these questions:\n"
             for idx, item in enumerate(incorrect_ans):
                 feedback_snippet = item['feedback_received'][:150].strip() + ('...' if len(item['feedback_received']) > 150 else '')
                 incorrect_summary += f"  {idx+1}. Sawaal: {item['question']}\n     Aapka Jawaab: `{item['your_answer']}`\n     Feedback Mila: {feedback_snippet}\n"
             incorrect_summary = incorrect_summary.strip()
         else:
-            incorrect_summary = "Koi galat jawaab nahi! Bahut badhiya!"
+            incorrect_summary = "No incorrect answers! Well done!"
         
         correct_summary = ""
         if correct_q:
-            correct_summary = "Yeh sawaal bilkul sahi kiye:\n"
+            correct_summary = "These questions were answered correctly:\n"
             for idx, q_text in enumerate(correct_q):
                 correct_summary += f"  - {q_text}\n"
             correct_summary = correct_summary.strip()
         else:
-            correct_summary = "Is baar koi jawaab sahi nahi hua."
+            correct_summary = "No correct answers this time."
         
         prompt = f"""
         A SQL learner has completed a practice quiz. Please analyze their performance and provide a friendly, motivating summary feedback in casual, approachable English (like a helpful mentor or senior).
@@ -547,7 +547,7 @@ elif st.session_state.quiz_started and not st.session_state.quiz_completed:
             q_num = i + 1
             is_correct = ans_data.get('is_correct', False)
             with st.expander(f"Question {q_num}: {ans_data['question']} {get_emoji(is_correct)}", expanded=False):
-                st.write(f"**Aapka Jawaab:**")
+                st.write(f"**Your Answere:**")
                 st.code(ans_data.get('student_answer', '(No answer provided)'), language='sql')
                 st.write(f"**SQL Mentor Feedback:**")
                 feedback_text = ans_data.get("feedback", "_Feedback not available._")
@@ -603,7 +603,7 @@ elif st.session_state.quiz_started and not st.session_state.quiz_completed:
     
     if st.button("✅ Submit Query", key=f"submit_{current_q_index}"):
         if user_query and user_query.strip():
-            with st.spinner("🔄 Query ko check kiya ja raha hai... AI Mentor se feedback aur simulation results generate ho rahe hain..."):
+            with st.spinner("🔄 Checking your query... Getting feedback and simulation results from the AI Mentor..."):
                 feedback, is_correct, expected_res, actual_res, raw_llm = evaluate_answer_with_llm(
                     question_data,
                     user_query,
@@ -649,7 +649,7 @@ elif st.session_state.quiz_completed:
         q_num = i + 1
         is_correct = ans_data.get('is_correct', False)
         with st.expander(f"Question {q_num}: {ans_data['question']} {get_emoji(is_correct)}", expanded=False):
-            st.write(f"**Aapka Jawaab:**")
+            st.write(f"**Your Answere:**")
             st.code(ans_data.get('student_answer', '(No answer provided)'), language='sql')
             st.write(f"**SQL Mentor Feedback:**")
             feedback_text = ans_data.get("feedback", "_Feedback not available._")
