@@ -591,7 +591,7 @@ if not st.session_state.quiz_started:
         transition: transform 0.3s ease, box-shadow 0.3s ease;
         position: relative;
         overflow: hidden;
-        min-height: 180px;
+        height: 200px;
         display: flex;
         flex-direction: column;
         justify-content: center;
@@ -626,8 +626,11 @@ if not st.session_state.quiz_started:
         display: block;
         margin-bottom: 0.5rem;
         line-height: 1.2;
-        word-wrap: break-word;
-        hyphens: auto;
+        text-align: center;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        max-width: 100%;
     }
     
     .stat-label {
@@ -635,6 +638,10 @@ if not st.session_state.quiz_started:
         font-weight: 500;
         font-size: 0.9rem;
         line-height: 1.3;
+        text-align: center;
+        max-width: 100%;
+        word-wrap: break-word;
+        hyphens: auto;
     }
     
     .start-button-container {
@@ -763,8 +770,8 @@ if not st.session_state.quiz_started:
     
     .step {
         background: white;
-        width: 120px;
-        height: 120px;
+        width: 130px;
+        height: 130px;
         border-radius: 50%;
         display: flex;
         flex-direction: column;
@@ -775,6 +782,7 @@ if not st.session_state.quiz_started:
         position: relative;
         z-index: 2;
         transition: transform 0.3s ease;
+        padding: 0.5rem;
     }
     
     .step:hover {
@@ -789,10 +797,13 @@ if not st.session_state.quiz_started:
     }
     
     .step-text {
-        font-size: 0.8rem;
+        font-size: 0.85rem;
         font-weight: 600;
         text-align: center;
         color: #64748b;
+        line-height: 1.2;
+        word-wrap: break-word;
+        hyphens: auto;
     }
     
     .testimonial {
@@ -836,7 +847,7 @@ if not st.session_state.quiz_started:
             gap: 1rem;
         }
         .stat-card {
-            min-height: 160px;
+            height: 180px;
             padding: 1.2rem;
         }
         .stat-number {
@@ -848,6 +859,10 @@ if not st.session_state.quiz_started:
         .features-grid { grid-template-columns: 1fr; }
         .steps-container { flex-direction: column; gap: 2rem; }
         .steps-container::before { display: none; }
+        .step {
+            width: 120px;
+            height: 120px;
+        }
     }
     
     @media (max-width: 480px) {
@@ -855,10 +870,17 @@ if not st.session_state.quiz_started:
             grid-template-columns: 1fr;
         }
         .stat-card {
-            min-height: 140px;
+            height: 160px;
         }
         .stat-number {
             font-size: 1.3rem;
+        }
+        .step {
+            width: 110px;
+            height: 110px;
+        }
+        .step-text {
+            font-size: 0.8rem;
         }
     }
     </style>
@@ -885,24 +907,12 @@ if not st.session_state.quiz_started:
     # Stats Section using Streamlit columns (Alternative approach)
     st.markdown('<div class="stats-container">', unsafe_allow_html=True)
     col1, col2, col3, col4 = st.columns(4)
-
-        # Start Button
-    col1, col2, col3 = st.columns([1, 2, 1])
-    with col2:
-        if st.button("🚀 Start Your SQL Journey", type="primary", use_container_width=True, key="start_quiz"):
-            st.session_state.quiz_started = True
-            st.session_state.user_answers = []
-            st.session_state.current_question = 0
-            st.session_state.quiz_completed = False
-            st.success("🎉 Welcome to your SQL mastery journey!")
-            st.balloons()
-            st.rerun()
     
     with col1:
         st.markdown("""
         <div class="stat-card">
             <div class="stat-icon">📊</div>
-            <span class="stat-number">5</span>
+            <span class="stat-number">25</span>
             <div class="stat-label">Expert Questions</div>
         </div>
         """, unsafe_allow_html=True)
@@ -910,7 +920,7 @@ if not st.session_state.quiz_started:
     with col2:
         st.markdown("""
         <div class="stat-card">
-            <div class="stat-icon">⚡</div>
+            <div class="stat-icon">⏰</div>
             <span class="stat-number">15-20</span>
             <div class="stat-label">Minutes</div>
         </div>
@@ -936,7 +946,17 @@ if not st.session_state.quiz_started:
     
     st.markdown('</div>', unsafe_allow_html=True)
     
-
+    # Start Button
+    col1, col2, col3 = st.columns([1, 2, 1])
+    with col2:
+        if st.button("🚀 Start Your SQL Journey", type="primary", use_container_width=True, key="start_quiz"):
+            st.session_state.quiz_started = True
+            st.session_state.user_answers = []
+            st.session_state.current_question = 0
+            st.session_state.quiz_completed = False
+            st.success("🎉 Welcome to your SQL mastery journey!")
+            st.balloons()
+            st.rerun()
     
     # Features Section
     st.markdown("""
@@ -987,8 +1007,8 @@ if not st.session_state.quiz_started:
     # Testimonial
     st.markdown("""
     <div class="testimonial pulse">
-        <p class="testimonial-text">"This platform transformed my SQL skills in just 2 weeks. The AI feedback was incredibly detailed and helped me land my dream data analyst role!"</p>
-        <div class="testimonial-author">— Sarah Chen, Senior Data Analyst at Tech Corp</div>
+        <p class="testimonial-text">"This platform transformed my SQL skills in just 2 weeks. The AI feedback was incredibly detailed and helped me land my dream data analyst role at a Fortune 500 company!"</p>
+        <div class="testimonial-author">— Arjun Sharma, Senior Data Analyst at TechMahindra</div>
     </div>
     """, unsafe_allow_html=True)
 # --- Quiz In Progress Screen ---
