@@ -3,6 +3,9 @@ import google.generativeai as genai
 import pandas as pd
 import re
 import duckdb
+import streamlit as st
+
+st.set_page_config(page_title="AI SQL Mastery - EdTech Platform", layout="wide")
 
 # --- Custom CSS ---
 # Updated to increase font sizes globally and for specific elements
@@ -463,9 +466,7 @@ def display_simulation(title, result_data):
 # --- Advanced EdTech Learning Platform UI ---
 # --- Advanced EdTech Learning Platform UI ---
 # --- Advanced EdTech Learning Platform UI ---
-import streamlit as st
 
-st.set_page_config(page_title="AI SQL Mastery - EdTech Platform", layout="wide")
 
 if 'quiz_started' not in st.session_state:
     st.session_state.quiz_started = False
