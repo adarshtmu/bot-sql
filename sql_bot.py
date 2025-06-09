@@ -460,6 +460,7 @@ def display_simulation(title, result_data):
 # --- Advanced Start Screen ---
 # --- Minimal Advanced Start Screen ---
 # --- Advanced EdTech Learning Platform UI ---
+# --- Advanced EdTech Learning Platform UI ---
 if not st.session_state.quiz_started:
     # Advanced CSS for modern EdTech platform
     st.markdown("""
@@ -838,36 +839,55 @@ if not st.session_state.quiz_started:
     """, unsafe_allow_html=True)
     
     # Main Hero Section
-    st.markdown(f"""
+    st.markdown("""
     <div class="hero-container">
         <div class="hero-badge">🚀 AI-Powered Learning Experience</div>
         <h1 class="hero-title">Master SQL Like a Pro</h1>
         <p class="hero-subtitle">Join 50,000+ developers who've accelerated their careers with our AI-powered SQL mastery program. Get personalized feedback, earn industry-recognized certificates, and land your dream job.</p>
-        
-        <div class="stats-container">
-            <div class="stat-card">
-                <div class="stat-icon">📊</div>
-                <span class="stat-number">{len(sql_questions)}</span>
-                <div class="stat-label">Expert Questions</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-icon">⚡</div>
-                <span class="stat-number">15-20</span>
-                <div class="stat-label">Minutes</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-icon">🎯</div>
-                <span class="stat-number">50%</span>
-                <div class="stat-label">Pass Rate</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-icon">🏆</div>
-                <span class="stat-number">Pro</span>
-                <div class="stat-label">Certificate</div>
-            </div>
-        </div>
     </div>
     """, unsafe_allow_html=True)
+    
+    # Stats Section using Streamlit columns (Alternative approach)
+    st.markdown('<div class="stats-container">', unsafe_allow_html=True)
+    col1, col2, col3, col4 = st.columns(4)
+    
+    with col1:
+        st.markdown("""
+        <div class="stat-card">
+            <div class="stat-icon">📊</div>
+            <span class="stat-number">25</span>
+            <div class="stat-label">Expert Questions</div>
+        </div>
+        """, unsafe_allow_html=True)
+    
+    with col2:
+        st.markdown("""
+        <div class="stat-card">
+            <div class="stat-icon">⚡</div>
+            <span class="stat-number">15-20</span>
+            <div class="stat-label">Minutes</div>
+        </div>
+        """, unsafe_allow_html=True)
+    
+    with col3:
+        st.markdown("""
+        <div class="stat-card">
+            <div class="stat-icon">🎯</div>
+            <span class="stat-number">50%</span>
+            <div class="stat-label">Pass Rate</div>
+        </div>
+        """, unsafe_allow_html=True)
+    
+    with col4:
+        st.markdown("""
+        <div class="stat-card">
+            <div class="stat-icon">🏆</div>
+            <span class="stat-number">Pro</span>
+            <div class="stat-label">Certificate</div>
+        </div>
+        """, unsafe_allow_html=True)
+    
+    st.markdown('</div>', unsafe_allow_html=True)
     
     # Start Button
     col1, col2, col3 = st.columns([1, 2, 1])
@@ -934,7 +954,6 @@ if not st.session_state.quiz_started:
         <div class="testimonial-author">— Sarah Chen, Senior Data Analyst at Tech Corp</div>
     </div>
     """, unsafe_allow_html=True)
-
 
 # --- Quiz In Progress Screen ---
 elif st.session_state.quiz_started and not st.session_state.quiz_completed:
