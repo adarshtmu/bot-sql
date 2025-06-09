@@ -463,430 +463,270 @@ def display_simulation(title, result_data):
 # --- Advanced EdTech Learning Platform UI ---
 # --- Advanced EdTech Learning Platform UI ---
 # --- Advanced EdTech Learning Platform UI ---
+import streamlit as st
+
+st.set_page_config(page_title="AI SQL Mastery - EdTech Platform", layout="wide")
+
+if 'quiz_started' not in st.session_state:
+    st.session_state.quiz_started = False
+
 if not st.session_state.quiz_started:
-    # Advanced CSS for modern EdTech platform
+    # --- ADVANCED 3D & GLASSMORPHIC CSS ---
     st.markdown("""
     <style>
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
-    
-    * {
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap');
+    html, body, [class*="css"] {
         font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-    }
-    
-    .main-container {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%) fixed;
         min-height: 100vh;
+    }
+    .main-container {
+        min-height: 100vh;
+        width: 100vw;
         padding: 2rem 0;
         position: relative;
+        z-index: 1;
     }
-    
     .floating-shapes {
         position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100vh;
-        overflow: hidden;
-        pointer-events: none;
-        z-index: -1;
+        top: 0; left: 0; width: 100vw; height: 100vh;
+        overflow: hidden; pointer-events: none; z-index: 0;
     }
-    
     .shape {
         position: absolute;
-        background: rgba(255,255,255,0.1);
+        background: rgba(255,255,255,0.13);
         border-radius: 50%;
         animation: float 6s ease-in-out infinite;
+        backdrop-filter: blur(16px);
+        box-shadow: 0 8px 32px 0 rgba(76,110,245,0.09);
+        filter: drop-shadow(0px 8px 24px #667eea55);
     }
-    
-    .shape:nth-child(1) {
-        width: 80px;
-        height: 80px;
-        top: 10%;
-        left: 10%;
-        animation-delay: 0s;
-    }
-    
-    .shape:nth-child(2) {
-        width: 120px;
-        height: 120px;
-        top: 20%;
-        right: 15%;
-        animation-delay: 2s;
-    }
-    
-    .shape:nth-child(3) {
-        width: 60px;
-        height: 60px;
-        bottom: 20%;
-        left: 20%;
-        animation-delay: 4s;
-    }
-    
-    @keyframes float {
-        0%, 100% { transform: translateY(0px) rotate(0deg); }
-        50% { transform: translateY(-20px) rotate(180deg); }
-    }
-    
+    .shape:nth-child(1) { width: 100px; height: 100px; top: 12%; left: 8%; animation-delay: 0s;}
+    .shape:nth-child(2) { width: 160px; height: 160px; top: 28%; right: 10%; animation-delay: 2s;}
+    .shape:nth-child(3) { width: 70px; height: 70px; bottom: 15%; left: 20%; animation-delay: 4s;}
+    @keyframes float { 0%,100% {transform: translateY(0px) rotate(0deg);} 50% {transform: translateY(-24px) rotate(180deg);} }
+
     .hero-container {
-        background: rgba(255,255,255,0.95);
-        backdrop-filter: blur(20px);
-        border: 1px solid rgba(255,255,255,0.2);
-        padding: 3rem;
-        border-radius: 24px;
-        margin: 2rem auto;
-        max-width: 1000px;
-        box-shadow: 0 20px 60px rgba(0,0,0,0.1);
+        background: rgba(255,255,255,0.91);
+        backdrop-filter: blur(18px);
+        border: 1px solid rgba(255,255,255,0.20);
+        padding: 3rem 2rem 2.5rem 2rem;
+        border-radius: 30px;
+        margin: 2rem auto 1.5rem auto;
+        max-width: 950px;
+        box-shadow: 0 24px 64px rgba(0,0,0,0.10), 0 2px 6px #764ba266;
         position: relative;
         overflow: hidden;
+        z-index: 2;
     }
-    
     .hero-badge {
         display: inline-block;
         background: linear-gradient(135deg, #667eea, #764ba2);
         color: white;
-        padding: 0.5rem 1.5rem;
-        border-radius: 50px;
-        font-size: 0.9rem;
-        font-weight: 600;
-        margin-bottom: 1.5rem;
-        box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+        padding: 0.5rem 1.25rem;
+        border-radius: 40px;
+        font-size: 1.05rem;
+        font-weight: 700;
+        margin-bottom: 2rem;
+        box-shadow: 0 4px 18px #667eea44;
+        letter-spacing: 0.04em;
     }
-    
     .hero-title {
-        font-size: 3.5rem;
+        font-size: 3.7rem;
         font-weight: 800;
         margin-bottom: 1rem;
-        background: linear-gradient(135deg, #2d3748, #4a5568);
+        background: linear-gradient(135deg, #2d3748, #4a5568 80%);
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
         background-clip: text;
-        line-height: 1.2;
+        line-height: 1.18;
+        letter-spacing: -2px;
     }
-    
     .hero-subtitle {
-        font-size: 1.4rem;
+        font-size: 1.36rem;
         color: #6b7280;
-        margin-bottom: 2.5rem;
+        margin-bottom: 2.2rem;
         font-weight: 400;
         max-width: 600px;
-        margin-left: auto;
-        margin-right: auto;
-        line-height: 1.6;
+        margin-left: auto; margin-right: auto;
+        line-height: 1.55;
     }
-    
     .stats-container {
         display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-        gap: 1.5rem;
-        margin: 2.5rem 0;
+        grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+        gap: 1.4rem;
+        margin: 2.2rem 0 0.5rem 0;
     }
-    
     .stat-card {
-        background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
-        padding: 1.5rem;
-        border-radius: 16px;
+        background: rgba(255,255,255,0.93);
+        border-radius: 18px;
+        box-shadow: 0 8px 32px rgba(76,110,245,0.13), 0 2px 8px rgba(102,126,234,0.08);
+        border: 1px solid rgba(255,255,255,0.19);
+        backdrop-filter: blur(7px);
         text-align: center;
-        border: 1px solid rgba(255,255,255,0.5);
-        box-shadow: 0 4px 20px rgba(0,0,0,0.08);
-        transition: transform 0.3s ease, box-shadow 0.3s ease;
         position: relative;
         overflow: hidden;
-        height: 200px;
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        align-items: center;
+        height: 170px;
+        display: flex; flex-direction: column; justify-content: center; align-items: center;
+        transition: transform 0.25s, box-shadow 0.25s;
     }
-    
     .stat-card:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 10px 40px rgba(0,0,0,0.15);
+        transform: scale(1.04) translateY(-7px) perspective(700px) rotateY(7deg);
+        box-shadow: 0 18px 44px #764ba233, 0 3px 12px #667eea22;
     }
-    
     .stat-card::before {
         content: '';
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
+        position: absolute; top: 0; left: 0; right: 0;
         height: 4px;
         background: linear-gradient(90deg, #667eea, #764ba2);
     }
-    
     .stat-icon {
-        font-size: 2.5rem;
-        margin-bottom: 0.8rem;
-        display: block;
+        font-size: 2.7rem;
+        margin-bottom: 0.6rem;
+        text-shadow: 0 2px 12px #667eea44;
     }
-    
     .stat-number {
-        font-size: 1.8rem;
+        font-size: 2.1rem;
         font-weight: 700;
         color: #1e293b;
         display: block;
-        margin-bottom: 0.5rem;
-        line-height: 1.2;
-        text-align: center;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        white-space: nowrap;
-        max-width: 100%;
+        margin-bottom: 0.28rem;
     }
-    
     .stat-label {
-        color: #64748b;
-        font-weight: 500;
-        font-size: 0.9rem;
-        line-height: 1.3;
-        text-align: center;
-        max-width: 100%;
-        word-wrap: break-word;
-        hyphens: auto;
+        color: #64748b; font-weight: 500; font-size: 1rem;
     }
-    
-    .start-button-container {
-        margin: 3rem 0;
-        text-align: center;
-    }
-    
+    .start-button-container {margin: 2.3rem 0 1.6rem 0; text-align: center;}
     .cta-button {
         background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
         color: white;
         border: none;
-        padding: 1.2rem 3rem;
-        border-radius: 50px;
-        font-size: 1.2rem;
-        font-weight: 600;
+        padding: 1.15rem 3.2rem;
+        border-radius: 44px;
+        font-size: 1.3rem;
+        font-weight: 700;
         cursor: pointer;
-        transition: all 0.3s ease;
-        box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+        box-shadow: 0 10px 36px #764ba244, 0 2px 8px #667eea33;
         position: relative;
+        transition: transform 0.18s, box-shadow 0.18s;
+        outline: none;
+        letter-spacing: 0.02em;
         overflow: hidden;
     }
-    
+    .cta-button:active { transform: scale(0.98); box-shadow: 0 4px 12px #764ba266; }
     .cta-button::before {
         content: '';
-        position: absolute;
-        top: 0;
-        left: -100%;
-        width: 100%;
-        height: 100%;
-        background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+        position: absolute; top: 0; left: -100%; width: 100%; height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255,255,255,0.18), transparent);
         transition: left 0.5s;
     }
-    
-    .cta-button:hover::before {
-        left: 100%;
-    }
-    
-    .cta-button:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 12px 35px rgba(102, 126, 234, 0.4);
-    }
-    
+    .cta-button:hover::before { left: 100%; }
+    .cta-button:hover { transform: scale(1.03); box-shadow: 0 20px 50px #667eea33; }
     .features-grid {
         display: grid;
         grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-        gap: 2rem;
-        margin: 3rem 0;
+        gap: 2.2rem;
+        margin: 3rem 0 2.3rem 0;
     }
-    
     .feature-card {
-        background: white;
-        padding: 2.5rem;
-        border-radius: 20px;
-        box-shadow: 0 8px 30px rgba(0,0,0,0.1);
-        border: 1px solid rgba(255,255,255,0.5);
-        transition: transform 0.3s ease, box-shadow 0.3s ease;
-        position: relative;
-    }
-    
-    .feature-card:hover {
-        transform: translateY(-8px);
-        box-shadow: 0 20px 60px rgba(0,0,0,0.15);
-    }
-    
-    .feature-icon {
-        width: 60px;
-        height: 60px;
-        background: linear-gradient(135deg, #667eea, #764ba2);
-        border-radius: 12px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 1.8rem;
-        margin-bottom: 1.5rem;
-        box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
-        color: white;
-    }
-    
-    .feature-title {
-        font-size: 1.4rem;
-        font-weight: 600;
-        margin-bottom: 1rem;
-        color: #1e293b !important;
-    }
-    
-    .feature-description {
-        color: #64748b !important;
-        line-height: 1.6;
-        font-size: 1rem;
-    }
-    
-    .learning-path {
-        background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
-        padding: 3rem;
-        border-radius: 20px;
-        margin: 3rem 0;
-        border: 1px solid rgba(255,255,255,0.5);
-    }
-    
-    .learning-path h3 {
-        text-align: center;
-        font-size: 2rem;
-        font-weight: 700;
-        margin-bottom: 2rem;
-        color: #1e293b;
-    }
-    
-    .steps-container {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        position: relative;
-        margin: 2rem 0;
-    }
-    
-    .steps-container::before {
-        content: '';
-        position: absolute;
-        top: 50%;
-        left: 0;
-        right: 0;
-        height: 2px;
-        background: linear-gradient(90deg, #667eea, #764ba2);
-        z-index: 1;
-    }
-    
-    .step {
-        background: white;
-        width: 130px;
-        height: 130px;
-        border-radius: 50%;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        box-shadow: 0 8px 25px rgba(0,0,0,0.1);
-        border: 3px solid #667eea;
+        background: rgba(255,255,255,0.98);
+        padding: 2.2rem 2rem;
+        border-radius: 23px;
+        box-shadow: 0 12px 36px #764ba220, 0 2px 8px #667eea19;
+        border: 1px solid rgba(255,255,255,0.19);
+        transition: transform 0.28s, box-shadow 0.28s;
         position: relative;
         z-index: 2;
-        transition: transform 0.3s ease;
-        padding: 0.5rem;
     }
-    
-    .step:hover {
-        transform: scale(1.05);
+    .feature-card:hover {
+        transform: scale(1.05) perspective(600px) rotateY(-8deg);
+        box-shadow: 0 28px 70px #667eea33, 0 4px 18px #764ba228;
     }
-    
-    .step-number {
-        font-size: 1.5rem;
-        font-weight: 700;
-        color: #667eea;
-        margin-bottom: 0.5rem;
+    .feature-icon {
+        width: 62px; height: 62px;
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        border-radius: 13px;
+        display: flex; align-items: center; justify-content: center;
+        font-size: 2.1rem; margin-bottom: 1.3rem; color: white;
+        box-shadow: 0 4px 20px #667eea40;
     }
-    
-    .step-text {
-        font-size: 0.85rem;
-        font-weight: 600;
-        text-align: center;
-        color: #64748b;
-        line-height: 1.2;
-        word-wrap: break-word;
-        hyphens: auto;
+    .feature-title { font-size: 1.35rem; font-weight: 700; margin-bottom: 0.7rem; color: #1e293b; }
+    .feature-description { color: #64748b; line-height: 1.5; font-size: 1.03rem; }
+    .learning-path {
+        background: rgba(248,250,252,0.93);
+        padding: 2.7rem 1.2rem 2.5rem 1.2rem;
+        border-radius: 22px;
+        margin: 2.8rem 0;
+        border: 1px solid rgba(255,255,255,0.15);
+        box-shadow: 0 10px 40px #667eea15;
     }
-    
-    .testimonial {
+    .learning-path h3 {
+        text-align: center; font-size: 2.1rem; font-weight: 800;
+        margin-bottom: 1.6rem; color: #1e293b;
+    }
+    .steps-container {
+        display: flex; justify-content: space-between; align-items: center;
+        position: relative; margin: 1.5rem 0 0.5rem 0;
+    }
+    .steps-container::before {
+        content: '';
+        position: absolute; top: 50%; left: 0; right: 0; height: 2.5px;
+        background: linear-gradient(90deg, #667eea, #764ba2); z-index: 1;
+    }
+    .step {
         background: white;
-        padding: 2.5rem;
-        border-radius: 20px;
-        margin: 3rem 0;
-        box-shadow: 0 8px 30px rgba(0,0,0,0.1);
-        text-align: center;
-        border: 1px solid rgba(255,255,255,0.5);
+        width: 120px; height: 120px;
+        border-radius: 50%;
+        display: flex; flex-direction: column; align-items: center; justify-content: center;
+        box-shadow: 0 10px 30px #667eea1a;
+        border: 4px solid #667eea;
+        position: relative; z-index: 2;
+        transition: transform 0.29s;
+        padding: 0.6rem;
     }
-    
+    .step:hover { transform: scale(1.09); }
+    .step-number { font-size: 1.45rem; font-weight: 800; color: #667eea; margin-bottom: 0.4rem; }
+    .step-text { font-size: 0.98rem; font-weight: 600; text-align: center; color: #64748b; }
+    .testimonial {
+        background: rgba(255,255,255,0.96);
+        padding: 2.3rem;
+        border-radius: 20px;
+        margin: 2.8rem 0 1.7rem 0;
+        box-shadow: 0 8px 32px #764ba217, 0 2px 10px #667eea13;
+        text-align: center;
+        border: 1px solid rgba(255,255,255,0.14);
+        z-index: 2;
+    }
     .testimonial-text {
-        font-size: 1.2rem;
+        font-size: 1.17rem;
         font-style: italic;
         color: #4a5568;
-        margin-bottom: 1.5rem;
-        line-height: 1.6;
+        margin-bottom: 1.3rem;
+        line-height: 1.55;
     }
-    
     .testimonial-author {
-        font-weight: 600;
+        font-weight: 700;
         color: #1e293b;
+        letter-spacing: 0.01em;
     }
-    
-    .pulse {
-        animation: pulse 2s infinite;
+    .pulse { animation: pulse 2.5s infinite; }
+    @keyframes pulse { 0% {transform:scale(1);} 50% {transform:scale(1.025);} 100% {transform:scale(1);} }
+    @media (max-width: 1000px) {
+      .hero-title { font-size: 2.4rem; }
+      .steps-container { flex-direction: column; gap: 2.1rem; }
+      .learning-path h3 { font-size: 1.38rem;}
+      .stats-container { grid-template-columns: 1fr 1fr; }
+      .step { width: 100px; height: 100px;}
     }
-    
-    @keyframes pulse {
-        0% { transform: scale(1); }
-        50% { transform: scale(1.02); }
-        100% { transform: scale(1); }
-    }
-    
-    @media (max-width: 768px) {
-        .hero-title { font-size: 2.5rem; }
-        .hero-subtitle { font-size: 1.2rem; }
-        .stats-container { 
-            grid-template-columns: repeat(2, 1fr); 
-            gap: 1rem;
-        }
-        .stat-card {
-            height: 180px;
-            padding: 1.2rem;
-        }
-        .stat-number {
-            font-size: 1.5rem;
-        }
-        .stat-label {
-            font-size: 0.8rem;
-        }
-        .features-grid { grid-template-columns: 1fr; }
-        .steps-container { flex-direction: column; gap: 2rem; }
-        .steps-container::before { display: none; }
-        .step {
-            width: 120px;
-            height: 120px;
-        }
-    }
-    
-    @media (max-width: 480px) {
-        .stats-container {
-            grid-template-columns: 1fr;
-        }
-        .stat-card {
-            height: 160px;
-        }
-        .stat-number {
-            font-size: 1.3rem;
-        }
-        .step {
-            width: 110px;
-            height: 110px;
-        }
-        .step-text {
-            font-size: 0.8rem;
-        }
+    @media (max-width: 680px) {
+      .stats-container { grid-template-columns: 1fr;}
+      .features-grid { grid-template-columns: 1fr;}
+      .step { width: 85px; height: 85px;}
+      .feature-title { font-size: 1.1rem;}
     }
     </style>
     """, unsafe_allow_html=True)
-    
-    # Floating background shapes - Fixed positioning
+
+    # --- FLOATING SHAPES BACKGROUND ---
     st.markdown("""
     <div class="floating-shapes">
         <div class="shape"></div>
@@ -894,62 +734,57 @@ if not st.session_state.quiz_started:
         <div class="shape"></div>
     </div>
     """, unsafe_allow_html=True)
-    
-    # Main Hero Section
+
+    # --- HERO SECTION ---
     st.markdown("""
     <div class="hero-container">
         <div class="hero-badge">🚀 AI-Powered Learning Experience</div>
         <h1 class="hero-title">Master SQL Like a Pro</h1>
-        <p class="hero-subtitle">Join 50,000+ developers who've accelerated their careers with our AI-powered SQL mastery program. Get personalized feedback, earn industry-recognized certificates, and land your dream job.</p>
+        <p class="hero-subtitle">
+        Join <b>50,000+ developers</b> who've accelerated their careers.<br>
+        Get personalized AI feedback, earn industry-recognized certificates, and land your dream job.
+        </p>
     </div>
     """, unsafe_allow_html=True)
-    
-    # Stats Section using Streamlit columns (Alternative approach)
+
+    # --- STATS SECTION ---
     st.markdown('<div class="stats-container">', unsafe_allow_html=True)
     col1, col2, col3, col4 = st.columns(4)
-    
     with col1:
-        st.markdown("""
-        <div class="stat-card">
-            <div class="stat-icon">📊</div>
-            <span class="stat-number">25</span>
-            <div class="stat-label">Expert Questions</div>
-        </div>
-        """, unsafe_allow_html=True)
-    
+        st.markdown(
+            """<div class="stat-card">
+                <div class="stat-icon">📊</div>
+                <span class="stat-number">25</span>
+                <div class="stat-label">Expert Questions</div>
+            </div>""", unsafe_allow_html=True)
     with col2:
-        st.markdown("""
-        <div class="stat-card">
-            <div class="stat-icon">⏰</div>
-            <span class="stat-number">15-20</span>
-            <div class="stat-label">Minutes</div>
-        </div>
-        """, unsafe_allow_html=True)
-    
+        st.markdown(
+            """<div class="stat-card">
+                <div class="stat-icon">⏰</div>
+                <span class="stat-number">15-20</span>
+                <div class="stat-label">Minutes Avg.</div>
+            </div>""", unsafe_allow_html=True)
     with col3:
-        st.markdown("""
-        <div class="stat-card">
-            <div class="stat-icon">🎯</div>
-            <span class="stat-number">50%</span>
-            <div class="stat-label">Pass Rate</div>
-        </div>
-        """, unsafe_allow_html=True)
-    
+        st.markdown(
+            """<div class="stat-card">
+                <div class="stat-icon">🎯</div>
+                <span class="stat-number">50%</span>
+                <div class="stat-label">Pass Rate</div>
+            </div>""", unsafe_allow_html=True)
     with col4:
-        st.markdown("""
-        <div class="stat-card">
-            <div class="stat-icon">🏆</div>
-            <span class="stat-number">Pro</span>
-            <div class="stat-label">Certificate</div>
-        </div>
-        """, unsafe_allow_html=True)
-    
+        st.markdown(
+            """<div class="stat-card">
+                <div class="stat-icon">🏆</div>
+                <span class="stat-number">Pro</span>
+                <div class="stat-label">Certificate</div>
+            </div>""", unsafe_allow_html=True)
     st.markdown('</div>', unsafe_allow_html=True)
-    
-    # Start Button
+
+    # --- START BUTTON ---
     col1, col2, col3 = st.columns([1, 2, 1])
     with col2:
-        if st.button("🚀 Start Your SQL Journey", type="primary", use_container_width=True, key="start_quiz"):
+        st.markdown('<div class="start-button-container">', unsafe_allow_html=True)
+        if st.button("🚀 Start Your SQL Journey", key="start_quiz", use_container_width=True):
             st.session_state.quiz_started = True
             st.session_state.user_answers = []
             st.session_state.current_question = 0
@@ -957,29 +792,30 @@ if not st.session_state.quiz_started:
             st.success("🎉 Welcome to your SQL mastery journey!")
             st.balloons()
             st.rerun()
-    
-    # Features Section
+        st.markdown('</div>', unsafe_allow_html=True)
+
+    # --- FEATURES SECTION ---
     st.markdown("""
     <div class="features-grid">
         <div class="feature-card">
-            <div class="feature-icon">🤖</div>
-            <h3 class="feature-title">AI-Powered Feedback</h3>
-            <p class="feature-description">Get instant, personalized feedback on your SQL queries with suggestions for optimization and best practices from our advanced AI tutor.</p>
+            <div class="feature-icon" title="AI feedback on your SQL!">🤖</div>
+            <div class="feature-title">AI-Powered Feedback</div>
+            <div class="feature-description">Get instant, personalized feedback on your SQL queries and tips for optimization from our advanced AI tutor.</div>
         </div>
         <div class="feature-card">
-            <div class="feature-icon">🎯</div>
-            <h3 class="feature-title">Real-World Scenarios</h3>
-            <p class="feature-description">Practice with authentic business problems and datasets that mirror what you'll encounter in your professional career.</p>
+            <div class="feature-icon" title="Real-world SQL practice!">🎯</div>
+            <div class="feature-title">Real-World Scenarios</div>
+            <div class="feature-description">Practice on authentic business problems and datasets that mirror what you'll encounter in your professional career.</div>
         </div>
         <div class="feature-card">
-            <div class="feature-icon">📈</div>
-            <h3 class="feature-title">Progress Tracking</h3>
-            <p class="feature-description">Monitor your learning journey with detailed analytics, performance insights, and skill progression tracking.</p>
+            <div class="feature-icon" title="Track your progress!">📈</div>
+            <div class="feature-title">Progress Tracking</div>
+            <div class="feature-description">Monitor your learning journey with detailed analytics, performance insights, and skill progression tracking.</div>
         </div>
     </div>
     """, unsafe_allow_html=True)
-    
-    # Learning Path
+
+    # --- LEARNING PATH ---
     st.markdown("""
     <div class="learning-path">
         <h3>Your Learning Journey</h3>
@@ -1003,8 +839,8 @@ if not st.session_state.quiz_started:
         </div>
     </div>
     """, unsafe_allow_html=True)
-    
-    # Testimonial
+
+    # --- TESTIMONIAL ---
     st.markdown("""
     <div class="testimonial pulse">
         <p class="testimonial-text">"This platform transformed my SQL skills in just 2 weeks. The AI feedback was incredibly detailed and helped me land my dream data analyst role at a Fortune 500 company!"</p>
@@ -1012,6 +848,7 @@ if not st.session_state.quiz_started:
     </div>
     """, unsafe_allow_html=True)
 
+# --- END OF ADVANCED 3D UI HOMEPAGE ---
 # --- Quiz In Progress Screen ---
 elif st.session_state.quiz_started and not st.session_state.quiz_completed:
     st.title("✍️ SQL Query Challenge")
