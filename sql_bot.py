@@ -5,7 +5,7 @@ import re
 import duckdb
 import streamlit as st
 
-st.set_page_config(page_title="AI SQL Mastery - EdTech Platform", layout="wide")
+st.set_page_config(page_title="AI SQL Mastery - EdTech Platform")
 
 # --- Custom CSS ---
 # Updated to increase font sizes globally and for specific elements
