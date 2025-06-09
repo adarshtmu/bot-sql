@@ -290,12 +290,10 @@ def evaluate_answer_with_llm(question_data, student_answer, original_tables_dict
     * **Validity:** Is the query syntactically valid standard SQL (ignoring the double quote allowance above)? Briefly mention any *other* syntax errors.
     * **Logic:** Does the query use appropriate SQL clauses (SELECT, FROM, WHERE, JOIN, GROUP BY, ORDER BY, aggregates, etc.) correctly for the task? Is the logic sound? Are comparisons appropriate for the data types (keeping the case-insensitivity rule for `status`/`city` in mind)?
     * **Alternatives:** Briefly acknowledge if the student used a valid alternative approach (e.g., different JOIN type if appropriate, subquery vs. JOIN). Mentioning `LOWER`/`UPPER` or using single quotes as *generally good practice* is okay, but don't imply it was *required* for correctness *here*.
-    * **Feedback:** Provide clear, constructive feedback in a friendly, encouraging, casual Hindi tone (like a helpful senior or 'bhaiya' talking to a learner).
-        * If incorrect (due to reasons *other* than case-sensitivity on `status`/`city` or using double quotes): Gently point out the error (e.g., "Arre yaar, yahaan thoda sa check karo..." or "Ek chhoti si galti ho gayi hai..."). Explain *what* is wrong (syntax, logic, columns, joins, other conditions etc.). Suggest how to fix it. **Do NOT mark the query incorrect or suggest using LOWER()/UPPER() or single quotes *solely* because of case differences in `status`/`city` or the use of double quotes if the rest of the logic is correct.**
-    * **Verdict:** Conclude your entire response with *exactly* one line formatted as: "Verdict: Correct" or "Verdict: Incorrect". This line MUST be the very last line.
-
-    **Begin Evaluation:**
-    """
+    * **Feedback:** Provide clear, constructive feedback in a friendly, encouraging, and approachable English tone (like a helpful mentor talking to a learner).
+        * If incorrect: Gently point out the error (e.g., "Please take a closer look at your WHERE clause..." or "There's a small mistake in your JOIN condition.").
+        **Begin Evaluation:**
+        """
     
     feedback_llm = "AI feedback generation failed."; is_correct_llm = False; llm_output = "Error: No LLM response received."
     try:
@@ -394,7 +392,7 @@ def analyze_performance(user_answers):
             correct_summary = "Is baar koi jawaab sahi nahi hua."
         
         prompt = f"""
-        Ek SQL learner ne ek practice quiz complete kiya hai. Unki performance ka analysis karke ek friendly, motivating summary feedback casual Hindi mein (jaise ek senior/mentor deta hai) provide karo.
+        A SQL learner has completed a practice quiz. Please analyze their performance and provide a friendly, motivating summary feedback in casual, approachable English (like a helpful mentor or senior).
 
         **Quiz Performance Summary:**
         - Total Questions Attempted: {total_q}
@@ -418,7 +416,7 @@ def analyze_performance(user_answers):
         3.  **Areas for Improvement:** Jo concepts galat hue (incorrect answers se related), unko gently point out karo. Focus on concepts, not just specific mistakes (e.g., "JOIN ka logic thoda aur clear karna hoga shayad.", "Aggregate functions (COUNT, AVG) pe dhyaan dena.", "Syntax ki chhoti-moti galtiyan ho rahi hain."). Briefly mention standard practices (like single quotes for strings in real DBs) as a learning point, without implying it was wrong *in this quiz*.
         4.  **Next Steps / Encouragement:** Kuch encouraging words aur aage kya karna chahiye (e.g., "Keep practicing!", "Concept X ko revise kar lena.", "Aise hi lage raho, SQL aa jayega! Real-world ke liye standard SQL practices (jaise single quotes) seekhte rehna important hai.").
 
-        Bas plain text mein feedback generate karna hai. Casual tone rakhna. Sidhe feedback se shuru karo.
+        Generate the feedback in plain English only. Start directly with the feedback.
         """
     except Exception as data_prep_error:
         print(f"Error preparing data for performance analysis: {data_prep_error}")
@@ -489,9 +487,9 @@ if not st.session_state.quiz_started:
     col1, col2 = st.columns([2, 1])
     with col1:
         st.write("""
-        Is interactive quiz mein, aap do sample tables ke saath kaam karenge:
-        - **Users Table**: User details jaise ID, naam, email, umar, aur sheher.
-        - **Orders Table**: Order details jaise ID, user ID, amount, order date, aur status.
+        In this interactive quiz, you will work with two sample tables:
+        - **Users Table**: Contains user details such as ID, name, email, age, and city.
+        - **Orders Table**: Contains order details such as ID, user ID, amount, order date, and status.
         """)
     with col2:
         st.markdown("#### Tables Overview")
