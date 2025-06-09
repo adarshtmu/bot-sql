@@ -900,6 +900,24 @@ if not st.session_state.quiz_started:
     <div class="hero-container">
         <div class="hero-badge">🚀 AI-Powered Learning Experience</div>
         <h1 class="hero-title">Master SQL Like a Pro</h1>
+    </div>
+    """, unsafe_allow_html=True)
+    
+    # Start Button - Moved up right after the title
+    col1, col2, col3 = st.columns([1, 2, 1])
+    with col2:
+        if st.button("🚀 Start Your SQL Journey", type="primary", use_container_width=True, key="start_quiz"):
+            st.session_state.quiz_started = True
+            st.session_state.user_answers = []
+            st.session_state.current_question = 0
+            st.session_state.quiz_completed = False
+            st.success("🎉 Welcome to your SQL mastery journey!")
+            st.balloons()
+            st.rerun()
+    
+    # Hero subtitle - moved after the button
+    st.markdown("""
+    <div style="max-width: 1000px; margin: 2rem auto; padding: 0 3rem;">
         <p class="hero-subtitle">Join 50,000+ developers who've accelerated their careers with our AI-powered SQL mastery program. Get personalized feedback, earn industry-recognized certificates, and land your dream job.</p>
     </div>
     """, unsafe_allow_html=True)
@@ -945,18 +963,6 @@ if not st.session_state.quiz_started:
         """, unsafe_allow_html=True)
     
     st.markdown('</div>', unsafe_allow_html=True)
-    
-    # Start Button
-    col1, col2, col3 = st.columns([1, 2, 1])
-    with col2:
-        if st.button("🚀 Start Your SQL Journey", type="primary", use_container_width=True, key="start_quiz"):
-            st.session_state.quiz_started = True
-            st.session_state.user_answers = []
-            st.session_state.current_question = 0
-            st.session_state.quiz_completed = False
-            st.success("🎉 Welcome to your SQL mastery journey!")
-            st.balloons()
-            st.rerun()
     
     # Features Section
     st.markdown("""
