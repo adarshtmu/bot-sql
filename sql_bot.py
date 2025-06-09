@@ -917,7 +917,7 @@ elif st.session_state.quiz_started and not st.session_state.quiz_completed:
     
     if st.button("✅ Submit Query", key=f"submit_{current_q_index}"):
         if user_query and user_query.strip():
-            with st.spinner("🔄 Query ko check kiya ja raha hai... AI Mentor se feedback aur simulation results generate ho rahe hain..."):
+            with st.spinner("🔄 Your query is being checked... AI Mentor is generating feedback and simulation results..."):
                 feedback, is_correct, expected_res, actual_res, raw_llm = evaluate_answer_with_llm(
                     question_data,
                     user_query,
