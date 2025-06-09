@@ -536,7 +536,7 @@ elif st.session_state.quiz_started and not st.session_state.quiz_completed:
             q_num = i + 1
             is_correct = ans_data.get('is_correct', False)
             with st.expander(f"Question {q_num}: {ans_data['question']} {get_emoji(is_correct)}", expanded=False):
-                st.write(f"**Aapka Jawaab:**")
+                st.write(f"**Your Answere:**")
                 st.code(ans_data.get('student_answer', '(No answer provided)'), language='sql')
                 st.write(f"**SQL Mentor Feedback:**")
                 feedback_text = ans_data.get("feedback", "_Feedback not available._")
@@ -633,12 +633,12 @@ elif st.session_state.quiz_completed:
 
     # --- 1. Answer/Feedback Summary first ---
     st.markdown("---")
-    st.subheader("📝 Aapke Jawaab Aur Feedback Ka Summary")
+    st.subheader("📝 Your Answers and Feedback So Far")
     for i, ans_data in enumerate(st.session_state.user_answers):
         q_num = i + 1
         is_correct = ans_data.get('is_correct', False)
         with st.expander(f"Question {q_num}: {ans_data['question']} {get_emoji(is_correct)}", expanded=False):
-            st.write(f"**Aapka Jawaab:**")
+            st.write(f"**Your Answere:**")
             st.code(ans_data.get('student_answer', '(No answer provided)'), language='sql')
             st.write(f"**SQL Mentor Feedback:**")
             feedback_text = ans_data.get("feedback", "_Feedback not available._")
