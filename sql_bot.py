@@ -917,8 +917,8 @@ if not st.session_state.quiz_started:
     
     # Hero subtitle - moved after the button
     st.markdown("""
-    <div style="max-width: 1000px; margin: 2rem auto; padding: 0 3rem;">
-        <p class="hero-subtitle">Join 50,000+ developers who've accelerated their careers with our AI-powered SQL mastery program. Get personalized feedback, earn industry-recognized certificates, and land your dream job.</p>
+    <div class="hero-container" style="margin-top: 1rem; padding: 2rem 3rem;">
+        <p class="hero-subtitle" style="margin-bottom: 0;">Join 50,000+ developers who've accelerated their careers with our AI-powered SQL mastery program. Get personalized feedback, earn industry-recognized certificates, and land your dream job.</p>
     </div>
     """, unsafe_allow_html=True)
     
