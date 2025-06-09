@@ -457,63 +457,68 @@ def display_simulation(title, result_data):
 
 # --- Streamlit App UI ---
 
-# --- Start Screen ---
+# --- Start Screen ---# --- Start Screen ---
 if not st.session_state.quiz_started:
-    st.title("🚀 SQL Mentor - Interactive SQL Practice")
-    st.markdown("### Finish the Quiz Successfully to Unlock Your SQL Certificate")
-    st.markdown("""
-        **📌 Important Notes:**
-        - To be eligible for a certificate, you must achieve a score of at least 50%.
-        - This quiz uses standard **SQL syntax** (similar to MySQL/PostgreSQL).
-        - String comparisons (like `WHERE city = 'new york'` or `WHERE status = "pending"`) are simulated to be **case-insensitive** for common text columns (`status`, `city`).
-        - **Both single quotes (') and double quotes (") are accepted** for string literals in this simulation.
-        - Your queries are evaluated by an AI for correctness and logic.
-        - Query simulation is powered by DuckDB to show results on sample data.
-        """)
+    # --- New, Improved UI Starts Here ---
+    st.title("🚀 SQL Mentor Challenge")
 
-    col1, col2 = st.columns([2, 1])
+    st.markdown("### Test your SQL skills, get AI-powered feedback, and earn your certificate.")
+
+    # --- Key Info Metrics Dashboard ---
+    st.write("")
+    col1, col2, col3 = st.columns(3)
     with col1:
-        st.write("""
-        In this interactive quiz, you will work with two sample tables:
-        - **Users Table**: Contains user details such as ID, name, email, age, and city.
-        - **Orders Table**: Contains order details such as ID, user ID, amount, order date, and status.
-        """)
+        st.metric(label="**Total Questions**", value=f"{len(sql_questions)}")
     with col2:
-        st.markdown("#### Tables Overview")
-        try:
-            table_overview_data = {"Table": list(original_tables.keys()),
-                                   "Rows": [len(df) for df in original_tables.values()],
-                                   "Columns": [len(df.columns) for df in original_tables.values()]}
-            st.dataframe(pd.DataFrame(table_overview_data), hide_index=True)
-        except Exception as e:
-            st.error(f"Error displaying table overview: {e}")
+        st.metric(label="**Passing Score**", value="50%")
+    with col3:
+        st.metric(label="**SQL Dialect**", value="Standard SQL")
 
-    st.write("### 🔍 Table Previews")
+    # --- How It Works & Rules Container ---
+    with st.container(border=True):
+        st.subheader("📝 How It Works")
+        c1, c2 = st.columns([1, 1])
+        with c1:
+            st.markdown("""
+            - **Solve Challenges**: Tackle a series of SQL questions.
+            - **Get Instant Feedback**: Our AI mentor evaluates your query logic and syntax.
+            - **Earn a Certificate**: Score 50% or more to unlock your certificate!
+            """)
+        with c2:
+             st.markdown("""
+            - **Case-Insensitive**: `city = 'chicago'` works the same as `city = 'Chicago'`.
+            - **Quotes**: Both single `'...'` and double `"..."` quotes are accepted.
+            - **Simulation**: Queries run on sample data to show you the result.
+            """)
+
+    # --- Data Tables Preview Section ---
+    st.header("📚 Meet Your Data")
+    st.markdown("You'll be querying these two tables. Get familiar with their structure below.")
+
     try:
         tab1, tab2 = st.tabs(["Users Table", "Orders Table"])
-        with tab1: st.dataframe(users_table, hide_index=True, use_container_width=False)
-        with tab2: st.dataframe(orders_table, hide_index=True, use_container_width=False)
+        with tab1:
+            st.dataframe(users_table, use_container_width=True)
+        with tab2:
+            st.dataframe(orders_table, use_container_width=True)
     except Exception as e:
         st.error(f"Error displaying table previews: {e}")
 
-    with st.expander("📝 About the Quiz"):
-        st.write(f"""
-        - You will be asked to solve {len(sql_questions)} SQL query challenges.
-        - You will receive immediate feedback from the AI Mentor after each answer.
-        - **SQL Dialect Focus:** Standard SQL (similar to MySQL/PostgreSQL).
-        - Case-insensitivity for `status` and `city` columns in `WHERE =` clauses is simulated.
-        - String literals can be enclosed in single quotes (`'...'`) or double quotes (`"..."`).
-        """)
+    # --- Centered Call to Action Button ---
+    st.write("")
+    st.markdown("---")
+    
+    cols = st.columns([1, 2, 1])
+    with cols[1]:
+        if st.button("🚀 Start SQL Challenge!", type="primary", use_container_width=True):
+            st.session_state.quiz_started = True
+            st.session_state.user_answers = []
+            st.session_state.current_question = 0
+            st.session_state.quiz_completed = False
+            st.rerun() # Use rerun to immediately transition to the quiz
 
-    if st.button("🚀 Start SQL Challenge!", type="primary"):
-        st.session_state.quiz_started = True
-        st.session_state.user_answers = []
-        st.session_state.current_question = 0
-        st.session_state.quiz_completed = False
-
-    # Footer
-    st.markdown("<div style='height: 220px;'></div>", unsafe_allow_html=True)
-
+    # --- Footer ---
+    st.markdown("<div style='height: 100px;'></div>", unsafe_allow_html=True)
     footer_html = """
     <div style='text-align: center; margin-top: 2rem; padding: 1.2rem; background: linear-gradient(135deg, #667eea, #764ba2); border-radius: 16px; color: white;'>
         <h3>🎓 Corporate Mentor Learning Platform</h3>
@@ -522,6 +527,7 @@ if not st.session_state.quiz_started:
     </div>
     """
     st.markdown(footer_html, unsafe_allow_html=True)
+    # --- New, Improved UI Ends Here ---
 
 
 
