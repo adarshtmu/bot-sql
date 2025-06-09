@@ -459,174 +459,479 @@ def display_simulation(title, result_data):
 
 # --- Advanced Start Screen ---
 # --- Minimal Advanced Start Screen ---
+# --- Advanced EdTech Learning Platform UI ---
 if not st.session_state.quiz_started:
-    # Custom CSS for minimal advanced styling
+    # Advanced CSS for modern EdTech platform
     st.markdown("""
     <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+    
+    * {
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    }
+    
+    .main-container {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+        min-height: 100vh;
+        padding: 2rem 0;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .floating-shapes {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+        pointer-events: none;
+    }
+    
+    .shape {
+        position: absolute;
+        background: rgba(255,255,255,0.1);
+        border-radius: 50%;
+        animation: float 6s ease-in-out infinite;
+    }
+    
+    .shape:nth-child(1) {
+        width: 80px;
+        height: 80px;
+        top: 10%;
+        left: 10%;
+        animation-delay: 0s;
+    }
+    
+    .shape:nth-child(2) {
+        width: 120px;
+        height: 120px;
+        top: 20%;
+        right: 15%;
+        animation-delay: 2s;
+    }
+    
+    .shape:nth-child(3) {
+        width: 60px;
+        height: 60px;
+        bottom: 20%;
+        left: 20%;
+        animation-delay: 4s;
+    }
+    
+    @keyframes float {
+        0%, 100% { transform: translateY(0px) rotate(0deg); }
+        50% { transform: translateY(-20px) rotate(180deg); }
+    }
+    
     .hero-container {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        padding: 2.5rem;
-        border-radius: 20px;
+        background: rgba(255,255,255,0.95);
+        backdrop-filter: blur(20px);
+        border: 1px solid rgba(255,255,255,0.2);
+        padding: 3rem;
+        border-radius: 24px;
+        margin: 2rem auto;
+        max-width: 1000px;
+        box-shadow: 0 20px 60px rgba(0,0,0,0.1);
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .hero-badge {
+        display: inline-block;
+        background: linear-gradient(135deg, #667eea, #764ba2);
         color: white;
-        text-align: center;
-        margin-bottom: 2rem;
-        box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-    }
-    .hero-title {
-        font-size: 2.5rem;
-        font-weight: bold;
-        margin-bottom: 1rem;
-        text-shadow: 0 2px 4px rgba(0,0,0,0.3);
-    }
-    .hero-subtitle {
-        font-size: 1.3rem;
-        margin-bottom: 1.5rem;
-        opacity: 0.95;
-    }
-    .stats-row {
-        display: flex;
-        justify-content: center;
-        gap: 2rem;
-        background: rgba(255,255,255,0.15);
-        padding: 1.2rem;
-        border-radius: 15px;
-        backdrop-filter: blur(10px);
-    }
-    .stat-box {
-        text-align: center;
-        min-width: 80px;
-    }
-    .stat-number {
-        font-size: 1.8rem;
-        font-weight: bold;
-        display: block;
-    }
-    .stat-label {
+        padding: 0.5rem 1.5rem;
+        border-radius: 50px;
         font-size: 0.9rem;
-        opacity: 0.9;
-        margin-top: 0.2rem;
+        font-weight: 600;
+        margin-bottom: 1.5rem;
+        box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
     }
-    .features-container {
-        background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-        padding: 2rem;
-        border-radius: 15px;
-        color: white;
-        margin: 1.5rem 0;
-        text-align: center;
+    
+    .hero-title {
+        font-size: 3.5rem;
+        font-weight: 800;
+        margin-bottom: 1rem;
+        background: linear-gradient(135deg, #2d3748, #4a5568);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        line-height: 1.2;
     }
-    .features-grid {
+    
+    .hero-subtitle {
+        font-size: 1.4rem;
+        color: #6b7280;
+        margin-bottom: 2.5rem;
+        font-weight: 400;
+        max-width: 600px;
+        margin-left: auto;
+        margin-right: auto;
+        line-height: 1.6;
+    }
+    
+    .stats-container {
         display: grid;
         grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-        gap: 1rem;
-        margin-top: 1rem;
+        gap: 1.5rem;
+        margin: 2.5rem 0;
     }
-    .feature-item {
-        background: rgba(255,255,255,0.2);
-        padding: 1rem;
-        border-radius: 10px;
-        backdrop-filter: blur(5px);
-    }
-    .cta-container {
-        background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+    
+    .stat-card {
+        background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
         padding: 2rem;
-        border-radius: 15px;
+        border-radius: 16px;
         text-align: center;
-        margin: 2rem 0;
-        color: white;
-        box-shadow: 0 8px 25px rgba(79, 172, 254, 0.3);
+        border: 1px solid rgba(255,255,255,0.5);
+        box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        position: relative;
+        overflow: hidden;
     }
-    .cta-container h3 {
-        color: white !important;
-        font-size: 1.5rem;
-        font-weight: bold;
+    
+    .stat-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 40px rgba(0,0,0,0.15);
+    }
+    
+    .stat-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: linear-gradient(90deg, #667eea, #764ba2);
+    }
+    
+    .stat-icon {
+        font-size: 2.5rem;
+        margin-bottom: 1rem;
+        display: block;
+    }
+    
+    .stat-number {
+        font-size: 2.2rem;
+        font-weight: 700;
+        color: #1e293b;
+        display: block;
         margin-bottom: 0.5rem;
-        text-shadow: 0 2px 4px rgba(0,0,0,0.2);
     }
-    .cta-container p {
-        color: white !important;
-        font-size: 1.1rem;
-        margin-bottom: 0;
-        opacity: 0.95;
-        text-shadow: 0 1px 2px rgba(0,0,0,0.1);
+    
+    .stat-label {
+        color: #64748b;
+        font-weight: 500;
+        font-size: 1rem;
     }
+    
     .start-button-container {
+        margin: 3rem 0;
+        text-align: center;
+    }
+    
+    .cta-button {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border: none;
+        padding: 1.2rem 3rem;
+        border-radius: 50px;
+        font-size: 1.2rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .cta-button::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+        transition: left 0.5s;
+    }
+    
+    .cta-button:hover::before {
+        left: 100%;
+    }
+    
+    .cta-button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 12px 35px rgba(102, 126, 234, 0.4);
+    }
+    
+    .features-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 2rem;
+        margin: 3rem 0;
+    }
+    
+    .feature-card {
+        background: white;
+        padding: 2.5rem;
+        border-radius: 20px;
+        box-shadow: 0 8px 30px rgba(0,0,0,0.1);
+        border: 1px solid rgba(255,255,255,0.5);
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        position: relative;
+    }
+    
+    .feature-card:hover {
+        transform: translateY(-8px);
+        box-shadow: 0 20px 60px rgba(0,0,0,0.15);
+    }
+    
+    .feature-icon {
+        width: 60px;
+        height: 60px;
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.8rem;
+        margin-bottom: 1.5rem;
+        box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+    }
+    
+    .feature-title {
+        font-size: 1.4rem;
+        font-weight: 600;
+        margin-bottom: 1rem;
+        color: #1e293b;
+    }
+    
+    .feature-description {
+        color: #64748b;
+        line-height: 1.6;
+        font-size: 1rem;
+    }
+    
+    .learning-path {
+        background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+        padding: 3rem;
+        border-radius: 20px;
+        margin: 3rem 0;
+        border: 1px solid rgba(255,255,255,0.5);
+    }
+    
+    .learning-path h3 {
+        text-align: center;
+        font-size: 2rem;
+        font-weight: 700;
+        margin-bottom: 2rem;
+        color: #1e293b;
+    }
+    
+    .steps-container {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        position: relative;
         margin: 2rem 0;
     }
-    .how-it-works {
-        background: rgba(255,255,255,0.05);
-        padding: 1.5rem;
-        border-radius: 12px;
-        margin: 1.5rem 0;
-        border: 1px solid rgba(255,255,255,0.1);
+    
+    .steps-container::before {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 0;
+        right: 0;
+        height: 2px;
+        background: linear-gradient(90deg, #667eea, #764ba2);
+        z-index: 1;
+    }
+    
+    .step {
+        background: white;
+        width: 120px;
+        height: 120px;
+        border-radius: 50%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+        border: 3px solid #667eea;
+        position: relative;
+        z-index: 2;
+        transition: transform 0.3s ease;
+    }
+    
+    .step:hover {
+        transform: scale(1.05);
+    }
+    
+    .step-number {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: #667eea;
+        margin-bottom: 0.5rem;
+    }
+    
+    .step-text {
+        font-size: 0.8rem;
+        font-weight: 600;
+        text-align: center;
+        color: #64748b;
+    }
+    
+    .testimonial {
+        background: white;
+        padding: 2.5rem;
+        border-radius: 20px;
+        margin: 3rem 0;
+        box-shadow: 0 8px 30px rgba(0,0,0,0.1);
+        text-align: center;
+        border: 1px solid rgba(255,255,255,0.5);
+    }
+    
+    .testimonial-text {
+        font-size: 1.2rem;
+        font-style: italic;
+        color: #4a5568;
+        margin-bottom: 1.5rem;
+        line-height: 1.6;
+    }
+    
+    .testimonial-author {
+        font-weight: 600;
+        color: #1e293b;
+    }
+    
+    .pulse {
+        animation: pulse 2s infinite;
+    }
+    
+    @keyframes pulse {
+        0% { transform: scale(1); }
+        50% { transform: scale(1.02); }
+        100% { transform: scale(1); }
+    }
+    
+    @media (max-width: 768px) {
+        .hero-title { font-size: 2.5rem; }
+        .hero-subtitle { font-size: 1.2rem; }
+        .stats-container { grid-template-columns: repeat(2, 1fr); }
+        .features-grid { grid-template-columns: 1fr; }
+        .steps-container { flex-direction: column; gap: 2rem; }
+        .steps-container::before { display: none; }
     }
     </style>
     """, unsafe_allow_html=True)
     
-    # Main Hero Section - FIXED: Removed the problematic HTML tags display
+    # Floating background shapes
+    st.markdown("""
+    <div class="main-container">
+        <div class="floating-shapes">
+            <div class="shape"></div>
+            <div class="shape"></div>
+            <div class="shape"></div>
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
+    
+    # Main Hero Section
     st.markdown(f"""
     <div class="hero-container">
-        <div class="hero-title">🚀 SQL Mastery Challenge</div>
-        <div class="hero-subtitle">Master SQL with AI-powered feedback and earn your professional certificate</div>
-        <div class="stats-row">
-            <div class="stat-box">
+        <div class="hero-badge">🚀 AI-Powered Learning Experience</div>
+        <h1 class="hero-title">Master SQL Like a Pro</h1>
+        <p class="hero-subtitle">Join 50,000+ developers who've accelerated their careers with our AI-powered SQL mastery program. Get personalized feedback, earn industry-recognized certificates, and land your dream job.</p>
+        
+        <div class="stats-container">
+            <div class="stat-card">
+                <div class="stat-icon">📊</div>
                 <span class="stat-number">{len(sql_questions)}</span>
-                <div class="stat-label">Questions</div>
+                <div class="stat-label">Expert Questions</div>
             </div>
-            <div class="stat-box">
+            <div class="stat-card">
+                <div class="stat-icon">⚡</div>
                 <span class="stat-number">15-20</span>
                 <div class="stat-label">Minutes</div>
             </div>
-            <div class="stat-box">
+            <div class="stat-card">
+                <div class="stat-icon">🎯</div>
                 <span class="stat-number">50%</span>
-                <div class="stat-label">To Pass</div>
+                <div class="stat-label">Pass Rate</div>
             </div>
-            <div class="stat-box">
-                <span class="stat-number">🏆</span>
+            <div class="stat-card">
+                <div class="stat-icon">🏆</div>
+                <span class="stat-number">Pro</span>
                 <div class="stat-label">Certificate</div>
             </div>
         </div>
     </div>
     """, unsafe_allow_html=True)
     
-    # Prominent Start Button - Moved Up
-    st.markdown('<div class="start-button-container">', unsafe_allow_html=True)
+    # Start Button
     col1, col2, col3 = st.columns([1, 2, 1])
     with col2:
-        if st.button("🚀 Start SQL Challenge Now!", type="primary", use_container_width=True, key="start_quiz"):
+        if st.button("🚀 Start Your SQL Journey", type="primary", use_container_width=True, key="start_quiz"):
             st.session_state.quiz_started = True
             st.session_state.user_answers = []
             st.session_state.current_question = 0
             st.session_state.quiz_completed = False
-            st.success("🎉 Challenge started! Good luck!")
+            st.success("🎉 Welcome to your SQL mastery journey!")
             st.balloons()
             st.rerun()
-    st.markdown('</div>', unsafe_allow_html=True)
     
-    # How It Works - Super Compact with better styling
-    st.markdown('<div class="how-it-works">', unsafe_allow_html=True)
-    col1, col2, col3 = st.columns(3)
-    with col1:
-        st.markdown("""
-        **1️⃣ Solve Challenges**  
-        Write SQL queries for real business problems
-        """)
-    with col2:
-        st.markdown("""
-        **2️⃣ Get AI Feedback**  
-        Receive instant tips and best practices
-        """)
-    with col3:
-        st.markdown("""
-        **3️⃣ Earn Certificate**  
-        Score 50%+ to get your professional credential
-        """)
-    st.markdown('</div>', unsafe_allow_html=True)
-    
-    # Call to Action - Fixed with better contrast
+    # Features Section
     st.markdown("""
-    <div class="cta-container">
-        <h3>🚀 Ready to Become an SQL Expert?</h3>
-        <p>Join thousands of developers mastering SQL through AI-powered learning</p>
+    <div class="features-grid">
+        <div class="feature-card">
+            <div class="feature-icon">🤖</div>
+            <h3 class="feature-title">AI-Powered Feedback</h3>
+            <p class="feature-description">Get instant, personalized feedback on your SQL queries with suggestions for optimization and best practices from our advanced AI tutor.</p>
+        </div>
+        <div class="feature-card">
+            <div class="feature-icon">🎯</div>
+            <h3 class="feature-title">Real-World Scenarios</h3>
+            <p class="feature-description">Practice with authentic business problems and datasets that mirror what you'll encounter in your professional career.</p>
+        </div>
+        <div class="feature-card">
+            <div class="feature-icon">📈</div>
+            <h3 class="feature-title">Progress Tracking</h3>
+            <p class="feature-description">Monitor your learning journey with detailed analytics, performance insights, and skill progression tracking.</p>
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
+    
+    # Learning Path
+    st.markdown("""
+    <div class="learning-path">
+        <h3>Your Learning Journey</h3>
+        <div class="steps-container">
+            <div class="step">
+                <div class="step-number">1</div>
+                <div class="step-text">Take Assessment</div>
+            </div>
+            <div class="step">
+                <div class="step-number">2</div>
+                <div class="step-text">Get AI Feedback</div>
+            </div>
+            <div class="step">
+                <div class="step-number">3</div>
+                <div class="step-text">Earn Certificate</div>
+            </div>
+            <div class="step">
+                <div class="step-number">4</div>
+                <div class="step-text">Advance Career</div>
+            </div>
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
+    
+    # Testimonial
+    st.markdown("""
+    <div class="testimonial pulse">
+        <p class="testimonial-text">"This platform transformed my SQL skills in just 2 weeks. The AI feedback was incredibly detailed and helped me land my dream data analyst role!"</p>
+        <div class="testimonial-author">— Sarah Chen, Senior Data Analyst at Tech Corp</div>
     </div>
     """, unsafe_allow_html=True)
 
