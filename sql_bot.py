@@ -583,7 +583,7 @@ if not st.session_state.quiz_started:
     
     .stat-card {
         background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
-        padding: 2rem;
+        padding: 1.5rem;
         border-radius: 16px;
         text-align: center;
         border: 1px solid rgba(255,255,255,0.5);
@@ -591,7 +591,7 @@ if not st.session_state.quiz_started:
         transition: transform 0.3s ease, box-shadow 0.3s ease;
         position: relative;
         overflow: hidden;
-        height: 200px;
+        min-height: 180px;
         display: flex;
         flex-direction: column;
         justify-content: center;
@@ -615,22 +615,26 @@ if not st.session_state.quiz_started:
     
     .stat-icon {
         font-size: 2.5rem;
-        margin-bottom: 1rem;
+        margin-bottom: 0.8rem;
         display: block;
     }
     
     .stat-number {
-        font-size: 2.2rem;
+        font-size: 1.8rem;
         font-weight: 700;
         color: #1e293b;
         display: block;
         margin-bottom: 0.5rem;
+        line-height: 1.2;
+        word-wrap: break-word;
+        hyphens: auto;
     }
     
     .stat-label {
         color: #64748b;
         font-weight: 500;
-        font-size: 1rem;
+        font-size: 0.9rem;
+        line-height: 1.3;
     }
     
     .start-button-container {
@@ -706,17 +710,18 @@ if not st.session_state.quiz_started:
         font-size: 1.8rem;
         margin-bottom: 1.5rem;
         box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+        color: white;
     }
     
     .feature-title {
         font-size: 1.4rem;
         font-weight: 600;
         margin-bottom: 1rem;
-        color: #1e293b;
+        color: #1e293b !important;
     }
     
     .feature-description {
-        color: #64748b;
+        color: #64748b !important;
         line-height: 1.6;
         font-size: 1rem;
     }
@@ -826,10 +831,35 @@ if not st.session_state.quiz_started:
     @media (max-width: 768px) {
         .hero-title { font-size: 2.5rem; }
         .hero-subtitle { font-size: 1.2rem; }
-        .stats-container { grid-template-columns: repeat(2, 1fr); }
+        .stats-container { 
+            grid-template-columns: repeat(2, 1fr); 
+            gap: 1rem;
+        }
+        .stat-card {
+            min-height: 160px;
+            padding: 1.2rem;
+        }
+        .stat-number {
+            font-size: 1.5rem;
+        }
+        .stat-label {
+            font-size: 0.8rem;
+        }
         .features-grid { grid-template-columns: 1fr; }
         .steps-container { flex-direction: column; gap: 2rem; }
         .steps-container::before { display: none; }
+    }
+    
+    @media (max-width: 480px) {
+        .stats-container {
+            grid-template-columns: 1fr;
+        }
+        .stat-card {
+            min-height: 140px;
+        }
+        .stat-number {
+            font-size: 1.3rem;
+        }
     }
     </style>
     """, unsafe_allow_html=True)
