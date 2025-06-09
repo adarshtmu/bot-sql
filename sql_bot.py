@@ -476,7 +476,7 @@ if not st.session_state.quiz_started:
     .main-container {
         background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
         min-height: 100vh;
-        padding: 1rem 0;
+        padding: 2rem 0;
         position: relative;
     }
     
@@ -531,9 +531,9 @@ if not st.session_state.quiz_started:
         background: rgba(255,255,255,0.95);
         backdrop-filter: blur(20px);
         border: 1px solid rgba(255,255,255,0.2);
-        padding: 2rem;
+        padding: 3rem;
         border-radius: 24px;
-        margin: 1rem auto;
+        margin: 2rem auto;
         max-width: 1000px;
         box-shadow: 0 20px 60px rgba(0,0,0,0.1);
         position: relative;
@@ -553,7 +553,7 @@ if not st.session_state.quiz_started:
     }
     
     .hero-title {
-        font-size: 3rem;
+        font-size: 3.5rem;
         font-weight: 800;
         margin-bottom: 1rem;
         background: linear-gradient(135deg, #2d3748, #4a5568);
@@ -561,77 +561,24 @@ if not st.session_state.quiz_started:
         -webkit-text-fill-color: transparent;
         background-clip: text;
         line-height: 1.2;
-        text-align: center;
     }
     
     .hero-subtitle {
-        font-size: 1.2rem;
+        font-size: 1.4rem;
         color: #6b7280;
-        margin-bottom: 2rem;
+        margin-bottom: 2.5rem;
         font-weight: 400;
         max-width: 600px;
         margin-left: auto;
         margin-right: auto;
         line-height: 1.6;
-        text-align: center;
-    }
-    
-    .start-button-container {
-        margin: 2rem 0;
-        text-align: center;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        width: 100%;
-    }
-    
-    .cta-button {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        color: white !important;
-        border: none;
-        padding: 1rem 2.5rem;
-        border-radius: 50px;
-        font-size: 1.1rem;
-        font-weight: 600;
-        cursor: pointer;
-        transition: all 0.3s ease;
-        box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
-        position: relative;
-        overflow: hidden;
-        text-decoration: none;
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        min-width: 250px;
-        white-space: nowrap;
-    }
-    
-    .cta-button::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: -100%;
-        width: 100%;
-        height: 100%;
-        background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
-        transition: left 0.5s;
-    }
-    
-    .cta-button:hover::before {
-        left: 100%;
-    }
-    
-    .cta-button:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 12px 35px rgba(102, 126, 234, 0.4);
     }
     
     .stats-container {
         display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
         gap: 1.5rem;
-        margin: 2rem 0;
-        padding: 0 1rem;
+        margin: 2.5rem 0;
     }
     
     .stat-card {
@@ -644,7 +591,7 @@ if not st.session_state.quiz_started:
         transition: transform 0.3s ease, box-shadow 0.3s ease;
         position: relative;
         overflow: hidden;
-        height: 180px;
+        height: 200px;
         display: flex;
         flex-direction: column;
         justify-content: center;
@@ -667,19 +614,23 @@ if not st.session_state.quiz_started:
     }
     
     .stat-icon {
-        font-size: 2.2rem;
+        font-size: 2.5rem;
         margin-bottom: 0.8rem;
         display: block;
     }
     
     .stat-number {
-        font-size: 1.6rem;
+        font-size: 1.8rem;
         font-weight: 700;
         color: #1e293b;
         display: block;
         margin-bottom: 0.5rem;
         line-height: 1.2;
         text-align: center;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        max-width: 100%;
     }
     
     .stat-label {
@@ -688,19 +639,61 @@ if not st.session_state.quiz_started:
         font-size: 0.9rem;
         line-height: 1.3;
         text-align: center;
+        max-width: 100%;
+        word-wrap: break-word;
+        hyphens: auto;
+    }
+    
+    .start-button-container {
+        margin: 3rem 0;
+        text-align: center;
+    }
+    
+    .cta-button {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border: none;
+        padding: 1.2rem 3rem;
+        border-radius: 50px;
+        font-size: 1.2rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .cta-button::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+        transition: left 0.5s;
+    }
+    
+    .cta-button:hover::before {
+        left: 100%;
+    }
+    
+    .cta-button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 12px 35px rgba(102, 126, 234, 0.4);
     }
     
     .features-grid {
         display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-        gap: 1.5rem;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 2rem;
         margin: 3rem 0;
-        padding: 0 1rem;
     }
     
     .feature-card {
         background: white;
-        padding: 2rem;
+        padding: 2.5rem;
         border-radius: 20px;
         box-shadow: 0 8px 30px rgba(0,0,0,0.1);
         border: 1px solid rgba(255,255,255,0.5);
@@ -728,7 +721,7 @@ if not st.session_state.quiz_started:
     }
     
     .feature-title {
-        font-size: 1.3rem;
+        font-size: 1.4rem;
         font-weight: 600;
         margin-bottom: 1rem;
         color: #1e293b !important;
@@ -737,12 +730,12 @@ if not st.session_state.quiz_started:
     .feature-description {
         color: #64748b !important;
         line-height: 1.6;
-        font-size: 0.95rem;
+        font-size: 1rem;
     }
     
     .learning-path {
         background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
-        padding: 2.5rem 1.5rem;
+        padding: 3rem;
         border-radius: 20px;
         margin: 3rem 0;
         border: 1px solid rgba(255,255,255,0.5);
@@ -750,7 +743,7 @@ if not st.session_state.quiz_started:
     
     .learning-path h3 {
         text-align: center;
-        font-size: 1.8rem;
+        font-size: 2rem;
         font-weight: 700;
         margin-bottom: 2rem;
         color: #1e293b;
@@ -762,8 +755,6 @@ if not st.session_state.quiz_started:
         align-items: center;
         position: relative;
         margin: 2rem 0;
-        flex-wrap: wrap;
-        gap: 1rem;
     }
     
     .steps-container::before {
@@ -779,8 +770,8 @@ if not st.session_state.quiz_started:
     
     .step {
         background: white;
-        width: 120px;
-        height: 120px;
+        width: 130px;
+        height: 130px;
         border-radius: 50%;
         display: flex;
         flex-direction: column;
@@ -792,7 +783,6 @@ if not st.session_state.quiz_started:
         z-index: 2;
         transition: transform 0.3s ease;
         padding: 0.5rem;
-        flex: 0 0 auto;
     }
     
     .step:hover {
@@ -800,23 +790,25 @@ if not st.session_state.quiz_started:
     }
     
     .step-number {
-        font-size: 1.4rem;
+        font-size: 1.5rem;
         font-weight: 700;
         color: #667eea;
-        margin-bottom: 0.3rem;
+        margin-bottom: 0.5rem;
     }
     
     .step-text {
-        font-size: 0.8rem;
+        font-size: 0.85rem;
         font-weight: 600;
         text-align: center;
         color: #64748b;
         line-height: 1.2;
+        word-wrap: break-word;
+        hyphens: auto;
     }
     
     .testimonial {
         background: white;
-        padding: 2rem;
+        padding: 2.5rem;
         border-radius: 20px;
         margin: 3rem 0;
         box-shadow: 0 8px 30px rgba(0,0,0,0.1);
@@ -825,7 +817,7 @@ if not st.session_state.quiz_started:
     }
     
     .testimonial-text {
-        font-size: 1.1rem;
+        font-size: 1.2rem;
         font-style: italic;
         color: #4a5568;
         margin-bottom: 1.5rem;
@@ -847,192 +839,54 @@ if not st.session_state.quiz_started:
         100% { transform: scale(1); }
     }
     
-    /* Mobile Responsive Styles */
     @media (max-width: 768px) {
-        .hero-container {
-            padding: 1.5rem;
-            margin: 0.5rem;
-        }
-        
-        .hero-title { 
-            font-size: 2.2rem; 
-        }
-        
-        .hero-subtitle { 
-            font-size: 1.1rem;
-            margin-bottom: 1.5rem;
-        }
-        
-        .cta-button {
-            padding: 0.9rem 2rem;
-            font-size: 1rem;
-            min-width: 200px;
-        }
-        
+        .hero-title { font-size: 2.5rem; }
+        .hero-subtitle { font-size: 1.2rem; }
         .stats-container { 
             grid-template-columns: repeat(2, 1fr); 
             gap: 1rem;
-            padding: 0 0.5rem;
         }
-        
         .stat-card {
-            height: 160px;
-            padding: 1.2rem 0.8rem;
+            height: 180px;
+            padding: 1.2rem;
         }
-        
-        .stat-icon {
-            font-size: 1.8rem;
-            margin-bottom: 0.6rem;
-        }
-        
         .stat-number {
-            font-size: 1.4rem;
+            font-size: 1.5rem;
         }
-        
         .stat-label {
             font-size: 0.8rem;
         }
-        
-        .features-grid { 
-            grid-template-columns: 1fr;
-            padding: 0 0.5rem;
-        }
-        
-        .feature-card {
-            padding: 1.5rem;
-        }
-        
-        .learning-path {
-            padding: 2rem 1rem;
-        }
-        
-        .steps-container { 
-            flex-direction: column; 
-            gap: 1.5rem;
-            justify-content: center;
-        }
-        
-        .steps-container::before { 
-            display: none; 
-        }
-        
+        .features-grid { grid-template-columns: 1fr; }
+        .steps-container { flex-direction: column; gap: 2rem; }
+        .steps-container::before { display: none; }
         .step {
-            width: 110px;
-            height: 110px;
-        }
-        
-        .step-number {
-            font-size: 1.2rem;
-        }
-        
-        .step-text {
-            font-size: 0.75rem;
-        }
-        
-        .testimonial {
-            padding: 1.5rem;
-            margin: 2rem 0.5rem;
-        }
-        
-        .testimonial-text {
-            font-size: 1rem;
+            width: 120px;
+            height: 120px;
         }
     }
     
     @media (max-width: 480px) {
-        .hero-container {
-            padding: 1rem;
-        }
-        
-        .hero-title {
-            font-size: 1.8rem;
-        }
-        
-        .hero-subtitle {
-            font-size: 1rem;
-        }
-        
-        .hero-badge {
-            font-size: 0.8rem;
-            padding: 0.4rem 1.2rem;
-        }
-        
-        .cta-button {
-            padding: 0.8rem 1.5rem;
-            font-size: 0.95rem;
-            min-width: 180px;
-        }
-        
         .stats-container {
             grid-template-columns: 1fr;
-            gap: 1rem;
         }
-        
         .stat-card {
-            height: 140px;
-            padding: 1rem;
+            height: 160px;
         }
-        
-        .stat-icon {
-            font-size: 1.6rem;
-        }
-        
         .stat-number {
-            font-size: 1.2rem;
+            font-size: 1.3rem;
         }
-        
         .step {
-            width: 100px;
-            height: 100px;
+            width: 110px;
+            height: 110px;
         }
-        
-        .step-number {
-            font-size: 1.1rem;
-        }
-        
         .step-text {
-            font-size: 0.7rem;
-        }
-        
-        .learning-path h3 {
-            font-size: 1.5rem;
-        }
-        
-        .feature-title {
-            font-size: 1.2rem;
-        }
-        
-        .feature-description {
-            font-size: 0.9rem;
-        }
-    }
-    
-    @media (max-width: 360px) {
-        .hero-title {
-            font-size: 1.6rem;
-        }
-        
-        .cta-button {
-            min-width: 160px;
-            font-size: 0.9rem;
-        }
-        
-        .stat-card {
-            height: 130px;
-        }
-        
-        .stat-number {
-            font-size: 1.1rem;
-        }
-        
-        .stat-label {
-            font-size: 0.75rem;
+            font-size: 0.8rem;
         }
     }
     </style>
     """, unsafe_allow_html=True)
     
-    # Floating background shapes
+    # Floating background shapes - Fixed positioning
     st.markdown("""
     <div class="floating-shapes">
         <div class="shape"></div>
@@ -1047,27 +901,10 @@ if not st.session_state.quiz_started:
         <div class="hero-badge">🚀 AI-Powered Learning Experience</div>
         <h1 class="hero-title">Master SQL Like a Pro</h1>
         <p class="hero-subtitle">Join 50,000+ developers who've accelerated their careers with our AI-powered SQL mastery program. Get personalized feedback, earn industry-recognized certificates, and land your dream job.</p>
-        
-        <!-- Start Button Container -->
-        <div class="start-button-container">
-    """, unsafe_allow_html=True)
-    
-    # Start Button (moved above stats)
-    if st.button("🚀 Start Your SQL Journey", type="primary", use_container_width=False, key="start_quiz"):
-        st.session_state.quiz_started = True
-        st.session_state.user_answers = []
-        st.session_state.current_question = 0
-        st.session_state.quiz_completed = False
-        st.success("🎉 Welcome to your SQL mastery journey!")
-        st.balloons()
-        st.rerun()
-    
-    st.markdown("""
-        </div>
     </div>
     """, unsafe_allow_html=True)
     
-    # Stats Section using Streamlit columns
+    # Stats Section using Streamlit columns (Alternative approach)
     st.markdown('<div class="stats-container">', unsafe_allow_html=True)
     col1, col2, col3, col4 = st.columns(4)
     
@@ -1108,6 +945,18 @@ if not st.session_state.quiz_started:
         """, unsafe_allow_html=True)
     
     st.markdown('</div>', unsafe_allow_html=True)
+    
+    # Start Button
+    col1, col2, col3 = st.columns([1, 2, 1])
+    with col2:
+        if st.button("🚀 Start Your SQL Journey", type="primary", use_container_width=True, key="start_quiz"):
+            st.session_state.quiz_started = True
+            st.session_state.user_answers = []
+            st.session_state.current_question = 0
+            st.session_state.quiz_completed = False
+            st.success("🎉 Welcome to your SQL mastery journey!")
+            st.balloons()
+            st.rerun()
     
     # Features Section
     st.markdown("""
