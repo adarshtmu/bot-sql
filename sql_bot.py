@@ -463,554 +463,780 @@ def display_simulation(title, result_data):
 # --- Advanced EdTech Learning Platform UI ---
 # --- Advanced EdTech Learning Platform UI ---
 # --- Advanced EdTech Learning Platform UI ---
-if not st.session_state.quiz_started:
-    # Advanced CSS for modern EdTech platform
-    st.markdown("""
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Master SQL Like a Pro - Advanced EdTech Platform</title>
     <style>
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
-    
-    * {
-        font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-    }
-    
-    .main-container {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
-        min-height: 100vh;
-        padding: 2rem 0;
-        position: relative;
-    }
-    
-    .floating-shapes {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100vh;
-        overflow: hidden;
-        pointer-events: none;
-        z-index: -1;
-    }
-    
-    .shape {
-        position: absolute;
-        background: rgba(255,255,255,0.1);
-        border-radius: 50%;
-        animation: float 6s ease-in-out infinite;
-    }
-    
-    .shape:nth-child(1) {
-        width: 80px;
-        height: 80px;
-        top: 10%;
-        left: 10%;
-        animation-delay: 0s;
-    }
-    
-    .shape:nth-child(2) {
-        width: 120px;
-        height: 120px;
-        top: 20%;
-        right: 15%;
-        animation-delay: 2s;
-    }
-    
-    .shape:nth-child(3) {
-        width: 60px;
-        height: 60px;
-        bottom: 20%;
-        left: 20%;
-        animation-delay: 4s;
-    }
-    
-    @keyframes float {
-        0%, 100% { transform: translateY(0px) rotate(0deg); }
-        50% { transform: translateY(-20px) rotate(180deg); }
-    }
-    
-    .hero-container {
-        background: rgba(255,255,255,0.95);
-        backdrop-filter: blur(20px);
-        border: 1px solid rgba(255,255,255,0.2);
-        padding: 3rem;
-        border-radius: 24px;
-        margin: 2rem auto;
-        max-width: 1000px;
-        box-shadow: 0 20px 60px rgba(0,0,0,0.1);
-        position: relative;
-        overflow: hidden;
-    }
-    
-    .hero-badge {
-        display: inline-block;
-        background: linear-gradient(135deg, #667eea, #764ba2);
-        color: white;
-        padding: 0.5rem 1.5rem;
-        border-radius: 50px;
-        font-size: 0.9rem;
-        font-weight: 600;
-        margin-bottom: 1.5rem;
-        box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
-    }
-    
-    .hero-title {
-        font-size: 3.5rem;
-        font-weight: 800;
-        margin-bottom: 1rem;
-        background: linear-gradient(135deg, #2d3748, #4a5568);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        background-clip: text;
-        line-height: 1.2;
-    }
-    
-    .hero-subtitle {
-        font-size: 1.4rem;
-        color: #6b7280;
-        margin-bottom: 2.5rem;
-        font-weight: 400;
-        max-width: 600px;
-        margin-left: auto;
-        margin-right: auto;
-        line-height: 1.6;
-    }
-    
-    .stats-container {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-        gap: 1.5rem;
-        margin: 2.5rem 0;
-    }
-    
-    .stat-card {
-        background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
-        padding: 1.5rem;
-        border-radius: 16px;
-        text-align: center;
-        border: 1px solid rgba(255,255,255,0.5);
-        box-shadow: 0 4px 20px rgba(0,0,0,0.08);
-        transition: transform 0.3s ease, box-shadow 0.3s ease;
-        position: relative;
-        overflow: hidden;
-        height: 200px;
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        align-items: center;
-    }
-    
-    .stat-card:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 10px 40px rgba(0,0,0,0.15);
-    }
-    
-    .stat-card::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        height: 4px;
-        background: linear-gradient(90deg, #667eea, #764ba2);
-    }
-    
-    .stat-icon {
-        font-size: 2.5rem;
-        margin-bottom: 0.8rem;
-        display: block;
-    }
-    
-    .stat-number {
-        font-size: 1.8rem;
-        font-weight: 700;
-        color: #1e293b;
-        display: block;
-        margin-bottom: 0.5rem;
-        line-height: 1.2;
-        text-align: center;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        white-space: nowrap;
-        max-width: 100%;
-    }
-    
-    .stat-label {
-        color: #64748b;
-        font-weight: 500;
-        font-size: 0.9rem;
-        line-height: 1.3;
-        text-align: center;
-        max-width: 100%;
-        word-wrap: break-word;
-        hyphens: auto;
-    }
-    
-    .start-button-container {
-        margin: 3rem 0;
-        text-align: center;
-    }
-    
-    .cta-button {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        color: white;
-        border: none;
-        padding: 1.2rem 3rem;
-        border-radius: 50px;
-        font-size: 1.2rem;
-        font-weight: 600;
-        cursor: pointer;
-        transition: all 0.3s ease;
-        box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
-        position: relative;
-        overflow: hidden;
-    }
-    
-    .cta-button::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: -100%;
-        width: 100%;
-        height: 100%;
-        background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
-        transition: left 0.5s;
-    }
-    
-    .cta-button:hover::before {
-        left: 100%;
-    }
-    
-    .cta-button:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 12px 35px rgba(102, 126, 234, 0.4);
-    }
-    
-    .features-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-        gap: 2rem;
-        margin: 3rem 0;
-    }
-    
-    .feature-card {
-        background: white;
-        padding: 2.5rem;
-        border-radius: 20px;
-        box-shadow: 0 8px 30px rgba(0,0,0,0.1);
-        border: 1px solid rgba(255,255,255,0.5);
-        transition: transform 0.3s ease, box-shadow 0.3s ease;
-        position: relative;
-    }
-    
-    .feature-card:hover {
-        transform: translateY(-8px);
-        box-shadow: 0 20px 60px rgba(0,0,0,0.15);
-    }
-    
-    .feature-icon {
-        width: 60px;
-        height: 60px;
-        background: linear-gradient(135deg, #667eea, #764ba2);
-        border-radius: 12px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 1.8rem;
-        margin-bottom: 1.5rem;
-        box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
-        color: white;
-    }
-    
-    .feature-title {
-        font-size: 1.4rem;
-        font-weight: 600;
-        margin-bottom: 1rem;
-        color: #1e293b !important;
-    }
-    
-    .feature-description {
-        color: #64748b !important;
-        line-height: 1.6;
-        font-size: 1rem;
-    }
-    
-    .learning-path {
-        background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
-        padding: 3rem;
-        border-radius: 20px;
-        margin: 3rem 0;
-        border: 1px solid rgba(255,255,255,0.5);
-    }
-    
-    .learning-path h3 {
-        text-align: center;
-        font-size: 2rem;
-        font-weight: 700;
-        margin-bottom: 2rem;
-        color: #1e293b;
-    }
-    
-    .steps-container {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        position: relative;
-        margin: 2rem 0;
-    }
-    
-    .steps-container::before {
-        content: '';
-        position: absolute;
-        top: 50%;
-        left: 0;
-        right: 0;
-        height: 2px;
-        background: linear-gradient(90deg, #667eea, #764ba2);
-        z-index: 1;
-    }
-    
-    .step {
-        background: white;
-        width: 130px;
-        height: 130px;
-        border-radius: 50%;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        box-shadow: 0 8px 25px rgba(0,0,0,0.1);
-        border: 3px solid #667eea;
-        position: relative;
-        z-index: 2;
-        transition: transform 0.3s ease;
-        padding: 0.5rem;
-    }
-    
-    .step:hover {
-        transform: scale(1.05);
-    }
-    
-    .step-number {
-        font-size: 1.5rem;
-        font-weight: 700;
-        color: #667eea;
-        margin-bottom: 0.5rem;
-    }
-    
-    .step-text {
-        font-size: 0.85rem;
-        font-weight: 600;
-        text-align: center;
-        color: #64748b;
-        line-height: 1.2;
-        word-wrap: break-word;
-        hyphens: auto;
-    }
-    
-    .testimonial {
-        background: white;
-        padding: 2.5rem;
-        border-radius: 20px;
-        margin: 3rem 0;
-        box-shadow: 0 8px 30px rgba(0,0,0,0.1);
-        text-align: center;
-        border: 1px solid rgba(255,255,255,0.5);
-    }
-    
-    .testimonial-text {
-        font-size: 1.2rem;
-        font-style: italic;
-        color: #4a5568;
-        margin-bottom: 1.5rem;
-        line-height: 1.6;
-    }
-    
-    .testimonial-author {
-        font-weight: 600;
-        color: #1e293b;
-    }
-    
-    .pulse {
-        animation: pulse 2s infinite;
-    }
-    
-    @keyframes pulse {
-        0% { transform: scale(1); }
-        50% { transform: scale(1.02); }
-        100% { transform: scale(1); }
-    }
-    
-    @media (max-width: 768px) {
-        .hero-title { font-size: 2.5rem; }
-        .hero-subtitle { font-size: 1.2rem; }
-        .stats-container { 
-            grid-template-columns: repeat(2, 1fr); 
-            gap: 1rem;
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
-        .stat-card {
-            height: 180px;
-            padding: 1.2rem;
+        
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            overflow-x: hidden;
+            background: #0a0e1a;
+            color: #ffffff;
         }
-        .stat-number {
+        
+        /* 3D Scene Background */
+        .scene-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100vh;
+            background: linear-gradient(135deg, #0a0e1a 0%, #1a1f35 25%, #2d1b69 50%, #764ba2 75%, #f093fb 100%);
+            z-index: -2;
+        }
+        
+        /* Floating 3D Elements */
+        .floating-elements {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100vh;
+            pointer-events: none;
+            z-index: -1;
+        }
+        
+        .floating-cube {
+            position: absolute;
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(45deg, rgba(102, 126, 234, 0.2), rgba(118, 75, 162, 0.2));
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            animation: float3d 8s ease-in-out infinite;
+            backdrop-filter: blur(10px);
+            transform-style: preserve-3d;
+        }
+        
+        .floating-cube:nth-child(1) {
+            top: 10%;
+            left: 5%;
+            animation-delay: 0s;
+            transform: rotateX(45deg) rotateY(45deg);
+        }
+        
+        .floating-cube:nth-child(2) {
+            top: 20%;
+            right: 10%;
+            animation-delay: 2s;
+            width: 80px;
+            height: 80px;
+            transform: rotateX(-30deg) rotateY(60deg);
+        }
+        
+        .floating-cube:nth-child(3) {
+            bottom: 15%;
+            left: 15%;
+            animation-delay: 4s;
+            width: 45px;
+            height: 45px;
+            transform: rotateX(60deg) rotateY(-45deg);
+        }
+        
+        .floating-cube:nth-child(4) {
+            top: 60%;
+            right: 20%;
+            animation-delay: 6s;
+            width: 70px;
+            height: 70px;
+            transform: rotateX(-45deg) rotateY(30deg);
+        }
+        
+        @keyframes float3d {
+            0%, 100% { 
+                transform: translateY(0px) translateZ(0px) rotateX(var(--rx, 45deg)) rotateY(var(--ry, 45deg)); 
+            }
+            33% { 
+                transform: translateY(-30px) translateZ(20px) rotateX(calc(var(--rx, 45deg) + 20deg)) rotateY(calc(var(--ry, 45deg) + 30deg)); 
+            }
+            66% { 
+                transform: translateY(15px) translateZ(-15px) rotateX(calc(var(--rx, 45deg) - 15deg)) rotateY(calc(var(--ry, 45deg) - 20deg)); 
+            }
+        }
+        
+        /* Particle System */
+        .particles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100vh;
+            pointer-events: none;
+            z-index: -1;
+        }
+        
+        .particle {
+            position: absolute;
+            width: 3px;
+            height: 3px;
+            background: rgba(255, 255, 255, 0.6);
+            border-radius: 50%;
+            animation: particleFloat 10s linear infinite;
+        }
+        
+        @keyframes particleFloat {
+            0% {
+                transform: translateY(100vh) translateX(0px);
+                opacity: 0;
+            }
+            10% {
+                opacity: 1;
+            }
+            90% {
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(-10px) translateX(100px);
+                opacity: 0;
+            }
+        }
+        
+        /* Main Container */
+        .main-container {
+            min-height: 100vh;
+            padding: 2rem 0;
+            position: relative;
+            perspective: 1000px;
+        }
+        
+        /* Glass Morphism Hero Container */
+        .hero-container {
+            background: rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            padding: 4rem 3rem;
+            border-radius: 32px;
+            margin: 2rem auto;
+            max-width: 1200px;
+            box-shadow: 
+                0 25px 80px rgba(0, 0, 0, 0.3),
+                0 0 0 1px rgba(255, 255, 255, 0.05),
+                inset 0 1px 0 rgba(255, 255, 255, 0.1);
+            position: relative;
+            transform-style: preserve-3d;
+            transition: transform 0.3s ease;
+        }
+        
+        .hero-container:hover {
+            transform: translateY(-10px) rotateX(5deg);
+        }
+        
+        /* Glowing Badge */
+        .hero-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 0.8rem 2rem;
+            border-radius: 50px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            margin-bottom: 2rem;
+            box-shadow: 
+                0 8px 32px rgba(102, 126, 234, 0.4),
+                0 0 20px rgba(102, 126, 234, 0.2);
+            animation: glow 2s ease-in-out infinite alternate;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .hero-badge::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+            animation: shimmer 3s infinite;
+        }
+        
+        @keyframes glow {
+            from { box-shadow: 0 8px 32px rgba(102, 126, 234, 0.4), 0 0 20px rgba(102, 126, 234, 0.2); }
+            to { box-shadow: 0 12px 40px rgba(102, 126, 234, 0.6), 0 0 30px rgba(102, 126, 234, 0.4); }
+        }
+        
+        @keyframes shimmer {
+            0% { left: -100%; }
+            100% { left: 100%; }
+        }
+        
+        /* 3D Typography */
+        .hero-title {
+            font-size: 4.5rem;
+            font-weight: 900;
+            margin-bottom: 1.5rem;
+            background: linear-gradient(135deg, #ffffff, #c3d9ff, #667eea);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            line-height: 1.1;
+            text-align: center;
+            position: relative;
+            text-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            transform-style: preserve-3d;
+        }
+        
+        .hero-title::after {
+            content: attr(data-text);
+            position: absolute;
+            top: 0;
+            left: 0;
+            z-index: -1;
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.3), rgba(118, 75, 162, 0.3));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            transform: translateZ(-20px) translateY(4px);
+            filter: blur(2px);
+        }
+        
+        .hero-subtitle {
             font-size: 1.5rem;
+            color: rgba(255, 255, 255, 0.8);
+            margin-bottom: 3rem;
+            font-weight: 400;
+            max-width: 700px;
+            margin-left: auto;
+            margin-right: auto;
+            line-height: 1.7;
+            text-align: center;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
         }
-        .stat-label {
-            font-size: 0.8rem;
-        }
-        .features-grid { grid-template-columns: 1fr; }
-        .steps-container { flex-direction: column; gap: 2rem; }
-        .steps-container::before { display: none; }
-        .step {
-            width: 120px;
-            height: 120px;
-        }
-    }
-    
-    @media (max-width: 480px) {
+        
+        /* 3D Stats Grid */
         .stats-container {
-            grid-template-columns: 1fr;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+            margin: 3rem 0;
+            perspective: 1000px;
         }
+        
         .stat-card {
-            height: 160px;
+            background: rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(15px);
+            padding: 2.5rem 1.5rem;
+            border-radius: 24px;
+            text-align: center;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 
+                0 15px 50px rgba(0, 0, 0, 0.2),
+                inset 0 1px 0 rgba(255, 255, 255, 0.1);
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            position: relative;
+            overflow: hidden;
+            height: 220px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            transform-style: preserve-3d;
         }
+        
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #667eea, #764ba2, #f093fb);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-15px) rotateX(10deg) rotateY(5deg);
+            box-shadow: 
+                0 25px 80px rgba(0, 0, 0, 0.3),
+                0 0 30px rgba(102, 126, 234, 0.2);
+        }
+        
+        .stat-card:hover::before {
+            opacity: 1;
+        }
+        
+        .stat-icon {
+            font-size: 3.5rem;
+            margin-bottom: 1rem;
+            display: block;
+            filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.3));
+            animation: iconFloat 3s ease-in-out infinite;
+        }
+        
+        @keyframes iconFloat {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-8px); }
+        }
+        
         .stat-number {
-            font-size: 1.3rem;
+            font-size: 2.5rem;
+            font-weight: 800;
+            color: #ffffff;
+            display: block;
+            margin-bottom: 0.8rem;
+            line-height: 1.1;
+            text-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
         }
+        
+        .stat-label {
+            color: rgba(255, 255, 255, 0.7);
+            font-weight: 500;
+            font-size: 1rem;
+            line-height: 1.3;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        /* Enhanced CTA Button */
+        .start-button-container {
+            margin: 4rem 0;
+            text-align: center;
+            perspective: 1000px;
+        }
+        
+        .cta-button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+            color: white;
+            border: none;
+            padding: 1.8rem 4rem;
+            border-radius: 60px;
+            font-size: 1.4rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            box-shadow: 
+                0 15px 40px rgba(102, 126, 234, 0.4),
+                0 5px 15px rgba(0, 0, 0, 0.2);
+            position: relative;
+            overflow: hidden;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transform-style: preserve-3d;
+        }
+        
+        .cta-button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+            transition: left 0.6s ease;
+        }
+        
+        .cta-button::after {
+            content: '';
+            position: absolute;
+            inset: 2px;
+            border-radius: 58px;
+            background: linear-gradient(135deg, rgba(255,255,255,0.1), transparent);
+            pointer-events: none;
+        }
+        
+        .cta-button:hover {
+            transform: translateY(-8px) scale(1.05) rotateX(5deg);
+            box-shadow: 
+                0 25px 60px rgba(102, 126, 234, 0.6),
+                0 15px 30px rgba(0, 0, 0, 0.3);
+        }
+        
+        .cta-button:hover::before {
+            left: 100%;
+        }
+        
+        .cta-button:active {
+            transform: translateY(-4px) scale(1.02);
+        }
+        
+        /* 3D Feature Cards */
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 2.5rem;
+            margin: 4rem 0;
+            perspective: 1200px;
+        }
+        
+        .feature-card {
+            background: rgba(255, 255, 255, 0.06);
+            backdrop-filter: blur(20px);
+            padding: 3rem;
+            border-radius: 28px;
+            box-shadow: 
+                0 20px 60px rgba(0, 0, 0, 0.2),
+                inset 0 1px 0 rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            position: relative;
+            cursor: pointer;
+            transform-style: preserve-3d;
+        }
+        
+        .feature-card:hover {
+            transform: translateY(-20px) rotateX(15deg) rotateY(5deg);
+            box-shadow: 
+                0 35px 100px rgba(0, 0, 0, 0.3),
+                0 0 40px rgba(102, 126, 234, 0.2);
+        }
+        
+        .feature-icon {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.2rem;
+            margin-bottom: 2rem;
+            box-shadow: 
+                0 10px 30px rgba(102, 126, 234, 0.4),
+                inset 0 1px 0 rgba(255, 255, 255, 0.2);
+            color: white;
+            position: relative;
+            transform: translateZ(20px);
+        }
+        
+        .feature-title {
+            font-size: 1.6rem;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+            color: #ffffff;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+        }
+        
+        .feature-description {
+            color: rgba(255, 255, 255, 0.7);
+            line-height: 1.7;
+            font-size: 1.1rem;
+        }
+        
+        /* 3D Learning Path */
+        .learning-path {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(25px);
+            padding: 4rem 3rem;
+            border-radius: 32px;
+            margin: 4rem 0;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 
+                0 25px 80px rgba(0, 0, 0, 0.2),
+                inset 0 1px 0 rgba(255, 255, 255, 0.1);
+        }
+        
+        .learning-path h3 {
+            text-align: center;
+            font-size: 2.5rem;
+            font-weight: 800;
+            margin-bottom: 3rem;
+            color: #ffffff;
+            text-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+        }
+        
+        .steps-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: relative;
+            margin: 3rem 0;
+            perspective: 1000px;
+        }
+        
+        .steps-container::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 10%;
+            right: 10%;
+            height: 3px;
+            background: linear-gradient(90deg, #667eea, #764ba2, #f093fb);
+            z-index: 1;
+            border-radius: 2px;
+            box-shadow: 0 0 20px rgba(102, 126, 234, 0.4);
+        }
+        
         .step {
-            width: 110px;
-            height: 110px;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(15px);
+            width: 160px;
+            height: 160px;
+            border-radius: 50%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 
+                0 15px 40px rgba(0, 0, 0, 0.2),
+                inset 0 1px 0 rgba(255, 255, 255, 0.2);
+            border: 2px solid rgba(102, 126, 234, 0.5);
+            position: relative;
+            z-index: 2;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            padding: 1rem;
+            cursor: pointer;
+            transform-style: preserve-3d;
         }
+        
+        .step:hover {
+            transform: translateY(-15px) scale(1.1) rotateX(15deg);
+            box-shadow: 
+                0 25px 60px rgba(0, 0, 0, 0.3),
+                0 0 30px rgba(102, 126, 234, 0.4);
+        }
+        
+        .step-number {
+            font-size: 2rem;
+            font-weight: 800;
+            color: #667eea;
+            margin-bottom: 0.8rem;
+            text-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+        }
+        
         .step-text {
-            font-size: 0.8rem;
+            font-size: 0.95rem;
+            font-weight: 600;
+            text-align: center;
+            color: rgba(255, 255, 255, 0.8);
+            line-height: 1.3;
         }
-    }
+        
+        /* Enhanced Testimonial */
+        .testimonial {
+            background: rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(20px);
+            padding: 3.5rem;
+            border-radius: 32px;
+            margin: 4rem 0;
+            box-shadow: 
+                0 25px 80px rgba(0, 0, 0, 0.2),
+                inset 0 1px 0 rgba(255, 255, 255, 0.1);
+            text-align: center;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .testimonial::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: conic-gradient(from 0deg, transparent, rgba(102, 126, 234, 0.1), transparent);
+            animation: rotate 20s linear infinite;
+            z-index: -1;
+        }
+        
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        
+        .testimonial-text {
+            font-size: 1.4rem;
+            font-style: italic;
+            color: rgba(255, 255, 255, 0.9);
+            margin-bottom: 2rem;
+            line-height: 1.7;
+            position: relative;
+            z-index: 2;
+        }
+        
+        .testimonial-author {
+            font-weight: 700;
+            color: #ffffff;
+            font-size: 1.1rem;
+            position: relative;
+            z-index: 2;
+        }
+        
+        /* Responsive Design */
+        @media (max-width: 1024px) {
+            .hero-title { font-size: 3.5rem; }
+            .hero-subtitle { font-size: 1.3rem; }
+            .features-grid { grid-template-columns: 1fr; }
+        }
+        
+        @media (max-width: 768px) {
+            .hero-container { padding: 3rem 2rem; }
+            .hero-title { font-size: 2.8rem; }
+            .hero-subtitle { font-size: 1.2rem; }
+            .stats-container { 
+                grid-template-columns: repeat(2, 1fr); 
+                gap: 1.5rem;
+            }
+            .stat-card { height: 200px; padding: 2rem 1rem; }
+            .steps-container { 
+                flex-direction: column; 
+                gap: 3rem; 
+            }
+            .steps-container::before { display: none; }
+            .step { width: 140px; height: 140px; }
+        }
+        
+        @media (max-width: 480px) {
+            .stats-container { grid-template-columns: 1fr; }
+            .stat-card { height: 180px; }
+            .cta-button { padding: 1.5rem 3rem; font-size: 1.2rem; }
+            .step { width: 120px; height: 120px; }
+        }
     </style>
-    """, unsafe_allow_html=True)
+</head>
+<body>
+    <!-- 3D Scene Background -->
+    <div class="scene-container"></div>
     
-    # Floating background shapes - Fixed positioning
-    st.markdown("""
-    <div class="floating-shapes">
-        <div class="shape"></div>
-        <div class="shape"></div>
-        <div class="shape"></div>
+    <!-- Floating 3D Elements -->
+    <div class="floating-elements">
+        <div class="floating-cube"></div>
+        <div class="floating-cube"></div>
+        <div class="floating-cube"></div>
+        <div class="floating-cube"></div>
     </div>
-    """, unsafe_allow_html=True)
     
-    # Main Hero Section
-    st.markdown("""
-    <div class="hero-container">
-        <div class="hero-badge">🚀 AI-Powered Learning Experience</div>
-        <h1 class="hero-title">Master SQL Like a Pro</h1>
-        <p class="hero-subtitle">Join 50,000+ developers who've accelerated their careers with our AI-powered SQL mastery program. Get personalized feedback, earn industry-recognized certificates, and land your dream job.</p>
-    </div>
-    """, unsafe_allow_html=True)
+    <!-- Particle System -->
+    <div class="particles" id="particles"></div>
     
-    # Stats Section using Streamlit columns (Alternative approach)
-    st.markdown('<div class="stats-container">', unsafe_allow_html=True)
-    col1, col2, col3, col4 = st.columns(4)
-    
-    with col1:
-        st.markdown("""
-        <div class="stat-card">
-            <div class="stat-icon">📊</div>
-            <span class="stat-number">25</span>
-            <div class="stat-label">Expert Questions</div>
-        </div>
-        """, unsafe_allow_html=True)
-    
-    with col2:
-        st.markdown("""
-        <div class="stat-card">
-            <div class="stat-icon">⏰</div>
-            <span class="stat-number">15-20</span>
-            <div class="stat-label">Minutes</div>
-        </div>
-        """, unsafe_allow_html=True)
-    
-    with col3:
-        st.markdown("""
-        <div class="stat-card">
-            <div class="stat-icon">🎯</div>
-            <span class="stat-number">50%</span>
-            <div class="stat-label">Pass Rate</div>
-        </div>
-        """, unsafe_allow_html=True)
-    
-    with col4:
-        st.markdown("""
-        <div class="stat-card">
-            <div class="stat-icon">🏆</div>
-            <span class="stat-number">Pro</span>
-            <div class="stat-label">Certificate</div>
-        </div>
-        """, unsafe_allow_html=True)
-    
-    st.markdown('</div>', unsafe_allow_html=True)
-    
-    # Start Button
-    col1, col2, col3 = st.columns([1, 2, 1])
-    with col2:
-        if st.button("🚀 Start Your SQL Journey", type="primary", use_container_width=True, key="start_quiz"):
-            st.session_state.quiz_started = True
-            st.session_state.user_answers = []
-            st.session_state.current_question = 0
-            st.session_state.quiz_completed = False
-            st.success("🎉 Welcome to your SQL mastery journey!")
-            st.balloons()
-            st.rerun()
-    
-    # Features Section
-    st.markdown("""
-    <div class="features-grid">
-        <div class="feature-card">
-            <div class="feature-icon">🤖</div>
-            <h3 class="feature-title">AI-Powered Feedback</h3>
-            <p class="feature-description">Get instant, personalized feedback on your SQL queries with suggestions for optimization and best practices from our advanced AI tutor.</p>
-        </div>
-        <div class="feature-card">
-            <div class="feature-icon">🎯</div>
-            <h3 class="feature-title">Real-World Scenarios</h3>
-            <p class="feature-description">Practice with authentic business problems and datasets that mirror what you'll encounter in your professional career.</p>
-        </div>
-        <div class="feature-card">
-            <div class="feature-icon">📈</div>
-            <h3 class="feature-title">Progress Tracking</h3>
-            <p class="feature-description">Monitor your learning journey with detailed analytics, performance insights, and skill progression tracking.</p>
-        </div>
-    </div>
-    """, unsafe_allow_html=True)
-    
-    # Learning Path
-    st.markdown("""
-    <div class="learning-path">
-        <h3>Your Learning Journey</h3>
-        <div class="steps-container">
-            <div class="step">
-                <div class="step-number">1</div>
-                <div class="step-text">Take Assessment</div>
+    <div class="main-container">
+        <!-- Hero Section -->
+        <div class="hero-container">
+            <div class="hero-badge">
+                🚀 AI-Powered Learning Experience
             </div>
-            <div class="step">
-                <div class="step-number">2</div>
-                <div class="step-text">Get AI Feedback</div>
+            <h1 class="hero-title" data-text="Master SQL Like a Pro">Master SQL Like a Pro</h1>
+            <p class="hero-subtitle">Join 50,000+ developers who've accelerated their careers with our AI-powered SQL mastery program. Get personalized feedback, earn industry-recognized certificates, and land your dream job.</p>
+        </div>
+        
+        <!-- Stats Section -->
+        <div class="stats-container">
+            <div class="stat-card">
+                <div class="stat-icon">📊</div>
+                <div class="stat-number">25</div>
+                <div class="stat-label">Expert Questions</div>
             </div>
-            <div class="step">
-                <div class="step-number">3</div>
-                <div class="step-text">Earn Certificate</div>
+            <div class="stat-card">
+                <div class="stat-icon">⏰</div>
+                <div class="stat-number">15-20</div>
+                <div class="stat-label">Minutes</div>
             </div>
-            <div class="step">
-                <div class="step-number">4</div>
-                <div class="step-text">Advance Career</div>
+            <div class="stat-card">
+                <div class="stat-icon">🎯</div>
+                <div class="stat-number">50%</div>
+                <div class="stat-label">Pass Rate</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">🏆</div>
+                <div class="stat-number">Pro</div>
+                <div class="stat-label">Certificate</div>
             </div>
         </div>
+        
+        <!-- CTA Button -->
+        <div class="start-button-container">
+            <button class="cta-button" onclick="startQuiz()">
+                🚀 Start Your SQL Journey
+            </button>
+        </div>
+        
+        <!-- Features Section -->
+        <div class="features-grid">
+            <div class="feature-card">
+                <div class="feature-icon">🤖</div>
+                <h3 class="feature-title">AI-Powered Feedback</h3>
+                <p class="feature-description">Get instant, personalized feedback on your SQL queries with suggestions for optimization and best practices from our advanced AI tutor.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">🎯</div>
+                <h3 class="feature-title">Real-World Scenarios</h3>
+                <p class="feature-description">Practice with authentic business problems and datasets that mirror what you'll encounter in your professional career.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">📈</div>
+                <h3 class="feature-title">Progress Tracking</h3>
+                <p class="feature-description">Monitor your learning journey with detailed analytics, performance insights, and skill progression tracking.</p>
+            </div>
+        </div>
+        
+        <!-- Learning Path -->
+        <div class="learning-path">
+            <h3>Your Learning Journey</h3>
+            <div class="steps-container">
+                <div class="step">
+                    <div class="step-number">1</div>
+                    <div class="step-text">Take Assessment</div>
+                </div>
+                <div class="step">
+                    <div class="step-number">2</div>
+                    <div class="step-text">Get AI Feedback</div>
+                </div>
+                <div class="step">
+                    <div class="step-number">3</div>
+                    <div class="step-text">Earn Certificate</div>
+                </div>
+                <div class="step">
+                    <div class="step-number">4</div>
+                    <div class="step-text">Advance Career</div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Testimonial -->
+        <div class="testimonial">
+            <p class="testimonial-text">"This platform transformed my SQL skills in just 2 weeks. The AI feedback was incredibly detailed and helped me land my dream data analyst role at a Fortune 500 company!"</p>
+            <div class="testimonial-author">— Arjun Sharma, Senior Data Analyst at TechMahindra</div>
+        </div>
     </div>
-    """, unsafe_allow_html=True)
     
-    # Testimonial
-    st.markdown("""
-    <div class="testimonial pulse">
-        <p class="testimonial-text">"This platform transformed my SQL skills in just 2 weeks. The AI feedback was incredibly detailed and helped me land my dream data analyst role at a Fortune 500 company!"</p>
-        <div class="testimonial-author">— Arjun Sharma, Senior Data Analyst at TechMahindra</div>
-    </div>
-    """, unsafe_allow_html=True)
+    <script>
+        // Particle System
+        function createParticles() {
+            const particlesContainer = document.getElementById('particles');
+            
+            for (let i = 0; i < 50; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                particle.style.left = Math.random() * 100 + '%';
+                particle.style.animationDelay = Math.random() * 10 + 's';
+                particle.style.animationDuration = (Math.random() * 10 + 10) + 's';
+                particlesContainer.appendChild(particle);
+            }
+        }
+        
+        // Enhanced Mouse Movement Effects
+        document.addEventListener('mousemove', (e) => {
+            const mouseX = e.clientX / window.innerWidth;
+            const mouseY = e.clientY / window.innerHeight;
+            
+            // Move floating cubes
+            const cubes = document.querySelectorAll('.floating-cube');
+            cubes.forEach((cube, index) => {
+                const speed = (index + 1) * 0.5;
+                const x = (mouseX - 0.5) * speed * 20;
+                const y = (mouseY - 0.5) * speed * 20;
+                cube.style.transform += ` translate(${x}px, ${y}px)`;
+            });
+            
+            // Tilt effect for cards
+            const cards = document.querySelectorAll('.stat-card, .feature-card');
+            cards.forEach(card => {
+                const rect = card.getBoundingClientRect();
 # --- Quiz In Progress Screen ---
 elif st.session_state.quiz_started and not st.session_state.quiz_completed:
     st.title("✍️ SQL Query Challenge")
