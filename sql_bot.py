@@ -462,6 +462,7 @@ def display_simulation(title, result_data):
 # --- Advanced EdTech Learning Platform UI ---
 # --- Advanced EdTech Learning Platform UI ---
 # --- Advanced EdTech Learning Platform UI ---
+# --- Advanced EdTech Learning Platform UI ---
 if not st.session_state.quiz_started:
     # Advanced CSS for modern EdTech platform
     st.markdown("""
@@ -590,6 +591,11 @@ if not st.session_state.quiz_started:
         transition: transform 0.3s ease, box-shadow 0.3s ease;
         position: relative;
         overflow: hidden;
+        height: 200px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
     }
     
     .stat-card:hover {
