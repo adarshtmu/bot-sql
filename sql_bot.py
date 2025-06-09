@@ -890,7 +890,7 @@ if not st.session_state.quiz_started:
         st.markdown("""
         <div class="stat-card">
             <div class="stat-icon">📊</div>
-            <span class="stat-number">25</span>
+            <span class="stat-number">5</span>
             <div class="stat-label">Expert Questions</div>
         </div>
         """, unsafe_allow_html=True)
