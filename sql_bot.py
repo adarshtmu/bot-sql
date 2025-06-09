@@ -461,6 +461,7 @@ def display_simulation(title, result_data):
 # --- Minimal Advanced Start Screen ---
 # --- Advanced EdTech Learning Platform UI ---
 # --- Advanced EdTech Learning Platform UI ---
+# --- Advanced EdTech Learning Platform UI ---
 if not st.session_state.quiz_started:
     # Advanced CSS for modern EdTech platform
     st.markdown("""
@@ -476,17 +477,17 @@ if not st.session_state.quiz_started:
         min-height: 100vh;
         padding: 2rem 0;
         position: relative;
-        overflow: hidden;
     }
     
     .floating-shapes {
-        position: absolute;
+        position: fixed;
         top: 0;
         left: 0;
         width: 100%;
-        height: 100%;
+        height: 100vh;
         overflow: hidden;
         pointer-events: none;
+        z-index: -1;
     }
     
     .shape {
@@ -827,14 +828,12 @@ if not st.session_state.quiz_started:
     </style>
     """, unsafe_allow_html=True)
     
-    # Floating background shapes
+    # Floating background shapes - Fixed positioning
     st.markdown("""
-    <div class="main-container">
-        <div class="floating-shapes">
-            <div class="shape"></div>
-            <div class="shape"></div>
-            <div class="shape"></div>
-        </div>
+    <div class="floating-shapes">
+        <div class="shape"></div>
+        <div class="shape"></div>
+        <div class="shape"></div>
     </div>
     """, unsafe_allow_html=True)
     
@@ -954,7 +953,6 @@ if not st.session_state.quiz_started:
         <div class="testimonial-author">— Sarah Chen, Senior Data Analyst at Tech Corp</div>
     </div>
     """, unsafe_allow_html=True)
-
 # --- Quiz In Progress Screen ---
 elif st.session_state.quiz_started and not st.session_state.quiz_completed:
     st.title("✍️ SQL Query Challenge")
