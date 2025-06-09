@@ -410,11 +410,11 @@ def analyze_performance(user_answers):
         - Both single (') and double (") quotes were acceptable for string literals in this quiz simulation.
 
         **Task:**
-        Ab, neeche diye gaye structure mein overall performance ka ek summary feedback do:
-        1.  **Overall Impression:** Score aur general performance pe ek positive ya encouraging comment (e.g., "Overall performance kaafi achhi rahi!", "Thodi aur practice lagegi, but potential hai!"). Be realistic but motivating.
-        2.  **Strengths:** Agar kuch specific concepts sahi kiye hain (jo correct answers se pata chale), unko highlight karo (e.g., "SELECT aur WHERE clause ka use aache se samajh aa gaya hai.", "JOINs wale sawaal sahi kiye, yeh achhi baat hai!"). General rakho agar specific pattern na dikhe.
-        3.  **Areas for Improvement:** Jo concepts galat hue (incorrect answers se related), unko gently point out karo. Focus on concepts, not just specific mistakes (e.g., "JOIN ka logic thoda aur clear karna hoga shayad.", "Aggregate functions (COUNT, AVG) pe dhyaan dena.", "Syntax ki chhoti-moti galtiyan ho rahi hain."). Briefly mention standard practices (like single quotes for strings in real DBs) as a learning point, without implying it was wrong *in this quiz*.
-        4.  **Next Steps / Encouragement:** Kuch encouraging words aur aage kya karna chahiye (e.g., "Keep practicing!", "Concept X ko revise kar lena.", "Aise hi lage raho, SQL aa jayega! Real-world ke liye standard SQL practices (jaise single quotes) seekhte rehna important hai.").
+        Using the structure below, provide an overall summary feedback on the learner's performance:
+        1.  **Overall Impression:** Give a positive or encouraging comment based on the score and general performance (e.g., "Overall performance was quite good!", "A bit more practice is needed, but there's great potential!"). Be realistic but motivating.
+        2.  **Strengths:** Highlight any specific concepts the learner did well with (as seen from the correct answers), such as "You have a good understanding of the SELECT and WHERE clauses," or "Your answers to JOIN questions were correct, which is great!" If no specific pattern is found, keep it general.
+        3.  **Areas for Improvement:** Gently point out concepts related to the incorrect answers that need improvement. Focus on concepts, not just specific mistakes (e.g., "You may need to clarify your approach to JOIN logic," "Pay attention to aggregate functions like COUNT and AVG," "There were some minor syntax mistakes."). Briefly mention standard practices (like using single quotes for strings in real databases) as a learning point, without implying it was wrong *in this quiz*.
+        4.  **Next Steps / Encouragement:** Give some encouraging words and suggest next steps (e.g., "Keep practicing!", "Consider reviewing concept X.", "Keep it up, you'll master SQL soon! It's important to keep learning standard SQL practices, such as using single quotes, for real-world use.").
 
         Generate the feedback in plain English only. Start directly with the feedback.
         """
@@ -644,7 +644,7 @@ elif st.session_state.quiz_completed:
 
     # --- 1. Answer/Feedback Summary first ---
     st.markdown("---")
-    st.subheader("📝 Aapke Jawaab Aur Feedback Ka Summary")
+    st.subheader("📝 Summary of Your Answers and Feedback")
     for i, ans_data in enumerate(st.session_state.user_answers):
         q_num = i + 1
         is_correct = ans_data.get('is_correct', False)
