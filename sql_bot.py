@@ -458,519 +458,175 @@ def display_simulation(title, result_data):
 # --- Streamlit App UI ---
 
 # --- Advanced Start Screen ---
-# --- Advanced EdTech Learning UI ---
+# --- Minimal Advanced Start Screen ---
 if not st.session_state.quiz_started:
-    # Advanced CSS for premium EdTech styling
+    # Custom CSS for minimal advanced styling
     st.markdown("""
     <style>
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
-    
-    * {
-        font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-    }
-    
-    .main-container {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
-        min-height: 100vh;
-        padding: 2rem 0;
-        position: relative;
-        overflow: hidden;
-    }
-    
-    .floating-shapes {
-        position: absolute;
-        width: 100%;
-        height: 100%;
-        overflow: hidden;
-        z-index: 1;
-    }
-    
-    .shape {
-        position: absolute;
-        opacity: 0.1;
-        animation: float 6s ease-in-out infinite;
-    }
-    
-    .shape:nth-child(1) {
-        top: 10%;
-        left: 10%;
-        width: 80px;
-        height: 80px;
-        background: white;
-        border-radius: 50%;
-        animation-delay: 0s;
-    }
-    
-    .shape:nth-child(2) {
-        top: 70%;
-        right: 10%;
-        width: 60px;
-        height: 60px;
-        background: white;
-        border-radius: 30%;
-        animation-delay: 2s;
-    }
-    
-    .shape:nth-child(3) {
-        top: 40%;
-        left: 80%;
-        width: 40px;
-        height: 40px;
-        background: white;
-        border-radius: 50%;
-        animation-delay: 4s;
-    }
-    
-    @keyframes float {
-        0%, 100% { transform: translateY(0px) rotate(0deg); }
-        50% { transform: translateY(-20px) rotate(180deg); }
-    }
-    
-    .content-wrapper {
-        position: relative;
-        z-index: 2;
-        max-width: 1200px;
-        margin: 0 auto;
-        padding: 0 1rem;
-    }
-    
-    .hero-card {
-        background: rgba(255, 255, 255, 0.95);
-        backdrop-filter: blur(20px);
-        border-radius: 24px;
-        padding: 3rem;
-        margin-bottom: 2rem;
-        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1);
-        border: 1px solid rgba(255, 255, 255, 0.2);
-        text-align: center;
-        position: relative;
-        overflow: hidden;
-    }
-    
-    .hero-card::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        height: 4px;
-        background: linear-gradient(90deg, #667eea, #764ba2, #f093fb);
-    }
-    
-    .hero-badge {
-        display: inline-flex;
-        align-items: center;
-        gap: 0.5rem;
-        background: linear-gradient(135deg, #667eea, #764ba2);
-        color: white;
-        padding: 0.5rem 1rem;
-        border-radius: 50px;
-        font-size: 0.85rem;
-        font-weight: 500;
-        margin-bottom: 1.5rem;
-        animation: pulse 2s infinite;
-    }
-    
-    @keyframes pulse {
-        0%, 100% { transform: scale(1); }
-        50% { transform: scale(1.05); }
-    }
-    
-    .hero-title {
-        font-size: 3rem;
-        font-weight: 700;
-        background: linear-gradient(135deg, #2d3748, #4a5568);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        margin-bottom: 1rem;
-        line-height: 1.2;
-    }
-    
-    .hero-subtitle {
-        font-size: 1.25rem;
-        color: #64748b;
-        margin-bottom: 2rem;
-        font-weight: 400;
-        line-height: 1.6;
-    }
-    
-    .stats-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-        gap: 1.5rem;
-        margin: 2rem 0;
-    }
-    
-    .stat-card {
-        background: linear-gradient(135deg, #f8fafc, #e2e8f0);
-        padding: 1.5rem;
-        border-radius: 16px;
-        text-align: center;
-        border: 1px solid rgba(0, 0, 0, 0.05);
-        transition: transform 0.3s ease, box-shadow 0.3s ease;
-    }
-    
-    .stat-card:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-    }
-    
-    .stat-icon {
-        font-size: 2rem;
-        margin-bottom: 0.5rem;
-        display: block;
-    }
-    
-    .stat-number {
-        font-size: 1.75rem;
-        font-weight: 700;
-        color: #1e293b;
-        display: block;
-        margin-bottom: 0.25rem;
-    }
-    
-    .stat-label {
-        font-size: 0.875rem;
-        color: #64748b;
-        font-weight: 500;
-    }
-    
-    .cta-button {
+    .hero-container {
         background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        color: white;
-        border: none;
-        padding: 1rem 3rem;
-        border-radius: 50px;
-        font-size: 1.1rem;
-        font-weight: 600;
-        cursor: pointer;
-        transition: all 0.3s ease;
-        box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
-        margin: 2rem 0;
-        display: inline-flex;
-        align-items: center;
-        gap: 0.75rem;
-        text-decoration: none;
-    }
-    
-    .cta-button:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 15px 40px rgba(102, 126, 234, 0.4);
-    }
-    
-    .features-section {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-        gap: 2rem;
-        margin: 3rem 0;
-    }
-    
-    .feature-card {
-        background: rgba(255, 255, 255, 0.9);
-        backdrop-filter: blur(10px);
-        padding: 2rem;
-        border-radius: 20px;
-        border: 1px solid rgba(255, 255, 255, 0.2);
-        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
-        transition: transform 0.3s ease;
-    }
-    
-    .feature-card:hover {
-        transform: translateY(-5px);
-    }
-    
-    .feature-icon {
-        width: 60px;
-        height: 60px;
-        background: linear-gradient(135deg, #667eea, #764ba2);
-        border-radius: 16px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 1.5rem;
-        color: white;
-        margin-bottom: 1rem;
-    }
-    
-    .feature-title {
-        font-size: 1.25rem;
-        font-weight: 600;
-        color: #1e293b;
-        margin-bottom: 0.75rem;
-    }
-    
-    .feature-desc {
-        color: #64748b;
-        line-height: 1.6;
-        font-size: 0.95rem;
-    }
-    
-    .learning-path {
-        background: rgba(255, 255, 255, 0.9);
-        backdrop-filter: blur(10px);
-        border-radius: 20px;
         padding: 2.5rem;
-        margin: 2rem 0;
-        border: 1px solid rgba(255, 255, 255, 0.2);
-        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
-    }
-    
-    .path-title {
+        border-radius: 20px;
+        color: white;
         text-align: center;
-        font-size: 1.75rem;
-        font-weight: 600;
-        color: #1e293b;
         margin-bottom: 2rem;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.2);
     }
-    
-    .path-steps {
+    .hero-title {
+        font-size: 2.5rem;
+        font-weight: bold;
+        margin-bottom: 1rem;
+        text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+    }
+    .hero-subtitle {
+        font-size: 1.3rem;
+        margin-bottom: 1.5rem;
+        opacity: 0.95;
+    }
+    .stats-row {
+        display: flex;
+        justify-content: center;
+        gap: 2rem;
+        background: rgba(255,255,255,0.15);
+        padding: 1.2rem;
+        border-radius: 15px;
+        backdrop-filter: blur(10px);
+    }
+    .stat-box {
+        text-align: center;
+        min-width: 80px;
+    }
+    .stat-number {
+        font-size: 1.8rem;
+        font-weight: bold;
+        display: block;
+    }
+    .stat-label {
+        font-size: 0.9rem;
+        opacity: 0.9;
+        margin-top: 0.2rem;
+    }
+    .features-container {
+        background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        padding: 2rem;
+        border-radius: 15px;
+        color: white;
+        margin: 1.5rem 0;
+        text-align: center;
+    }
+    .features-grid {
         display: grid;
         grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-        gap: 2rem;
-        position: relative;
+        gap: 1rem;
+        margin-top: 1rem;
     }
-    
-    .step {
+    .feature-item {
+        background: rgba(255,255,255,0.2);
+        padding: 1rem;
+        border-radius: 10px;
+        backdrop-filter: blur(5px);
+    }
+    .cta-container {
+        background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        padding: 2rem;
+        border-radius: 15px;
         text-align: center;
-        position: relative;
-    }
-    
-    .step-number {
-        width: 50px;
-        height: 50px;
-        background: linear-gradient(135deg, #667eea, #764ba2);
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        color: white;
-        font-weight: 600;
-        margin: 0 auto 1rem;
-        box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
-    }
-    
-    .step-title {
-        font-weight: 600;
-        color: #1e293b;
-        margin-bottom: 0.5rem;
-    }
-    
-    .step-desc {
-        color: #64748b;
-        font-size: 0.9rem;
-        line-height: 1.5;
-    }
-    
-    .trust-indicators {
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        gap: 2rem;
         margin: 2rem 0;
-        flex-wrap: wrap;
-    }
-    
-    .trust-item {
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-        color: #64748b;
-        font-size: 0.9rem;
-        font-weight: 500;
-    }
-    
-    .final-cta {
-        background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
         color: white;
-        padding: 3rem;
-        border-radius: 24px;
-        text-align: center;
-        margin: 3rem 0 2rem;
-        position: relative;
-        overflow: hidden;
+        box-shadow: 0 8px 25px rgba(79, 172, 254, 0.3);
     }
-    
-    .final-cta::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: -100%;
-        width: 100%;
-        height: 100%;
-        background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
-        animation: shimmer 3s infinite;
+    .cta-container h3 {
+        color: white !important;
+        font-size: 1.5rem;
+        font-weight: bold;
+        margin-bottom: 0.5rem;
+        text-shadow: 0 2px 4px rgba(0,0,0,0.2);
     }
-    
-    @keyframes shimmer {
-        0% { left: -100%; }
-        100% { left: 100%; }
-    }
-    
-    .final-cta h3 {
-        font-size: 2rem;
-        font-weight: 700;
-        margin-bottom: 1rem;
-        position: relative;
-        z-index: 1;
-    }
-    
-    .final-cta p {
+    .cta-container p {
+        color: white !important;
         font-size: 1.1rem;
-        opacity: 0.9;
         margin-bottom: 0;
-        position: relative;
-        z-index: 1;
+        opacity: 0.95;
+        text-shadow: 0 1px 2px rgba(0,0,0,0.1);
     }
-    
-    @media (max-width: 768px) {
-        .hero-title {
-            font-size: 2rem;
-        }
-        .content-wrapper {
-            padding: 0 0.5rem;
-        }
-        .hero-card {
-            padding: 2rem;
-        }
+    .start-button-container {
+        margin: 2rem 0;
+    }
+    .how-it-works {
+        background: rgba(255,255,255,0.05);
+        padding: 1.5rem;
+        border-radius: 12px;
+        margin: 1.5rem 0;
+        border: 1px solid rgba(255,255,255,0.1);
     }
     </style>
     """, unsafe_allow_html=True)
     
-    # Main container with floating shapes
-    st.markdown("""
-    <div class="main-container">
-        <div class="floating-shapes">
-            <div class="shape"></div>
-            <div class="shape"></div>
-            <div class="shape"></div>
-        </div>
-        <div class="content-wrapper">
-    """, unsafe_allow_html=True)
-    
-    # Hero Section
+    # Main Hero Section - FIXED: Removed the problematic HTML tags display
     st.markdown(f"""
-    <div class="hero-card">
-        <div class="hero-badge">
-            ⚡ AI-Powered Learning Experience
-        </div>
-        <h1 class="hero-title">Master SQL Like a Pro</h1>
-        <p class="hero-subtitle">Join 50,000+ developers who've accelerated their careers with our AI-powered SQL mastery program. Get personalized feedback, earn industry-recognized certificates, and land your dream job.</p>
-        
-        <div class="stats-grid">
-            <div class="stat-card">
-                <span class="stat-icon">📚</span>
+    <div class="hero-container">
+        <div class="hero-title">🚀 SQL Mastery Challenge</div>
+        <div class="hero-subtitle">Master SQL with AI-powered feedback and earn your professional certificate</div>
+        <div class="stats-row">
+            <div class="stat-box">
                 <span class="stat-number">{len(sql_questions)}</span>
-                <span class="stat-label">Expert Questions</span>
+                <div class="stat-label">Questions</div>
             </div>
-            <div class="stat-card">
-                <span class="stat-icon">⏱️</span>
+            <div class="stat-box">
                 <span class="stat-number">15-20</span>
-                <span class="stat-label">Minutes</span>
+                <div class="stat-label">Minutes</div>
             </div>
-            <div class="stat-card">
-                <span class="stat-icon">🎯</span>
+            <div class="stat-box">
                 <span class="stat-number">50%</span>
-                <span class="stat-label">Pass Rate</span>
+                <div class="stat-label">To Pass</div>
             </div>
-            <div class="stat-card">
-                <span class="stat-icon">🏆</span>
-                <span class="stat-number">Pro</span>
-                <span class="stat-label">Certificate</span>
+            <div class="stat-box">
+                <span class="stat-number">🏆</span>
+                <div class="stat-label">Certificate</div>
             </div>
         </div>
     </div>
     """, unsafe_allow_html=True)
     
-    # CTA Button
+    # Prominent Start Button - Moved Up
+    st.markdown('<div class="start-button-container">', unsafe_allow_html=True)
     col1, col2, col3 = st.columns([1, 2, 1])
     with col2:
-        if st.button("🚀 Start Your SQL Journey", type="primary", use_container_width=True, key="start_quiz"):
+        if st.button("🚀 Start SQL Challenge Now!", type="primary", use_container_width=True, key="start_quiz"):
             st.session_state.quiz_started = True
             st.session_state.user_answers = []
             st.session_state.current_question = 0
             st.session_state.quiz_completed = False
-            st.success("🎉 Welcome to SQL Mastery! Let's begin your journey.")
+            st.success("🎉 Challenge started! Good luck!")
             st.balloons()
             st.rerun()
+    st.markdown('</div>', unsafe_allow_html=True)
     
-    # Features Section
-    st.markdown("""
-    <div class="features-section">
-        <div class="feature-card">
-            <div class="feature-icon">🤖</div>
-            <div class="feature-title">AI-Powered Feedback</div>
-            <div class="feature-desc">Get instant, personalized feedback on your SQL queries with detailed explanations and optimization tips from our advanced AI system.</div>
-        </div>
-        <div class="feature-card">
-            <div class="feature-icon">💼</div>
-            <div class="feature-title">Real-World Scenarios</div>
-            <div class="feature-desc">Practice with authentic business problems and datasets that mirror what you'll encounter in actual development roles.</div>
-        </div>
-        <div class="feature-card">
-            <div class="feature-icon">📈</div>
-            <div class="feature-title">Progress Tracking</div>
-            <div class="feature-desc">Monitor your improvement with detailed analytics, skill assessments, and personalized learning recommendations.</div>
-        </div>
-    </div>
-    """, unsafe_allow_html=True)
+    # How It Works - Super Compact with better styling
+    st.markdown('<div class="how-it-works">', unsafe_allow_html=True)
+    col1, col2, col3 = st.columns(3)
+    with col1:
+        st.markdown("""
+        **1️⃣ Solve Challenges**  
+        Write SQL queries for real business problems
+        """)
+    with col2:
+        st.markdown("""
+        **2️⃣ Get AI Feedback**  
+        Receive instant tips and best practices
+        """)
+    with col3:
+        st.markdown("""
+        **3️⃣ Earn Certificate**  
+        Score 50%+ to get your professional credential
+        """)
+    st.markdown('</div>', unsafe_allow_html=True)
     
-    # Learning Path
+    # Call to Action - Fixed with better contrast
     st.markdown("""
-    <div class="learning-path">
-        <h2 class="path-title">Your Learning Journey</h2>
-        <div class="path-steps">
-            <div class="step">
-                <div class="step-number">1</div>
-                <div class="step-title">Solve Challenges</div>
-                <div class="step-desc">Work through expertly crafted SQL problems designed to test real-world skills</div>
-            </div>
-            <div class="step">
-                <div class="step-number">2</div>
-                <div class="step-title">Get AI Insights</div>
-                <div class="step-desc">Receive detailed feedback, alternative solutions, and performance optimization tips</div>
-            </div>
-            <div class="step">
-                <div class="step-number">3</div>
-                <div class="step-title">Earn Certificate</div>
-                <div class="step-desc">Showcase your verified SQL expertise with our industry-recognized digital certificate</div>
-            </div>
-        </div>
-    </div>
-    """, unsafe_allow_html=True)
-    
-    # Trust Indicators
-    st.markdown("""
-    <div class="trust-indicators">
-        <div class="trust-item">
-            <span>⭐</span>
-            <span>50,000+ Satisfied Learners</span>
-        </div>
-        <div class="trust-item">
-            <span>🏢</span>
-            <span>Used by Top Companies</span>
-        </div>
-        <div class="trust-item">
-            <span>🔒</span>
-            <span>100% Secure & Private</span>
-        </div>
-        <div class="trust-item">
-            <span>📱</span>
-            <span>Mobile Responsive</span>
-        </div>
-    </div>
-    """, unsafe_allow_html=True)
-    
-    # Final CTA
-    st.markdown("""
-    <div class="final-cta">
-        <h3>🚀 Ready to Transform Your Career?</h3>
-        <p>Join thousands of developers who've mastered SQL and advanced their careers with our proven learning system.</p>
-    </div>
-    """, unsafe_allow_html=True)
-    
-    # Close containers
-    st.markdown("""
-        </div>
+    <div class="cta-container">
+        <h3>🚀 Ready to Become an SQL Expert?</h3>
+        <p>Join thousands of developers mastering SQL through AI-powered learning</p>
     </div>
     """, unsafe_allow_html=True)
 
