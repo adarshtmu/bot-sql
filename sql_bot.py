@@ -594,6 +594,20 @@ if not st.session_state.quiz_started:
     </div>
     """, unsafe_allow_html=True)
     
+    # Prominent Start Button - Moved Up
+    st.markdown('<div class="start-button-container">', unsafe_allow_html=True)
+    col1, col2, col3 = st.columns([1, 2, 1])
+    with col2:
+        if st.button("🚀 Start SQL Challenge Now!", type="primary", use_container_width=True, key="start_quiz"):
+            st.session_state.quiz_started = True
+            st.session_state.user_answers = []
+            st.session_state.current_question = 0
+            st.session_state.quiz_completed = False
+            st.success("🎉 Challenge started! Good luck!")
+            st.balloons()
+            st.rerun()
+    st.markdown('</div>', unsafe_allow_html=True)
+    
     # How It Works - Super Compact
     col1, col2, col3 = st.columns(3)
     with col1:
@@ -618,21 +632,7 @@ if not st.session_state.quiz_started:
         <h3 style="margin-bottom: 0.5rem;">🚀 Ready to Become an SQL Expert?</h3>
         <p style="margin-bottom: 0; font-size: 1.1rem;">Join thousands of developers mastering SQL through AI-powered learning</p>
     </div>
-    """, unsafe_allow_html=True)
-    
-    # Prominent Start Button
-    st.markdown('<div class="start-button-container">', unsafe_allow_html=True)
-    col1, col2, col3 = st.columns([1, 2, 1])
-    with col2:
-        if st.button("🚀 Start SQL Challenge Now!", type="primary", use_container_width=True, key="start_quiz"):
-            st.session_state.quiz_started = True
-            st.session_state.user_answers = []
-            st.session_state.current_question = 0
-            st.session_state.quiz_completed = False
-            st.success("🎉 Challenge started! Good luck!")
-            st.balloons()
-            st.rerun()
-    st.markdown('</div>', unsafe_allow_html=True)
+    """)
     
     # Minimal Footer
     st.markdown("---")
@@ -643,7 +643,6 @@ if not st.session_state.quiz_started:
         <span style="opacity: 0.7; font-size: 0.9rem;">© 2025 All rights reserved</span>
     </div>
     """, unsafe_allow_html=True)
-
 
 
 # --- Quiz In Progress Screen ---
