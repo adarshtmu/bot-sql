@@ -1074,7 +1074,7 @@ if not st.session_state.quiz_started:
         <div class="stat-card">
             <div class="stat-icon">🎯</div>
             <span class="stat-number">5</span>
-            <div class="stat-label">Expert Challenges</div>
+            <div class="stat-label">Questions</div>
         </div>
         """, unsafe_allow_html=True)
     
