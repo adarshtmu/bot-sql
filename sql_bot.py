@@ -1057,7 +1057,6 @@ if not st.session_state.quiz_started:
     </div>
     """, unsafe_allow_html=True)
 
-
     # --- HERO SECTION ---
     st.markdown("""
     <div class="hero-container">
@@ -1071,27 +1070,6 @@ if not st.session_state.quiz_started:
         </p>
     </div>
     """, unsafe_allow_html=True)
-    
-    # --- ENHANCED START BUTTON (REFACTORED) ---
-    st.markdown('<div style="text-align: center; margin: 3rem 0;">', unsafe_allow_html=True)
-    if st.button("🚀 Launch Your Journey", key="start_quiz"):
-        st.session_state.quiz_started = True
-        st.session_state.user_answers = []
-        st.session_state.current_question = 0
-        st.session_state.quiz_completed = False
-        st.success("🎉 Welcome to the future of learning!")
-        st.balloons()
-        st.rerun()
-    st.markdown('</div>', unsafe_allow_html=True)
-    
-    # ----- (Insert your dashboard code/components here, if any) -----
-    
-    # --- END BUTTON (Add this at the very end of your file) ---
-    st.markdown('<div style="text-align: center; margin: 3rem 0;">', unsafe_allow_html=True)
-    if st.button("🔚 End Dashboard Action", key="end_dashboard"):
-        st.success("You clicked the end button!")
-        # Place any logic you want here (e.g., navigation, resetting values, etc.)
-    st.markdown('</div>', unsafe_allow_html=True)
 
     # --- ADVANCED STATS SECTION (REFACTORED) ---
     # By placing all cards inside one container, we let the CSS grid handle the responsive layout.
@@ -1121,7 +1099,18 @@ if not st.session_state.quiz_started:
     """, unsafe_allow_html=True)
 
 
-
+    # --- ENHANCED START BUTTON (REFACTORED) ---
+    # Simplified layout for better centering on all devices.
+    st.markdown('<div style="text-align: center; margin: 3rem 0;">', unsafe_allow_html=True)
+    if st.button("🚀 Launch Your Journey", key="start_quiz"):
+        st.session_state.quiz_started = True
+        st.session_state.user_answers = []
+        st.session_state.current_question = 0
+        st.session_state.quiz_completed = False
+        st.success("🎉 Welcome to the future of learning!")
+        st.balloons()
+        st.rerun()
+    st.markdown('</div>', unsafe_allow_html=True)
 
     # --- ADVANCED FEATURES SECTION ---
     # This section was already well-structured for responsiveness.
