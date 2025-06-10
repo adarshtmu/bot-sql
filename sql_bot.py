@@ -468,387 +468,744 @@ def display_simulation(title, result_data):
 # --- Advanced EdTech Learning Platform UI ---
 
 
+import streamlit as st
+
+# Initialize session state
 if 'quiz_started' not in st.session_state:
     st.session_state.quiz_started = False
 
 if not st.session_state.quiz_started:
-    # --- ADVANCED 3D & GLASSMORPHIC CSS ---
+    # --- ULTRA ADVANCED 3D GLASSMORPHIC CSS ---
     st.markdown("""
     <style>
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap');
+    
+    * { box-sizing: border-box; }
+    
     html, body, [class*="css"] {
-        font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%) fixed;
+        font-family: 'Space Grotesk', -apple-system, BlinkMacSystemFont, sans-serif;
+        background: linear-gradient(135deg, #0f0f23 0%, #1a1a2e 25%, #16213e 50%, #0f3460 75%, #533483 100%);
+        background-attachment: fixed;
         min-height: 100vh;
+        overflow-x: hidden;
     }
-    .main-container {
-        min-height: 100vh;
-        width: 100vw;
-        padding: 2rem 0;
-        position: relative;
-        z-index: 1;
-    }
-    .floating-shapes {
+    
+    /* Animated Background Particles */
+    .particle-background {
         position: fixed;
         top: 0; left: 0; width: 100vw; height: 100vh;
-        overflow: hidden; pointer-events: none; z-index: 0;
+        pointer-events: none; z-index: 0;
+        background: radial-gradient(circle at 20% 80%, rgba(120, 119, 198, 0.3) 0%, transparent 50%),
+                    radial-gradient(circle at 80% 20%, rgba(255, 119, 198, 0.3) 0%, transparent 50%);
     }
-    .shape {
+    
+    .floating-orbs {
+        position: fixed;
+        top: 0; left: 0; width: 100vw; height: 100vh;
+        pointer-events: none; z-index: 1;
+        overflow: hidden;
+    }
+    
+    .orb {
         position: absolute;
-        background: rgba(255,255,255,0.13);
         border-radius: 50%;
-        animation: float 6s ease-in-out infinite;
-        backdrop-filter: blur(16px);
-        box-shadow: 0 8px 32px 0 rgba(76,110,245,0.09);
-        filter: drop-shadow(0px 8px 24px #667eea55);
+        background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05));
+        backdrop-filter: blur(20px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        animation: float3d 8s ease-in-out infinite;
+        box-shadow: 0 8px 40px rgba(120, 119, 198, 0.3),
+                    inset 0 1px 0 rgba(255, 255, 255, 0.2);
     }
-    .shape:nth-child(1) { width: 100px; height: 100px; top: 12%; left: 8%; animation-delay: 0s;}
-    .shape:nth-child(2) { width: 160px; height: 160px; top: 28%; right: 10%; animation-delay: 2s;}
-    .shape:nth-child(3) { width: 70px; height: 70px; bottom: 15%; left: 20%; animation-delay: 4s;}
-    @keyframes float { 0%,100% {transform: translateY(0px) rotate(0deg);} 50% {transform: translateY(-24px) rotate(180deg);} }
-
+    
+    .orb:nth-child(1) { 
+        width: 120px; height: 120px; top: 10%; left: 10%; 
+        animation-delay: 0s; animation-duration: 10s;
+    }
+    .orb:nth-child(2) { 
+        width: 200px; height: 200px; top: 20%; right: 15%; 
+        animation-delay: 2s; animation-duration: 12s;
+    }
+    .orb:nth-child(3) { 
+        width: 80px; height: 80px; bottom: 20%; left: 15%; 
+        animation-delay: 4s; animation-duration: 8s;
+    }
+    .orb:nth-child(4) { 
+        width: 150px; height: 150px; bottom: 10%; right: 20%; 
+        animation-delay: 6s; animation-duration: 14s;
+    }
+    
+    @keyframes float3d {
+        0%, 100% { 
+            transform: translateY(0px) translateX(0px) rotateX(0deg) rotateY(0deg) scale(1);
+        }
+        25% { 
+            transform: translateY(-30px) translateX(20px) rotateX(10deg) rotateY(5deg) scale(1.1);
+        }
+        50% { 
+            transform: translateY(-15px) translateX(-20px) rotateX(-5deg) rotateY(10deg) scale(0.9);
+        }
+        75% { 
+            transform: translateY(-45px) translateX(10px) rotateX(5deg) rotateY(-5deg) scale(1.05);
+        }
+    }
+    
+    /* 3D Cube Animation */
+    .cube-container {
+        position: fixed;
+        top: 50%; right: 10%;
+        width: 80px; height: 80px;
+        perspective: 1000px;
+        pointer-events: none;
+        z-index: 1;
+    }
+    
+    .cube {
+        width: 100%; height: 100%;
+        position: relative;
+        transform-style: preserve-3d;
+        animation: rotateCube 15s linear infinite;
+    }
+    
+    .cube-face {
+        position: absolute;
+        width: 80px; height: 80px;
+        background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05));
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        backdrop-filter: blur(10px);
+    }
+    
+    .cube-face.front { transform: rotateY(0deg) translateZ(40px); }
+    .cube-face.back { transform: rotateY(180deg) translateZ(40px); }
+    .cube-face.right { transform: rotateY(90deg) translateZ(40px); }
+    .cube-face.left { transform: rotateY(-90deg) translateZ(40px); }
+    .cube-face.top { transform: rotateX(90deg) translateZ(40px); }
+    .cube-face.bottom { transform: rotateX(-90deg) translateZ(40px); }
+    
+    @keyframes rotateCube {
+        0% { transform: rotateX(0deg) rotateY(0deg); }
+        100% { transform: rotateX(360deg) rotateY(360deg); }
+    }
+    
+    /* Hero Container with 3D Effects */
     .hero-container {
-        background: rgba(255,255,255,0.91);
-        backdrop-filter: blur(18px);
-        border: 1px solid rgba(255,255,255,0.20);
-        padding: 3rem 2rem 2.5rem 2rem;
-        border-radius: 30px;
-        margin: 2rem auto 1.5rem auto;
-        max-width: 950px;
-        box-shadow: 0 24px 64px rgba(0,0,0,0.10), 0 2px 6px #764ba266;
+        background: linear-gradient(135deg, 
+            rgba(255, 255, 255, 0.15) 0%, 
+            rgba(255, 255, 255, 0.1) 50%, 
+            rgba(255, 255, 255, 0.05) 100%);
+        backdrop-filter: blur(30px);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        padding: 4rem 3rem;
+        border-radius: 40px;
+        margin: 3rem auto 2rem auto;
+        max-width: 1100px;
+        box-shadow: 0 40px 100px rgba(0, 0, 0, 0.3),
+                    0 20px 50px rgba(120, 119, 198, 0.2),
+                    inset 0 1px 0 rgba(255, 255, 255, 0.3);
         position: relative;
         overflow: hidden;
-        z-index: 2;
+        z-index: 10;
+        transform: perspective(1000px) rotateX(5deg);
+        transition: transform 0.3s ease;
     }
+    
+    .hero-container:hover {
+        transform: perspective(1000px) rotateX(0deg) translateY(-10px);
+    }
+    
+    .hero-container::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        left: -50%;
+        width: 200%;
+        height: 200%;
+        background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+        animation: shimmer 3s ease-in-out infinite;
+        pointer-events: none;
+    }
+    
+    @keyframes shimmer {
+        0% { transform: translateX(-100%) translateY(-100%) rotate(45deg); }
+        100% { transform: translateX(100%) translateY(100%) rotate(45deg); }
+    }
+    
     .hero-badge {
         display: inline-block;
-        background: linear-gradient(135deg, #667eea, #764ba2);
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
         color: white;
-        padding: 0.5rem 1.25rem;
-        border-radius: 40px;
-        font-size: 1.05rem;
-        font-weight: 700;
-        margin-bottom: 2rem;
-        box-shadow: 0 4px 18px #667eea44;
-        letter-spacing: 0.04em;
+        padding: 0.8rem 2rem;
+        border-radius: 50px;
+        font-size: 1.1rem;
+        font-weight: 600;
+        margin-bottom: 2.5rem;
+        box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4),
+                    0 5px 15px rgba(118, 75, 162, 0.3);
+        letter-spacing: 0.5px;
+        text-transform: uppercase;
+        position: relative;
+        overflow: hidden;
+        animation: pulse3d 3s ease-in-out infinite;
     }
+    
+    @keyframes pulse3d {
+        0%, 100% { transform: scale(1) rotateX(0deg); }
+        50% { transform: scale(1.05) rotateX(5deg); }
+    }
+    
     .hero-title {
-        font-size: 3.7rem;
+        font-size: 4.5rem;
         font-weight: 800;
-        margin-bottom: 1rem;
-        background: linear-gradient(135deg, #2d3748, #4a5568 80%);
+        margin-bottom: 1.5rem;
+        background: linear-gradient(135deg, #ffffff 0%, #e2e8f0 50%, #cbd5e1 100%);
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
         background-clip: text;
-        line-height: 1.18;
-        letter-spacing: -2px;
+        line-height: 1.1;
+        letter-spacing: -3px;
+        text-shadow: 0 10px 30px rgba(255, 255, 255, 0.3);
+        animation: titleGlow 4s ease-in-out infinite alternate;
     }
+    
+    @keyframes titleGlow {
+        0% { text-shadow: 0 0 20px rgba(255, 255, 255, 0.5); }
+        100% { text-shadow: 0 0 40px rgba(255, 255, 255, 0.8), 0 0 60px rgba(120, 119, 198, 0.4); }
+    }
+    
     .hero-subtitle {
-        font-size: 1.36rem;
-        color: #6b7280;
-        margin-bottom: 2.2rem;
+        font-size: 1.4rem;
+        color: rgba(255, 255, 255, 0.8);
+        margin-bottom: 3rem;
         font-weight: 400;
-        max-width: 600px;
-        margin-left: auto; margin-right: auto;
-        line-height: 1.55;
+        max-width: 700px;
+        margin-left: auto; 
+        margin-right: auto;
+        line-height: 1.6;
+        text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
     }
+    
+    /* 3D Stats Cards */
     .stats-container {
         display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
-        gap: 1.4rem;
-        margin: 2.2rem 0 0.5rem 0;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 2rem;
+        margin: 3rem 0 2rem 0;
+        perspective: 1000px;
     }
+    
     .stat-card {
-        background: rgba(255,255,255,0.93);
-        border-radius: 18px;
-        box-shadow: 0 8px 32px rgba(76,110,245,0.13), 0 2px 8px rgba(102,126,234,0.08);
-        border: 1px solid rgba(255,255,255,0.19);
-        backdrop-filter: blur(7px);
+        background: linear-gradient(135deg, 
+            rgba(255, 255, 255, 0.2) 0%, 
+            rgba(255, 255, 255, 0.1) 100%);
+        border-radius: 25px;
+        box-shadow: 0 15px 50px rgba(0, 0, 0, 0.2),
+                    0 10px 30px rgba(120, 119, 198, 0.15),
+                    inset 0 1px 0 rgba(255, 255, 255, 0.3);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        backdrop-filter: blur(20px);
         text-align: center;
+        height: 200px;
+        display: flex; 
+        flex-direction: column; 
+        justify-content: center; 
+        align-items: center;
+        transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        transform-style: preserve-3d;
         position: relative;
         overflow: hidden;
-        height: 170px;
-        display: flex; flex-direction: column; justify-content: center; align-items: center;
-        transition: transform 0.25s, box-shadow 0.25s;
     }
+    
     .stat-card:hover {
-        transform: scale(1.04) translateY(-7px) perspective(700px) rotateY(7deg);
-        box-shadow: 0 18px 44px #764ba233, 0 3px 12px #667eea22;
+        transform: rotateY(10deg) rotateX(10deg) translateY(-20px) scale(1.05);
+        box-shadow: 0 30px 80px rgba(0, 0, 0, 0.3),
+                    0 20px 50px rgba(120, 119, 198, 0.3);
     }
+    
     .stat-card::before {
         content: '';
-        position: absolute; top: 0; left: 0; right: 0;
+        position: absolute;
+        top: 0; left: 0; right: 0;
         height: 4px;
-        background: linear-gradient(90deg, #667eea, #764ba2);
+        background: linear-gradient(90deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+        border-radius: 25px 25px 0 0;
     }
+    
     .stat-icon {
-        font-size: 2.7rem;
-        margin-bottom: 0.6rem;
-        text-shadow: 0 2px 12px #667eea44;
+        font-size: 3.5rem;
+        margin-bottom: 1rem;
+        filter: drop-shadow(0 5px 15px rgba(255, 255, 255, 0.3));
+        animation: iconFloat 3s ease-in-out infinite;
     }
+    
+    @keyframes iconFloat {
+        0%, 100% { transform: translateY(0px) rotateZ(0deg); }
+        50% { transform: translateY(-10px) rotateZ(5deg); }
+    }
+    
     .stat-number {
-        font-size: 2.1rem;
-        font-weight: 700;
-        color: #1e293b;
+        font-size: 2.5rem;
+        font-weight: 800;
+        color: #ffffff;
         display: block;
-        margin-bottom: 0.28rem;
+        margin-bottom: 0.5rem;
+        text-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        font-family: 'JetBrains Mono', monospace;
     }
+    
     .stat-label {
-        color: #64748b; font-weight: 500; font-size: 1rem;
+        color: rgba(255, 255, 255, 0.8);
+        font-weight: 600;
+        font-size: 1.1rem;
+        letter-spacing: 0.5px;
+        text-transform: uppercase;
     }
-    .start-button-container {margin: 2.3rem 0 1.6rem 0; text-align: center;}
+    
+    /* Advanced CTA Button */
     .cta-button {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
         color: white;
         border: none;
-        padding: 1.15rem 3.2rem;
-        border-radius: 44px;
-        font-size: 1.3rem;
+        padding: 1.5rem 4rem;
+        border-radius: 60px;
+        font-size: 1.4rem;
         font-weight: 700;
         cursor: pointer;
-        box-shadow: 0 10px 36px #764ba244, 0 2px 8px #667eea33;
+        box-shadow: 0 20px 60px rgba(102, 126, 234, 0.4),
+                    0 10px 30px rgba(118, 75, 162, 0.3),
+                    inset 0 1px 0 rgba(255, 255, 255, 0.3);
         position: relative;
-        transition: transform 0.18s, box-shadow 0.18s;
+        transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         outline: none;
-        letter-spacing: 0.02em;
+        letter-spacing: 1px;
+        text-transform: uppercase;
         overflow: hidden;
+        transform: perspective(1000px) rotateX(15deg);
     }
-    .cta-button:active { transform: scale(0.98); box-shadow: 0 4px 12px #764ba266; }
+    
+    .cta-button:hover {
+        transform: perspective(1000px) rotateX(0deg) translateY(-10px) scale(1.05);
+        box-shadow: 0 30px 80px rgba(102, 126, 234, 0.5),
+                    0 20px 50px rgba(118, 75, 162, 0.4);
+    }
+    
+    .cta-button:active {
+        transform: perspective(1000px) rotateX(5deg) translateY(-5px) scale(1.02);
+    }
+    
     .cta-button::before {
         content: '';
-        position: absolute; top: 0; left: -100%; width: 100%; height: 100%;
-        background: linear-gradient(90deg, transparent, rgba(255,255,255,0.18), transparent);
-        transition: left 0.5s;
+        position: absolute;
+        top: 0; left: -100%;
+        width: 100%; height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+        transition: left 0.6s;
     }
-    .cta-button:hover::before { left: 100%; }
-    .cta-button:hover { transform: scale(1.03); box-shadow: 0 20px 50px #667eea33; }
+    
+    .cta-button:hover::before {
+        left: 100%;
+    }
+    
+    /* Advanced Feature Cards */
     .features-grid {
         display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-        gap: 2.2rem;
-        margin: 3rem 0 2.3rem 0;
+        grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+        gap: 2.5rem;
+        margin: 4rem 0;
+        perspective: 1000px;
     }
+    
     .feature-card {
-        background: rgba(255,255,255,0.98);
-        padding: 2.2rem 2rem;
-        border-radius: 23px;
-        box-shadow: 0 12px 36px #764ba220, 0 2px 8px #667eea19;
-        border: 1px solid rgba(255,255,255,0.19);
-        transition: transform 0.28s, box-shadow 0.28s;
+        background: linear-gradient(135deg, 
+            rgba(255, 255, 255, 0.15) 0%, 
+            rgba(255, 255, 255, 0.1) 50%, 
+            rgba(255, 255, 255, 0.05) 100%);
+        padding: 3rem 2.5rem;
+        border-radius: 30px;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2),
+                    0 10px 30px rgba(120, 119, 198, 0.15),
+                    inset 0 1px 0 rgba(255, 255, 255, 0.3);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        backdrop-filter: blur(25px);
+        transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        transform-style: preserve-3d;
         position: relative;
-        z-index: 2;
+        overflow: hidden;
     }
+    
     .feature-card:hover {
-        transform: scale(1.05) perspective(600px) rotateY(-8deg);
-        box-shadow: 0 28px 70px #667eea33, 0 4px 18px #764ba228;
+        transform: rotateY(-10deg) rotateX(5deg) translateY(-20px) scale(1.03);
+        box-shadow: 0 40px 100px rgba(0, 0, 0, 0.3),
+                    0 20px 60px rgba(120, 119, 198, 0.3);
     }
+    
     .feature-icon {
-        width: 62px; height: 62px;
-        background: linear-gradient(135deg, #667eea, #764ba2);
-        border-radius: 13px;
-        display: flex; align-items: center; justify-content: center;
-        font-size: 2.1rem; margin-bottom: 1.3rem; color: white;
-        box-shadow: 0 4px 20px #667eea40;
+        width: 80px; height: 80px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+        border-radius: 20px;
+        display: flex; 
+        align-items: center; 
+        justify-content: center;
+        font-size: 2.5rem; 
+        margin-bottom: 2rem; 
+        color: white;
+        box-shadow: 0 10px 30px rgba(102, 126, 234, 0.5),
+                    inset 0 1px 0 rgba(255, 255, 255, 0.3);
+        animation: iconPulse 4s ease-in-out infinite;
     }
-    .feature-title { font-size: 1.35rem; font-weight: 700; margin-bottom: 0.7rem; color: #1e293b; }
-    .feature-description { color: #64748b; line-height: 1.5; font-size: 1.03rem; }
+    
+    @keyframes iconPulse {
+        0%, 100% { transform: scale(1) rotateZ(0deg); }
+        50% { transform: scale(1.1) rotateZ(10deg); }
+    }
+    
+    .feature-title {
+        font-size: 1.6rem;
+        font-weight: 700;
+        margin-bottom: 1rem;
+        color: #ffffff;
+        text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+    }
+    
+    .feature-description {
+        color: rgba(255, 255, 255, 0.8);
+        line-height: 1.6;
+        font-size: 1.1rem;
+        font-weight: 400;
+    }
+    
+    /* 3D Learning Path */
     .learning-path {
-        background: rgba(248,250,252,0.93);
-        padding: 2.7rem 1.2rem 2.5rem 1.2rem;
-        border-radius: 22px;
-        margin: 2.8rem 0;
-        border: 1px solid rgba(255,255,255,0.15);
-        box-shadow: 0 10px 40px #667eea15;
+        background: linear-gradient(135deg, 
+            rgba(255, 255, 255, 0.1) 0%, 
+            rgba(255, 255, 255, 0.05) 100%);
+        padding: 4rem 2rem;
+        border-radius: 35px;
+        margin: 4rem 0;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        box-shadow: 0 25px 80px rgba(0, 0, 0, 0.2),
+                    inset 0 1px 0 rgba(255, 255, 255, 0.3);
+        backdrop-filter: blur(30px);
+        position: relative;
+        overflow: hidden;
     }
+    
     .learning-path h3 {
-        text-align: center; font-size: 2.1rem; font-weight: 800;
-        margin-bottom: 1.6rem; color: #1e293b;
+        text-align: center;
+        font-size: 2.8rem;
+        font-weight: 800;
+        margin-bottom: 3rem;
+        color: #ffffff;
+        text-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
     }
+    
     .steps-container {
-        display: flex; justify-content: space-between; align-items: center;
-        position: relative; margin: 1.5rem 0 0.5rem 0;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        position: relative;
+        margin: 2rem 0;
+        perspective: 1000px;
     }
+    
     .steps-container::before {
         content: '';
-        position: absolute; top: 50%; left: 0; right: 0; height: 2.5px;
-        background: linear-gradient(90deg, #667eea, #764ba2); z-index: 1;
+        position: absolute;
+        top: 50%; left: 5%; right: 5%;
+        height: 4px;
+        background: linear-gradient(90deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+        border-radius: 2px;
+        z-index: 1;
+        box-shadow: 0 2px 10px rgba(102, 126, 234, 0.5);
     }
+    
     .step {
-        background: white;
-        width: 120px; height: 120px;
+        background: linear-gradient(135deg, 
+            rgba(255, 255, 255, 0.2) 0%, 
+            rgba(255, 255, 255, 0.1) 100%);
+        width: 140px; height: 140px;
         border-radius: 50%;
-        display: flex; flex-direction: column; align-items: center; justify-content: center;
-        box-shadow: 0 10px 30px #667eea1a;
-        border: 4px solid #667eea;
-        position: relative; z-index: 2;
-        transition: transform 0.29s;
-        padding: 0.6rem;
-    }
-    .step:hover { transform: scale(1.09); }
-    .step-number { font-size: 1.45rem; font-weight: 800; color: #667eea; margin-bottom: 0.4rem; }
-    .step-text { font-size: 0.98rem; font-weight: 600; text-align: center; color: #64748b; }
-    .testimonial {
-        background: rgba(255,255,255,0.96);
-        padding: 2.3rem;
-        border-radius: 20px;
-        margin: 2.8rem 0 1.7rem 0;
-        box-shadow: 0 8px 32px #764ba217, 0 2px 10px #667eea13;
-        text-align: center;
-        border: 1px solid rgba(255,255,255,0.14);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3),
+                    0 10px 25px rgba(120, 119, 198, 0.2),
+                    inset 0 1px 0 rgba(255, 255, 255, 0.3);
+        border: 3px solid rgba(102, 126, 234, 0.5);
+        position: relative;
         z-index: 2;
+        transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        backdrop-filter: blur(20px);
+        transform-style: preserve-3d;
     }
+    
+    .step:hover {
+        transform: rotateY(15deg) translateY(-15px) scale(1.1);
+        box-shadow: 0 30px 80px rgba(0, 0, 0, 0.4),
+                    0 20px 40px rgba(120, 119, 198, 0.4);
+    }
+    
+    .step-number {
+        font-size: 2rem;
+        font-weight: 800;
+        color: #ffffff;
+        margin-bottom: 0.5rem;
+        text-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+        font-family: 'JetBrains Mono', monospace;
+    }
+    
+    .step-text {
+        font-size: 1rem;
+        font-weight: 600;
+        text-align: center;
+        color: rgba(255, 255, 255, 0.9);
+        letter-spacing: 0.5px;
+        text-transform: uppercase;
+    }
+    
+    /* Testimonial with 3D Effect */
+    .testimonial {
+        background: linear-gradient(135deg, 
+            rgba(255, 255, 255, 0.15) 0%, 
+            rgba(255, 255, 255, 0.1) 100%);
+        padding: 3rem;
+        border-radius: 30px;
+        margin: 4rem 0;
+        box-shadow: 0 25px 80px rgba(0, 0, 0, 0.2),
+                    0 10px 40px rgba(120, 119, 198, 0.2),
+                    inset 0 1px 0 rgba(255, 255, 255, 0.3);
+        text-align: center;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        backdrop-filter: blur(25px);
+        position: relative;
+        overflow: hidden;
+        transform: perspective(1000px) rotateX(5deg);
+        transition: transform 0.3s ease;
+    }
+    
+    .testimonial:hover {
+        transform: perspective(1000px) rotateX(0deg) translateY(-10px);
+    }
+    
     .testimonial-text {
-        font-size: 1.17rem;
+        font-size: 1.3rem;
         font-style: italic;
-        color: #4a5568;
-        margin-bottom: 1.3rem;
-        line-height: 1.55;
+        color: rgba(255, 255, 255, 0.9);
+        margin-bottom: 2rem;
+        line-height: 1.6;
+        text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
     }
+    
     .testimonial-author {
         font-weight: 700;
-        color: #1e293b;
-        letter-spacing: 0.01em;
+        color: #ffffff;
+        font-size: 1.1rem;
+        text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
     }
-    .pulse { animation: pulse 2.5s infinite; }
-    @keyframes pulse { 0% {transform:scale(1);} 50% {transform:scale(1.025);} 100% {transform:scale(1);} }
-    @media (max-width: 1000px) {
-      .hero-title { font-size: 2.4rem; }
-      .steps-container { flex-direction: column; gap: 2.1rem; }
-      .learning-path h3 { font-size: 1.38rem;}
-      .stats-container { grid-template-columns: 1fr 1fr; }
-      .step { width: 100px; height: 100px;}
+    
+    /* Responsive Design */
+    @media (max-width: 1200px) {
+        .hero-title { font-size: 3.5rem; }
+        .stats-container { grid-template-columns: repeat(2, 1fr); }
     }
-    @media (max-width: 680px) {
-      .stats-container { grid-template-columns: 1fr;}
-      .features-grid { grid-template-columns: 1fr;}
-      .step { width: 85px; height: 85px;}
-      .feature-title { font-size: 1.1rem;}
+    
+    @media (max-width: 768px) {
+        .hero-title { font-size: 2.8rem; letter-spacing: -1px; }
+        .hero-container { padding: 2.5rem 2rem; }
+        .steps-container { 
+            flex-direction: column; 
+            gap: 3rem; 
+        }
+        .steps-container::before { display: none; }
+        .stats-container { grid-template-columns: 1fr; }
+        .features-grid { grid-template-columns: 1fr; }
+        .step { width: 120px; height: 120px; }
+        .cube-container { display: none; }
+    }
+    
+    @media (max-width: 480px) {
+        .hero-title { font-size: 2.2rem; }
+        .hero-subtitle { font-size: 1.2rem; }
+        .feature-title { font-size: 1.3rem; }
+        .step { width: 100px; height: 100px; }
+        .stat-card { height: 160px; }
     }
     </style>
     """, unsafe_allow_html=True)
 
-    # --- FLOATING SHAPES BACKGROUND ---
+    # --- ANIMATED BACKGROUND ELEMENTS ---
     st.markdown("""
-    <div class="floating-shapes">
-        <div class="shape"></div>
-        <div class="shape"></div>
-        <div class="shape"></div>
+    <div class="particle-background"></div>
+    <div class="floating-orbs">
+        <div class="orb"></div>
+        <div class="orb"></div>
+        <div class="orb"></div>
+        <div class="orb"></div>
+    </div>
+    <div class="cube-container">
+        <div class="cube">
+            <div class="cube-face front"></div>
+            <div class="cube-face back"></div>
+            <div class="cube-face right"></div>
+            <div class="cube-face left"></div>
+            <div class="cube-face top"></div>
+            <div class="cube-face bottom"></div>
+        </div>
     </div>
     """, unsafe_allow_html=True)
 
     # --- HERO SECTION ---
     st.markdown("""
     <div class="hero-container">
-        <div class="hero-badge">🚀 AI-Powered Learning Experience</div>
-        <h1 class="hero-title">Master SQL Like a Pro</h1>
+        <div class="hero-badge">🚀 Next-Gen AI Learning Platform</div>
+        <h1 class="hero-title">Master SQL Like Never Before</h1>
         <p class="hero-subtitle">
-        Join <b>50,000+ developers</b> who've accelerated their careers.<br>
-        Get personalized AI feedback, earn industry-recognized certificates, and land your dream job.
+            Experience the future of learning with our advanced AI-powered platform.<br>
+            Join <strong>100,000+ developers</strong> who've transformed their careers with immersive 3D learning.
         </p>
     </div>
     """, unsafe_allow_html=True)
 
-    # --- STATS SECTION ---
+    # --- ADVANCED STATS SECTION ---
     st.markdown('<div class="stats-container">', unsafe_allow_html=True)
     col1, col2, col3, col4 = st.columns(4)
+    
     with col1:
-        st.markdown(
-            """<div class="stat-card">
-                <div class="stat-icon">📊</div>
-                <span class="stat-number">5</span>
-                <div class="stat-label">Expert Questions</div>
-            </div>""", unsafe_allow_html=True)
+        st.markdown("""
+        <div class="stat-card">
+            <div class="stat-icon">🎯</div>
+            <span class="stat-number">5</span>
+            <div class="stat-label">Expert Challenges</div>
+        </div>
+        """, unsafe_allow_html=True)
+    
     with col2:
-        st.markdown(
-            """<div class="stat-card">
-                <div class="stat-icon">⏰</div>
-                <span class="stat-number">5-10</span>
-                <div class="stat-label">Minutes Avg.</div>
-            </div>""", unsafe_allow_html=True)
+        st.markdown("""
+        <div class="stat-card">
+            <div class="stat-icon">⚡</div>
+            <span class="stat-number">5-10</span>
+            <div class="stat-label">Minutes</div>
+        </div>
+        """, unsafe_allow_html=True)
+    
     with col3:
-        st.markdown(
-            """<div class="stat-card">
-                <div class="stat-icon">🎯</div>
-                <span class="stat-number">50%</span>
-                <div class="stat-label">Pass Rate</div>
-            </div>""", unsafe_allow_html=True)
+        st.markdown("""
+        <div class="stat-card">
+            <div class="stat-icon">🏆</div>
+            <span class="stat-number">85%</span>
+            <div class="stat-label">Success Rate</div>
+        </div>
+        """, unsafe_allow_html=True)
+    
     with col4:
-        st.markdown(
-            """<div class="stat-card">
-                <div class="stat-icon">🏆</div>
-                <span class="stat-number">Pro</span>
-                <div class="stat-label">Certificate</div>
-            </div>""", unsafe_allow_html=True)
+        st.markdown("""
+        <div class="stat-card">
+            <div class="stat-icon">🎓</div>
+            <span class="stat-number">Pro</span>
+            <div class="stat-label">Certification</div>
+        </div>
+        """, unsafe_allow_html=True)
+    
     st.markdown('</div>', unsafe_allow_html=True)
 
-    # --- START BUTTON ---
+    # --- ENHANCED START BUTTON ---
     col1, col2, col3 = st.columns([1, 2, 1])
     with col2:
-        st.markdown('<div class="start-button-container">', unsafe_allow_html=True)
-        if st.button("🚀 Start Your SQL Journey", key="start_quiz", use_container_width=True):
+        st.markdown('<div style="text-align: center; margin: 3rem 0;">', unsafe_allow_html=True)
+        if st.button("🚀 Launch Your Journey", key="start_quiz", use_container_width=True):
             st.session_state.quiz_started = True
             st.session_state.user_answers = []
             st.session_state.current_question = 0
             st.session_state.quiz_completed = False
-            st.success("🎉 Welcome to your SQL mastery journey!")
+            st.success("🎉 Welcome to the future of learning!")
             st.balloons()
             st.rerun()
         st.markdown('</div>', unsafe_allow_html=True)
 
-    # --- FEATURES SECTION ---
+    # --- ADVANCED FEATURES SECTION ---
     st.markdown("""
     <div class="features-grid">
         <div class="feature-card">
-            <div class="feature-icon" title="AI feedback on your SQL!">🤖</div>
-            <div class="feature-title">AI-Powered Feedback</div>
-            <div class="feature-description">Get instant, personalized feedback on your SQL queries and tips for optimization from our advanced AI tutor.</div>
+            <div class="feature-icon">🤖</div>
+            <div class="feature-title">AI-Powered Mentorship</div>
+            <div class="feature-description">Experience personalized learning with our advanced AI that adapts to your coding style, provides real-time feedback, and guides you through complex SQL concepts with precision.</div>
         </div>
         <div class="feature-card">
-            <div class="feature-icon" title="Real-world SQL practice!">🎯</div>
-            <div class="feature-title">Real-World Scenarios</div>
-            <div class="feature-description">Practice on authentic business problems and datasets that mirror what you'll encounter in your professional career.</div>
+            <div class="feature-icon">🌐</div>
+            <div class="feature-title">Immersive 3D Learning</div>
+            <div class="feature-description">Dive into interactive 3D database visualizations that make complex relationships crystal clear. See your queries come to life in our cutting-edge virtual environment.</div>
         </div>
         <div class="feature-card">
-            <div class="feature-icon" title="Track your progress!">📈</div>
-            <div class="feature-title">Progress Tracking</div>
-            <div class="feature-description">Monitor your learning journey with detailed analytics, performance insights, and skill progression tracking.</div>
+            <div class="feature-icon">📊</div>
+            <div class="feature-title">Advanced Analytics</div>
+            <div class="feature-description">Track your progress with detailed performance metrics, skill mapping, and predictive insights that help you identify strengths and areas for improvement.</div>
+        </div>
+        <div class="feature-card">
+            <div class="feature-icon">🎮</div>
+            <div class="feature-title">Gamified Challenges</div>
+            <div class="feature-description">Level up your skills through engaging challenges, unlock achievements, and compete with peers in our dynamic leaderboard system designed to keep you motivated.</div>
+        </div>
+        <div class="feature-card">
+            <div class="feature-icon">🔗</div>
+            <div class="feature-title">Industry Integration</div>
+            <div class="feature-description">Practice on real-world datasets from leading companies, work with live APIs, and build projects that directly translate to professional success.</div>
+        </div>
+        <div class="feature-card">
+            <div class="feature-icon">🚀</div>
+            <div class="feature-title">Career Acceleration</div>
+            <div class="feature-description">Get matched with job opportunities, receive interview prep, and showcase your certified skills to our network of 500+ hiring partners worldwide.</div>
         </div>
     </div>
     """, unsafe_allow_html=True)
 
-    # --- LEARNING PATH ---
+    # --- 3D LEARNING PATH ---
     st.markdown("""
     <div class="learning-path">
-        <h3>Your Learning Journey</h3>
+        <h3>🎯 Your Learning Journey</h3>
         <div class="steps-container">
             <div class="step">
                 <div class="step-number">1</div>
-                <div class="step-text">Take Assessment</div>
+                <div class="step-text">Assessment</div>
             </div>
             <div class="step">
                 <div class="step-number">2</div>
-                <div class="step-text">Get AI Feedback</div>
+                <div class="step-text">AI Feedback</div>
             </div>
             <div class="step">
                 <div class="step-number">3</div>
-                <div class="step-text">Earn Certificate</div>
+                <div class="step-text">Practice</div>
             </div>
             <div class="step">
                 <div class="step-number">4</div>
-                <div class="step-text">Advance Career</div>
+                <div class="step-text">Certification</div>
             </div>
         </div>
     </div>
     """, unsafe_allow_html=True)
 
-    # --- TESTIMONIAL ---
+    # --- ENHANCED TESTIMONIAL ---
     st.markdown("""
-    <div class="testimonial pulse">
-        <p class="testimonial-text">"This platform transformed my SQL skills in just 2 weeks. The AI feedback was incredibly detailed and helped me land my dream data analyst role at a Fortune 500 company!"</p>
-        <div class="testimonial-author">— Arjun Sharma, Senior Data Analyst at TechMahindra</div>
+    <div class="testimonial">
+        <p class="testimonial-text">"This platform completely transformed my understanding of SQL! The 3D visualizations made complex joins and subqueries incredibly intuitive. Within 3 weeks, I landed a senior data engineer role at Google with a 40% salary increase!"</p>
+        <div class="testimonial-author">— Priya Sharma, Senior Data Engineer at Google</div>
     </div>
     """, unsafe_allow_html=True)
 
+    # --- ADDITIONAL INTERACTIVE ELEMENTS ---
+    st.markdown("""
+    <div style="text-align: center; margin: 4rem 0 2rem 0;">
+        <div style="background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05)); 
+                    backdrop-filter: blur(25px); 
+                    border: 1px solid rgba(255, 255, 255, 0.2); 
+                    border-radius: 25px; 
+                    padding: 2rem; 
+                    max-width: 600px; 
+                    margin: 0 auto;
+                    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);">
+            <h3 style="color: #ffffff; font-size: 1.8rem; font-weight: 700; margin-bottom: 1rem;">Ready to Transform Your Career?</h3>
+            <p style="color: rgba(255, 255, 255, 0.8); font-size: 1.1rem; margin-bottom: 0;">Join thousands of developers who've accelerated their careers with our cutting-edge platform.</p>
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
 # --- END OF ADVANCED 3D UI HOMEPAGE ---
 # --- Quiz In Progress Screen ---
 elif st.session_state.quiz_started and not st.session_state.quiz_completed:
