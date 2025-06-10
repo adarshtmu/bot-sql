@@ -1057,7 +1057,6 @@ if not st.session_state.quiz_started:
     </div>
     """, unsafe_allow_html=True)
 
-    # --- HERO SECTION ---
     st.markdown("""
     <div class="hero-container">
         <div style="text-align: center;">
@@ -1070,6 +1069,12 @@ if not st.session_state.quiz_started:
         </p>
     </div>
     """, unsafe_allow_html=True)
+    
+    # Streamlit button centered
+    col1, col2, col3 = st.columns([1,2,1])
+    with col2:
+        if st.button("🚀 Launch Your SQL Journey"):
+            st.success("SQL Journey Launched!")
 
     # --- ADVANCED STATS SECTION (REFACTORED) ---
     # By placing all cards inside one container, we let the CSS grid handle the responsive layout.
