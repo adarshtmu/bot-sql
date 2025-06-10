@@ -495,14 +495,14 @@ if not st.session_state.quiz_started:
         overflow-x: hidden;
     }
     
-    /* Animated Background Particles */
-    .particle-background {
-        position: fixed;
-        top: 0; left: 0; width: 100vw; height: 100vh;
-        pointer-events: none; z-index: 0;
-        background: radial-gradient(circle at 20% 80%, rgba(120, 119, 198, 0.3) 0%, transparent 50%),
-                    radial-gradient(circle at 80% 20%, rgba(255, 119, 198, 0.3) 0%, transparent 50%);
-    }
+    # /* Animated Background Particles */
+    # .particle-background {
+    #     position: fixed;
+    #     top: 0; left: 0; width: 100vw; height: 100vh;
+    #     pointer-events: none; z-index: 0;
+    #     background: radial-gradient(circle at 20% 80%, rgba(120, 119, 198, 0.3) 0%, transparent 50%),
+    #                 radial-gradient(circle at 80% 20%, rgba(255, 119, 198, 0.3) 0%, transparent 50%);
+    # }
     
     .floating-orbs {
         position: fixed;
