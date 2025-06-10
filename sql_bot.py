@@ -1057,83 +1057,20 @@ if not st.session_state.quiz_started:
     </div>
     """, unsafe_allow_html=True)
 
-    # # --- HERO SECTION ---
-    # st.markdown("""
-    # <div class="hero-container">
-    #     <div style="text-align: center;">
-    #         <div class="hero-badge">🚀 Next-Gen AI Learning Platform</div>
-    #     </div>
-    #     <h1 class="hero-title" style="text-align: center;">Master SQL Like Never Before</h1>
-    #     <p class="hero-subtitle" style="text-align: center;">
-    #         Experience the future of learning with our advanced AI-powered platform.<br>
-    #         Join <strong>100,000+ developers</strong> who've transformed their careers with immersive 3D learning.
-    #     </p>
-    # </div>
-    # """,
-                
-    
-    # Add CSS first
+    # --- HERO SECTION ---
     st.markdown("""
-        <style>
-        .hero-container {
-            background: linear-gradient(135deg, #fff3 0%, #c5cae9 50%, #fff9 100%);
-            backdrop-filter: blur(24px);
-            border: 1px solid rgba(120,119,198,0.17);
-            padding: 3rem 2rem;
-            border-radius: 32px;
-            margin: 2.5rem auto 2rem auto;
-            max-width: 680px;
-            box-shadow: 0 16px 64px rgba(0,0,0,0.15);
-            position: relative;
-        }
-        .launch-btn {
-            display: flex;
-            justify-content: center;
-            margin-top: 2.5rem;
-        }
-        .hero-badge {
-            display: inline-block;
-            background: #6c63ff;
-            color: white;
-            font-weight: 700;
-            border-radius: 16px;
-            padding: 0.4em 1.5em;
-            font-size: 1.1em;
-            margin-bottom: 1.2em;
-            box-shadow: 0 2px 12px #6c63ff33;
-        }
-        </style>
-    """, unsafe_allow_html=True)
-    
-    # Open the dashboard box
-    st.markdown(
-        """
-        <div class="hero-container">
-            <div style="text-align: center;">
-                <div class="hero-badge">🚀 Next-Gen AI Learning Platform</div>
-            </div>
-            <h1 class="hero-title" style="text-align: center;">Master SQL Like Never Before</h1>
-            <p class="hero-subtitle" style="text-align: center;">
-                Experience the future of learning with our advanced AI-powered platform.<br>
-                Join <strong>100,000+ developers</strong> who've transformed their careers with immersive 3D learning.
-            </p>
-            <div class="launch-btn">
-        """,
-        unsafe_allow_html=True
-    )
-    
-    # BUTTON IS INSIDE THE BOX HERE!
-    if st.button("🚀 Launch Your SQL Journey", key="launch_sql_journey"):
-        st.success("Your SQL journey begins now!")
-    
-    # Close the button div and box
-    st.markdown(
-        """
-            </div>
+    <div class="hero-container">
+        <div style="text-align: center;">
+            <div class="hero-badge">🚀 Next-Gen AI Learning Platform</div>
         </div>
-        """,
-        unsafe_allow_html=True
-    )
+        <h1 class="hero-title" style="text-align: center;">Master SQL Like Never Before</h1>
+        <p class="hero-subtitle" style="text-align: center;">
+            Experience the future of learning with our advanced AI-powered platform.<br>
+            Join <strong>100,000+ developers</strong> who've transformed their careers with immersive 3D learning.
+        </p>
+    </div>
+    """, unsafe_allow_html=True)
+
     # --- ADVANCED STATS SECTION (REFACTORED) ---
     # By placing all cards inside one container, we let the CSS grid handle the responsive layout.
     st.markdown("""
