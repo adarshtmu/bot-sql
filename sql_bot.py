@@ -1073,7 +1073,7 @@ if not st.session_state.quiz_started:
     # Streamlit button centered
     col1, col2, col3 = st.columns([1,2,1])
     with col2:
-        if st.button("🚀 Launch Your SQL Journey"):
+        if st.button("🚀 Start Your SQL Journey"):
             st.success("SQL Journey Launched!")
 
     # --- ADVANCED STATS SECTION (REFACTORED) ---
