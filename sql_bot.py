@@ -1057,9 +1057,7 @@ if not st.session_state.quiz_started:
     </div>
     """, unsafe_allow_html=True)
 
-# --- HERO SECTION ---
-if not st.session_state.quiz_started:
-    # --- SINGLE DASHBOARD CONTAINER ---
+    # --- HERO SECTION ---
     st.markdown("""
     <div class="hero-container">
         <div style="text-align: center;">
@@ -1070,120 +1068,49 @@ if not st.session_state.quiz_started:
             Experience the future of learning with our advanced AI-powered platform.<br>
             Join <strong>100,000+ developers</strong> who've transformed their careers with immersive 3D learning.
         </p>
-        <!-- Stats Section -->
-        <div class="stats-container">
-            <div class="stat-card">
-                <div class="stat-icon">🎯</div>
-                <span class="stat-number">5</span>
-                <div class="stat-label">Questions</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-icon">⚡</div>
-                <span class="stat-number">5-10</span>
-                <div class="stat-label">Minutes</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-icon">🏆</div>
-                <span class="stat-number">50%</span>
-                <div class="stat-label">Target</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-icon">🎓</div>
-                <span class="stat-number">Pro</span>
-                <div class="stat-label">Certification</div>
-            </div>
-        </div>
+    </div>
+    """, unsafe_allow_html=True)
 
-        <!-- Features Section -->
-        <div class="features-grid">
-            <div class="feature-card">
-                <div class="feature-icon">🤖</div>
-                <div class="feature-title">AI-Powered Mentorship</div>
-                <div class="feature-description">Experience personalized learning with our advanced AI that adapts to your coding style, provides real-time feedback, and guides you through complex SQL concepts with precision.</div>
-            </div>
-            <div class="feature-card">
-                <div class="feature-icon">🌐</div>
-                <div class="feature-title">Immersive 3D Learning</div>
-                <div class="feature-description">Dive into interactive 3D database visualizations that make complex relationships crystal clear. See your queries come to life in our cutting-edge virtual environment.</div>
-            </div>
-            <div class="feature-card">
-                <div class="feature-icon">📊</div>
-                <div class="feature-title">Advanced Analytics</div>
-                <div class="feature-description">Track your progress with detailed performance metrics, skill mapping, and predictive insights that help you identify strengths and areas for improvement.</div>
-            </div>
-            <div class="feature-card">
-                <div class="feature-icon">🎮</div>
-                <div class="feature-title">Gamified Challenges</div>
-                <div class="feature-description">Level up your skills through engaging challenges, unlock achievements, and compete with peers in our dynamic leaderboard system designed to keep you motivated.</div>
-            </div>
-            <div class="feature-card">
-                <div class="feature-icon">🔗</div>
-                <div class="feature-title">Industry Integration</div>
-                <div class="feature-description">Practice on real-world datasets from leading companies, work with live APIs, and build projects that directly translate to professional success.</div>
-            </div>
-            <div class="feature-card">
-                <div class="feature-icon">🚀</div>
-                <div class="feature-title">Career Acceleration</div>
-                <div class="feature-description">Get matched with job opportunities, receive interview prep, and showcase your certified skills to our network of 500+ hiring partners worldwide.</div>
-            </div>
+    # --- ADVANCED STATS SECTION (REFACTORED) ---
+    # By placing all cards inside one container, we let the CSS grid handle the responsive layout.
+    st.markdown("""
+    <div class="stats-container">
+        <div class="stat-card">
+            <div class="stat-icon">🎯</div>
+            <span class="stat-number">5</span>
+            <div class="stat-label">Questions</div>
         </div>
-
-        <!-- Learning Path -->
-        <div class="learning-path">
-            <h3>🎯 Your Learning Journey</h3>
-            <div class="steps-container">
-                <div class="step">
-                    <div class="step-number">1</div>
-                    <div class="step-text">Assessment</div>
-                </div>
-                <div class="step">
-                    <div class="step-number">2</div>
-                    <div class="step-text">AI Feedback</div>
-                </div>
-                <div class="step">
-                    <div class="step-number">3</div>
-                    <div class="step-text">Practice</div>
-                </div>
-                <div class="step">
-                    <div class="step-number">4</div>
-                    <div class="step-text">Certification</div>
-                </div>
-            </div>
+        <div class="stat-card">
+            <div class="stat-icon">⚡</div>
+            <span class="stat-number">5-10</span>
+            <div class="stat-label">Minutes</div>
         </div>
-
-        <!-- Testimonial -->
-        <div class="testimonial">
-            <p class="testimonial-text">"This platform completely transformed my understanding of SQL! The 3D visualizations made complex joins and subqueries incredibly intuitive. Within 3 weeks, I landed a senior data engineer role at Google with a 40% salary increase!"</p>
-            <div class="testimonial-author">— Priya Sharma, Senior Data Engineer at Google</div>
+        <div class="stat-card">
+            <div class="stat-icon">🏆</div>
+            <span class="stat-number">50%</span>
+            <div class="stat-label">Target</div>
         </div>
-    """, unsafe_allow_html=True)  # Don't close the container yet!
+        <div class="stat-card">
+            <div class="stat-icon">🎓</div>
+            <span class="stat-number">Pro</span>
+            <div class="stat-label">Certification</div>
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
 
-    # --- BUTTON AT END OF DASHBOARD ---
-    # Use columns for centering if desired
-    cols = st.columns([1,2,1])
-    with cols[1]:
-        if st.button("🚀 Launch Your Journey", key="start_quiz", use_container_width=True):
-            st.session_state.quiz_started = True
-            st.session_state.user_answers = []
-            st.session_state.current_question = 0
-            st.session_state.quiz_completed = False
-            st.success("🎉 Welcome to the future of learning!")
-            st.balloons()
-            st.rerun()
-    st.markdown("</div>", unsafe_allow_html=True)
 
     # --- ENHANCED START BUTTON (REFACTORED) ---
     # Simplified layout for better centering on all devices.
-    # st.markdown('<div style="text-align: center; margin: 3rem 0;">', unsafe_allow_html=True)
-    # if st.button("🚀 Launch Your Journey", key="start_quiz"):
-    #     st.session_state.quiz_started = True
-    #     st.session_state.user_answers = []
-    #     st.session_state.current_question = 0
-    #     st.session_state.quiz_completed = False
-    #     st.success("🎉 Welcome to the future of learning!")
-    #     st.balloons()
-    #     st.rerun()
-    # st.markdown('</div>', unsafe_allow_html=True)
+    st.markdown('<div style="text-align: center; margin: 3rem 0;">', unsafe_allow_html=True)
+    if st.button("🚀 Launch Your Journey", key="start_quiz"):
+        st.session_state.quiz_started = True
+        st.session_state.user_answers = []
+        st.session_state.current_question = 0
+        st.session_state.quiz_completed = False
+        st.success("🎉 Welcome to the future of learning!")
+        st.balloons()
+        st.rerun()
+    st.markdown('</div>', unsafe_allow_html=True)
 
     # --- ADVANCED FEATURES SECTION ---
     # This section was already well-structured for responsiveness.
@@ -2053,5 +1980,6 @@ elif st.session_state.quiz_completed:
     display_advanced_results_page(final_score , st.session_state.user_answers, analyze_performance)
     
     
+
 
 
