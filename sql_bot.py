@@ -1069,6 +1069,33 @@ if not st.session_state.quiz_started:
             Join <strong>100,000+ developers</strong> who've transformed their careers with immersive 3D learning.
         </p>
     </div>
+    """,
+                
+    # --- HERO SECTION ---
+    st.markdown(
+        """
+        <div class="hero-container">
+            <div style="text-align: center;">
+                <div class="hero-badge">🚀 Next-Gen AI Learning Platform</div>
+            </div>
+            <h1 class="hero-title" style="text-align: center;">Master SQL Like Never Before</h1>
+            <p class="hero-subtitle" style="text-align: center;">
+                Experience the future of learning with our advanced AI-powered platform.<br>
+                Join <strong>100,000+ developers</strong> who've transformed their careers with immersive 3D learning.
+            </p>
+            <div class="launch-btn">
+        """,
+        unsafe_allow_html=True
+    )
+    
+    # --- Button INSIDE the box, below the content ---
+    if st.button("🚀 Launch Your SQL Journey", key="launch_sql_journey"):
+        st.success("Your SQL journey begins now!")
+    
+    # --- End of button div and hero box div ---
+    st.markdown("""
+            </div>
+        </div>
     """, unsafe_allow_html=True)
 
     # --- ADVANCED STATS SECTION (REFACTORED) ---
