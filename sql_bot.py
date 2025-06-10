@@ -1073,8 +1073,9 @@ if not st.session_state.quiz_started:
     # Streamlit button centered
     col1, col2, col3 = st.columns([1,2,1])
     with col2:
-        if st.button("🚀 Start Your SQL Journey"):
-            st.success("SQL Journey Launched!")
+        if st.button("🚀 Launch Your SQL Journey"):
+            st.experimental_set_query_params(page="questions")
+            st.experimental_rerun()
 
     # --- ADVANCED STATS SECTION (REFACTORED) ---
     # By placing all cards inside one container, we let the CSS grid handle the responsive layout.
