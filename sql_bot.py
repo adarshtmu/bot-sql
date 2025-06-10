@@ -1057,7 +1057,6 @@ if not st.session_state.quiz_started:
     </div>
     """, unsafe_allow_html=True)
 
-import streamlit as st
 
     # --- HERO SECTION ---
     st.markdown("""
