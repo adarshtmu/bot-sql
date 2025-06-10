@@ -1071,7 +1071,41 @@ if not st.session_state.quiz_started:
     # </div>
     # """,
                 
-    # --- HERO SECTION ---
+    
+    # Add CSS first
+    st.markdown("""
+        <style>
+        .hero-container {
+            background: linear-gradient(135deg, #fff3 0%, #c5cae9 50%, #fff9 100%);
+            backdrop-filter: blur(24px);
+            border: 1px solid rgba(120,119,198,0.17);
+            padding: 3rem 2rem;
+            border-radius: 32px;
+            margin: 2.5rem auto 2rem auto;
+            max-width: 680px;
+            box-shadow: 0 16px 64px rgba(0,0,0,0.15);
+            position: relative;
+        }
+        .launch-btn {
+            display: flex;
+            justify-content: center;
+            margin-top: 2.5rem;
+        }
+        .hero-badge {
+            display: inline-block;
+            background: #6c63ff;
+            color: white;
+            font-weight: 700;
+            border-radius: 16px;
+            padding: 0.4em 1.5em;
+            font-size: 1.1em;
+            margin-bottom: 1.2em;
+            box-shadow: 0 2px 12px #6c63ff33;
+        }
+        </style>
+    """, unsafe_allow_html=True)
+    
+    # Open the dashboard box
     st.markdown(
         """
         <div class="hero-container">
@@ -1088,16 +1122,18 @@ if not st.session_state.quiz_started:
         unsafe_allow_html=True
     )
     
-    # --- Button INSIDE the box, below the content ---
+    # BUTTON IS INSIDE THE BOX HERE!
     if st.button("🚀 Launch Your SQL Journey", key="launch_sql_journey"):
         st.success("Your SQL journey begins now!")
     
-    # --- End of button div and hero box div ---
-    st.markdown("""
+    # Close the button div and box
+    st.markdown(
+        """
             </div>
         </div>
-    """, unsafe_allow_html=True)
-
+        """,
+        unsafe_allow_html=True
+    )
     # --- ADVANCED STATS SECTION (REFACTORED) ---
     # By placing all cards inside one container, we let the CSS grid handle the responsive layout.
     st.markdown("""
