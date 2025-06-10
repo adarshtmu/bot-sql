@@ -1074,7 +1074,7 @@ if not st.session_state.quiz_started:
     col1, col2, col3 = st.columns([1,2,1])
     with col2:
         if st.button("🚀 Launch Your SQL Journey"):
-            st.experimental_set_query_params(page="questions")
+            st.query_params.update({"page": "questions"})
             st.experimental_rerun()
 
     # --- ADVANCED STATS SECTION (REFACTORED) ---
