@@ -5,7 +5,7 @@ import re
 import duckdb
 import streamlit as st
 import streamlit as st
-from streamlit_chat import message  # pip install streamlit-chat
+# from streamlit_chat import message  # pip install streamlit-chat
 
 st.set_page_config(page_title="AI SQL Mastery - EdTech Platform")
 
