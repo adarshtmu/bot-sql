@@ -504,55 +504,55 @@ if not st.session_state.quiz_started:
     #                 radial-gradient(circle at 80% 20%, rgba(255, 119, 198, 0.3) 0%, transparent 50%);
     # }
     
-    .floating-orbs {
-        position: fixed;
-        top: 0; left: 0; width: 100vw; height: 100vh;
-        pointer-events: none; z-index: 1;
-        overflow: hidden;
-    }
+    # .floating-orbs {
+    #     position: fixed;
+    #     top: 0; left: 0; width: 100vw; height: 100vh;
+    #     pointer-events: none; z-index: 1;
+    #     overflow: hidden;
+    # }
     
-    .orb {
-        position: absolute;
-        border-radius: 50%;
-        background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05));
-        backdrop-filter: blur(20px);
-        border: 1px solid rgba(255, 255, 255, 0.1);
-        animation: float3d 8s ease-in-out infinite;
-        box-shadow: 0 8px 40px rgba(120, 119, 198, 0.3),
-                    inset 0 1px 0 rgba(255, 255, 255, 0.2);
-    }
+    # .orb {
+    #     position: absolute;
+    #     border-radius: 50%;
+    #     background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05));
+    #     backdrop-filter: blur(20px);
+    #     border: 1px solid rgba(255, 255, 255, 0.1);
+    #     animation: float3d 8s ease-in-out infinite;
+    #     box-shadow: 0 8px 40px rgba(120, 119, 198, 0.3),
+    #                 inset 0 1px 0 rgba(255, 255, 255, 0.2);
+    # }
     
-    .orb:nth-child(1) { 
-        width: 120px; height: 120px; top: 10%; left: 10%; 
-        animation-delay: 0s; animation-duration: 10s;
-    }
-    .orb:nth-child(2) { 
-        width: 200px; height: 200px; top: 20%; right: 15%; 
-        animation-delay: 2s; animation-duration: 12s;
-    }
-    .orb:nth-child(3) { 
-        width: 80px; height: 80px; bottom: 20%; left: 15%; 
-        animation-delay: 4s; animation-duration: 8s;
-    }
-    .orb:nth-child(4) { 
-        width: 150px; height: 150px; bottom: 10%; right: 20%; 
-        animation-delay: 6s; animation-duration: 14s;
-    }
+    # .orb:nth-child(1) { 
+    #     width: 120px; height: 120px; top: 10%; left: 10%; 
+    #     animation-delay: 0s; animation-duration: 10s;
+    # }
+    # .orb:nth-child(2) { 
+    #     width: 200px; height: 200px; top: 20%; right: 15%; 
+    #     animation-delay: 2s; animation-duration: 12s;
+    # }
+    # .orb:nth-child(3) { 
+    #     width: 80px; height: 80px; bottom: 20%; left: 15%; 
+    #     animation-delay: 4s; animation-duration: 8s;
+    # }
+    # .orb:nth-child(4) { 
+    #     width: 150px; height: 150px; bottom: 10%; right: 20%; 
+    #     animation-delay: 6s; animation-duration: 14s;
+    # }
     
-    @keyframes float3d {
-        0%, 100% { 
-            transform: translateY(0px) translateX(0px) rotateX(0deg) rotateY(0deg) scale(1);
-        }
-        25% { 
-            transform: translateY(-30px) translateX(20px) rotateX(10deg) rotateY(5deg) scale(1.1);
-        }
-        50% { 
-            transform: translateY(-15px) translateX(-20px) rotateX(-5deg) rotateY(10deg) scale(0.9);
-        }
-        75% { 
-            transform: translateY(-45px) translateX(10px) rotateX(5deg) rotateY(-5deg) scale(1.05);
-        }
-    }
+    # @keyframes float3d {
+    #     0%, 100% { 
+    #         transform: translateY(0px) translateX(0px) rotateX(0deg) rotateY(0deg) scale(1);
+    #     }
+    #     25% { 
+    #         transform: translateY(-30px) translateX(20px) rotateX(10deg) rotateY(5deg) scale(1.1);
+    #     }
+    #     50% { 
+    #         transform: translateY(-15px) translateX(-20px) rotateX(-5deg) rotateY(10deg) scale(0.9);
+    #     }
+    #     75% { 
+    #         transform: translateY(-45px) translateX(10px) rotateX(5deg) rotateY(-5deg) scale(1.05);
+    #     }
+    # }
     
     /* 3D Cube Animation */
     .cube-container {
@@ -1043,11 +1043,7 @@ if not st.session_state.quiz_started:
     # --- ANIMATED BACKGROUND ELEMENTS ---
     st.markdown("""
     <div class="particle-background"></div>
-    <div class="floating-orbs">
-        <div class="orb"></div>
-        <div class="orb"></div>
-        <div class="orb"></div>
-        <div class="orb"></div>
+    <div class="cube-container">
     </div>
     <div class="cube-container">
         <div class="cube">
