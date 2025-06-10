@@ -1057,6 +1057,7 @@ if not st.session_state.quiz_started:
     </div>
     """, unsafe_allow_html=True)
 
+    # --- HERO SECTION ---
     st.markdown("""
     <div class="hero-container">
         <div style="text-align: center;">
@@ -1069,13 +1070,6 @@ if not st.session_state.quiz_started:
         </p>
     </div>
     """, unsafe_allow_html=True)
-    
-    # Streamlit button centered
-    col1, col2, col3 = st.columns([1,2,1])
-    with col2:
-        if st.button("🚀 Launch Your SQL Journey"):
-            st.query_params.update({"page": "questions"})
-            st.experimental_rerun()
 
     # --- ADVANCED STATS SECTION (REFACTORED) ---
     # By placing all cards inside one container, we let the CSS grid handle the responsive layout.
@@ -1105,18 +1099,18 @@ if not st.session_state.quiz_started:
     """, unsafe_allow_html=True)
 
 
-    # # --- ENHANCED START BUTTON (REFACTORED) ---
-    # # Simplified layout for better centering on all devices.
-    # st.markdown('<div style="text-align: center; margin: 3rem 0;">', unsafe_allow_html=True)
-    # if st.button("🚀 Launch Your Journey", key="start_quiz"):
-    #     st.session_state.quiz_started = True
-    #     st.session_state.user_answers = []
-    #     st.session_state.current_question = 0
-    #     st.session_state.quiz_completed = False
-    #     st.success("🎉 Welcome to the future of learning!")
-    #     st.balloons()
-    #     st.rerun()
-    # st.markdown('</div>', unsafe_allow_html=True)
+    # --- ENHANCED START BUTTON (REFACTORED) ---
+    # Simplified layout for better centering on all devices.
+    st.markdown('<div style="text-align: center; margin: 3rem 0;">', unsafe_allow_html=True)
+    if st.button("🚀 Launch Your Journey", key="start_quiz"):
+        st.session_state.quiz_started = True
+        st.session_state.user_answers = []
+        st.session_state.current_question = 0
+        st.session_state.quiz_completed = False
+        st.success("🎉 Welcome to the future of learning!")
+        st.balloons()
+        st.rerun()
+    st.markdown('</div>', unsafe_allow_html=True)
 
     # --- ADVANCED FEATURES SECTION ---
     # This section was already well-structured for responsiveness.
