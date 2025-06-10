@@ -1069,7 +1069,7 @@ if not st.session_state.quiz_started:
             Join <strong>100,000+ developers</strong> who've transformed their careers with immersive 3D learning.
         </p>
     </div>
-    """, unsafe_allow_html=True)
+
 
         # --- ENHANCED START BUTTON (REFACTORED) ---
     # Simplified layout for better centering on all devices.
