@@ -1057,6 +1057,8 @@ if not st.session_state.quiz_started:
     </div>
     """, unsafe_allow_html=True)
 
+import streamlit as st
+
     # --- HERO SECTION ---
     st.markdown("""
     <div class="hero-container">
@@ -1069,10 +1071,9 @@ if not st.session_state.quiz_started:
             Join <strong>100,000+ developers</strong> who've transformed their careers with immersive 3D learning.
         </p>
     </div>
-
-
-        # --- ENHANCED START BUTTON (REFACTORED) ---
-    # Simplified layout for better centering on all devices.
+    """, unsafe_allow_html=True)
+    
+    # --- ENHANCED START BUTTON (REFACTORED) ---
     st.markdown('<div style="text-align: center; margin: 3rem 0;">', unsafe_allow_html=True)
     if st.button("🚀 Launch Your Journey", key="start_quiz"):
         st.session_state.quiz_started = True
@@ -1082,6 +1083,15 @@ if not st.session_state.quiz_started:
         st.success("🎉 Welcome to the future of learning!")
         st.balloons()
         st.rerun()
+    st.markdown('</div>', unsafe_allow_html=True)
+    
+    # ----- (Insert your dashboard code/components here, if any) -----
+    
+    # --- END BUTTON (Add this at the very end of your file) ---
+    st.markdown('<div style="text-align: center; margin: 3rem 0;">', unsafe_allow_html=True)
+    if st.button("🔚 End Dashboard Action", key="end_dashboard"):
+        st.success("You clicked the end button!")
+        # Place any logic you want here (e.g., navigation, resetting values, etc.)
     st.markdown('</div>', unsafe_allow_html=True)
 
     # --- ADVANCED STATS SECTION (REFACTORED) ---
