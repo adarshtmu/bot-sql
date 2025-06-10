@@ -471,11 +471,16 @@ def display_simulation(title, result_data):
 import streamlit as st
 
 # Initialize session state
+import streamlit as st
+
+# Initialize session state
 if 'quiz_started' not in st.session_state:
     st.session_state.quiz_started = False
 
 if not st.session_state.quiz_started:
     # --- ULTRA ADVANCED 3D GLASSMORPHIC CSS ---
+    # This CSS is excellent and already contains responsive @media queries.
+    # No changes are needed here.
     st.markdown("""
     <style>
     @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap');
@@ -712,6 +717,7 @@ if not st.session_state.quiz_started:
         transform-style: preserve-3d;
         position: relative;
         overflow: hidden;
+        padding: 1rem; /* Added some padding for better spacing */
     }
     
     .stat-card:hover {
@@ -1005,12 +1011,13 @@ if not st.session_state.quiz_started:
     /* Responsive Design */
     @media (max-width: 1200px) {
         .hero-title { font-size: 3.5rem; }
+        /* The auto-fit grid handles this automatically now, but this is a good fallback. */
         .stats-container { grid-template-columns: repeat(2, 1fr); }
     }
     
     @media (max-width: 768px) {
         .hero-title { font-size: 2.8rem; letter-spacing: -1px; }
-        .hero-container { padding: 2.5rem 2rem; }
+        .hero-container { padding: 2.5rem 2rem; margin: 2rem auto; }
         .steps-container { 
             flex-direction: column; 
             gap: 3rem; 
@@ -1028,6 +1035,7 @@ if not st.session_state.quiz_started:
         .feature-title { font-size: 1.3rem; }
         .step { width: 100px; height: 100px; }
         .stat-card { height: 160px; }
+        .cta-button { padding: 1.2rem 2.5rem; font-size: 1.2rem;}
     }
     </style>
     """, unsafe_allow_html=True)
@@ -1056,72 +1064,60 @@ if not st.session_state.quiz_started:
     # --- HERO SECTION ---
     st.markdown("""
     <div class="hero-container">
-        <div class="hero-badge">🚀 Next-Gen AI Learning Platform</div>
-        <h1 class="hero-title">Master SQL Like Never Before</h1>
-        <p class="hero-subtitle">
+        <div style="text-align: center;">
+            <div class="hero-badge">🚀 Next-Gen AI Learning Platform</div>
+        </div>
+        <h1 class="hero-title" style="text-align: center;">Master SQL Like Never Before</h1>
+        <p class="hero-subtitle" style="text-align: center;">
             Experience the future of learning with our advanced AI-powered platform.<br>
             Join <strong>100,000+ developers</strong> who've transformed their careers with immersive 3D learning.
         </p>
     </div>
     """, unsafe_allow_html=True)
 
-    # --- ADVANCED STATS SECTION ---
-    st.markdown('<div class="stats-container">', unsafe_allow_html=True)
-    col1, col2, col3, col4 = st.columns(4)
-    
-    with col1:
-        st.markdown("""
+    # --- ADVANCED STATS SECTION (REFACTORED) ---
+    # By placing all cards inside one container, we let the CSS grid handle the responsive layout.
+    st.markdown("""
+    <div class="stats-container">
         <div class="stat-card">
             <div class="stat-icon">🎯</div>
             <span class="stat-number">5</span>
             <div class="stat-label">Questions</div>
         </div>
-        """, unsafe_allow_html=True)
-    
-    with col2:
-        st.markdown("""
         <div class="stat-card">
             <div class="stat-icon">⚡</div>
             <span class="stat-number">5-10</span>
             <div class="stat-label">Minutes</div>
         </div>
-        """, unsafe_allow_html=True)
-    
-    with col3:
-        st.markdown("""
         <div class="stat-card">
             <div class="stat-icon">🏆</div>
             <span class="stat-number">50%</span>
             <div class="stat-label">Target</div>
         </div>
-        """, unsafe_allow_html=True)
-    
-    with col4:
-        st.markdown("""
         <div class="stat-card">
             <div class="stat-icon">🎓</div>
             <span class="stat-number">Pro</span>
             <div class="stat-label">Certification</div>
         </div>
-        """, unsafe_allow_html=True)
-    
+    </div>
+    """, unsafe_allow_html=True)
+
+
+    # --- ENHANCED START BUTTON (REFACTORED) ---
+    # Simplified layout for better centering on all devices.
+    st.markdown('<div style="text-align: center; margin: 3rem 0;">', unsafe_allow_html=True)
+    if st.button("🚀 Launch Your Journey", key="start_quiz"):
+        st.session_state.quiz_started = True
+        st.session_state.user_answers = []
+        st.session_state.current_question = 0
+        st.session_state.quiz_completed = False
+        st.success("🎉 Welcome to the future of learning!")
+        st.balloons()
+        st.rerun()
     st.markdown('</div>', unsafe_allow_html=True)
 
-    # --- ENHANCED START BUTTON ---
-    col1, col2, col3 = st.columns([1, 2, 1])
-    with col2:
-        st.markdown('<div style="text-align: center; margin: 3rem 0;">', unsafe_allow_html=True)
-        if st.button("🚀 Launch Your Journey", key="start_quiz", use_container_width=True):
-            st.session_state.quiz_started = True
-            st.session_state.user_answers = []
-            st.session_state.current_question = 0
-            st.session_state.quiz_completed = False
-            st.success("🎉 Welcome to the future of learning!")
-            st.balloons()
-            st.rerun()
-        st.markdown('</div>', unsafe_allow_html=True)
-
     # --- ADVANCED FEATURES SECTION ---
+    # This section was already well-structured for responsiveness.
     st.markdown("""
     <div class="features-grid">
         <div class="feature-card">
@@ -1158,6 +1154,7 @@ if not st.session_state.quiz_started:
     """, unsafe_allow_html=True)
 
     # --- 3D LEARNING PATH ---
+    # This section was also well-structured for responsiveness.
     st.markdown("""
     <div class="learning-path">
         <h3>🎯 Your Learning Journey</h3>
@@ -1206,6 +1203,14 @@ if not st.session_state.quiz_started:
         </div>
     </div>
     """, unsafe_allow_html=True)
+
+# The rest of your quiz logic would go here, after the 'if not st.session_state.quiz_started:' block.
+# Example:
+# else:
+#     st.write("The quiz has started!")
+#     # ... your quiz questions and logic ...
+
+        
 # --- END OF ADVANCED 3D UI HOMEPAGE ---
 # --- Quiz In Progress Screen ---
 elif st.session_state.quiz_started and not st.session_state.quiz_completed:
