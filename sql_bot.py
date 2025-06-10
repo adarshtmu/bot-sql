@@ -1097,7 +1097,7 @@ if not st.session_state.quiz_started:
             <div class="stat-label">Questions</div>
         </div>
         <div class="stat-card">
-            <div class="stat-icon">⚡</div>
+            <div class="stat-icon">⏱️</div>
             <span class="stat-number">5-10</span>
             <div class="stat-label">Minutes</div>
         </div>
