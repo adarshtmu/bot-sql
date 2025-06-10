@@ -1073,14 +1073,18 @@ if not st.session_state.quiz_started:
 
 
     st.markdown('<div style="text-align: center; margin: 3rem 0;">', unsafe_allow_html=True)
-    if st.button("🚀 Start Your SQL Journey", key="start_quiz"):
-        st.session_state.quiz_started = True
-        st.session_state.user_answers = []
-        st.session_state.current_question = 0
-        st.session_state.quiz_completed = False
-        st.success("🎉 Welcome to the future of learning!")
-        st.balloons()
-        st.rerun()
+
+    # Create three columns, use the center one for your button
+    col1, col2, col3 = st.columns([1, 2, 1])
+    with col2:
+        if st.button("🚀 Start Your SQL Journey", key="start_quiz"):
+            st.session_state.quiz_started = True
+            st.session_state.user_answers = []
+            st.session_state.current_question = 0
+            st.session_state.quiz_completed = False
+            st.success("🎉 Welcome to the future of learning!")
+            st.balloons()
+            st.rerun()
     st.markdown('</div>', unsafe_allow_html=True)
 
     # --- ADVANCED STATS SECTION (REFACTORED) ---
