@@ -1081,6 +1081,16 @@ if not st.session_state.quiz_started:
         st.rerun()
     st.markdown('</div>', unsafe_allow_html=True)
 
+        # --- KEEP ALL YOUR OTHER DASHBOARD CONTENT BELOW ---
+    st.markdown("""
+    <div class="hero-container">
+        <p class="hero-subtitle" style="text-align: center;">
+            Experience the future of learning with our advanced AI-powered platform.<br>
+            Join <strong>100,000+ developers</strong> who've transformed their careers with immersive 3D learning.
+        </p>
+    </div>
+    """, unsafe_allow_html=True)
+
     # --- ADVANCED STATS SECTION (REFACTORED) ---
     # By placing all cards inside one container, we let the CSS grid handle the responsive layout.
     st.markdown("""
