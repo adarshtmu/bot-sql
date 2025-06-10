@@ -1091,8 +1091,8 @@ if not st.session_state.quiz_started:
         st.markdown("""
         <div class="stat-card">
             <div class="stat-icon">🏆</div>
-            <span class="stat-number">85%</span>
-            <div class="stat-label">Success Rate</div>
+            <span class="stat-number">50%</span>
+            <div class="stat-label">Target</div>
         </div>
         """, unsafe_allow_html=True)
     
