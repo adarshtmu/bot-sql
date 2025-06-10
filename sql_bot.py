@@ -4,8 +4,6 @@ import pandas as pd
 import re
 import duckdb
 import streamlit as st
-import streamlit as st
-# from streamlit_chat import message  # pip install streamlit-chat
 
 st.set_page_config(page_title="AI SQL Mastery - EdTech Platform")
 
@@ -1059,8 +1057,6 @@ if not st.session_state.quiz_started:
     </div>
     """, unsafe_allow_html=True)
 
-
-
     # --- HERO SECTION ---
     st.markdown("""
     <div class="hero-container">
@@ -1074,30 +1070,6 @@ if not st.session_state.quiz_started:
         </p>
     </div>
     """, unsafe_allow_html=True)
-    
-    # --- Copilot Chat Button ---
-    st.markdown("<br>", unsafe_allow_html=True)
-    launch = st.button("💬 Launch AI SQL Assistant")
-    
-    if launch or st.session_state.get("show_chat", False):
-        st.session_state["show_chat"] = True
-    
-        st.markdown("### Copilot Chat Assistant")
-        # Initialize chat history
-        if "messages" not in st.session_state:
-            st.session_state["messages"] = []
-    
-        user_input = st.text_input("You:", key="user_input")
-        if user_input:
-            # Here you'd call your AI backend (OpenAI API, etc.)
-            bot_reply = "I'm your SQL Copilot! Ask me anything about SQL or this platform."  # Replace with real inference
-            st.session_state["messages"].append(("user", user_input))
-            st.session_state["messages"].append(("bot", bot_reply))
-    
-        for i, (sender, msg) in enumerate(st.session_state["messages"]):
-            is_user = sender == "user"
-            message(msg, is_user=is_user, key=f"{sender}_{i}")
-
 
     # --- ADVANCED STATS SECTION (REFACTORED) ---
     # By placing all cards inside one container, we let the CSS grid handle the responsive layout.
