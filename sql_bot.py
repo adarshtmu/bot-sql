@@ -180,11 +180,14 @@ sql_questions = [
      "difficulty": "difficult"}
 ]
 
+import streamlit as st
+import random
+
 NUM_EASY = 3
 NUM_INTERMEDIATE = 1
 NUM_DIFFICULT = 1
 
-# Randomly select questions ONCE per session
+# Only select exam questions if not already picked for this session
 if "exam_questions" not in st.session_state:
     easy = [q for q in sql_questions if q['difficulty'] == 'easy']
     intermediate = [q for q in sql_questions if q['difficulty'] == 'intermediate']
