@@ -115,11 +115,9 @@ original_tables = {
 }
 
 # --- SQL Questions List ---
-import random
-
-# Example structure: each question has a 'difficulty' field
+# --- SQL Questions List with Difficulty Levels ---
 sql_questions = [
-    # Easy (5)
+    # Easy Questions
     {
         "question": "Write a SQL query to get all details about users from the 'users' table.",
         "correct_answer_example": "SELECT * FROM users;",
@@ -135,28 +133,27 @@ sql_questions = [
         "difficulty": "easy"
     },
     {
+        "question": "Write a SQL query to list all orders from the 'orders' table.",
+        "correct_answer_example": "SELECT * FROM orders;",
+        "sample_table": orders_table,
+        "relevant_tables": ["orders"],
+        "difficulty": "easy"
+    },
+    {
+        "question": "Write a SQL query to find users from the 'users' table who live in 'New York'.",
+        "correct_answer_example": "SELECT * FROM users WHERE city = 'New York';",
+        "sample_table": users_table,
+        "relevant_tables": ["users"],
+        "difficulty": "easy"
+    },
+    # Intermediate Questions
+    {
         "question": "Write a SQL query to get all users older than 30 from the 'users' table.",
         "correct_answer_example": "SELECT * FROM users WHERE age > 30;",
         "sample_table": users_table,
         "relevant_tables": ["users"],
-        "difficulty": "easy"
+        "difficulty": "intermediate"
     },
-    {
-        "question": "Write a SQL query to select only the names from the 'users' table.",
-        "correct_answer_example": "SELECT name FROM users;",
-        "sample_table": users_table,
-        "relevant_tables": ["users"],
-        "difficulty": "easy"
-    },
-    {
-        "question": "Write a SQL query to get users whose email address ends with '@gmail.com' from the 'users' table.",
-        "correct_answer_example": "SELECT * FROM users WHERE email LIKE '%@gmail.com';",
-        "sample_table": users_table,
-        "relevant_tables": ["users"],
-        "difficulty": "easy"
-    },
-
-    # Intermediate (4)
     {
         "question": "Write a SQL query to find the average order amount from the 'orders' table.",
         "correct_answer_example": "SELECT AVG(amount) AS average_amount FROM orders;",
@@ -165,83 +162,83 @@ sql_questions = [
         "difficulty": "intermediate"
     },
     {
-        "question": "Write a SQL query to get the user with the highest age from the 'users' table.",
-        "correct_answer_example": "SELECT * FROM users ORDER BY age DESC LIMIT 1;",
+        "question": "Write a SQL query to get all orders with status 'Completed' from the 'orders' table.",
+        "correct_answer_example": "SELECT * FROM orders WHERE status = 'Completed';",
+        "sample_table": orders_table,
+        "relevant_tables": ["orders"],
+        "difficulty": "intermediate"
+    },
+    {
+        "question": "Write a SQL query to join 'users' and 'orders' tables to show user names and their order amounts.",
+        "correct_answer_example": "SELECT u.name, o.amount FROM users u JOIN orders o ON u.user_id = o.user_id;",
         "sample_table": users_table,
-        "relevant_tables": ["users"],
+        "relevant_tables": ["users", "orders"],
         "difficulty": "intermediate"
     },
     {
-        "question": "Write a SQL query to show the number of orders placed by each user.",
-        "correct_answer_example": "SELECT user_id, COUNT(*) AS order_count FROM orders GROUP BY user_id;",
-        "sample_table": orders_table,
-        "relevant_tables": ["orders"],
+        "question": "Write a SQL query to find the total number of orders per user from the 'orders' table.",
+        "correct_answer_example": "SELECT u.name, COUNT(o.order_id) AS order_count FROM users u LEFT JOIN orders o ON u.user_id = o.user_id GROUP BY u.name;",
+        "sample_table": users_table,
+        "relevant_tables": ["users", "orders"],
         "difficulty": "intermediate"
     },
-    {
-        "question": "Write a SQL query to show all orders placed in the month of January from the 'orders' table.",
-        "correct_answer_example": "SELECT * FROM orders WHERE strftime('%m', order_date) = '01';",
-        "sample_table": orders_table,
-        "relevant_tables": ["orders"],
-        "difficulty": "intermediate"
-    },
-
-    # Hard (2)
+    # Difficult Questions
     {
         "question": "Write a SQL query to calculate the total amount spent by each user by joining the 'users' and 'orders' tables.",
         "correct_answer_example": "SELECT u.name, SUM(o.amount) AS total_spent FROM users u JOIN orders o ON u.user_id = o.user_id GROUP BY u.name ORDER BY u.name;",
         "sample_table": users_table,
         "relevant_tables": ["users", "orders"],
-        "difficulty": "hard"
+        "difficulty": "difficult"
     },
     {
-        "question": "Write a SQL query to list users who have not placed any orders.",
-        "correct_answer_example": "SELECT u.* FROM users u LEFT JOIN orders o ON u.user_id = o.user_id WHERE o.order_id IS NULL;",
+        "question": "Write a SQL query to find users who have not placed any orders using a LEFT JOIN.",
+        "correct_answer_example": "SELECT u.name FROM users u LEFT JOIN orders o ON u.user_id = o.user_id WHERE o.order_id IS NULL;",
         "sample_table": users_table,
         "relevant_tables": ["users", "orders"],
-        "difficulty": "hard"
+        "difficulty": "difficult"
+    },
+    {
+        "question": "Write a SQL query to find the user with the highest total order amount.",
+        "correct_answer_example": "SELECT u.name, SUM(o.amount) AS total_spent FROM users u JOIN orders o ON u.user_id = o.user_id GROUP BY u.name ORDER BY total_spent DESC LIMIT 1;",
+        "sample_table": users_table,
+        "relevant_tables": ["users", "orders"],
+        "difficulty": "difficult"
     }
 ]
 
 import random
 
-NUM_EASY = 3
-NUM_INTERMEDIATE = 1
-NUM_HARD = 1
-
-easy_questions = [q for q in sql_questions if q["difficulty"] == "easy"]
-intermediate_questions = [q for q in sql_questions if q["difficulty"] == "intermediate"]
-hard_questions = [q for q in sql_questions if q["difficulty"] == "hard"]
-
-selected_questions = []
-selected_questions.extend(random.sample(easy_questions, 3))
-selected_questions.extend(random.sample(intermediate_questions, 1))
-selected_questions.extend(random.sample(hard_questions, 1))
-# selected_questions now has 5 random questions
-
+# --- Session State Initialization ---
+if "user_answers" not in st.session_state:
+    st.session_state.user_answers = []
+if "current_question" not in st.session_state:
+    st.session_state.current_question = 0
+if "quiz_started" not in st.session_state:
+    st.session_state.quiz_started = False
+if "quiz_completed" not in st.session_state:
+    st.session_state.quiz_completed = False
+if "show_detailed_feedback" not in st.session_state:
+    st.session_state.show_detailed_feedback = False
 if "selected_questions" not in st.session_state:
+    # Categorize questions by difficulty
     easy_questions = [q for q in sql_questions if q["difficulty"] == "easy"]
     intermediate_questions = [q for q in sql_questions if q["difficulty"] == "intermediate"]
-    hard_questions = [q for q in sql_questions if q["difficulty"] == "hard"]
-    st.session_state.selected_questions = (
-        random.sample(easy_questions, 3) +
-        random.sample(intermediate_questions, 1) +
-        random.sample(hard_questions, 1)
+    difficult_questions = [q for q in sql_questions if q["difficulty"] == "difficult"]
+    
+    # Ensure there are enough questions in each category
+    if len(easy_questions) < 1 or len(intermediate_questions) < 4 or len(difficult_questions) < 1:
+        st.error("🚨 Not enough questions in one or more difficulty categories to generate the quiz.")
+        st.stop()
+    
+    # Select 1 easy, 4 intermediate, 1 difficult question
+    selected_questions = (
+        random.sample(easy_questions, 1) +
+        random.sample(intermediate_questions, 4) +
+        random.sample(difficult_questions, 1)
     )
-selected_questions = st.session_state.selected_questions
-
-# Now use selected_questions below here
-for q in selected_questions:
-    print(q["question"])
-
-# Now, selected_questions has 5 questions for the current session, with different combinations every time.
-
-# --- Session State Initialization ---
-if "user_answers" not in st.session_state: st.session_state.user_answers = []
-if "current_question" not in st.session_state: st.session_state.current_question = 0
-if "quiz_started" not in st.session_state: st.session_state.quiz_started = False
-if "quiz_completed" not in st.session_state: st.session_state.quiz_completed = False
-if "show_detailed_feedback" not in st.session_state: st.session_state.show_detailed_feedback = False
+    # Shuffle the selected questions to present them in random order
+    random.shuffle(selected_questions)
+    st.session_state.selected_questions = selected_questions
 
 # --- Helper Functions ---
 def simulate_query_duckdb(sql_query, tables_dict):
@@ -1329,6 +1326,7 @@ if not st.session_state.quiz_started:
         
 # --- END OF ADVANCED 3D UI HOMEPAGE ---
 # --- Quiz In Progress Screen ---
+# --- Quiz In Progress Screen ---
 elif st.session_state.quiz_started and not st.session_state.quiz_completed:
     st.title("✍️ SQL Query Challenge")
     
@@ -1339,7 +1337,7 @@ elif st.session_state.quiz_started and not st.session_state.quiz_completed:
             q_num = i + 1
             is_correct = ans_data.get('is_correct', False)
             with st.expander(f"Question {q_num}: {ans_data['question']} {get_emoji(is_correct)}", expanded=False):
-                st.write(f"**Your Answere:**")
+                st.write(f"**Your Answer:**")
                 st.code(ans_data.get('student_answer', '(No answer provided)'), language='sql')
                 st.write(f"**SQL Mentor Feedback:**")
                 feedback_text = ans_data.get("feedback", "_Feedback not available._")
@@ -1362,13 +1360,12 @@ elif st.session_state.quiz_started and not st.session_state.quiz_completed:
                 if show_expected:
                     display_simulation("Simulated Result (Correct Query Output)", ans_data.get("expected_result", "N/A"))
 
-
     st.markdown("---")
     
     current_q_index = st.session_state.current_question
-    question_data = sql_questions[current_q_index]
+    question_data = st.session_state.selected_questions[current_q_index]  # Use selected_questions
     
-    st.subheader(f"Question {current_q_index + 1} of {len(sql_questions)}")
+    st.subheader(f"Question {current_q_index + 1} of {len(st.session_state.selected_questions)}")
     st.markdown(f"**{question_data['question']}**")
     
     relevant_tables = question_data["relevant_tables"]
@@ -1413,7 +1410,7 @@ elif st.session_state.quiz_started and not st.session_state.quiz_completed:
                     "raw_llm_output": raw_llm
                 })
                 
-                if current_q_index + 1 < len(sql_questions):
+                if current_q_index + 1 < len(st.session_state.selected_questions):  # Update to use selected_questions
                     st.session_state.current_question += 1
                 else:
                     st.session_state.quiz_completed = True
@@ -2055,9 +2052,20 @@ elif st.session_state.quiz_completed:
         with col2:
             if st.button("🔄 Start New Quiz", key="retry_quiz", use_container_width=True):
                 # Reset session state
-                for key in ['user_answers', 'current_question', 'quiz_started', 'quiz_completed', 'show_detailed_feedback']:
+                for key in ['user_answers', 'current_question', 'quiz_started', 'quiz_completed', 'show_detailed_feedback', 'selected_questions']:
                     if key in st.session_state:
                         del st.session_state[key]
+                # Re-select new questions
+                easy_questions = [q for q in sql_questions if q["difficulty"] == "easy"]
+                intermediate_questions = [q for q in sql_questions if q["difficulty"] == "intermediate"]
+                difficult_questions = [q for q in sql_questions if q["difficulty"] == "difficult"]
+                selected_questions = (
+                    random.sample(easy_questions, 1) +
+                    random.sample(intermediate_questions, 4) +
+                    random.sample(difficult_questions, 1)
+                )
+                random.shuffle(selected_questions)
+                st.session_state.selected_questions = selected_questions
                 st.rerun()
     
     # Main function to display the complete results page
