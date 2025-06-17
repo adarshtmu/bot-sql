@@ -4,6 +4,8 @@ import pandas as pd
 import re
 import duckdb
 import streamlit as st
+import random
+
 
 st.set_page_config(page_title="AI SQL Mastery - EdTech Platform")
 
@@ -115,7 +117,7 @@ original_tables = {
 }
 
 # --- SQL Questions List ---
-st.session_state.sql_questions = [
+all_sql_questions  = [
     # Easy (at least 4 for variety)
     {"difficulty": "easy", "question": "Get all users from the users table.", "correct_answer_example": "SELECT * FROM users;", "sample_table": users_table, "relevant_tables": ["users"]},
     {"difficulty": "easy", "question": "Count users in the users table.", "correct_answer_example": "SELECT COUNT(*) FROM users;", "sample_table": users_table, "relevant_tables": ["users"]},
