@@ -213,14 +213,22 @@ easy_questions = [q for q in sql_questions if q["difficulty"] == "easy"]
 intermediate_questions = [q for q in sql_questions if q["difficulty"] == "intermediate"]
 hard_questions = [q for q in sql_questions if q["difficulty"] == "hard"]
 
-
-if len(easy_questions) < NUM_EASY or len(intermediate_questions) < NUM_INTERMEDIATE or len(hard_questions) < NUM_HARD:
-    raise ValueError("Not enough questions in one or more categories!")
-
 selected_questions = []
 selected_questions.extend(random.sample(easy_questions, 3))
 selected_questions.extend(random.sample(intermediate_questions, 1))
 selected_questions.extend(random.sample(hard_questions, 1))
+# selected_questions now has 5 random questions
+
+if "selected_questions" not in st.session_state:
+    easy_questions = [q for q in sql_questions if q["difficulty"] == "easy"]
+    intermediate_questions = [q for q in sql_questions if q["difficulty"] == "intermediate"]
+    hard_questions = [q for q in sql_questions if q["difficulty"] == "hard"]
+    st.session_state.selected_questions = (
+        random.sample(easy_questions, 3) +
+        random.sample(intermediate_questions, 1) +
+        random.sample(hard_questions, 1)
+    )
+selected_questions = st.session_state.selected_questions
 
 # Now use selected_questions below here
 for q in selected_questions:
