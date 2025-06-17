@@ -4,8 +4,6 @@ import pandas as pd
 import re
 import duckdb
 import streamlit as st
-import random
-
 
 st.set_page_config(page_title="AI SQL Mastery - EdTech Platform")
 
@@ -117,44 +115,126 @@ original_tables = {
 }
 
 # --- SQL Questions List ---
-all_sql_questions  = [
-    # Easy (at least 4 for variety)
-    {"difficulty": "easy", "question": "Get all users from the users table.", "correct_answer_example": "SELECT * FROM users;", "sample_table": users_table, "relevant_tables": ["users"]},
-    {"difficulty": "easy", "question": "Count users in the users table.", "correct_answer_example": "SELECT COUNT(*) FROM users;", "sample_table": users_table, "relevant_tables": ["users"]},
-    {"difficulty": "easy", "question": "List users older than 30.", "correct_answer_example": "SELECT * FROM users WHERE age > 30;", "sample_table": users_table, "relevant_tables": ["users"]},
-    {"difficulty": "easy", "question": "Get names of users from Chicago.", "correct_answer_example": "SELECT name FROM users WHERE city = 'Chicago';", "sample_table": users_table, "relevant_tables": ["users"]},
+sql_questions = [
+    # EASY (5 questions, pick 3)
+    {
+        "question": "Write a SQL query to retrieve all columns from the 'users' table.",
+        "correct_answer_example": "SELECT * FROM users;",
+        "sample_table": users_table,
+        "relevant_tables": ["users"],
+        "difficulty": "easy"
+    },
+    {
+        "question": "Write a SQL query to find the names of all users in the 'users' table.",
+        "correct_answer_example": "SELECT name FROM users;",
+        "sample_table": users_table,
+        "relevant_tables": ["users"],
+        "difficulty": "easy"
+    },
+    {
+        "question": "Write a SQL query to get the user_id and age of all users.",
+        "correct_answer_example": "SELECT user_id, age FROM users;",
+        "sample_table": users_table,
+        "relevant_tables": ["users"],
+        "difficulty": "easy"
+    },
+    {
+        "question": "Write a SQL query to get all users whose age is exactly 25.",
+        "correct_answer_example": "SELECT * FROM users WHERE age = 25;",
+        "sample_table": users_table,
+        "relevant_tables": ["users"],
+        "difficulty": "easy"
+    },
+    {
+        "question": "Write a SQL query to count the number of users in the 'users' table.",
+        "correct_answer_example": "SELECT COUNT(*) FROM users;",
+        "sample_table": users_table,
+        "relevant_tables": ["users"],
+        "difficulty": "easy"
+    },
 
-    # Intermediate (no JOINs)
-    {"difficulty": "intermediate", "question": "Find the average age of users.", "correct_answer_example": "SELECT AVG(age) FROM users;", "sample_table": users_table, "relevant_tables": ["users"]},
-    {"difficulty": "intermediate", "question": "Show all orders with an amount greater than 50.", "correct_answer_example": "SELECT * FROM orders WHERE amount > 50;", "sample_table": orders_table, "relevant_tables": ["orders"]},
-    {"difficulty": "intermediate", "question": "Find the highest order amount.", "correct_answer_example": "SELECT MAX(amount) FROM orders;", "sample_table": orders_table, "relevant_tables": ["orders"]},
-    {"difficulty": "intermediate", "question": "List all unique cities from the users table.", "correct_answer_example": "SELECT DISTINCT city FROM users;", "sample_table": users_table, "relevant_tables": ["users"]},
+    # INTERMEDIATE (4 questions, pick 1)
+    {
+        "question": "Write a SQL query to calculate the average age of users.",
+        "correct_answer_example": "SELECT AVG(age) AS average_age FROM users;",
+        "sample_table": users_table,
+        "relevant_tables": ["users"],
+        "difficulty": "intermediate"
+    },
+    {
+        "question": "Write a SQL query to get the maximum order amount from the 'orders' table.",
+        "correct_answer_example": "SELECT MAX(amount) AS max_order FROM orders;",
+        "sample_table": orders_table,
+        "relevant_tables": ["orders"],
+        "difficulty": "intermediate"
+    },
+    {
+        "question": "Write a SQL query to list all users who have placed at least one order.",
+        "correct_answer_example": "SELECT DISTINCT u.name FROM users u JOIN orders o ON u.user_id = o.user_id;",
+        "sample_table": users_table,
+        "relevant_tables": ["users", "orders"],
+        "difficulty": "intermediate"
+    },
+    {
+        "question": "Write a SQL query to count the number of orders for each user.",
+        "correct_answer_example": "SELECT user_id, COUNT(*) AS order_count FROM orders GROUP BY user_id;",
+        "sample_table": orders_table,
+        "relevant_tables": ["orders"],
+        "difficulty": "intermediate"
+    },
 
-    # Difficult (with JOINs or multi-step logic)
-    {"difficulty": "difficult", "question": "Find the user who spent the most in total.", "correct_answer_example": "SELECT u.name, SUM(o.amount) AS total_spent FROM users u JOIN orders o ON u.user_id = o.user_id GROUP BY u.name ORDER BY total_spent DESC LIMIT 1;", "sample_table": users_table, "relevant_tables": ["users", "orders"]},
-    {"difficulty": "difficult", "question": "Which users have never placed an order?", "correct_answer_example": "SELECT name FROM users WHERE user_id NOT IN (SELECT user_id FROM orders);", "sample_table": users_table, "relevant_tables": ["users", "orders"]},
+    # DIFFICULT (2 questions, pick 1)
+    {
+        "question": "Write a SQL query to get the names of users who have never placed an order.",
+        "correct_answer_example": "SELECT u.name FROM users u LEFT JOIN orders o ON u.user_id = o.user_id WHERE o.order_id IS NULL;",
+        "sample_table": users_table,
+        "relevant_tables": ["users", "orders"],
+        "difficulty": "difficult"
+    },
+    {
+        "question": "Write a SQL query to show each user's name and the total amount they have spent, ordered by total spent descending.",
+        "correct_answer_example": "SELECT u.name, SUM(o.amount) AS total_spent FROM users u JOIN orders o ON u.user_id = o.user_id GROUP BY u.name ORDER BY total_spent DESC;",
+        "sample_table": users_table,
+        "relevant_tables": ["users", "orders"],
+        "difficulty": "difficult"
+    },
 ]
+
+
+# Set how many questions to pick from each difficulty
+NUM_EASY = 3
+NUM_INTERMEDIATE = 1
+NUM_DIFFICULT = 1
+
+# Filter by difficulty
+easy_questions = [q for q in sql_questions if q['difficulty'] == 'easy']
+intermediate_questions = [q for q in sql_questions if q['difficulty'] == 'intermediate']
+difficult_questions = [q for q in sql_questions if q['difficulty'] == 'difficult']
+
+# Ensure enough questions are present in each category
+if len(easy_questions) < NUM_EASY or len(intermediate_questions) < NUM_INTERMEDIATE or len(difficult_questions) < NUM_DIFFICULT:
+    raise ValueError("Not enough questions in one or more categories!")
+
+# Choose randomly (no repeats)
+selected_easy = random.sample(easy_questions, NUM_EASY)
+selected_intermediate = random.sample(intermediate_questions, NUM_INTERMEDIATE)
+selected_difficult = random.sample(difficult_questions, NUM_DIFFICULT)
+
+# Combine and shuffle
+exam_questions = selected_easy + selected_intermediate + selected_difficult
+random.shuffle(exam_questions)
+
+# Now use exam_questions as your quiz
+for idx, q in enumerate(exam_questions, 1):
+    print(f"Q{idx}: {q['question']}")
+
+
 # --- Session State Initialization ---
 if "user_answers" not in st.session_state: st.session_state.user_answers = []
 if "current_question" not in st.session_state: st.session_state.current_question = 0
 if "quiz_started" not in st.session_state: st.session_state.quiz_started = False
 if "quiz_completed" not in st.session_state: st.session_state.quiz_completed = False
 if "show_detailed_feedback" not in st.session_state: st.session_state.show_detailed_feedback = False
-
-
-
-#random
-def select_quiz_questions():
-    easy_qs = [q for q in all_sql_questions if q["difficulty"] == "easy"]
-    intermediate_qs = [q for q in all_sql_questions if q["difficulty"] == "intermediate"]
-    difficult_qs = [q for q in all_sql_questions if q["difficulty"] == "difficult"]
-    selected = []
-    selected.extend(random.sample(easy_qs, 3))
-    selected.extend(random.sample(intermediate_qs, 1))
-    selected.extend(random.sample(difficult_qs, 1))
-    random.shuffle(selected)
-    return selected
-
 
 # --- Helper Functions ---
 def simulate_query_duckdb(sql_query, tables_dict):
@@ -1108,7 +1188,6 @@ if not st.session_state.quiz_started:
             st.session_state.user_answers = []
             st.session_state.current_question = 0
             st.session_state.quiz_completed = False
-            st.session_state.st.session_state.sql_questions = select_quiz_questions()
             st.success("🎉 Welcome to the future of learning!")
             st.balloons()
             st.rerun()
@@ -1280,9 +1359,9 @@ elif st.session_state.quiz_started and not st.session_state.quiz_completed:
     st.markdown("---")
     
     current_q_index = st.session_state.current_question
-    question_data = st.session_state.sql_questions[current_q_index]
+    question_data = sql_questions[current_q_index]
     
-    st.subheader(f"Question {current_q_index + 1} of {len(st.session_state.sql_questions)}")
+    st.subheader(f"Question {current_q_index + 1} of {len(sql_questions)}")
     st.markdown(f"**{question_data['question']}**")
     
     relevant_tables = question_data["relevant_tables"]
@@ -1327,7 +1406,7 @@ elif st.session_state.quiz_started and not st.session_state.quiz_completed:
                     "raw_llm_output": raw_llm
                 })
                 
-                if current_q_index + 1 < len(st.session_state.sql_questions):
+                if current_q_index + 1 < len(sql_questions):
                     st.session_state.current_question += 1
                 else:
                     st.session_state.quiz_completed = True
@@ -2014,6 +2093,7 @@ elif st.session_state.quiz_completed:
     display_advanced_results_page(final_score , st.session_state.user_answers, analyze_performance)
     
     
+
 
 
 
