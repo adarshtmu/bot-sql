@@ -200,6 +200,7 @@ sql_questions = [
     },
 ]
 
+import random
 
 # Set how many questions to pick from each difficulty
 NUM_EASY = 3
