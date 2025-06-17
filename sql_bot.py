@@ -216,7 +216,7 @@ selected_questions.extend(random.sample(hard_questions, 1))
 
 # Now selected_questions contains your poll for this session
 for q in selected_questions:
-    print(q["text"])
+    print(q['question'])
 
 # --- Session State Initialization ---
 if "user_answers" not in st.session_state: st.session_state.user_answers = []
