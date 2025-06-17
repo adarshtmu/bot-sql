@@ -212,13 +212,12 @@ if "selected_questions" not in st.session_state:
         st.stop()
     
     # Select 3 easy, 1 intermediate, 1 difficult question
-    selected_questions = (
-        random.sample(easy_questions, 3) +
-        random.sample(intermediate_questions, 1) +
-        random.sample(difficult_questions, 1)
-    )
-    # Shuffle the selected questions to present them in random order
-    random.shuffle(selected_questions)
+    selected_easy = random.sample(easy_questions, 3)
+    selected_intermediate = random.sample(intermediate_questions, 1)
+    selected_difficult = random.sample(difficult_questions, 1)
+    
+    # Arrange in order: easy -> intermediate -> difficult
+    selected_questions = selected_easy + selected_intermediate + selected_difficult
     st.session_state.selected_questions = selected_questions
 
 # --- Helper Functions ---
@@ -1306,6 +1305,7 @@ if not st.session_state.quiz_started:
 
         
 # --- END OF ADVANCED 3D UI HOMEPAGE ---
+# --- Quiz In Progress Screen ---
 # --- Quiz In Progress Screen ---
 # --- Quiz In Progress Screen ---
 # --- Quiz In Progress Screen ---
