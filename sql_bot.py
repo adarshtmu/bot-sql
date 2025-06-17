@@ -189,7 +189,6 @@ sql_questions = [
 import random
 
 # --- Session State Initialization ---
-# --- Session State Initialization ---
 if "user_answers" not in st.session_state:
     st.session_state.user_answers = []
 if "current_question" not in st.session_state:
@@ -2041,12 +2040,10 @@ elif st.session_state.quiz_completed:
                 easy_questions = [q for q in sql_questions if q["difficulty"] == "easy"]
                 intermediate_questions = [q for q in sql_questions if q["difficulty"] == "intermediate"]
                 difficult_questions = [q for q in sql_questions if q["difficulty"] == "difficult"]
-                selected_questions = (
-                    random.sample(easy_questions, 3) +
-                    random.sample(intermediate_questions, 1) +
-                    random.sample(difficult_questions, 1)
-                )
-                random.shuffle(selected_questions)
+                selected_easy = random.sample(easy_questions, 3)
+                selected_intermediate = random.sample(intermediate_questions, 1)
+                selected_difficult = random.sample(difficult_questions, 1)
+                selected_questions = selected_easy + selected_intermediate + selected_difficult
                 st.session_state.selected_questions = selected_questions
                 st.rerun()
     
