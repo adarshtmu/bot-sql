@@ -116,8 +116,9 @@ original_tables = {
 
 # --- SQL Questions List ---
 # --- SQL Questions List with Difficulty Levels ---
+# --- SQL Questions List with Difficulty Levels ---
 sql_questions = [
-    # Easy Questions
+    # Easy Questions (3 questions)
     {
         "question": "Write a SQL query to get all details about users from the 'users' table.",
         "correct_answer_example": "SELECT * FROM users;",
@@ -139,14 +140,7 @@ sql_questions = [
         "relevant_tables": ["orders"],
         "difficulty": "easy"
     },
-    {
-        "question": "Write a SQL query to find users from the 'users' table who live in 'New York'.",
-        "correct_answer_example": "SELECT * FROM users WHERE city = 'New York';",
-        "sample_table": users_table,
-        "relevant_tables": ["users"],
-        "difficulty": "easy"
-    },
-    # Intermediate Questions
+    # Intermediate Questions (4 questions)
     {
         "question": "Write a SQL query to get all users older than 30 from the 'users' table.",
         "correct_answer_example": "SELECT * FROM users WHERE age > 30;",
@@ -175,14 +169,7 @@ sql_questions = [
         "relevant_tables": ["users", "orders"],
         "difficulty": "intermediate"
     },
-    {
-        "question": "Write a SQL query to find the total number of orders per user from the 'orders' table.",
-        "correct_answer_example": "SELECT u.name, COUNT(o.order_id) AS order_count FROM users u LEFT JOIN orders o ON u.user_id = o.user_id GROUP BY u.name;",
-        "sample_table": users_table,
-        "relevant_tables": ["users", "orders"],
-        "difficulty": "intermediate"
-    },
-    # Difficult Questions
+    # Difficult Questions (2 questions)
     {
         "question": "Write a SQL query to calculate the total amount spent by each user by joining the 'users' and 'orders' tables.",
         "correct_answer_example": "SELECT u.name, SUM(o.amount) AS total_spent FROM users u JOIN orders o ON u.user_id = o.user_id GROUP BY u.name ORDER BY u.name;",
@@ -196,18 +183,12 @@ sql_questions = [
         "sample_table": users_table,
         "relevant_tables": ["users", "orders"],
         "difficulty": "difficult"
-    },
-    {
-        "question": "Write a SQL query to find the user with the highest total order amount.",
-        "correct_answer_example": "SELECT u.name, SUM(o.amount) AS total_spent FROM users u JOIN orders o ON u.user_id = o.user_id GROUP BY u.name ORDER BY total_spent DESC LIMIT 1;",
-        "sample_table": users_table,
-        "relevant_tables": ["users", "orders"],
-        "difficulty": "difficult"
     }
 ]
 
 import random
 
+# --- Session State Initialization ---
 # --- Session State Initialization ---
 if "user_answers" not in st.session_state:
     st.session_state.user_answers = []
@@ -226,14 +207,14 @@ if "selected_questions" not in st.session_state:
     difficult_questions = [q for q in sql_questions if q["difficulty"] == "difficult"]
     
     # Ensure there are enough questions in each category
-    if len(easy_questions) < 1 or len(intermediate_questions) < 4 or len(difficult_questions) < 1:
+    if len(easy_questions) < 3 or len(intermediate_questions) < 1 or len(difficult_questions) < 1:
         st.error("🚨 Not enough questions in one or more difficulty categories to generate the quiz.")
         st.stop()
     
-    # Select 1 easy, 4 intermediate, 1 difficult question
+    # Select 3 easy, 1 intermediate, 1 difficult question
     selected_questions = (
-        random.sample(easy_questions, 1) +
-        random.sample(intermediate_questions, 4) +
+        random.sample(easy_questions, 3) +
+        random.sample(intermediate_questions, 1) +
         random.sample(difficult_questions, 1)
     )
     # Shuffle the selected questions to present them in random order
@@ -1327,6 +1308,7 @@ if not st.session_state.quiz_started:
 # --- END OF ADVANCED 3D UI HOMEPAGE ---
 # --- Quiz In Progress Screen ---
 # --- Quiz In Progress Screen ---
+# --- Quiz In Progress Screen ---
 elif st.session_state.quiz_started and not st.session_state.quiz_completed:
     st.title("✍️ SQL Query Challenge")
     
@@ -1410,7 +1392,7 @@ elif st.session_state.quiz_started and not st.session_state.quiz_completed:
                     "raw_llm_output": raw_llm
                 })
                 
-                if current_q_index + 1 < len(st.session_state.selected_questions):  # Update to use selected_questions
+                if current_q_index + 1 < len(st.session_state.selected_questions):
                     st.session_state.current_question += 1
                 else:
                     st.session_state.quiz_completed = True
@@ -2060,8 +2042,8 @@ elif st.session_state.quiz_completed:
                 intermediate_questions = [q for q in sql_questions if q["difficulty"] == "intermediate"]
                 difficult_questions = [q for q in sql_questions if q["difficulty"] == "difficult"]
                 selected_questions = (
-                    random.sample(easy_questions, 1) +
-                    random.sample(intermediate_questions, 4) +
+                    random.sample(easy_questions, 3) +
+                    random.sample(intermediate_questions, 1) +
                     random.sample(difficult_questions, 1)
                 )
                 random.shuffle(selected_questions)
