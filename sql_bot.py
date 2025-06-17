@@ -200,34 +200,29 @@ sql_questions = [
     },
 ]
 
+import streamlit as st
 import random
 
-# Set how many questions to pick from each difficulty
+# Your sql_questions list here, including the "difficulty" key for each question.
+
 NUM_EASY = 3
 NUM_INTERMEDIATE = 1
 NUM_DIFFICULT = 1
 
-# Filter by difficulty
-easy_questions = [q for q in sql_questions if q['difficulty'] == 'easy']
-intermediate_questions = [q for q in sql_questions if q['difficulty'] == 'intermediate']
-difficult_questions = [q for q in sql_questions if q['difficulty'] == 'difficult']
+if "exam_questions" not in st.session_state:
+    easy = [q for q in sql_questions if q['difficulty'] == 'easy']
+    intermediate = [q for q in sql_questions if q['difficulty'] == 'intermediate']
+    difficult = [q for q in sql_questions if q['difficulty'] == 'difficult']
+    st.session_state.exam_questions = (
+        random.sample(easy, NUM_EASY)
+        + random.sample(intermediate, NUM_INTERMEDIATE)
+        + random.sample(difficult, NUM_DIFFICULT)
+    )
+    random.shuffle(st.session_state.exam_questions)
 
-# Ensure enough questions are present in each category
-if len(easy_questions) < NUM_EASY or len(intermediate_questions) < NUM_INTERMEDIATE or len(difficult_questions) < NUM_DIFFICULT:
-    raise ValueError("Not enough questions in one or more categories!")
-
-# Choose randomly (no repeats)
-selected_easy = random.sample(easy_questions, NUM_EASY)
-selected_intermediate = random.sample(intermediate_questions, NUM_INTERMEDIATE)
-selected_difficult = random.sample(difficult_questions, NUM_DIFFICULT)
-
-# Combine and shuffle
-exam_questions = selected_easy + selected_intermediate + selected_difficult
-random.shuffle(exam_questions)
-
-# Now use exam_questions as your quiz
-for idx, q in enumerate(exam_questions, 1):
-    print(f"Q{idx}: {q['question']}")
+# Use st.session_state.exam_questions for your quiz
+for idx, q in enumerate(st.session_state.exam_questions, 1):
+    st.write(f"Q{idx}: {q['question']}")
 
 
 # --- Session State Initialization ---
