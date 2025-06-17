@@ -180,29 +180,29 @@ sql_questions = [
      "difficulty": "difficult"}
 ]
 
-import streamlit as st
 import random
 
-NUM_EASY = 3
-NUM_INTERMEDIATE = 1
-NUM_DIFFICULT = 1
 
-# Only select exam questions if not already picked for this session
-if "exam_questions" not in st.session_state:
+def get_exam_questions():
+    """Randomly select 3 easy, 1 intermediate, 1 difficult question."""
     easy = [q for q in sql_questions if q['difficulty'] == 'easy']
     intermediate = [q for q in sql_questions if q['difficulty'] == 'intermediate']
     difficult = [q for q in sql_questions if q['difficulty'] == 'difficult']
-    st.session_state.exam_questions = (
-        random.sample(easy, NUM_EASY) +
-        random.sample(intermediate, NUM_INTERMEDIATE) +
-        random.sample(difficult, NUM_DIFFICULT)
+    exam_questions = (
+        random.sample(easy, 3) +
+        random.sample(intermediate, 1) +
+        random.sample(difficult, 1)
     )
-    random.shuffle(st.session_state.exam_questions)
+    random.shuffle(exam_questions)
+    return exam_questions
 
-# Display the 5 selected questions
-st.header("Random SQL Exam")
-for idx, q in enumerate(st.session_state.exam_questions, 1):
-    st.markdown(f"**Q{idx}:** {q['question']}")
+# At the start of the quiz, call this ONCE and use only this list for the quiz
+current_quiz_questions = get_exam_questions()
+
+# Then, in your quiz logic (asking questions one by one), use:
+for idx, q in enumerate(current_quiz_questions, 1):
+    # Ask q['question'] to the user, handle answers, etc.
+    print(f"Q{idx}: {q['question']}")
 
 # --- Session State Initialization ---
 if "user_answers" not in st.session_state: st.session_state.user_answers = []
