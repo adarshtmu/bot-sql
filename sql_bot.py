@@ -115,94 +115,108 @@ original_tables = {
 }
 
 # --- SQL Questions List ---
-import streamlit as st
 import random
 
-# Sample data structure for your questions
+# Example structure: each question has a 'difficulty' field
 sql_questions = [
-    # EASY (5)
-    {"question": "Write a SQL query to retrieve all columns from the 'users' table.",
-     "correct_answer_example": "SELECT * FROM users;",
-     "sample_table": users_table,
-     "relevant_tables": ["users"],
-     "difficulty": "easy"},
-    {"question": "Write a SQL query to find the names of all users in the 'users' table.",
-     "correct_answer_example": "SELECT name FROM users;",
-     "sample_table": users_table,
-     "relevant_tables": ["users"],
-     "difficulty": "easy"},
-    {"question": "Write a SQL query to get the user_id and age of all users.",
-     "correct_answer_example": "SELECT user_id, age FROM users;",
-     "sample_table": users_table,
-     "relevant_tables": ["users"],
-     "difficulty": "easy"},
-    {"question": "Write a SQL query to get all users whose age is exactly 25.",
-     "correct_answer_example": "SELECT * FROM users WHERE age = 25;",
-     "sample_table": users_table,
-     "relevant_tables": ["users"],
-     "difficulty": "easy"},
-    {"question": "Write a SQL query to count the number of users in the 'users' table.",
-     "correct_answer_example": "SELECT COUNT(*) FROM users;",
-     "sample_table": users_table,
-     "relevant_tables": ["users"],
-     "difficulty": "easy"},
-    # INTERMEDIATE (4)
-    {"question": "Write a SQL query to calculate the average age of users.",
-     "correct_answer_example": "SELECT AVG(age) AS average_age FROM users;",
-     "sample_table": users_table,
-     "relevant_tables": ["users"],
-     "difficulty": "intermediate"},
-    {"question": "Write a SQL query to get the maximum order amount from the 'orders' table.",
-     "correct_answer_example": "SELECT MAX(amount) AS max_order FROM orders;",
-     "sample_table": orders_table,
-     "relevant_tables": ["orders"],
-     "difficulty": "intermediate"},
-    {"question": "Write a SQL query to list all users who have placed at least one order.",
-     "correct_answer_example": "SELECT DISTINCT u.name FROM users u JOIN orders o ON u.user_id = o.user_id;",
-     "sample_table": users_table,
-     "relevant_tables": ["users", "orders"],
-     "difficulty": "intermediate"},
-    {"question": "Write a SQL query to count the number of orders for each user.",
-     "correct_answer_example": "SELECT user_id, COUNT(*) AS order_count FROM orders GROUP BY user_id;",
-     "sample_table": orders_table,
-     "relevant_tables": ["orders"],
-     "difficulty": "intermediate"},
-    # DIFFICULT (2)
-    {"question": "Write a SQL query to get the names of users who have never placed an order.",
-     "correct_answer_example": "SELECT u.name FROM users u LEFT JOIN orders o ON u.user_id = o.user_id WHERE o.order_id IS NULL;",
-     "sample_table": users_table,
-     "relevant_tables": ["users", "orders"],
-     "difficulty": "difficult"},
-    {"question": "Write a SQL query to show each user's name and the total amount they have spent, ordered by total spent descending.",
-     "correct_answer_example": "SELECT u.name, SUM(o.amount) AS total_spent FROM users u JOIN orders o ON u.user_id = o.user_id GROUP BY u.name ORDER BY total_spent DESC;",
-     "sample_table": users_table,
-     "relevant_tables": ["users", "orders"],
-     "difficulty": "difficult"}
+    # Easy (5)
+    {
+        "question": "Write a SQL query to get all details about users from the 'users' table.",
+        "correct_answer_example": "SELECT * FROM users;",
+        "sample_table": users_table,
+        "relevant_tables": ["users"],
+        "difficulty": "easy"
+    },
+    {
+        "question": "Write a SQL query to count the total number of users in the 'users' table.",
+        "correct_answer_example": "SELECT COUNT(*) AS user_count FROM users;",
+        "sample_table": users_table,
+        "relevant_tables": ["users"],
+        "difficulty": "easy"
+    },
+    {
+        "question": "Write a SQL query to get all users older than 30 from the 'users' table.",
+        "correct_answer_example": "SELECT * FROM users WHERE age > 30;",
+        "sample_table": users_table,
+        "relevant_tables": ["users"],
+        "difficulty": "easy"
+    },
+    {
+        "question": "Write a SQL query to select only the names from the 'users' table.",
+        "correct_answer_example": "SELECT name FROM users;",
+        "sample_table": users_table,
+        "relevant_tables": ["users"],
+        "difficulty": "easy"
+    },
+    {
+        "question": "Write a SQL query to get users whose email address ends with '@gmail.com' from the 'users' table.",
+        "correct_answer_example": "SELECT * FROM users WHERE email LIKE '%@gmail.com';",
+        "sample_table": users_table,
+        "relevant_tables": ["users"],
+        "difficulty": "easy"
+    },
+
+    # Intermediate (4)
+    {
+        "question": "Write a SQL query to find the average order amount from the 'orders' table.",
+        "correct_answer_example": "SELECT AVG(amount) AS average_amount FROM orders;",
+        "sample_table": orders_table,
+        "relevant_tables": ["orders"],
+        "difficulty": "intermediate"
+    },
+    {
+        "question": "Write a SQL query to get the user with the highest age from the 'users' table.",
+        "correct_answer_example": "SELECT * FROM users ORDER BY age DESC LIMIT 1;",
+        "sample_table": users_table,
+        "relevant_tables": ["users"],
+        "difficulty": "intermediate"
+    },
+    {
+        "question": "Write a SQL query to show the number of orders placed by each user.",
+        "correct_answer_example": "SELECT user_id, COUNT(*) AS order_count FROM orders GROUP BY user_id;",
+        "sample_table": orders_table,
+        "relevant_tables": ["orders"],
+        "difficulty": "intermediate"
+    },
+    {
+        "question": "Write a SQL query to show all orders placed in the month of January from the 'orders' table.",
+        "correct_answer_example": "SELECT * FROM orders WHERE strftime('%m', order_date) = '01';",
+        "sample_table": orders_table,
+        "relevant_tables": ["orders"],
+        "difficulty": "intermediate"
+    },
+
+    # Hard (2)
+    {
+        "question": "Write a SQL query to calculate the total amount spent by each user by joining the 'users' and 'orders' tables.",
+        "correct_answer_example": "SELECT u.name, SUM(o.amount) AS total_spent FROM users u JOIN orders o ON u.user_id = o.user_id GROUP BY u.name ORDER BY u.name;",
+        "sample_table": users_table,
+        "relevant_tables": ["users", "orders"],
+        "difficulty": "hard"
+    },
+    {
+        "question": "Write a SQL query to list users who have not placed any orders.",
+        "correct_answer_example": "SELECT u.* FROM users u LEFT JOIN orders o ON u.user_id = o.user_id WHERE o.order_id IS NULL;",
+        "sample_table": users_table,
+        "relevant_tables": ["users", "orders"],
+        "difficulty": "hard"
+    }
 ]
 
 import random
 
+easy_questions = [q for q in sql_questions if q["difficulty"] == "easy"]
+intermediate_questions = [q for q in sql_questions if q["difficulty"] == "intermediate"]
+hard_questions = [q for q in sql_questions if q["difficulty"] == "hard"]
 
-def get_exam_questions():
-    """Randomly select 3 easy, 1 intermediate, 1 difficult question."""
-    easy = [q for q in sql_questions if q['difficulty'] == 'easy']
-    intermediate = [q for q in sql_questions if q['difficulty'] == 'intermediate']
-    difficult = [q for q in sql_questions if q['difficulty'] == 'difficult']
-    exam_questions = (
-        random.sample(easy, 3) +
-        random.sample(intermediate, 1) +
-        random.sample(difficult, 1)
-    )
-    random.shuffle(exam_questions)
-    return exam_questions
+selected_questions = []
+selected_questions.extend(random.sample(easy_questions, 3))
+selected_questions.extend(random.sample(intermediate_questions, 1))
+selected_questions.extend(random.sample(hard_questions, 1))
 
-# At the start of the quiz, call this ONCE and use only this list for the quiz
-current_quiz_questions = get_exam_questions()
-
-# Then, in your quiz logic (asking questions one by one), use:
-for idx, q in enumerate(current_quiz_questions, 1):
-    # Ask q['question'] to the user, handle answers, etc.
-    print(f"Q{idx}: {q['question']}")
+# Now selected_questions contains your poll for this session
+for q in selected_questions:
+    print(q["text"])
 
 # --- Session State Initialization ---
 if "user_answers" not in st.session_state: st.session_state.user_answers = []
