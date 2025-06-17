@@ -145,15 +145,14 @@ if "show_detailed_feedback" not in st.session_state: st.session_state.show_detai
 
 #random
 def select_quiz_questions():
-    easy_qs = [q for q in all_st.session_state.sql_questions if q["difficulty"] == "easy"]
-    intermediate_qs = [q for q in all_st.session_state.sql_questions if q["difficulty"] == "intermediate"]
-    difficult_qs = [q for q in all_st.session_state.sql_questions if q["difficulty"] == "difficult"]
-
+    easy_qs = [q for q in all_sql_questions if q["difficulty"] == "easy"]
+    intermediate_qs = [q for q in all_sql_questions if q["difficulty"] == "intermediate"]
+    difficult_qs = [q for q in all_sql_questions if q["difficulty"] == "difficult"]
     selected = []
-    selected.extend(random.sample(easy_qs, 3))            # 3 random easy
-    selected.extend(random.sample(intermediate_qs, 1))    # 1 random intermediate
-    selected.extend(random.sample(difficult_qs, 1))       # 1 random difficult
-    random.shuffle(selected)                              # Shuffle for random order
+    selected.extend(random.sample(easy_qs, 3))
+    selected.extend(random.sample(intermediate_qs, 1))
+    selected.extend(random.sample(difficult_qs, 1))
+    random.shuffle(selected)
     return selected
 
 
