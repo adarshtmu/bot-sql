@@ -205,18 +205,23 @@ sql_questions = [
 
 import random
 
+NUM_EASY = 3
+NUM_INTERMEDIATE = 1
+NUM_HARD = 1
+
 easy_questions = [q for q in sql_questions if q["difficulty"] == "easy"]
 intermediate_questions = [q for q in sql_questions if q["difficulty"] == "intermediate"]
 hard_questions = [q for q in sql_questions if q["difficulty"] == "hard"]
 
-selected_questions = []
-selected_questions.extend(random.sample(easy_questions, 3))
-selected_questions.extend(random.sample(intermediate_questions, 1))
-selected_questions.extend(random.sample(hard_questions, 1))
+if len(easy_questions) < NUM_EASY or len(intermediate_questions) < NUM_INTERMEDIATE or len(hard_questions) < NUM_HARD:
+    raise ValueError("Not enough questions in one or more categories!")
 
-# Now selected_questions contains your poll for this session
-for q in selected_questions:
-    print(q['question'])
+selected_questions = []
+selected_questions.extend(random.sample(easy_questions, NUM_EASY))
+selected_questions.extend(random.sample(intermediate_questions, NUM_INTERMEDIATE))
+selected_questions.extend(random.sample(hard_questions, NUM_HARD))
+
+# Now, selected_questions has 5 questions for the current session, with different combinations every time.
 
 # --- Session State Initialization ---
 if "user_answers" not in st.session_state: st.session_state.user_answers = []
