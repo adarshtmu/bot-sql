@@ -115,115 +115,91 @@ original_tables = {
 }
 
 # --- SQL Questions List ---
-sql_questions = [
-    # EASY (5 questions, pick 3)
-    {
-        "question": "Write a SQL query to retrieve all columns from the 'users' table.",
-        "correct_answer_example": "SELECT * FROM users;",
-        "sample_table": users_table,
-        "relevant_tables": ["users"],
-        "difficulty": "easy"
-    },
-    {
-        "question": "Write a SQL query to find the names of all users in the 'users' table.",
-        "correct_answer_example": "SELECT name FROM users;",
-        "sample_table": users_table,
-        "relevant_tables": ["users"],
-        "difficulty": "easy"
-    },
-    {
-        "question": "Write a SQL query to get the user_id and age of all users.",
-        "correct_answer_example": "SELECT user_id, age FROM users;",
-        "sample_table": users_table,
-        "relevant_tables": ["users"],
-        "difficulty": "easy"
-    },
-    {
-        "question": "Write a SQL query to get all users whose age is exactly 25.",
-        "correct_answer_example": "SELECT * FROM users WHERE age = 25;",
-        "sample_table": users_table,
-        "relevant_tables": ["users"],
-        "difficulty": "easy"
-    },
-    {
-        "question": "Write a SQL query to count the number of users in the 'users' table.",
-        "correct_answer_example": "SELECT COUNT(*) FROM users;",
-        "sample_table": users_table,
-        "relevant_tables": ["users"],
-        "difficulty": "easy"
-    },
-
-    # INTERMEDIATE (4 questions, pick 1)
-    {
-        "question": "Write a SQL query to calculate the average age of users.",
-        "correct_answer_example": "SELECT AVG(age) AS average_age FROM users;",
-        "sample_table": users_table,
-        "relevant_tables": ["users"],
-        "difficulty": "intermediate"
-    },
-    {
-        "question": "Write a SQL query to get the maximum order amount from the 'orders' table.",
-        "correct_answer_example": "SELECT MAX(amount) AS max_order FROM orders;",
-        "sample_table": orders_table,
-        "relevant_tables": ["orders"],
-        "difficulty": "intermediate"
-    },
-    {
-        "question": "Write a SQL query to list all users who have placed at least one order.",
-        "correct_answer_example": "SELECT DISTINCT u.name FROM users u JOIN orders o ON u.user_id = o.user_id;",
-        "sample_table": users_table,
-        "relevant_tables": ["users", "orders"],
-        "difficulty": "intermediate"
-    },
-    {
-        "question": "Write a SQL query to count the number of orders for each user.",
-        "correct_answer_example": "SELECT user_id, COUNT(*) AS order_count FROM orders GROUP BY user_id;",
-        "sample_table": orders_table,
-        "relevant_tables": ["orders"],
-        "difficulty": "intermediate"
-    },
-
-    # DIFFICULT (2 questions, pick 1)
-    {
-        "question": "Write a SQL query to get the names of users who have never placed an order.",
-        "correct_answer_example": "SELECT u.name FROM users u LEFT JOIN orders o ON u.user_id = o.user_id WHERE o.order_id IS NULL;",
-        "sample_table": users_table,
-        "relevant_tables": ["users", "orders"],
-        "difficulty": "difficult"
-    },
-    {
-        "question": "Write a SQL query to show each user's name and the total amount they have spent, ordered by total spent descending.",
-        "correct_answer_example": "SELECT u.name, SUM(o.amount) AS total_spent FROM users u JOIN orders o ON u.user_id = o.user_id GROUP BY u.name ORDER BY total_spent DESC;",
-        "sample_table": users_table,
-        "relevant_tables": ["users", "orders"],
-        "difficulty": "difficult"
-    },
-]
-
 import streamlit as st
 import random
 
-# Your sql_questions list here, including the "difficulty" key for each question.
+# Sample data structure for your questions
+sql_questions = [
+    # EASY (5)
+    {"question": "Write a SQL query to retrieve all columns from the 'users' table.",
+     "correct_answer_example": "SELECT * FROM users;",
+     "sample_table": users_table,
+     "relevant_tables": ["users"],
+     "difficulty": "easy"},
+    {"question": "Write a SQL query to find the names of all users in the 'users' table.",
+     "correct_answer_example": "SELECT name FROM users;",
+     "sample_table": users_table,
+     "relevant_tables": ["users"],
+     "difficulty": "easy"},
+    {"question": "Write a SQL query to get the user_id and age of all users.",
+     "correct_answer_example": "SELECT user_id, age FROM users;",
+     "sample_table": users_table,
+     "relevant_tables": ["users"],
+     "difficulty": "easy"},
+    {"question": "Write a SQL query to get all users whose age is exactly 25.",
+     "correct_answer_example": "SELECT * FROM users WHERE age = 25;",
+     "sample_table": users_table,
+     "relevant_tables": ["users"],
+     "difficulty": "easy"},
+    {"question": "Write a SQL query to count the number of users in the 'users' table.",
+     "correct_answer_example": "SELECT COUNT(*) FROM users;",
+     "sample_table": users_table,
+     "relevant_tables": ["users"],
+     "difficulty": "easy"},
+    # INTERMEDIATE (4)
+    {"question": "Write a SQL query to calculate the average age of users.",
+     "correct_answer_example": "SELECT AVG(age) AS average_age FROM users;",
+     "sample_table": users_table,
+     "relevant_tables": ["users"],
+     "difficulty": "intermediate"},
+    {"question": "Write a SQL query to get the maximum order amount from the 'orders' table.",
+     "correct_answer_example": "SELECT MAX(amount) AS max_order FROM orders;",
+     "sample_table": orders_table,
+     "relevant_tables": ["orders"],
+     "difficulty": "intermediate"},
+    {"question": "Write a SQL query to list all users who have placed at least one order.",
+     "correct_answer_example": "SELECT DISTINCT u.name FROM users u JOIN orders o ON u.user_id = o.user_id;",
+     "sample_table": users_table,
+     "relevant_tables": ["users", "orders"],
+     "difficulty": "intermediate"},
+    {"question": "Write a SQL query to count the number of orders for each user.",
+     "correct_answer_example": "SELECT user_id, COUNT(*) AS order_count FROM orders GROUP BY user_id;",
+     "sample_table": orders_table,
+     "relevant_tables": ["orders"],
+     "difficulty": "intermediate"},
+    # DIFFICULT (2)
+    {"question": "Write a SQL query to get the names of users who have never placed an order.",
+     "correct_answer_example": "SELECT u.name FROM users u LEFT JOIN orders o ON u.user_id = o.user_id WHERE o.order_id IS NULL;",
+     "sample_table": users_table,
+     "relevant_tables": ["users", "orders"],
+     "difficulty": "difficult"},
+    {"question": "Write a SQL query to show each user's name and the total amount they have spent, ordered by total spent descending.",
+     "correct_answer_example": "SELECT u.name, SUM(o.amount) AS total_spent FROM users u JOIN orders o ON u.user_id = o.user_id GROUP BY u.name ORDER BY total_spent DESC;",
+     "sample_table": users_table,
+     "relevant_tables": ["users", "orders"],
+     "difficulty": "difficult"}
+]
 
 NUM_EASY = 3
 NUM_INTERMEDIATE = 1
 NUM_DIFFICULT = 1
 
+# Randomly select questions ONCE per session
 if "exam_questions" not in st.session_state:
     easy = [q for q in sql_questions if q['difficulty'] == 'easy']
     intermediate = [q for q in sql_questions if q['difficulty'] == 'intermediate']
     difficult = [q for q in sql_questions if q['difficulty'] == 'difficult']
     st.session_state.exam_questions = (
-        random.sample(easy, NUM_EASY)
-        + random.sample(intermediate, NUM_INTERMEDIATE)
-        + random.sample(difficult, NUM_DIFFICULT)
+        random.sample(easy, NUM_EASY) +
+        random.sample(intermediate, NUM_INTERMEDIATE) +
+        random.sample(difficult, NUM_DIFFICULT)
     )
     random.shuffle(st.session_state.exam_questions)
 
-# Use st.session_state.exam_questions for your quiz
+# Display the 5 selected questions
+st.header("Random SQL Exam")
 for idx, q in enumerate(st.session_state.exam_questions, 1):
-    st.write(f"Q{idx}: {q['question']}")
-
+    st.markdown(f"**Q{idx}:** {q['question']}")
 
 # --- Session State Initialization ---
 if "user_answers" not in st.session_state: st.session_state.user_answers = []
