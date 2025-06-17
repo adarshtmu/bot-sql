@@ -115,7 +115,7 @@ original_tables = {
 }
 
 # --- SQL Questions List ---
-all_st.session_state.sql_questions = [
+st.session_state.sql_questions = [
     # Easy (at least 4 for variety)
     {"difficulty": "easy", "question": "Get all users from the users table.", "correct_answer_example": "SELECT * FROM users;", "sample_table": users_table, "relevant_tables": ["users"]},
     {"difficulty": "easy", "question": "Count users in the users table.", "correct_answer_example": "SELECT COUNT(*) FROM users;", "sample_table": users_table, "relevant_tables": ["users"]},
