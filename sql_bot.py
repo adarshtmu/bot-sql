@@ -115,7 +115,7 @@ original_tables = {
 }
 
 # --- SQL Questions List ---
-all_sql_questions = [
+all_st.session_state.sql_questions = [
     # Easy (at least 4 for variety)
     {"difficulty": "easy", "question": "Get all users from the users table.", "correct_answer_example": "SELECT * FROM users;", "sample_table": users_table, "relevant_tables": ["users"]},
     {"difficulty": "easy", "question": "Count users in the users table.", "correct_answer_example": "SELECT COUNT(*) FROM users;", "sample_table": users_table, "relevant_tables": ["users"]},
@@ -143,9 +143,9 @@ if "show_detailed_feedback" not in st.session_state: st.session_state.show_detai
 
 #random
 def select_quiz_questions():
-    easy_qs = [q for q in all_sql_questions if q["difficulty"] == "easy"]
-    intermediate_qs = [q for q in all_sql_questions if q["difficulty"] == "intermediate"]
-    difficult_qs = [q for q in all_sql_questions if q["difficulty"] == "difficult"]
+    easy_qs = [q for q in all_st.session_state.sql_questions if q["difficulty"] == "easy"]
+    intermediate_qs = [q for q in all_st.session_state.sql_questions if q["difficulty"] == "intermediate"]
+    difficult_qs = [q for q in all_st.session_state.sql_questions if q["difficulty"] == "difficult"]
 
     selected = []
     selected.extend(random.sample(easy_qs, 3))            # 3 random easy
@@ -1107,7 +1107,7 @@ if not st.session_state.quiz_started:
             st.session_state.user_answers = []
             st.session_state.current_question = 0
             st.session_state.quiz_completed = False
-            st.session_state.sql_questions = select_quiz_questions()
+            st.session_state.st.session_state.sql_questions = select_quiz_questions()
             st.success("🎉 Welcome to the future of learning!")
             st.balloons()
             st.rerun()
@@ -1279,9 +1279,9 @@ elif st.session_state.quiz_started and not st.session_state.quiz_completed:
     st.markdown("---")
     
     current_q_index = st.session_state.current_question
-    question_data = sql_questions[current_q_index]
+    question_data = st.session_state.sql_questions[current_q_index]
     
-    st.subheader(f"Question {current_q_index + 1} of {len(sql_questions)}")
+    st.subheader(f"Question {current_q_index + 1} of {len(st.session_state.sql_questions)}")
     st.markdown(f"**{question_data['question']}**")
     
     relevant_tables = question_data["relevant_tables"]
@@ -1326,7 +1326,7 @@ elif st.session_state.quiz_started and not st.session_state.quiz_completed:
                     "raw_llm_output": raw_llm
                 })
                 
-                if current_q_index + 1 < len(sql_questions):
+                if current_q_index + 1 < len(st.session_state.sql_questions):
                     st.session_state.current_question += 1
                 else:
                     st.session_state.quiz_completed = True
