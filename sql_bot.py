@@ -217,9 +217,13 @@ if len(easy_questions) < NUM_EASY or len(intermediate_questions) < NUM_INTERMEDI
     raise ValueError("Not enough questions in one or more categories!")
 
 selected_questions = []
-selected_questions.extend(random.sample(easy_questions, NUM_EASY))
-selected_questions.extend(random.sample(intermediate_questions, NUM_INTERMEDIATE))
-selected_questions.extend(random.sample(hard_questions, NUM_HARD))
+selected_questions.extend(random.sample(easy_questions, 3))
+selected_questions.extend(random.sample(intermediate_questions, 1))
+selected_questions.extend(random.sample(hard_questions, 1))
+
+# Now use selected_questions below here
+for q in selected_questions:
+    print(q["question"])
 
 # Now, selected_questions has 5 questions for the current session, with different combinations every time.
 
