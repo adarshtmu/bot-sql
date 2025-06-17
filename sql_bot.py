@@ -209,9 +209,9 @@ NUM_EASY = 3
 NUM_INTERMEDIATE = 1
 NUM_HARD = 1
 
-easy_questions = [q for q in sql_questions if q["difficulty"] == "easy"]
-intermediate_questions = [q for q in sql_questions if q["difficulty"] == "intermediate"]
-hard_questions = [q for q in sql_questions if q["difficulty"] == "hard"]
+easy_questions = [q for q in selected_questions: if q["difficulty"] == "easy"]
+intermediate_questions = [q for q in selected_questions: if q["difficulty"] == "intermediate"]
+hard_questions = [q for q in selected_questions: if q["difficulty"] == "hard"]
 
 if len(easy_questions) < NUM_EASY or len(intermediate_questions) < NUM_INTERMEDIATE or len(hard_questions) < NUM_HARD:
     raise ValueError("Not enough questions in one or more categories!")
