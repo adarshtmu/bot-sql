@@ -1441,7 +1441,7 @@ elif st.session_state.quiz_started and not st.session_state.quiz_completed:
     st.markdown(f"""
     <div class="certificate-container">
         <div class="certificate-icon">
-            <!-- Advanced Certificate SVG Icon -->
+            <!-- SVG Certificate Icon -->
             <svg width="36" height="36" viewBox="0 0 36 36" fill="none">
               <rect x="4" y="6" width="28" height="24" rx="4" fill="#fff8e1" stroke="#ffd700" stroke-width="2"/>
               <rect x="8" y="10" width="20" height="10" rx="2" fill="#fff" stroke="#ffd700" stroke-width="1"/>
@@ -1451,6 +1451,7 @@ elif st.session_state.quiz_started and not st.session_state.quiz_completed:
             </svg>
             <div class="lock-overlay {('unlocked' if is_certificate_unlocked else 'locked')}">🔒</div>
         </div>
+        <div class="certificate-helper-text">unlock your certificate</div>
         <div class="certificate-count">{correct_answers}/5</div>
     </div>
     """, unsafe_allow_html=True)
