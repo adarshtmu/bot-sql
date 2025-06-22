@@ -80,6 +80,7 @@ certificate_svg = '''
  <path d="M48 41 L49.5 46 L46.5 46 Z" fill="#ffd700"/>
 </svg>
 '''
+
 st.markdown("""
 <style>
 .certificate-container {
@@ -89,8 +90,8 @@ st.markdown("""
     width: 56px;
     height: 56px;
     display: flex;
-    align-items: flex-start;
-    justify-content: flex-end;
+    align-items: center;
+    justify-content: center;
     z-index: 10;
 }
 .certificate-svg-holder {
@@ -133,6 +134,8 @@ st.markdown("""
 }
 </style>
 """, unsafe_allow_html=True)
+
+
 # --- Set up Gemini API ---
 gemini_api_key = "AIzaSyAfzl_66GZsgaYjAM7cT2djVCBCAr86t2k"  # Replace with your Gemini API Key
 
@@ -1421,14 +1424,15 @@ elif st.session_state.quiz_started and not st.session_state.quiz_completed:
     # After displaying the question
     correct_answers = sum(1 for ans in st.session_state.user_answers if ans.get('is_correct', False))
     is_certificate_unlocked = correct_answers >= 3
+    lock_class = "unlocked" if is_certificate_unlocked else "locked"
     
     st.markdown(f"""
     <div class="certificate-container">
       <div class="certificate-svg-holder">
         {certificate_svg}
-        <span class="lock-overlay locked">🔒</span>
+        <span class="lock-overlay {lock_class}">🔒</span>
       </div>
-      <span class="certificate-count">0/5</span>
+      <span class="certificate-count">{correct_answers}/5</span>
     </div>
     """, unsafe_allow_html=True)
         
