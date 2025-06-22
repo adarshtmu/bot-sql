@@ -147,11 +147,11 @@ st.markdown(
     """
     <div class="certificate-container">
         <div class="certificate-icon">
-            <img src="certificate.png" alt="Certificate" />
+            <img src="https://raw.githubusercontent.com/<username>/<repo>/<branch>/certificate.png" alt="Certificate" />
         </div>
     </div>
-    """,
-    unsafe_allow_html=True,
+    """, 
+    unsafe_allow_html=True
 )
 # --- Set up Gemini API ---
 gemini_api_key = "AIzaSyAfzl_66GZsgaYjAM7cT2djVCBCAr86t2k"  # Replace with your Gemini API Key
