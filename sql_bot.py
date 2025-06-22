@@ -72,44 +72,53 @@ st.markdown(hide_streamlit_style, unsafe_allow_html=True)
 
 st.markdown("""
 <style>
-.certificate-lock {
+.certificate-container {
     position: absolute;
     top: 20px;
     right: 20px;
-    font-size: 24px;
-    background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05));
-    backdrop-filter: blur(10px);
-    border-radius: 50%;
     width: 48px;
     height: 48px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-    transition: all 0.3s ease;
+    z-index: 10;
 }
-.certificate-lock.locked {
+.certificate-icon {
+    font-size: 38px;
+    color: #FFD700;
+    filter: drop-shadow(0 2px 8px #fff99b);
+    position: absolute;
+    top: 0; left: 0;
+}
+.lock-overlay {
+    font-size: 26px;
     color: #dc3545;
-    border: 2px solid #dc3545;
-    animation: lockPulse 2s infinite;
+    position: absolute;
+    top: 10px; left: 12px;
+    background: rgba(255,255,255,0.85);
+    border-radius: 50%;
+    padding: 2px 4px 2px 4px;
+    box-shadow: 0 2px 8px #fff4f4;
+    transition: opacity 0.4s;
 }
-.certificate-lock.unlocked {
-    color: #28a745;
-    border: 2px solid #28a745;
-    animation: unlockCelebrate 1s ease;
+.lock-overlay.unlocked {
+    opacity: 0;
+    transition: opacity 0.5s;
 }
-@keyframes lockPulse {
-    0%, 100% { transform: scale(1); }
-    50% { transform: scale(1.1); }
+.lock-overlay.locked {
+    opacity: 1;
+    transition: opacity 0.5s;
 }
-@keyframes unlockCelebrate {
-    0% { transform: scale(0.5) rotate(-15deg); opacity: 0; }
-    50% { transform: scale(1.2) rotate(15deg); }
-    100% { transform: scale(1) rotate(0deg); opacity: 1; }
+.certificate-count {
+    position: absolute;
+    bottom: -16px;
+    right: -8px;
+    font-size: 13px;
+    background: #222;
+    color: #fff;
+    border-radius: 8px;
+    padding: 2px 7px;
+    opacity: 0.85;
 }
 </style>
 """, unsafe_allow_html=True)
-
 # --- Set up Gemini API ---
 gemini_api_key = "AIzaSyAfzl_66GZsgaYjAM7cT2djVCBCAr86t2k"  # Replace with your Gemini API Key
 
@@ -1393,18 +1402,16 @@ elif st.session_state.quiz_started and not st.session_state.quiz_completed:
     st.markdown(f"**{question_data['question']}**")
     # Calculate current score (safe for empty)
     # Calculate number of correct answers
+     # Unlock only when 3 or more questions are correct
+    
     correct_answers = sum(1 for ans in st.session_state.user_answers if ans.get('is_correct', False))
-    is_certificate_unlocked = correct_answers >= 3  # Unlock only when 3 or more questions are correct
+    is_certificate_unlocked = correct_answers >= 3
     
     st.markdown(f"""
-    <div style="position:relative; height:0;">
-      <div class="certificate-lock {'unlocked' if is_certificate_unlocked else 'locked'}">
-        {'🏆' if is_certificate_unlocked else '🔒'}
-        <div style="position: absolute; top: -20px; right: -10px; font-size: 12px; background: rgba(0,0,0,0.7); 
-             padding: 2px 6px; border-radius: 10px; color: white;">
-            {correct_answers}/5
-        </div>
-      </div>
+    <div class="certificate-container">
+      <span class="certificate-icon">🎓</span>
+      <span class="lock-overlay {'unlocked' if is_certificate_unlocked else 'locked'}">🔒</span>
+      <span class="certificate-count">{correct_answers}/5</span>
     </div>
     """, unsafe_allow_html=True)
         
@@ -1941,20 +1948,15 @@ elif st.session_state.quiz_completed:
         """, unsafe_allow_html=True)
     
     def display_certificate_section(final_score):
-        """Display certificate eligibility section with animated lock"""
-        # Calculate number of correct answers from final score
         total_questions = 5
         correct_answers = int((final_score / 100) * total_questions)
-        is_certificate_unlocked = correct_answers >= 3  # Unlock for 3 or more correct answers
+        is_certificate_unlocked = correct_answers >= 3
     
         st.markdown(f"""
-        <div class="certificate-lock {'unlocked' if is_certificate_unlocked else 'locked'}" 
-             style="position: relative; margin: 0 auto 2rem auto;">
-            {'🏆' if is_certificate_unlocked else '🔒'}
-            <div style="position: absolute; top: -20px; right: -10px; font-size: 12px; background: rgba(0,0,0,0.7); 
-                 padding: 2px 6px; border-radius: 10px; color: white;">
-                {correct_answers}/5
-            </div>
+        <div class="certificate-container" style="position: relative; margin: 0 auto 2rem auto;">
+          <span class="certificate-icon">🎓</span>
+          <span class="lock-overlay {'unlocked' if is_certificate_unlocked else 'locked'}">🔒</span>
+          <span class="certificate-count">{correct_answers}/5</span>
         </div>
         """, unsafe_allow_html=True)
     
