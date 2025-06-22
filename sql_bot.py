@@ -97,14 +97,14 @@ st.markdown("""
 }
 
 
-
 .lock-overlay {
     position: absolute;
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    width: 24px;
-    height: 24px;
+    width: 14px;    /* Reduced from 24px */
+    height: 14px;   /* Reduced from 24px */
+    font-size: 10px; /* Make lock emoji smaller */
     background: rgba(0, 0, 0, 0.8);
     border-radius: 50%;
     display: flex;
@@ -131,7 +131,7 @@ st.markdown("""
     right: -10px;
     background: #222;
     color: #fff;
-    font-size: 12px;
+    font-size: 15px; /* Optional: Slightly bigger for better balance */
     padding: 2px 8px;
     border-radius: 10px;
     border: 2px solid #fff;
