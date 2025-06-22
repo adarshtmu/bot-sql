@@ -1392,18 +1392,22 @@ elif st.session_state.quiz_started and not st.session_state.quiz_completed:
     st.subheader(f"Question {current_q_index + 1} of {len(st.session_state.selected_questions)}")
     st.markdown(f"**{question_data['question']}**")
     # Calculate current score (safe for empty)
-    current_score = calculate_score(st.session_state.user_answers) if st.session_state.user_answers else 0
-    is_certificate_unlocked = current_score >= 50
+    # Calculate number of correct answers
+    correct_answers = sum(1 for ans in st.session_state.user_answers if ans.get('is_correct', False))
+    is_certificate_unlocked = correct_answers >= 3  # Unlock only when 3 or more questions are correct
     
-    # Place lock icon at top right (relative to main quiz area)
     st.markdown(f"""
     <div style="position:relative; height:0;">
       <div class="certificate-lock {'unlocked' if is_certificate_unlocked else 'locked'}">
         {'🏆' if is_certificate_unlocked else '🔒'}
+        <div style="position: absolute; top: -20px; right: -10px; font-size: 12px; background: rgba(0,0,0,0.7); 
+             padding: 2px 6px; border-radius: 10px; color: white;">
+            {correct_answers}/5
+        </div>
       </div>
     </div>
     """, unsafe_allow_html=True)
-    
+        
     relevant_tables = question_data["relevant_tables"]
     if relevant_tables:
         st.markdown("**Sample Table Preview(s):**")
@@ -1938,13 +1942,19 @@ elif st.session_state.quiz_completed:
     
     def display_certificate_section(final_score):
         """Display certificate eligibility section with animated lock"""
-        is_certificate_unlocked = final_score >= 50
+        # Calculate number of correct answers from final score
+        total_questions = 5
+        correct_answers = int((final_score / 100) * total_questions)
+        is_certificate_unlocked = correct_answers >= 3  # Unlock for 3 or more correct answers
     
-        # Animated lock/trophy icon at the top of the certificate area
         st.markdown(f"""
         <div class="certificate-lock {'unlocked' if is_certificate_unlocked else 'locked'}" 
              style="position: relative; margin: 0 auto 2rem auto;">
             {'🏆' if is_certificate_unlocked else '🔒'}
+            <div style="position: absolute; top: -20px; right: -10px; font-size: 12px; background: rgba(0,0,0,0.7); 
+                 padding: 2px 6px; border-radius: 10px; color: white;">
+                {correct_answers}/5
+            </div>
         </div>
         """, unsafe_allow_html=True)
     
@@ -1953,7 +1963,7 @@ elif st.session_state.quiz_completed:
             <div class="certificate-section">
                 <h2 style='color:#2c3e50; margin-bottom: 1rem;'>🎉 Certificate Unlocked!</h2>
                 <p style='color:#5d6d7e; font-size: 1.1rem; margin-bottom: 2rem;'>
-                    Congratulations! You've achieved above 50% and earned your certificate.
+                    Congratulations! You've correctly answered 3 or more questions and earned your certificate.
                 </p>
                 <a href="https://superprofile.bio/vp/corporate-bhaiya-sql-page" target="_blank" class="certificate-btn">
                     🎓 Claim Your Certificate
@@ -1961,12 +1971,12 @@ elif st.session_state.quiz_completed:
             </div>
             """, unsafe_allow_html=True)
         else:
-            score_needed = 50 - final_score
+            questions_needed = 3 - correct_answers
             st.markdown(f"""
             <div class="retry-section">
                 <h3 style='color:#2c3e50; margin-bottom: 1rem;'>📚 Certificate Locked</h3>
                 <p style='color:#5d6d7e; font-size: 1rem; margin-bottom: 1.5rem;'>
-                    You need {score_needed:.1f}% more to unlock your certificate. Keep going!
+                    You need {questions_needed} more correct {'question' if questions_needed == 1 else 'questions'} to unlock your certificate. Keep going!
                 </p>
                 <a href="https://www.corporatebhaiya.com/" target="_blank" class="mentor-btn">
                     🚀 Book a SQL Mentor To Guide You
