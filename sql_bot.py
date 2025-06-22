@@ -1439,7 +1439,7 @@ elif st.session_state.quiz_started and not st.session_state.quiz_completed:
     is_certificate_unlocked = correct_answers >= 3
     
     st.markdown(f"""
-    <div class="certificate-container" style="position: relative; display: inline-block;">
+    <div class="certificate-container" style="position: relative; display: inline-block;float: right;">
         <div class="certificate-icon" style="position: relative; display: inline-block;">
             <!-- Overlay text on icon -->
             <span style="
