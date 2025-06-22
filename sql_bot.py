@@ -72,32 +72,28 @@ st.markdown(hide_streamlit_style, unsafe_allow_html=True)
 
 st.markdown("""
 <style>
+/* Enhanced Certificate Container */
 .certificate-container {
-    position: absolute;
-    top: 20px;
-    right: 20px;
+    position: relative;
     width: 48px;
     height: 48px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 10;
+    perspective: 1000px;
 }
 
+/* Enhanced Certificate Icon */
 .certificate-icon {
     width: 100%;
     height: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: linear-gradient(135deg, #ffd700 0%, #ffed4a 100%);
-    border-radius: 8px;
-    box-shadow: 0 4px 12px rgba(255, 215, 0, 0.3);
     position: relative;
+    transform-style: preserve-3d;
+    transition: transform 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
+.certificate-icon.unlocked {
+    animation: certificateUnlock 1.2s forwards;
+}
 
-
+/* Enhanced Lock Overlay */
 .lock-overlay {
     position: absolute;
     top: 50%;
@@ -105,14 +101,15 @@ st.markdown("""
     transform: translate(-50%, -50%);
     width: 24px;
     height: 24px;
-    background: rgba(0, 0, 0, 0.8);
+    background: rgba(0, 0, 0, 0.85);
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: all 0.3s ease;
+    transition: all 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
     border: 2px solid #fff;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+    box-shadow: 0 0 20px rgba(255, 215, 0, 0.5);
+    z-index: 10;
 }
 
 .lock-overlay.locked {
@@ -121,31 +118,112 @@ st.markdown("""
 }
 
 .lock-overlay.unlocked {
-    opacity: 0;
-    transform: translate(-50%, -50%) scale(0);
+    animation: unlockEffect 1s forwards;
 }
 
+/* Particle Effects */
+.particles {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    opacity: 0;
+}
+
+.certificate-icon.unlocked .particles {
+    animation: particleEffect 1.5s ease-out forwards;
+}
+
+/* Count Badge */
 .certificate-count {
     position: absolute;
     bottom: -10px;
     right: -10px;
-    background: #222;
-    color: #fff;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
     font-size: 12px;
     padding: 2px 8px;
     border-radius: 10px;
-    # border: 2px solid #fff;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    border: 2px solid #fff;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+    z-index: 5;
 }
 
-@keyframes unlockAnimation {
-    0% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
-    50% { transform: translate(-50%, -50%) scale(1.2); opacity: 0.5; }
-    100% { transform: translate(-50%, -50%) scale(0); opacity: 0; }
+/* Glow Effect */
+.certificate-icon::before {
+    content: '';
+    position: absolute;
+    top: -5px;
+    left: -5px;
+    right: -5px;
+    bottom: -5px;
+    background: radial-gradient(circle at center, rgba(255,215,0,0.5) 0%, transparent 70%);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    pointer-events: none;
+    border-radius: 50%;
 }
 
-.lock-overlay.unlocking {
-    animation: unlockAnimation 0.5s ease forwards;
+.certificate-icon.unlocked::before {
+    animation: glowPulse 2s infinite;
+}
+
+/* Animations */
+@keyframes certificateUnlock {
+    0% { transform: rotate3d(0, 1, 0, 0deg); }
+    50% { transform: rotate3d(0, 1, 0, 180deg) scale(1.2); }
+    100% { transform: rotate3d(0, 1, 0, 360deg) scale(1); }
+}
+
+@keyframes unlockEffect {
+    0% { 
+        transform: translate(-50%, -50%) scale(1);
+        opacity: 1;
+    }
+    50% { 
+        transform: translate(-50%, -50%) scale(1.5);
+        opacity: 0.5;
+    }
+    100% { 
+        transform: translate(-50%, -50%) scale(0);
+        opacity: 0;
+    }
+}
+
+@keyframes particleEffect {
+    0% { 
+        opacity: 1;
+        transform: scale(0);
+    }
+    50% { 
+        opacity: 1;
+        transform: scale(1.2);
+    }
+    100% { 
+        opacity: 0;
+        transform: scale(2);
+    }
+}
+
+@keyframes glowPulse {
+    0% { opacity: 0.3; }
+    50% { opacity: 0.7; }
+    100% { opacity: 0.3; }
+}
+
+/* Shine effect for unlocked state */
+.certificate-icon.unlocked {
+    filter: drop-shadow(0 0 10px rgba(255,215,0,0.5));
+}
+
+/* Particle container */
+.particle {
+    position: absolute;
+    background: radial-gradient(circle at center, #ffd700, transparent);
+    border-radius: 50%;
+    pointer-events: none;
 }
 </style>
 """, unsafe_allow_html=True)
@@ -1440,58 +1518,61 @@ elif st.session_state.quiz_started and not st.session_state.quiz_completed:
     
     st.markdown(f"""
     <div class="certificate-container">
-        <div class="certificate-icon">
-            <!-- Advanced 3D Certificate SVG Icon -->
+        <div class="certificate-icon {('unlocked' if is_certificate_unlocked else 'locked')}">
+            <!-- Enhanced 3D Certificate SVG Icon -->
             <svg width="54" height="54" viewBox="0 0 54 54" fill="none">
-              <defs>
-                <linearGradient id="paperGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-                  <stop offset="0%" stop-color="#ffffff"/>
-                  <stop offset="45%" stop-color="#f8f8f8"/>
-                  <stop offset="100%" stop-color="#e8e8e8"/>
-                </linearGradient>
-                <linearGradient id="sealGrad" x1="30%" y1="20%" x2="70%" y2="80%">
-                  <stop offset="0%" stop-color="#ffd700"/>
-                  <stop offset="50%" stop-color="#ffc800"/>
-                  <stop offset="100%" stop-color="#ffb700"/>
-                </linearGradient>
-                <filter id="paper-shadow" x="-20%" y="-20%" width="140%" height="140%">
-                  <feDropShadow dx="1" dy="1" stdDeviation="0.5" flood-color="#000" flood-opacity="0.3"/>
-                  <feDropShadow dx="2" dy="2" stdDeviation="1" flood-color="#000" flood-opacity="0.2"/>
-                  <feDropShadow dx="3" dy="3" stdDeviation="2" flood-color="#000" flood-opacity="0.1"/>
-                </filter>
-                <filter id="seal-shadow" x="-50%" y="-50%" width="200%" height="200%">
-                  <feDropShadow dx="0" dy="2" stdDeviation="1" flood-color="#000" flood-opacity="0.3"/>
-                </filter>
-              </defs>
-              <!-- 3D shadow below certificate -->
-              <ellipse cx="25" cy="44" rx="15" ry="4" fill="#000" opacity="0.18"/>
-              <!-- Certificate Edges -->
-              <path d="M10 14 L12 12 L42 12 L40 14 Z" fill="#bdbdbd"/>
-              <path d="M40 14 L42 12 L42 38 L40 40 Z" fill="#888888"/>
-              <!-- Main certificate body -->
-              <rect x="10" y="14" width="30" height="26" rx="2" fill="url(#paperGrad)" filter="url(#paper-shadow)"/>
-              <!-- Highlight/shine for bevel -->
-              <rect x="10" y="14" width="30" height="6" rx="3" fill="#fff" opacity="0.18"/>
-              <!-- Decorative lines -->
-              <rect x="14" y="20" width="22" height="2" rx="1" fill="#e0e0e0" opacity="0.8"/>
-              <rect x="14" y="24" width="18" height="2" rx="1" fill="#d0d0d0" opacity="0.7"/>
-              <rect x="14" y="28" width="14" height="2" rx="1" fill="#c0c0c0" opacity="0.6"/>
-              <!-- 3D Seal with shadow and inner ring -->
-              <circle cx="25" cy="34" r="6" fill="url(#sealGrad)" filter="url(#seal-shadow)"/>
-              <circle cx="25" cy="34" r="4.6" fill="none" stroke="#b79e38" stroke-width="1.3" opacity="0.25"/>
-              <circle cx="25" cy="34" r="4" fill="none" stroke="#fff" stroke-width="0.5" opacity="0.6"/>
-              <path d="M25 30 L26 32 L28 32.5 L26.5 34 L27 36 L25 35 L23 36 L23.5 34 L22 32.5 L24 32 Z" 
-                fill="#ffffff" opacity="0.8"/>
-              <!-- Ribbon with 3D shadow -->
-              <path d="M20 38 L25 42 L30 38" fill="#ff4444" stroke="#cc0000" stroke-width="1" filter="url(#paper-shadow)"/>
-              <path d="M20 38 L22 44 L25 42 L28 44 L30 38" fill="#ff6666" stroke="#cc0000" stroke-width="1"/>
-              <!-- Shine Effects -->
-              <path d="M12 16 L38 16 L37 17 L13 17 Z" fill="#ffffff" opacity="0.5"/>
-              <path d="M14 26 C18 25, 32 25, 36 26" stroke="#ffffff" stroke-width="0.5" opacity="0.3"/>
+                <defs>
+                    <linearGradient id="paperGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" stop-color="#ffffff"/>
+                        <stop offset="45%" stop-color="#f8f8f8"/>
+                        <stop offset="100%" stop-color="#e8e8e8"/>
+                    </linearGradient>
+                    <linearGradient id="sealGrad" x1="30%" y1="20%" x2="70%" y2="80%">
+                        <stop offset="0%" stop-color="#ffd700"/>
+                        <stop offset="50%" stop-color="#ffc800"/>
+                        <stop offset="100%" stop-color="#ffb700"/>
+                    </linearGradient>
+                    <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
+                        <feGaussianBlur in="SourceGraphic" stdDeviation="2"/>
+                        <feColorMatrix type="matrix" values="0 0 0 0 1   0 0 0 0 0.8   0 0 0 0 0   0 0 0 1 0"/>
+                    </filter>
+                </defs>
+                
+                <!-- Shadow beneath -->
+                <ellipse cx="27" cy="44" rx="15" ry="4" fill="#000" opacity="0.18"/>
+                
+                <!-- Main certificate -->
+                <rect x="10" y="14" width="34" height="26" rx="2" fill="url(#paperGrad)" filter="url(#glow)"/>
+                
+                <!-- Decorative elements -->
+                <rect x="14" y="20" width="26" height="2" rx="1" fill="#e0e0e0" opacity="0.8"/>
+                <rect x="14" y="24" width="20" height="2" rx="1" fill="#d0d0d0" opacity="0.7"/>
+                <rect x="14" y="28" width="16" height="2" rx="1" fill="#c0c0c0" opacity="0.6"/>
+                
+                <!-- Enhanced 3D Seal -->
+                <circle cx="27" cy="34" r="6" fill="url(#sealGrad)"/>
+                <path d="M27 30 L28 32 L30 32.5 L28.5 34 L29 36 L27 35 L25 36 L25.5 34 L24 32.5 L26 32 Z" 
+                      fill="#ffffff" opacity="0.8"/>
+                
+                <!-- Ribbon -->
+                <path d="M22 38 L27 42 L32 38" fill="#ff4444" stroke="#cc0000"/>
+                <path d="M22 38 L24 44 L27 42 L30 44 L32 38" fill="#ff6666" stroke="#cc0000"/>
             </svg>
-            <div class="lock-overlay locked">🔒</div>
+            
+            <!-- Particle effects -->
+            <div class="particles">
+                <div class="particle" style="top: 20%; left: 20%;"></div>
+                <div class="particle" style="top: 20%; right: 20%;"></div>
+                <div class="particle" style="bottom: 20%; left: 20%;"></div>
+                <div class="particle" style="bottom: 20%; right: 20%;"></div>
+            </div>
+            
+            <!-- Lock overlay -->
+            <div class="lock-overlay {('unlocked' if is_certificate_unlocked else 'locked')}">
+                {('🎉' if is_certificate_unlocked else '🔒')}
+            </div>
         </div>
-        <div class="certificate-count">0/5</div>
+        <div class="certificate-count">{correct_answers}/5</div>
     </div>
     """, unsafe_allow_html=True)
         
