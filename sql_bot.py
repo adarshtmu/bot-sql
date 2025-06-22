@@ -1299,7 +1299,7 @@ if not st.session_state.quiz_started:
         st.markdown(button_html, unsafe_allow_html=True)
     
         # Button click logic
-        if st.session_state.get("start_quiz_clicked") or st.experimental_get_query_params().get("start_quiz"):
+        if st.session_state.get("start_quiz_clicked") or st.query_params.get("start_quiz"):
             st.session_state.quiz_started = True
             st.session_state.user_answers = []
             st.session_state.current_question = 0
@@ -1310,7 +1310,7 @@ if not st.session_state.quiz_started:
         else:
             # Detect click with query param workaround
             import urllib.parse
-            if st.experimental_get_query_params().get("start_quiz") is not None:
+            if st.query_params.get("start_quiz") is not None:
                 st.session_state["start_quiz_clicked"] = True
 
     # --- ADVANCED STATS SECTION (REFACTORED) ---
