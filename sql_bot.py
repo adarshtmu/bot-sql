@@ -1439,7 +1439,7 @@ elif st.session_state.quiz_started and not st.session_state.quiz_completed:
     is_certificate_unlocked = correct_answers >= 3
     
     st.markdown(f"""
-    <div style="display: flex; flex-direction: column; align-items: center; width: 90px; margin-top: 10px;">
+    <div style="display: flex; flex-direction: column; align-items: center; width: 90px; margin-top-right: 10px;">
         <span style="
             color: #fff;
             font-size: 12px;
