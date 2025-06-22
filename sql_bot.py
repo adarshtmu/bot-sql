@@ -72,27 +72,30 @@ st.markdown(hide_streamlit_style, unsafe_allow_html=True)
 
 st.markdown("""
 <style>
-# .certificate-container {
-#     position: absolute;
-#     top: 20px;
-#     right: 20px;
-#     width: 40px;
-#     height: 40px;
-#     display: flex;
-#     align-items: center;
-#     justify-content: center;
-#     z-index: 10;
-# }
-
-.certificate-icon {
-    width: 100%;
-    height: 100%;
+.certificate-container {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    /* Set to SVG size or auto */
+    width: 80px;  /* or auto */
+    height: 80px; /* or auto */
     display: flex;
     align-items: center;
     justify-content: center;
-    background: linear-gradient(135deg, #ffd700 0%, #ffed4a 100%);
-    border-radius: 12px;
-    box-shadow: 0 4px 12px rgba(255, 215, 0, 0.3);
+    z-index: 10;
+}
+
+.certificate-icon {
+    width: 80px;    /* match SVG width or auto */
+    height: 80px;   /* match SVG height or auto */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    /* Remove background and padding */
+    /* background: linear-gradient(135deg, #ffd700 0%, #ffed4a 100%); <-- REMOVE THIS */
+    /* border-radius: 16px; <-- REMOVE THIS IF YOU WANT NO ROUNDED CORNER */
+    /* padding: ...; <-- REMOVE IF PRESENT */
+    box-shadow: none; /* Remove if you don't want any shadow */
     position: relative;
 }
 
