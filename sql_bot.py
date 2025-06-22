@@ -76,96 +76,28 @@ st.markdown("""
     position: absolute;
     top: 20px;
     right: 20px;
-    width: 48px;
-    height: 48px;
+    width: 60px;
     display: flex;
+    flex-direction: column;
     align-items: center;
-    justify-content: center;
     z-index: 10;
 }
-
-.certificate-icon {
-    width: 100%;
-    height: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: linear-gradient(135deg, #ffd700 0%, #ffed4a 100%);
-    border-radius: 8px;
-    box-shadow: 0 4px 12px rgba(255, 215, 0, 0.3);
-    position: relative;
-}
-
-
-
-.lock-overlay {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    width: 24px;
-    height: 24px;
-    background: rgba(0, 0, 0, 0.8);
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: all 0.3s ease;
-    border: 2px solid #fff;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.3);
-}
-
-.lock-overlay.locked {
-    opacity: 1;
-    transform: translate(-50%, -50%) scale(1);
-}
-
-.lock-overlay.unlocked {
-    opacity: 0;
-    transform: translate(-50%, -50%) scale(0);
-}
-
-.certificate-count {
-    position: absolute;
-    bottom: -10px;
-    right: -10px;
-    background: #222;
-    color: #fff;
-    font-size: 12px;
-    padding: 2px 8px;
-    border-radius: 10px;
-    border: 2px solid #fff;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-}
-
-@keyframes unlockAnimation {
-    0% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
-    50% { transform: translate(-50%, -50%) scale(1.2); opacity: 0.5; }
-    100% { transform: translate(-50%, -50%) scale(0); opacity: 0; }
-}
-
-.lock-overlay.unlocking {
-    animation: unlockAnimation 0.5s ease forwards;
-}
-
 .certificate-icon {
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: center;
+    justify-content: flex-start;
 }
-
 .certificate-svg-wrap {
     position: relative;
     display: flex;
     align-items: center;
     justify-content: center;
 }
-
 .certificate-helper-text {
-    font-size: 0.65rem;      /* Make it extra small */
+    font-size: 0.55rem;
     color: #888;
-    margin-top: 3px;
+    margin-top: 2px;
     text-align: center;
     line-height: 1.1;
     font-family: inherit;
@@ -173,7 +105,34 @@ st.markdown("""
     letter-spacing: 0.05em;
     white-space: nowrap;
 }
+.certificate-count {
+    position: absolute;
+    top: -15px;
+    right: -15px;
+    background: #222;
+    color: #fff;
+    font-size: 14px;
+    padding: 2px 10px;
+    border-radius: 10px;
+    border: 2px solid #fff;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
 </style>
+""", unsafe_allow_html=True)
+
+st.markdown("""
+<div class="certificate-container">
+    <div class="certificate-icon">
+        <div class="certificate-svg-wrap">
+            <svg width="36" height="36" viewBox="0 0 36 36" fill="none">
+              <!-- Your SVG paths here -->
+            </svg>
+            <div class="lock-overlay locked">🔒</div>
+        </div>
+        <div class="certificate-helper-text">unlock your certificate</div>
+    </div>
+    <div class="certificate-count">0/5</div>
+</div>
 """, unsafe_allow_html=True)
 # --- Set up Gemini API ---
 gemini_api_key = "AIzaSyAfzl_66GZsgaYjAM7cT2djVCBCAr86t2k"  # Replace with your Gemini API Key
