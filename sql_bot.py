@@ -70,6 +70,46 @@ hide_streamlit_style = """
 """
 st.markdown(hide_streamlit_style, unsafe_allow_html=True)
 
+st.markdown("""
+<style>
+.certificate-lock {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    font-size: 24px;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05));
+    backdrop-filter: blur(10px);
+    border-radius: 50%;
+    width: 48px;
+    height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+}
+.certificate-lock.locked {
+    color: #dc3545;
+    border: 2px solid #dc3545;
+    animation: lockPulse 2s infinite;
+}
+.certificate-lock.unlocked {
+    color: #28a745;
+    border: 2px solid #28a745;
+    animation: unlockCelebrate 1s ease;
+}
+@keyframes lockPulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+}
+@keyframes unlockCelebrate {
+    0% { transform: scale(0.5) rotate(-15deg); opacity: 0; }
+    50% { transform: scale(1.2) rotate(15deg); }
+    100% { transform: scale(1) rotate(0deg); opacity: 1; }
+}
+</style>
+""", unsafe_allow_html=True)
+
 # --- Set up Gemini API ---
 gemini_api_key = "AIzaSyAfzl_66GZsgaYjAM7cT2djVCBCAr86t2k"  # Replace with your Gemini API Key
 
@@ -1351,6 +1391,18 @@ elif st.session_state.quiz_started and not st.session_state.quiz_completed:
     
     st.subheader(f"Question {current_q_index + 1} of {len(st.session_state.selected_questions)}")
     st.markdown(f"**{question_data['question']}**")
+    # Calculate current score (safe for empty)
+    current_score = calculate_score(st.session_state.user_answers) if st.session_state.user_answers else 0
+    is_certificate_unlocked = current_score >= 50
+    
+    # Place lock icon at top right (relative to main quiz area)
+    st.markdown(f"""
+    <div style="position:relative; height:0;">
+      <div class="certificate-lock {'unlocked' if is_certificate_unlocked else 'locked'}">
+        {'🏆' if is_certificate_unlocked else '🔒'}
+      </div>
+    </div>
+    """, unsafe_allow_html=True)
     
     relevant_tables = question_data["relevant_tables"]
     if relevant_tables:
@@ -1883,13 +1935,23 @@ elif st.session_state.quiz_completed:
         """, unsafe_allow_html=True)
     
     def display_certificate_section(final_score):
-        """Display certificate eligibility section"""
-        if final_score >= 50:
+        """Display certificate eligibility section with animated lock"""
+        is_certificate_unlocked = final_score >= 50
+    
+        # Animated lock/trophy icon at the top of the certificate area
+        st.markdown(f"""
+        <div class="certificate-lock {'unlocked' if is_certificate_unlocked else 'locked'}" 
+             style="position: relative; margin: 0 auto 2rem auto;">
+            {'🏆' if is_certificate_unlocked else '🔒'}
+        </div>
+        """, unsafe_allow_html=True)
+    
+        if is_certificate_unlocked:
             st.markdown("""
             <div class="certificate-section">
-                <h2 style='color:#2c3e50; margin-bottom: 1rem;'>🏆 Outstanding Performance!</h2>
+                <h2 style='color:#2c3e50; margin-bottom: 1rem;'>🎉 Certificate Unlocked!</h2>
                 <p style='color:#5d6d7e; font-size: 1.1rem; margin-bottom: 2rem;'>
-                    Congratulations! You've demonstrated excellent SQL skills and earned your certificate.
+                    Congratulations! You've achieved above 50% and earned your certificate.
                 </p>
                 <a href="https://superprofile.bio/vp/corporate-bhaiya-sql-page" target="_blank" class="certificate-btn">
                     🎓 Claim Your Certificate
@@ -1900,9 +1962,9 @@ elif st.session_state.quiz_completed:
             score_needed = 50 - final_score
             st.markdown(f"""
             <div class="retry-section">
-                <h3 style='color:#2c3e50; margin-bottom: 1rem;'>📚 Keep Learning & Growing!</h3>
+                <h3 style='color:#2c3e50; margin-bottom: 1rem;'>📚 Certificate Locked</h3>
                 <p style='color:#5d6d7e; font-size: 1rem; margin-bottom: 1.5rem;'>
-                    You need {score_needed:.1f}% more to earn your certificate. Don't give up!
+                    You need {score_needed:.1f}% more to unlock your certificate. Keep going!
                 </p>
                 <a href="https://www.corporatebhaiya.com/" target="_blank" class="mentor-btn">
                     🚀 Book a SQL Mentor To Guide You
