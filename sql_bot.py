@@ -1439,22 +1439,17 @@ elif st.session_state.quiz_started and not st.session_state.quiz_completed:
     is_certificate_unlocked = correct_answers >= 3
     
     st.markdown(f"""
-    <div class="certificate-label-container" style="
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        gap: 5px;
-        margin: 0;
-        padding: 0;
-    ">
-        <div style="
-            color: white;
-            font-size: 11px;
+    <div style="display: flex; flex-direction: column; align-items: center; width: 90px; margin-top: 10px;">
+        <span style="
+            color: #fff;
+            font-size: 12px;
             font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 0;
-            line-height: 1;
-        ">certificate</div>
+            letter-spacing: 0.2px;
+            margin-bottom: 2px;
+            opacity: 0.85;
+            text-align: center;
+            width: 100%;
+        ">certificate</span>
         <div class="certificate-container">
             <div class="certificate-icon">
                 <svg width="70" height="70" viewBox="0 0 54 54" fill="none">
@@ -1484,7 +1479,7 @@ elif st.session_state.quiz_started and not st.session_state.quiz_completed:
                     <path d="M13 40 l3 8 9-5 9 5 3-8" fill="url(#redRibbon)" stroke="#a30000" stroke-width="1.2"/>
                     <circle cx="27" cy="38" r="6" fill="url(#sealRadial)" stroke="#ffd700" stroke-width="2"/>
                     <circle cx="27" cy="38" r="2.8" fill="#fffbe5" opacity="0.8"/>
-                    <polygon points="27,34.5 28,37 30.7,37.2 28.5,38.7 29.2,41.3 27,39.8 24.8,41.3 25.5,38.7 23.3,37.2 26,37" 
+                    <polygon points="27,34.5 28,37 30.7,37.2 28.5,38.7 29.2,41.3 27,39.8 24.8,41.3 25.5,38.7 23.3,37.2 26,37"
                         fill="#ffaa00" stroke="#e3c04f" stroke-width="0.4"/>
                     <ellipse cx="21" cy="17" rx="4" ry="1.2" fill="#fff" opacity="0.28" transform="rotate(-9 21 17)"/>
                 </svg>
