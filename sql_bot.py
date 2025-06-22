@@ -1224,29 +1224,24 @@ if not st.session_state.quiz_started:
     <div class="features-grid">
         <div class="feature-card">
             <div class="feature-icon">🤖</div>
-            <div class="feature-title">AI-Powered Mentorship</div>
-            <div class="feature-description">Experience personalized learning with our advanced AI that adapts to your coding style, provides real-time feedback, and guides you through complex SQL concepts with precision.</div>
-        </div>
-
-        <div class="feature-card">
-            <div class="feature-icon">📊</div>
-            <div class="feature-title">Advanced Analytics</div>
-            <div class="feature-description">Track your progress with detailed performance metrics, skill mapping, and predictive insights that help you identify strengths and areas for improvement.</div>
+            <div class="feature-title">AI-Powered SQL Feedback</div>
+            <div class="feature-description">
+                Get instant, personalized feedback on your SQL queries. Our AI mentor helps you learn from mistakes and master new concepts with every attempt.
+            </div>
         </div>
         <div class="feature-card">
-            <div class="feature-icon">🎮</div>
-            <div class="feature-title">Gamified Challenges</div>
-            <div class="feature-description">Level up your skills through engaging challenges, unlock achievements, and compete with peers in our dynamic leaderboard system designed to keep you motivated.</div>
+            <div class="feature-icon">📈</div>
+            <div class="feature-title">Realistic SQL Practice</div>
+            <div class="feature-description">
+                Solve real-world SQL problems on sample datasets. Practice SELECTs, JOINs, GROUP BY, subqueries, and more—just like in real interviews or jobs.
+            </div>
         </div>
         <div class="feature-card">
-            <div class="feature-icon">🔗</div>
-            <div class="feature-title">Industry Integration</div>
-            <div class="feature-description">Practice on real-world datasets from leading companies, work with live APIs, and build projects that directly translate to professional success.</div>
-        </div>
-        <div class="feature-card">
-            <div class="feature-icon">🚀</div>
-            <div class="feature-title">Career Acceleration</div>
-            <div class="feature-description">Get matched with job opportunities, receive interview prep, and showcase your certified skills to our network of 500+ hiring partners worldwide.</div>
+            <div class="feature-icon">🏅</div>
+            <div class="feature-title">Progress & Motivation</div>
+            <div class="feature-description">
+                Track your improvement, celebrate your wins, and unlock achievements as you level up your SQL skills. Stay motivated and see your growth!
+            </div>
         </div>
     </div>
     """, unsafe_allow_html=True)
