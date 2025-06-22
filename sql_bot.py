@@ -76,8 +76,8 @@ st.markdown("""
     position: absolute;
     top: 20px;
     right: 20px;
-    width: 80px;
-    height: 80px;
+    width: 40px;
+    height: 40px;
     display: flex;
     align-items: center;
     justify-content: center;
