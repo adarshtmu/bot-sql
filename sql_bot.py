@@ -147,6 +147,32 @@ st.markdown("""
 .lock-overlay.unlocking {
     animation: unlockAnimation 0.5s ease forwards;
 }
+
+.certificate-icon {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.certificate-svg-wrap {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.certificate-helper-text {
+    font-size: 0.65rem;      /* Make it extra small */
+    color: #888;
+    margin-top: 3px;
+    text-align: center;
+    line-height: 1.1;
+    font-family: inherit;
+    font-weight: 400;
+    letter-spacing: 0.05em;
+    white-space: nowrap;
+}
 </style>
 """, unsafe_allow_html=True)
 # --- Set up Gemini API ---
@@ -1449,12 +1475,13 @@ elif st.session_state.quiz_started and not st.session_state.quiz_completed:
               <path d="M18 28 v6 M18 34 l-2 -2 M18 34 l2 -2" stroke="#c9a200" stroke-width="1.5" stroke-linecap="round"/>
               <path d="M14 26 l-3 5 M22 26 l3 5" stroke="#c9a200" stroke-width="1.5" stroke-linecap="round"/>
             </svg>
-            <div class="lock-overlay {('unlocked' if is_certificate_unlocked else 'locked')}">🔒</div>
+            <div class="lock-overlay {'unlocked' if is_certificate_unlocked else 'locked'}">🔒</div>
         </div>
         <div class="certificate-helper-text">unlock your certificate</div>
-        <div class="certificate-count">{correct_answers}/5</div>
     </div>
-    """, unsafe_allow_html=True)
+    <div class="certificate-count">{correct_answers}/5</div>
+</div>
+""", unsafe_allow_html=True)
         
     relevant_tables = question_data["relevant_tables"]
     if relevant_tables:
