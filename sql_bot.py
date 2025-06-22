@@ -133,7 +133,7 @@ st.markdown("""
     color: #fff;
     font-size: 6px; /* Optional: Slightly bigger for better balance */
     padding: 2px 6px;
-    border-radius: 10px;
+    border-radius: 8px;
     border: 2px solid #fff;
     box-shadow: 0 2px 4px rgba(0,0,0,0.2);
 }
