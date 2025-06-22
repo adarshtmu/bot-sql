@@ -102,8 +102,8 @@ st.markdown("""
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    width: 14px;    /* Reduced from 24px */
-    height: 14px;   /* Reduced from 24px */
+    width: 28px;    /* Reduced from 24px */
+    height: 28px;   /* Reduced from 24px */
     font-size: 10px; /* Make lock emoji smaller */
     background: rgba(0, 0, 0, 0.8);
     border-radius: 30%;
