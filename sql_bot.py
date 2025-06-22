@@ -70,46 +70,45 @@ hide_streamlit_style = """
 """
 st.markdown(hide_streamlit_style, unsafe_allow_html=True)
 
-    st.markdown("""
-    <style>
-    .certificate-lock {
-        position: absolute;
-        top: 20px;
-        right: 20px;
-        font-size: 24px;
-        background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05));
-        backdrop-filter: blur(10px);
-        border-radius: 50%;
-        width: 48px;
-        height: 48px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-        transition: all 0.3s ease;
-    }
-    .certificate-lock.locked {
-        color: #dc3545;
-        border: 2px solid #dc3545;
-        animation: lockPulse 2s infinite;
-    }
-    .certificate-lock.unlocked {
-        color: #28a745;
-        border: 2px solid #28a745;
-        animation: unlockCelebrate 1s ease;
-    }
-    @keyframes lockPulse {
-        0%, 100% { transform: scale(1); }
-        50% { transform: scale(1.1); }
-    }
-    @keyframes unlockCelebrate {
-        0% { transform: scale(0.5) rotate(-15deg); opacity: 0; }
-        50% { transform: scale(1.2) rotate(15deg); }
-        100% { transform: scale(1) rotate(0deg); opacity: 1; }
-    }
-    </style>
-    """, unsafe_allow_html=True)
-
+st.markdown("""
+<style>
+.certificate-lock {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    font-size: 24px;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05));
+    backdrop-filter: blur(10px);
+    border-radius: 50%;
+    width: 48px;
+    height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+}
+.certificate-lock.locked {
+    color: #dc3545;
+    border: 2px solid #dc3545;
+    animation: lockPulse 2s infinite;
+}
+.certificate-lock.unlocked {
+    color: #28a745;
+    border: 2px solid #28a745;
+    animation: unlockCelebrate 1s ease;
+}
+@keyframes lockPulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+}
+@keyframes unlockCelebrate {
+    0% { transform: scale(0.5) rotate(-15deg); opacity: 0; }
+    50% { transform: scale(1.2) rotate(15deg); }
+    100% { transform: scale(1) rotate(0deg); opacity: 1; }
+}
+</style>
+""", unsafe_allow_html=True)
 
 # --- Set up Gemini API ---
 gemini_api_key = "AIzaSyAfzl_66GZsgaYjAM7cT2djVCBCAr86t2k"  # Replace with your Gemini API Key
