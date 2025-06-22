@@ -1012,6 +1012,7 @@ if not st.session_state.quiz_started:
     }
     
     .steps-container::before {
+        display: none !important;
         content: '';
         position: absolute;
         top: 50%; left: 5%; right: 5%;
