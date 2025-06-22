@@ -78,44 +78,78 @@ st.markdown("""
     right: 20px;
     width: 48px;
     height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     z-index: 10;
 }
+
 .certificate-icon {
-    font-size: 38px;
-    color: #FFD700;
-    filter: drop-shadow(0 2px 8px #fff99b);
-    position: absolute;
-    top: 0; left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #ffd700 0%, #ffed4a 100%);
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(255, 215, 0, 0.3);
+    position: relative;
 }
+
+.certificate-icon::before {
+    content: '📜';  /* Certificate emoji */
+    font-size: 28px;
+    filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));
+}
+
 .lock-overlay {
-    font-size: 26px;
-    color: #dc3545;
     position: absolute;
-    top: 10px; left: 12px;
-    background: rgba(255,255,255,0.85);
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 24px;
+    height: 24px;
+    background: rgba(0, 0, 0, 0.8);
     border-radius: 50%;
-    padding: 2px 4px 2px 4px;
-    box-shadow: 0 2px 8px #fff4f4;
-    transition: opacity 0.4s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+    border: 2px solid #fff;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.3);
 }
-.lock-overlay.unlocked {
-    opacity: 0;
-    transition: opacity 0.5s;
-}
+
 .lock-overlay.locked {
     opacity: 1;
-    transition: opacity 0.5s;
+    transform: translate(-50%, -50%) scale(1);
 }
+
+.lock-overlay.unlocked {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0);
+}
+
 .certificate-count {
     position: absolute;
-    bottom: -16px;
-    right: -8px;
-    font-size: 13px;
+    bottom: -10px;
+    right: -10px;
     background: #222;
     color: #fff;
-    border-radius: 8px;
-    padding: 2px 7px;
-    opacity: 0.85;
+    font-size: 12px;
+    padding: 2px 8px;
+    border-radius: 10px;
+    border: 2px solid #fff;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
+@keyframes unlockAnimation {
+    0% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+    50% { transform: translate(-50%, -50%) scale(1.2); opacity: 0.5; }
+    100% { transform: translate(-50%, -50%) scale(0); opacity: 0; }
+}
+
+.lock-overlay.unlocking {
+    animation: unlockAnimation 0.5s ease forwards;
 }
 </style>
 """, unsafe_allow_html=True)
@@ -1404,14 +1438,16 @@ elif st.session_state.quiz_started and not st.session_state.quiz_completed:
     # Calculate number of correct answers
      # Unlock only when 3 or more questions are correct
     
+# After displaying the question
     correct_answers = sum(1 for ans in st.session_state.user_answers if ans.get('is_correct', False))
     is_certificate_unlocked = correct_answers >= 3
     
     st.markdown(f"""
     <div class="certificate-container">
-      <span class="certificate-icon">🎓</span>
-      <span class="lock-overlay {'unlocked' if is_certificate_unlocked else 'locked'}">🔒</span>
-      <span class="certificate-count">{correct_answers}/5</span>
+        <div class="certificate-icon">
+            <div class="lock-overlay {('unlocked' if is_certificate_unlocked else 'locked')}">🔒</div>
+        </div>
+        <div class="certificate-count">{correct_answers}/5</div>
     </div>
     """, unsafe_allow_html=True)
         
@@ -1953,10 +1989,13 @@ elif st.session_state.quiz_completed:
         is_certificate_unlocked = correct_answers >= 3
     
         st.markdown(f"""
-        <div class="certificate-container" style="position: relative; margin: 0 auto 2rem auto;">
-          <span class="certificate-icon">🎓</span>
-          <span class="lock-overlay {'unlocked' if is_certificate_unlocked else 'locked'}">🔒</span>
-          <span class="certificate-count">{correct_answers}/5</span>
+        <div style="text-align: center; margin-bottom: 2rem;">
+            <div class="certificate-container" style="position: relative; display: inline-block; margin: 0 auto;">
+                <div class="certificate-icon" style="transform: scale(1.5);">
+                    <div class="lock-overlay {('unlocked' if is_certificate_unlocked else 'locked')}">🔒</div>
+                </div>
+                <div class="certificate-count">{correct_answers}/5</div>
+            </div>
         </div>
         """, unsafe_allow_html=True)
     
@@ -1968,7 +2007,7 @@ elif st.session_state.quiz_completed:
                     Congratulations! You've correctly answered 3 or more questions and earned your certificate.
                 </p>
                 <a href="https://superprofile.bio/vp/corporate-bhaiya-sql-page" target="_blank" class="certificate-btn">
-                    🎓 Claim Your Certificate
+                    📜 Claim Your Certificate
                 </a>
             </div>
             """, unsafe_allow_html=True)
@@ -1976,7 +2015,7 @@ elif st.session_state.quiz_completed:
             questions_needed = 3 - correct_answers
             st.markdown(f"""
             <div class="retry-section">
-                <h3 style='color:#2c3e50; margin-bottom: 1rem;'>📚 Certificate Locked</h3>
+                <h3 style='color:#2c3e50; margin-bottom: 1rem;'>📜 Certificate Locked</h3>
                 <p style='color:#5d6d7e; font-size: 1rem; margin-bottom: 1.5rem;'>
                     You need {questions_needed} more correct {'question' if questions_needed == 1 else 'questions'} to unlock your certificate. Keep going!
                 </p>
@@ -1985,7 +2024,6 @@ elif st.session_state.quiz_completed:
                 </a>
             </div>
             """, unsafe_allow_html=True)
-    
     # def display_question_summary(user_answers):
     #     """Display question summary with advanced styling"""
     #     st.markdown("""
