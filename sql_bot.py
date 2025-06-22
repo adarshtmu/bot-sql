@@ -1470,8 +1470,10 @@ elif st.session_state.quiz_started and not st.session_state.quiz_completed:
     
     st.markdown(f"""
     <div class="certificate-container">
-        <div class="certificate-icon">
-            <div class="lock-overlay {('unlocked' if is_certificate_unlocked else 'locked')}">🔒</div>
+        <div class="certificate-icon" style="background: none; box-shadow: none;">
+            {"<img src='https://www.svgrepo.com/show/502556/certificate-award.svg' width='48' height='48' style='display:block;' />" if is_certificate_unlocked else ""}
+            <div class="lock-overlay {'unlocked' if is_certificate_unlocked else 'locked'}" style="{ 'display:none;' if is_certificate_unlocked else ''}">🔒</div>
+            {"" if is_certificate_unlocked else "<div style='font-size:30px;position:absolute;top:8px;left:8px;'>📜</div>"}
         </div>
         <div class="certificate-count">{correct_answers}/5</div>
     </div>
