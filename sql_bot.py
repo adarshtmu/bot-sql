@@ -1193,7 +1193,25 @@ if not st.session_state.quiz_started:
     # Create three columns, use the center one for your button
     col1, col2, col3 = st.columns([1, 2, 1])
     with col2:
-        if st.button("🚀 Start Your SQL Practice", key="start_quiz", use_container_width=True):
+        # Advanced button as HTML with click detection hack
+        button_html = """
+        <button class="advanced-cta-btn" id="start-sql-btn">
+            <span class="icon">🚀</span>Start Your SQL Journey
+        </button>
+        <script>
+        // Streamlit hack: send value to Streamlit on click
+        const btn = window.parent.document.getElementById('start-sql-btn');
+        if (btn) {
+            btn.onclick = function() {
+                window.parent.postMessage({isStreamlitMessage: true, type: 'streamlit:setComponentValue', value: true}, '*');
+            };
+        }
+        </script>
+        """
+        # Use a Streamlit component to listen for the button click value
+        import streamlit.components.v1 as components
+        clicked = components.html(button_html, height=100)
+        if clicked:
             st.session_state.quiz_started = True
             st.session_state.user_answers = []
             st.session_state.current_question = 0
