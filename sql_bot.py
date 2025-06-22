@@ -83,25 +83,24 @@ st.markdown("""
     justify-content: center;
     z-index: 10;
 }
-
 .certificate-icon {
     width: 100%;
     height: 100%;
     display: flex;
     align-items: center;
     justify-content: center;
-    background: linear-gradient(135deg, #ffd700 0%, #ffed4a 100%);
+    background: transparent;
     border-radius: 8px;
     box-shadow: 0 4px 12px rgba(255, 215, 0, 0.3);
     position: relative;
+    overflow: hidden;
 }
-
-.certificate-icon::before {
-    content: '📜';  /* Certificate emoji */
-    font-size: 28px;
-    filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));
+.certificate-icon img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    display: block;
 }
-
 .lock-overlay {
     position: absolute;
     top: 50%;
@@ -118,17 +117,8 @@ st.markdown("""
     border: 2px solid #fff;
     box-shadow: 0 2px 8px rgba(0,0,0,0.3);
 }
-
-.lock-overlay.locked {
-    opacity: 1;
-    transform: translate(-50%, -50%) scale(1);
-}
-
-.lock-overlay.unlocked {
-    opacity: 0;
-    transform: translate(-50%, -50%) scale(0);
-}
-
+.lock-overlay.locked { opacity: 1; transform: translate(-50%, -50%) scale(1);}
+.lock-overlay.unlocked { opacity: 0; transform: translate(-50%, -50%) scale(0);}
 .certificate-count {
     position: absolute;
     bottom: -10px;
@@ -141,18 +131,28 @@ st.markdown("""
     border: 2px solid #fff;
     box-shadow: 0 2px 4px rgba(0,0,0,0.2);
 }
-
 @keyframes unlockAnimation {
     0% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
     50% { transform: translate(-50%, -50%) scale(1.2); opacity: 0.5; }
     100% { transform: translate(-50%, -50%) scale(0); opacity: 0; }
 }
-
 .lock-overlay.unlocking {
     animation: unlockAnimation 0.5s ease forwards;
 }
 </style>
 """, unsafe_allow_html=True)
+
+# Render the certificate icon (replace 'certificate.png' with your image path if needed)
+st.markdown(
+    """
+    <div class="certificate-container">
+        <div class="certificate-icon">
+            <img src="certificate.png" alt="Certificate" />
+        </div>
+    </div>
+    """,
+    unsafe_allow_html=True,
+)
 # --- Set up Gemini API ---
 gemini_api_key = "AIzaSyAfzl_66GZsgaYjAM7cT2djVCBCAr86t2k"  # Replace with your Gemini API Key
 
