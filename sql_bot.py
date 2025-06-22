@@ -1537,37 +1537,32 @@ elif st.session_state.quiz_started and not st.session_state.quiz_completed:
                         <feColorMatrix type="matrix" values="0 0 0 0 1   0 0 0 0 0.8   0 0 0 0 0   0 0 0 1 0"/>
                     </filter>
                 </defs>
-                
                 <!-- Shadow beneath -->
                 <ellipse cx="27" cy="44" rx="15" ry="4" fill="#000" opacity="0.18"/>
-                
                 <!-- Main certificate -->
                 <rect x="10" y="14" width="34" height="26" rx="2" fill="url(#paperGrad)" filter="url(#glow)"/>
-                
                 <!-- Decorative elements -->
                 <rect x="14" y="20" width="26" height="2" rx="1" fill="#e0e0e0" opacity="0.8"/>
                 <rect x="14" y="24" width="20" height="2" rx="1" fill="#d0d0d0" opacity="0.7"/>
                 <rect x="14" y="28" width="16" height="2" rx="1" fill="#c0c0c0" opacity="0.6"/>
-                
                 <!-- Enhanced 3D Seal -->
                 <circle cx="27" cy="34" r="6" fill="url(#sealGrad)"/>
                 <path d="M27 30 L28 32 L30 32.5 L28.5 34 L29 36 L27 35 L25 36 L25.5 34 L24 32.5 L26 32 Z" 
                       fill="#ffffff" opacity="0.8"/>
-                
                 <!-- Ribbon -->
                 <path d="M22 38 L27 42 L32 38" fill="#ff4444" stroke="#cc0000"/>
                 <path d="M22 38 L24 44 L27 42 L30 44 L32 38" fill="#ff6666" stroke="#cc0000"/>
             </svg>
-            
-            <!-- Particle effects -->
+    
+            <!-- Particle effects (HTML, outside SVG) -->
             <div class="particles">
                 <div class="particle" style="top: 20%; left: 20%;"></div>
                 <div class="particle" style="top: 20%; right: 20%;"></div>
                 <div class="particle" style="bottom: 20%; left: 20%;"></div>
                 <div class="particle" style="bottom: 20%; right: 20%;"></div>
             </div>
-            
-            <!-- Lock overlay -->
+    
+            <!-- Lock overlay (HTML, outside SVG) -->
             <div class="lock-overlay {('unlocked' if is_certificate_unlocked else 'locked')}">
                 {('🎉' if is_certificate_unlocked else '🔒')}
             </div>
