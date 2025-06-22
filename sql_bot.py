@@ -1437,9 +1437,8 @@ elif st.session_state.quiz_started and not st.session_state.quiz_completed:
 # After displaying the question
     correct_answers = sum(1 for ans in st.session_state.user_answers if ans.get('is_correct', False))
     is_certificate_unlocked = correct_answers >= 3
-    
     st.markdown(f"""
-    <div class="certificate-container" style="position: relative; display: inline-block;float: right;">
+    <div class="certificate-container" style="position: relative; display: inline-block; float: right;">
         <div class="certificate-icon" style="position: relative; display: inline-block;">
             <!-- Overlay text on icon -->
             <span style="
@@ -1457,8 +1456,9 @@ elif st.session_state.quiz_started and not st.session_state.quiz_completed:
                 z-index: 2;
                 pointer-events: none;
                 ">certificate</span>
-            <!-- Advanced Certificate SVG Icon with Ribbon, Gradient, and Seal -->
-            <svg width="70" height="70" viewBox="0 0 54 54" fill="none">
+            <!-- Certificate SVG Icon with full icon shadow -->
+            <svg width="70" height="70" viewBox="0 0 54 54" fill="none"
+                 style="filter: drop-shadow(0px 2px 6px rgba(191,164,0,0.35));">
               <defs>
                 <radialGradient id="goldRadial" cx="50%" cy="40%" r="70%">
                   <stop offset="0%" stop-color="#fffbe5"/>
@@ -1474,12 +1474,9 @@ elif st.session_state.quiz_started and not st.session_state.quiz_completed:
                   <stop offset="0%" stop-color="#ffe268"/>
                   <stop offset="100%" stop-color="#c49000"/>
                 </radialGradient>
-                <filter id="shadow" x="10%" y="10%" width="120%" height="120%">
-                    <feDropShadow dx="0" dy="2" stdDeviation="3" flood-color="#bfa400" flood-opacity="0.35"/>
-                </filter>
               </defs>
-              <!-- Certificate Body with gold gradient and shadow -->
-              <rect x="8" y="12" width="38" height="28" rx="5" fill="url(#goldRadial)" stroke="#e3c04f" stroke-width="2.2" filter="url(#shadow)"/>
+              <!-- Certificate Body with gold gradient -->
+              <rect x="8" y="12" width="38" height="28" rx="5" fill="url(#goldRadial)" stroke="#e3c04f" stroke-width="2.2"/>
               <!-- Inner Text Lines (simulate text) -->
               <rect x="15" y="20" width="24" height="3" rx="1.3" fill="#fffde2" opacity="0.8"/>
               <rect x="15" y="25" width="18" height="2.2" rx="1.1" fill="#fffde2" opacity="0.7"/>
