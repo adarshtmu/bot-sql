@@ -134,7 +134,7 @@ st.markdown("""
     font-size: 6px; /* Optional: Slightly bigger for better balance */
     padding: 2px 6px;
     border-radius: 6px;
-    border: 2px solid #fff;
+    border: 1px solid #fff;
     box-shadow: 0 2px 4px rgba(0,0,0,0.2);
 }
 
