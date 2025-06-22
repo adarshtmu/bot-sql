@@ -1439,8 +1439,25 @@ elif st.session_state.quiz_started and not st.session_state.quiz_completed:
     is_certificate_unlocked = correct_answers >= 3
     
     st.markdown(f"""
-    <div class="certificate-container">
-        <div class="certificate-icon">
+    <div class="certificate-container" style="position: relative; display: inline-block;">
+        <div class="certificate-icon" style="position: relative; display: inline-block;">
+            <!-- Overlay text on icon -->
+            <span style="
+                position: absolute;
+                top: 4px;
+                left: 50%;
+                transform: translateX(-50%);
+                background: rgba(0,0,0,0.45);
+                color: #fff;
+                font-size: 10px;
+                font-family: Arial, sans-serif;
+                letter-spacing: 0.5px;
+                padding: 1px 6px 0 6px;
+                border-radius: 6px;
+                z-index: 2;
+                pointer-events: none;
+                ">certificate</span>
+            <!-- Advanced Certificate SVG Icon with Ribbon, Gradient, and Seal -->
             <svg width="70" height="70" viewBox="0 0 54 54" fill="none">
               <defs>
                 <radialGradient id="goldRadial" cx="50%" cy="40%" r="70%">
@@ -1463,12 +1480,10 @@ elif st.session_state.quiz_started and not st.session_state.quiz_completed:
               </defs>
               <!-- Certificate Body with gold gradient and shadow -->
               <rect x="8" y="12" width="38" height="28" rx="5" fill="url(#goldRadial)" stroke="#e3c04f" stroke-width="2.2" filter="url(#shadow)"/>
-              <!-- "certificate" text on icon -->
-              <text x="27" y="22" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" font-size="5" fill="#fff" opacity="0.9">certificate</text>
               <!-- Inner Text Lines (simulate text) -->
-              <rect x="15" y="26" width="24" height="3" rx="1.3" fill="#fffde2" opacity="0.8"/>
-              <rect x="15" y="31" width="18" height="2.2" rx="1.1" fill="#fffde2" opacity="0.7"/>
-              <rect x="15" y="34" width="13" height="2.2" rx="1.1" fill="#fffde2" opacity="0.6"/>
+              <rect x="15" y="20" width="24" height="3" rx="1.3" fill="#fffde2" opacity="0.8"/>
+              <rect x="15" y="25" width="18" height="2.2" rx="1.1" fill="#fffde2" opacity="0.7"/>
+              <rect x="15" y="29" width="13" height="2.2" rx="1.1" fill="#fffde2" opacity="0.6"/>
               <!-- Ribbon -->
               <path d="M13 40 l3 8 9-5 9 5 3-8" fill="url(#redRibbon)" stroke="#a30000" stroke-width="1.2"/>
               <!-- Seal -->
