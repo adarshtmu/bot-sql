@@ -90,7 +90,7 @@ st.markdown("""
     display: flex;
     align-items: center;
     justify-content: center;
-    background: linear-gradient(135deg, #ffd700 0%, #ffed4a 100%);
+    background: linear-gradient(135deg, #a18cd1 0%, #fbc2eb 100%);
     border-radius: 8px;
     box-shadow: 0 4px 12px rgba(255, 215, 0, 0.3);
     position: relative;
