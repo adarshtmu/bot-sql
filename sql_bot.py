@@ -72,17 +72,17 @@ st.markdown(hide_streamlit_style, unsafe_allow_html=True)
 
 st.markdown("""
 <style>
-.certificate-container {
-    position: absolute;
-    top: 20px;
-    right: 20px;
-    width: 40px;
-    height: 40px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 10;
-}
+# .certificate-container {
+#     position: absolute;
+#     top: 20px;
+#     right: 20px;
+#     width: 40px;
+#     height: 40px;
+#     display: flex;
+#     align-items: center;
+#     justify-content: center;
+#     z-index: 10;
+# }
 
 .certificate-icon {
     width: 100%;
