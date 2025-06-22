@@ -1449,11 +1449,12 @@ elif st.session_state.quiz_started and not st.session_state.quiz_completed:
               <path d="M18 28 v6 M18 34 l-2 -2 M18 34 l2 -2" stroke="#c9a200" stroke-width="1.5" stroke-linecap="round"/>
               <path d="M14 26 l-3 5 M22 26 l3 5" stroke="#c9a200" stroke-width="1.5" stroke-linecap="round"/>
             </svg>
-            <div class="lock-overlay {('unlocked' if is_certificate_unlocked else 'locked')}">🔒</div>
+            <div class="certificate-count">{correct_answers}/5</div>
+            <div style="font-size: 12px; color: #888; text-align: center; margin-top: 4px;">
+                Unlock your certificate
+            </div>
         </div>
-        <div class="certificate-count">{correct_answers}/5</div>
-    </div>
-    """, unsafe_allow_html=True)
+        """, unsafe_allow_html=True)
         
     relevant_tables = question_data["relevant_tables"]
     if relevant_tables:
