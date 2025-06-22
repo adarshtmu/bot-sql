@@ -1451,12 +1451,12 @@ elif st.session_state.quiz_started and not st.session_state.quiz_completed:
             </svg>
             <div class="lock-overlay {('unlocked' if is_certificate_unlocked else 'locked')}">🔒</div>
         </div>
-        <div class="certificate-count">{correct_answers}/5</div>
-    <div style="font-size: 12px; color: #888; text-align: center; margin-top: 4px;">
-        Unlock your certificate
+        <div style="font-size: 11px; color: #aaa; margin-top: 6px; text-align: center; line-height: 1.1;">
+            Unlock<br>your<br>certificate
+        </div>
+        <div class="certificate-count" style="margin-top: 6px;">{correct_answers}/5</div>
     </div>
-</div>
-""", unsafe_allow_html=True)
+    """, unsafe_allow_html=True)
 
         
     relevant_tables = question_data["relevant_tables"]
