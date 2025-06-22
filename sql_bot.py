@@ -73,14 +73,15 @@ st.markdown(hide_streamlit_style, unsafe_allow_html=True)
 st.markdown("""
 <style>
 .certificate-container {
-    position: absolute;
-    top: 20px;
-    right: 20px;
-    width: 60px;
+    position: relative;  /* changed from absolute to relative for badge positioning */
+    margin-top: 20px;
+    margin-right: 20px;
     display: flex;
     flex-direction: column;
     align-items: center;
     z-index: 10;
+    width: auto; /* let content decide width */
+    min-width: 60px;
 }
 .certificate-icon {
     display: flex;
@@ -95,27 +96,29 @@ st.markdown("""
     justify-content: center;
 }
 .certificate-helper-text {
-    font-size: 0.55rem;
+    font-size: 0.50rem;
     color: #888;
-    margin-top: 2px;
+    margin-top: 4px;
     text-align: center;
     line-height: 1.1;
     font-family: inherit;
     font-weight: 400;
     letter-spacing: 0.05em;
-    white-space: nowrap;
+    word-break: break-word;
+    max-width: 70px;
 }
 .certificate-count {
     position: absolute;
-    top: -15px;
-    right: -15px;
+    top: -10px;
+    right: -18px;
     background: #222;
     color: #fff;
-    font-size: 14px;
-    padding: 2px 10px;
+    font-size: 11px;
+    padding: 2px 8px;
     border-radius: 10px;
     border: 2px solid #fff;
     box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    z-index: 2;
 }
 </style>
 """, unsafe_allow_html=True)
