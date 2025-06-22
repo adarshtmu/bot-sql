@@ -72,25 +72,32 @@ st.markdown(hide_streamlit_style, unsafe_allow_html=True)
 
 st.markdown("""
 <style>
-.certificate-stack {
+.certificate-container {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    width: 48px;
+    height: 48px;
     display: flex;
-    flex-direction: column;
     align-items: center;
-    justify-content: flex-start;
-    margin: 0 auto;
-    width: 90px;
+    justify-content: center;
+    z-index: 10;
 }
+
 .certificate-icon {
-    position: relative;
+    width: 100%;
+    height: 100%;
     display: flex;
     align-items: center;
     justify-content: center;
     background: linear-gradient(135deg, #ffd700 0%, #ffed4a 100%);
     border-radius: 8px;
     box-shadow: 0 4px 12px rgba(255, 215, 0, 0.3);
-    width: 48px;
-    height: 48px;
+    position: relative;
 }
+
+
+
 .lock-overlay {
     position: absolute;
     top: 50%;
@@ -103,38 +110,45 @@ st.markdown("""
     display: flex;
     align-items: center;
     justify-content: center;
+    transition: all 0.3s ease;
     border: 2px solid #fff;
     box-shadow: 0 2px 8px rgba(0,0,0,0.3);
 }
-.lock-overlay.unlocked {
-    opacity: 0;
-}
+
 .lock-overlay.locked {
     opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
 }
-.certificate-label {
-    font-size: 11px;
-    color: #aaa;
-    margin-top: 6px;
-    text-align: center;
-    line-height: 1.1;
+
+.lock-overlay.unlocked {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0);
 }
+
 .certificate-count {
-    margin-top: 6px;
+    position: absolute;
+    bottom: -10px;
+    right: -10px;
     background: #222;
     color: #fff;
-    font-size: 13px;
-    padding: 2px 10px;
+    font-size: 12px;
+    padding: 2px 8px;
     border-radius: 10px;
     border: 2px solid #fff;
     box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-    text-align: center;
-    display: inline-block;
+}
+
+@keyframes unlockAnimation {
+    0% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+    50% { transform: translate(-50%, -50%) scale(1.2); opacity: 0.5; }
+    100% { transform: translate(-50%, -50%) scale(0); opacity: 0; }
+}
+
+.lock-overlay.unlocking {
+    animation: unlockAnimation 0.5s ease forwards;
 }
 </style>
 """, unsafe_allow_html=True)
-
-
 # --- Set up Gemini API ---
 gemini_api_key = "AIzaSyAfzl_66GZsgaYjAM7cT2djVCBCAr86t2k"  # Replace with your Gemini API Key
 
@@ -1423,11 +1437,11 @@ elif st.session_state.quiz_started and not st.session_state.quiz_completed:
 # After displaying the question
     correct_answers = sum(1 for ans in st.session_state.user_answers if ans.get('is_correct', False))
     is_certificate_unlocked = correct_answers >= 3
-
+    
     st.markdown(f"""
-    <div class="certificate-stack">
+    <div class="certificate-container">
         <div class="certificate-icon">
-            <!-- SVG icon -->
+            <!-- Advanced Certificate SVG Icon -->
             <svg width="36" height="36" viewBox="0 0 36 36" fill="none">
               <rect x="4" y="6" width="28" height="24" rx="4" fill="#fff8e1" stroke="#ffd700" stroke-width="2"/>
               <rect x="8" y="10" width="20" height="10" rx="2" fill="#fff" stroke="#ffd700" stroke-width="1"/>
@@ -1437,15 +1451,9 @@ elif st.session_state.quiz_started and not st.session_state.quiz_completed:
             </svg>
             <div class="lock-overlay {('unlocked' if is_certificate_unlocked else 'locked')}">🔒</div>
         </div>
-        <div class="certificate-label">
-            Unlock your certificate
-        </div>
         <div class="certificate-count">{correct_answers}/5</div>
     </div>
     """, unsafe_allow_html=True)
-</style>
-""", unsafe_allow_html=True)
-
         
     relevant_tables = question_data["relevant_tables"]
     if relevant_tables:
