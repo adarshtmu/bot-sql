@@ -69,41 +69,47 @@ hide_streamlit_style = """
     </style>
 """
 st.markdown(hide_streamlit_style, unsafe_allow_html=True)
-certificate_svg = """
+certificate_svg = '''
 <svg width="48" height="48" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
- <rect x="6" y="10" width="52" height="38" rx="4" fill="#fffbe6" stroke="#333" stroke-width="2"/>
- <rect x="12" y="16" width="40" height="26" rx="2" fill="#f9e79f" stroke="#d4af37" stroke-width="1.5"/>
+ <rect x="8" y="12" width="48" height="32" rx="5" fill="#fffbe6" stroke="#d4af37" stroke-width="2"/>
+ <rect x="14" y="18" width="36" height="20" rx="3" fill="#f9e79f" stroke="#d4af37" stroke-width="1.5"/>
  <rect x="18" y="24" width="28" height="4" rx="2" fill="#fff" />
  <rect x="18" y="30" width="20" height="3" rx="1.5" fill="#fff" />
- <circle cx="50" cy="38" r="5" fill="#ffd700" stroke="#d4af37" stroke-width="1.5"/>
- <path d="M50 43 L52 47 L48 47 Z" fill="#d4af37"/>
- <path d="M50 43 L51.5 48 L48.5 48 Z" fill="#ffd700"/>
+ <circle cx="48" cy="36" r="5" fill="#ffd700" stroke="#d4af37" stroke-width="1.5"/>
+ <path d="M48 41 L50 45 L46 45 Z" fill="#d4af37"/>
+ <path d="M48 41 L49.5 46 L46.5 46 Z" fill="#ffd700"/>
 </svg>
-"""
+'''
 st.markdown("""
 <style>
 .certificate-container {
     position: absolute;
     top: 20px;
     right: 20px;
-    width: 48px;
-    height: 48px;
-    z-index: 10;
-}
-.lock-overlay {
-    position: absolute;
-    top: 12px;
-    left: 12px;
-    width: 24px;
-    height: 24px;
+    width: 56px;
+    height: 56px;
     display: flex;
     align-items: center;
     justify-content: center;
+    z-index: 10;
+}
+.certificate-svg-holder {
+    position: relative;
+    width: 48px;
+    height: 48px;
+}
+.lock-overlay {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 28px;
+    color: #212121;
+    background: rgba(255,255,255,0.92);
     border-radius: 50%;
-    background: rgba(0,0,0,0.8);
-    color: #fff;
-    font-size: 18px;
-    transition: opacity 0.3s;
+    padding: 2px 4px 2px 4px;
+    box-shadow: 0 2px 8px #f5e1bd;
+    transition: opacity 0.5s;
     z-index: 2;
 }
 .lock-overlay.unlocked {
@@ -115,15 +121,14 @@ st.markdown("""
 }
 .certificate-count {
     position: absolute;
-    bottom: -10px;
+    bottom: -14px;
     right: -10px;
     background: #222;
     color: #fff;
-    font-size: 12px;
+    font-size: 13px;
     padding: 2px 8px;
     border-radius: 10px;
-    border: 2px solid #fff;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
     z-index: 3;
 }
 </style>
@@ -1413,17 +1418,17 @@ elif st.session_state.quiz_started and not st.session_state.quiz_completed:
     # Calculate number of correct answers
      # Unlock only when 3 or more questions are correct
     
-# After displaying the question
+    # After displaying the question
     correct_answers = sum(1 for ans in st.session_state.user_answers if ans.get('is_correct', False))
     is_certificate_unlocked = correct_answers >= 3
     
     st.markdown(f"""
     <div class="certificate-container">
-      <div style="position:relative;">
+      <div class="certificate-svg-holder">
         {certificate_svg}
-        <div class="lock-overlay {'unlocked' if is_certificate_unlocked else 'locked'}">🔒</div>
-        <div class="certificate-count">{correct_answers}/5</div>
+        <span class="lock-overlay {'unlocked' if is_certificate_unlocked else 'locked'}">🔒</span>
       </div>
+      <div class="certificate-count">{correct_answers}/5</div>
     </div>
     """, unsafe_allow_html=True)
         
