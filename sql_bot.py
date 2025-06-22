@@ -854,18 +854,19 @@ if not st.session_state.quiz_started:
         text-transform: uppercase;
     }
     
-    /* Advanced CTA Button */
+
+    /* Updated CTA Button with yellow highlight */
     .cta-button {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
-        color: white;
+        background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%) !important;  /* Yellow to Orange gradient */
+        color: #000000 !important;  /* Black text for better contrast on yellow */
         border: none;
-        padding: 1.5rem 4rem;
+        padding: 2rem 5rem !important;  /* Increased padding for bigger size */
         border-radius: 60px;
-        font-size: 1.4rem;
+        font-size: 1.8rem !important;  /* Larger font size */
         font-weight: 700;
         cursor: pointer;
-        box-shadow: 0 20px 60px rgba(102, 126, 234, 0.4),
-                    0 10px 30px rgba(118, 75, 162, 0.3),
+        box-shadow: 0 20px 60px rgba(255, 215, 0, 0.4),
+                    0 10px 30px rgba(255, 165, 0, 0.3),
                     inset 0 1px 0 rgba(255, 255, 255, 0.3);
         position: relative;
         transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
@@ -878,25 +879,34 @@ if not st.session_state.quiz_started:
     
     .cta-button:hover {
         transform: perspective(1000px) rotateX(0deg) translateY(-10px) scale(1.05);
-        box-shadow: 0 30px 80px rgba(102, 126, 234, 0.5),
-                    0 20px 50px rgba(118, 75, 162, 0.4);
+        box-shadow: 0 30px 80px rgba(255, 215, 0, 0.5),
+                    0 20px 50px rgba(255, 165, 0, 0.4);
+        background: linear-gradient(135deg, #FFE44D 0%, #FFB347 100%) !important;  /* Lighter yellow on hover */
     }
     
     .cta-button:active {
         transform: perspective(1000px) rotateX(5deg) translateY(-5px) scale(1.02);
     }
     
-    .cta-button::before {
-        content: '';
-        position: absolute;
-        top: 0; left: -100%;
-        width: 100%; height: 100%;
-        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
-        transition: left 0.6s;
+    /* Update the button style specifically */
+    .stButton > button {
+        background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%) !important;
+        color: #000000 !important;
+        border-radius: 60px !important;
+        border: none !important;
+        padding: 1.5rem 4rem !important;
+        font-weight: 700 !important;
+        font-size: 1.8rem !important;
+        transition: all 0.3s ease !important;
+        box-shadow: 0 15px 35px rgba(255, 215, 0, 0.4) !important;
+        text-transform: uppercase !important;
+        letter-spacing: 1px !important;
     }
     
-    .cta-button:hover::before {
-        left: 100%;
+    .stButton > button:hover {
+        transform: translateY(-3px) !important;
+        box-shadow: 0 20px 45px rgba(255, 215, 0, 0.5) !important;
+        background: linear-gradient(135deg, #FFE44D 0%, #FFB347 100%) !important;
     }
     
     /* Advanced Feature Cards */
@@ -1166,7 +1176,7 @@ if not st.session_state.quiz_started:
     # Create three columns, use the center one for your button
     col1, col2, col3 = st.columns([1, 2, 1])
     with col2:
-        if st.button("🚀 Start Your SQL Journey", key="start_quiz"):
+        if st.button("🚀 Start Your SQL Journey", key="start_quiz", use_container_width=True):
             st.session_state.quiz_started = True
             st.session_state.user_answers = []
             st.session_state.current_question = 0
