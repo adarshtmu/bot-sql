@@ -1517,57 +1517,30 @@ elif st.session_state.quiz_started and not st.session_state.quiz_completed:
     is_certificate_unlocked = correct_answers >= 3
     
     st.markdown(f"""
-    <div class="certificate-container">
-        <div class="certificate-icon {('unlocked' if is_certificate_unlocked else 'locked')}">
-            <!-- Enhanced 3D Certificate SVG Icon -->
-            <svg width="54" height="54" viewBox="0 0 54 54" fill="none">
-                <defs>
-                    <linearGradient id="paperGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-                        <stop offset="0%" stop-color="#ffffff"/>
-                        <stop offset="45%" stop-color="#f8f8f8"/>
-                        <stop offset="100%" stop-color="#e8e8e8"/>
-                    </linearGradient>
-                    <linearGradient id="sealGrad" x1="30%" y1="20%" x2="70%" y2="80%">
-                        <stop offset="0%" stop-color="#ffd700"/>
-                        <stop offset="50%" stop-color="#ffc800"/>
-                        <stop offset="100%" stop-color="#ffb700"/>
-                    </linearGradient>
-                    <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
-                        <feGaussianBlur in="SourceGraphic" stdDeviation="2"/>
-                        <feColorMatrix type="matrix" values="0 0 0 0 1   0 0 0 0 0.8   0 0 0 0 0   0 0 0 1 0"/>
-                    </filter>
-                </defs>
-                <!-- Shadow beneath -->
-                <ellipse cx="27" cy="44" rx="15" ry="4" fill="#000" opacity="0.18"/>
-                <!-- Main certificate -->
-                <rect x="10" y="14" width="34" height="26" rx="2" fill="url(#paperGrad)" filter="url(#glow)"/>
-                <!-- Decorative elements -->
-                <rect x="14" y="20" width="26" height="2" rx="1" fill="#e0e0e0" opacity="0.8"/>
-                <rect x="14" y="24" width="20" height="2" rx="1" fill="#d0d0d0" opacity="0.7"/>
-                <rect x="14" y="28" width="16" height="2" rx="1" fill="#c0c0c0" opacity="0.6"/>
-                <!-- Enhanced 3D Seal -->
-                <circle cx="27" cy="34" r="6" fill="url(#sealGrad)"/>
-                <path d="M27 30 L28 32 L30 32.5 L28.5 34 L29 36 L27 35 L25 36 L25.5 34 L24 32.5 L26 32 Z" 
-                      fill="#ffffff" opacity="0.8"/>
-                <!-- Ribbon -->
-                <path d="M22 38 L27 42 L32 38" fill="#ff4444" stroke="#cc0000"/>
-                <path d="M22 38 L24 44 L27 42 L30 44 L32 38" fill="#ff6666" stroke="#cc0000"/>
-            </svg>
-    
-            <!-- Particle effects (HTML, outside SVG) -->
-            <div class="particles">
-                <div class="particle" style="top: 20%; left: 20%;"></div>
-                <div class="particle" style="top: 20%; right: 20%;"></div>
-                <div class="particle" style="bottom: 20%; left: 20%;"></div>
-                <div class="particle" style="bottom: 20%; right: 20%;"></div>
-            </div>
-    
-            <!-- Lock overlay (HTML, outside SVG) -->
-            <div class="lock-overlay {('unlocked' if is_certificate_unlocked else 'locked')}">
-                {('🎉' if is_certificate_unlocked else '🔒')}
-            </div>
-        </div>
-        <div class="certificate-count">{correct_answers}/5</div>
+    <div style="position: relative; width: 56px; height: 56px;">
+      <svg width="54" height="54" style="display:block;">
+        <defs>
+          <radialGradient id="gold" cx="50%" cy="40%" r="70%">
+            <stop offset="0%" stop-color="#fffbe5"/>
+            <stop offset="70%" stop-color="#ffd700"/>
+            <stop offset="100%" stop-color="#bfa400"/>
+          </radialGradient>
+        </defs>
+        <ellipse cx="27" cy="44" rx="15" ry="4" fill="#000" opacity="0.18"/>
+        <rect x="10" y="14" width="34" height="26" rx="3" fill="url(#gold)" stroke="#e3c04f" stroke-width="2"/>
+        <circle cx="27" cy="34" r="6" fill="#ffd700"/>
+      </svg>
+      <!-- Particle Dots -->
+      <div style="position:absolute;top:12px;left:12px;width:5px;height:5px;border-radius:50%;background:#fff;opacity:0.7;"></div>
+      <div style="position:absolute;top:14px;right:12px;width:5px;height:5px;border-radius:50%;background:#ffd700;opacity:0.7;"></div>
+      <div style="position:absolute;bottom:10px;left:20px;width:4px;height:4px;border-radius:50%;background:#fffde2;opacity:0.5;"></div>
+      <!-- Lock overlay -->
+      <div style="position:absolute;top:0;left:0;width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:1.7em;pointer-events:none;">
+        {"🎉" if is_certificate_unlocked else "🔒"}
+      </div>
+    </div>
+    <div style="margin-top:6px;display:inline-block;background: #222; color: #fff; font-size: 12px; padding: 2px 8px; border-radius: 10px;">
+      {correct_answers}/5
     </div>
     """, unsafe_allow_html=True)
         
