@@ -1216,7 +1216,29 @@ if not st.session_state.quiz_started:
 
     # --- ENHANCED START BUTTON (REFACTORED) ---
     # Simplified layout for better centering on all devices.
-
+    st.markdown("""
+    <div class="learning-path">
+        <h3>🎯 Your Learning Journey</h3>
+        <div class="steps-container">
+            <div class="step">
+                <div class="step-number">1</div>
+                <div class="step-text">Assessment</div>
+            </div>
+            <div class="step">
+                <div class="step-number">2</div>
+                <div class="step-text">AI Feedback</div>
+            </div>
+            <div class="step">
+                <div class="step-number">3</div>
+                <div class="step-text">Practice</div>
+            </div>
+            <div class="step">
+                <div class="step-number">4</div>
+                <div class="step-text">Certification</div>
+            </div>
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
 
     # --- ADVANCED FEATURES SECTION ---
     # This section was already well-structured for responsiveness.
@@ -1248,29 +1270,7 @@ if not st.session_state.quiz_started:
 
     # --- 3D LEARNING PATH ---
     # This section was also well-structured for responsiveness.
-    st.markdown("""
-    <div class="learning-path">
-        <h3>🎯 Your Learning Journey</h3>
-        <div class="steps-container">
-            <div class="step">
-                <div class="step-number">1</div>
-                <div class="step-text">Assessment</div>
-            </div>
-            <div class="step">
-                <div class="step-number">2</div>
-                <div class="step-text">AI Feedback</div>
-            </div>
-            <div class="step">
-                <div class="step-number">3</div>
-                <div class="step-text">Practice</div>
-            </div>
-            <div class="step">
-                <div class="step-number">4</div>
-                <div class="step-text">Certification</div>
-            </div>
-        </div>
-    </div>
-    """, unsafe_allow_html=True)
+
 
     # --- ENHANCED TESTIMONIAL ---
     st.markdown("""
