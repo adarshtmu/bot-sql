@@ -72,28 +72,32 @@ st.markdown(hide_streamlit_style, unsafe_allow_html=True)
 
 st.markdown("""
 <style>
-/* Enhanced Certificate Container */
 .certificate-container {
-    position: relative;
+    position: absolute;
+    top: 20px;
+    right: 20px;
     width: 48px;
     height: 48px;
-    perspective: 1000px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10;
 }
 
-/* Enhanced Certificate Icon */
 .certificate-icon {
     width: 100%;
     height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #ffd700 0%, #ffed4a 100%);
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(255, 215, 0, 0.3);
     position: relative;
-    transform-style: preserve-3d;
-    transition: transform 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
-.certificate-icon.unlocked {
-    animation: certificateUnlock 1.2s forwards;
-}
 
-/* Enhanced Lock Overlay */
+
 .lock-overlay {
     position: absolute;
     top: 50%;
@@ -101,15 +105,14 @@ st.markdown("""
     transform: translate(-50%, -50%);
     width: 24px;
     height: 24px;
-    background: rgba(0, 0, 0, 0.85);
+    background: rgba(0, 0, 0, 0.8);
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: all 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    transition: all 0.3s ease;
     border: 2px solid #fff;
-    box-shadow: 0 0 20px rgba(255, 215, 0, 0.5);
-    z-index: 10;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.3);
 }
 
 .lock-overlay.locked {
@@ -118,112 +121,31 @@ st.markdown("""
 }
 
 .lock-overlay.unlocked {
-    animation: unlockEffect 1s forwards;
-}
-
-/* Particle Effects */
-.particles {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    pointer-events: none;
     opacity: 0;
+    transform: translate(-50%, -50%) scale(0);
 }
 
-.certificate-icon.unlocked .particles {
-    animation: particleEffect 1.5s ease-out forwards;
-}
-
-/* Count Badge */
 .certificate-count {
     position: absolute;
     bottom: -10px;
     right: -10px;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: white;
+    background: #222;
+    color: #fff;
     font-size: 12px;
     padding: 2px 8px;
     border-radius: 10px;
     border: 2px solid #fff;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
-    z-index: 5;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
 }
 
-/* Glow Effect */
-.certificate-icon::before {
-    content: '';
-    position: absolute;
-    top: -5px;
-    left: -5px;
-    right: -5px;
-    bottom: -5px;
-    background: radial-gradient(circle at center, rgba(255,215,0,0.5) 0%, transparent 70%);
-    opacity: 0;
-    transition: opacity 0.3s ease;
-    pointer-events: none;
-    border-radius: 50%;
+@keyframes unlockAnimation {
+    0% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+    50% { transform: translate(-50%, -50%) scale(1.2); opacity: 0.5; }
+    100% { transform: translate(-50%, -50%) scale(0); opacity: 0; }
 }
 
-.certificate-icon.unlocked::before {
-    animation: glowPulse 2s infinite;
-}
-
-/* Animations */
-@keyframes certificateUnlock {
-    0% { transform: rotate3d(0, 1, 0, 0deg); }
-    50% { transform: rotate3d(0, 1, 0, 180deg) scale(1.2); }
-    100% { transform: rotate3d(0, 1, 0, 360deg) scale(1); }
-}
-
-@keyframes unlockEffect {
-    0% { 
-        transform: translate(-50%, -50%) scale(1);
-        opacity: 1;
-    }
-    50% { 
-        transform: translate(-50%, -50%) scale(1.5);
-        opacity: 0.5;
-    }
-    100% { 
-        transform: translate(-50%, -50%) scale(0);
-        opacity: 0;
-    }
-}
-
-@keyframes particleEffect {
-    0% { 
-        opacity: 1;
-        transform: scale(0);
-    }
-    50% { 
-        opacity: 1;
-        transform: scale(1.2);
-    }
-    100% { 
-        opacity: 0;
-        transform: scale(2);
-    }
-}
-
-@keyframes glowPulse {
-    0% { opacity: 0.3; }
-    50% { opacity: 0.7; }
-    100% { opacity: 0.3; }
-}
-
-/* Shine effect for unlocked state */
-.certificate-icon.unlocked {
-    filter: drop-shadow(0 0 10px rgba(255,215,0,0.5));
-}
-
-/* Particle container */
-.particle {
-    position: absolute;
-    background: radial-gradient(circle at center, #ffd700, transparent);
-    border-radius: 50%;
-    pointer-events: none;
+.lock-overlay.unlocking {
+    animation: unlockAnimation 0.5s ease forwards;
 }
 </style>
 """, unsafe_allow_html=True)
@@ -1517,30 +1439,19 @@ elif st.session_state.quiz_started and not st.session_state.quiz_completed:
     is_certificate_unlocked = correct_answers >= 3
     
     st.markdown(f"""
-    <div style="position: relative; width: 56px; height: 56px;">
-      <svg width="54" height="54" style="display:block;">
-        <defs>
-          <radialGradient id="gold" cx="50%" cy="40%" r="70%">
-            <stop offset="0%" stop-color="#fffbe5"/>
-            <stop offset="70%" stop-color="#ffd700"/>
-            <stop offset="100%" stop-color="#bfa400"/>
-          </radialGradient>
-        </defs>
-        <ellipse cx="27" cy="44" rx="15" ry="4" fill="#000" opacity="0.18"/>
-        <rect x="10" y="14" width="34" height="26" rx="3" fill="url(#gold)" stroke="#e3c04f" stroke-width="2"/>
-        <circle cx="27" cy="34" r="6" fill="#ffd700"/>
-      </svg>
-      <!-- Particle Dots -->
-      <div style="position:absolute;top:12px;left:12px;width:5px;height:5px;border-radius:50%;background:#fff;opacity:0.7;"></div>
-      <div style="position:absolute;top:14px;right:12px;width:5px;height:5px;border-radius:50%;background:#ffd700;opacity:0.7;"></div>
-      <div style="position:absolute;bottom:10px;left:20px;width:4px;height:4px;border-radius:50%;background:#fffde2;opacity:0.5;"></div>
-      <!-- Lock overlay -->
-      <div style="position:absolute;top:0;left:0;width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:1.7em;pointer-events:none;">
-        {"🎉" if is_certificate_unlocked else "🔒"}
-      </div>
-    </div>
-    <div style="margin-top:6px;display:inline-block;background: #222; color: #fff; font-size: 12px; padding: 2px 8px; border-radius: 10px;">
-      {correct_answers}/5
+    <div class="certificate-container">
+        <div class="certificate-icon">
+            <!-- Advanced Certificate SVG Icon -->
+            <svg width="36" height="36" viewBox="0 0 36 36" fill="none">
+              <rect x="4" y="6" width="28" height="24" rx="4" fill="#fff8e1" stroke="#ffd700" stroke-width="2"/>
+              <rect x="8" y="10" width="20" height="10" rx="2" fill="#fff" stroke="#ffd700" stroke-width="1"/>
+              <circle cx="18" cy="24" r="4" fill="#ffd700" stroke="#c9a200" stroke-width="1.5"/>
+              <path d="M18 28 v6 M18 34 l-2 -2 M18 34 l2 -2" stroke="#c9a200" stroke-width="1.5" stroke-linecap="round"/>
+              <path d="M14 26 l-3 5 M22 26 l3 5" stroke="#c9a200" stroke-width="1.5" stroke-linecap="round"/>
+            </svg>
+            <div class="lock-overlay {('unlocked' if is_certificate_unlocked else 'locked')}">🔒</div>
+        </div>
+        <div class="certificate-count">{correct_answers}/5</div>
     </div>
     """, unsafe_allow_html=True)
         
