@@ -135,7 +135,8 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-correct_answers = sum(1 for ans in st.session_state.user_answers if ans.get('is_correct', False))
+# Example values:
+correct_answers = 0
 is_certificate_unlocked = correct_answers >= 3
 lock_class = "unlocked" if is_certificate_unlocked else "locked"
 
