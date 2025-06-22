@@ -135,6 +135,20 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
+correct_answers = sum(1 for ans in st.session_state.user_answers if ans.get('is_correct', False))
+is_certificate_unlocked = correct_answers >= 3
+lock_class = "unlocked" if is_certificate_unlocked else "locked"
+
+st.markdown(f"""
+<div class="certificate-container">
+  <div class="certificate-svg-holder">
+    {certificate_svg}
+    <span class="lock-overlay {lock_class}">🔒</span>
+  </div>
+  <span class="certificate-count">{correct_answers}/5</span>
+</div>
+""", unsafe_allow_html=True)
+
 
 # --- Set up Gemini API ---
 gemini_api_key = "AIzaSyAfzl_66GZsgaYjAM7cT2djVCBCAr86t2k"  # Replace with your Gemini API Key
@@ -1421,20 +1435,20 @@ elif st.session_state.quiz_started and not st.session_state.quiz_completed:
     # Calculate number of correct answers
      # Unlock only when 3 or more questions are correct
     
-    # After displaying the question
-    correct_answers = sum(1 for ans in st.session_state.user_answers if ans.get('is_correct', False))
-    is_certificate_unlocked = correct_answers >= 3
-    lock_class = "unlocked" if is_certificate_unlocked else "locked"
+    # # After displaying the question
+    # correct_answers = sum(1 for ans in st.session_state.user_answers if ans.get('is_correct', False))
+    # is_certificate_unlocked = correct_answers >= 3
+    # lock_class = "unlocked" if is_certificate_unlocked else "locked"
     
-    st.markdown(f"""
-    <div class="certificate-container">
-      <div class="certificate-svg-holder">
-        {certificate_svg}
-        <span class="lock-overlay {lock_class}">🔒</span>
-      </div>
-      <span class="certificate-count">{correct_answers}/5</span>
-    </div>
-    """, unsafe_allow_html=True)
+    # st.markdown(f"""
+    # <div class="certificate-container">
+    #   <div class="certificate-svg-holder">
+    #     {certificate_svg}
+    #     <span class="lock-overlay {lock_class}">🔒</span>
+    #   </div>
+    #   <span class="certificate-count">{correct_answers}/5</span>
+    # </div>
+    # """, unsafe_allow_html=True)
         
     relevant_tables = question_data["relevant_tables"]
     if relevant_tables:
