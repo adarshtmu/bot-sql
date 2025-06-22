@@ -68,8 +68,8 @@ hide_streamlit_style = """
         }
     </style>
 """
-st.markdown(hide_streamlit_style, unsafe_allow_html=True)
-
+st.markdown("""
+<style>
 .certificate-container {
     position: absolute;
     top: 32px;
@@ -113,7 +113,8 @@ st.markdown(hide_streamlit_style, unsafe_allow_html=True)
     border: 2px solid #fff;
     box-shadow: 0 2px 4px rgba(0,0,0,0.2);
 }
-
+</style>
+""", unsafe_allow_html=True)
 
 # --- Set up Gemini API ---
 gemini_api_key = "AIzaSyAfzl_66GZsgaYjAM7cT2djVCBCAr86t2k"  # Replace with your Gemini API Key
