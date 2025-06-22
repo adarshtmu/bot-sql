@@ -68,54 +68,87 @@ hide_streamlit_style = """
         }
     </style>
 """
+st.markdown(hide_streamlit_style, unsafe_allow_html=True)
+
 st.markdown("""
 <style>
 .certificate-container {
     position: absolute;
-    top: 32px;
-    right: 32px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    z-index: 10;
-    min-width: 60px;
-}
-.certificate-icon {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-}
-.certificate-svg-wrap {
-    position: relative;
+    top: 20px;
+    right: 20px;
+    width: 48px;
+    height: 48px;
     display: flex;
     align-items: center;
     justify-content: center;
+    z-index: 10;
 }
-.certificate-helper-text {
-    font-size: 0.55rem;
-    color: #888;
-    margin-top: 4px;
-    text-align: center;
-    line-height: 1.1;
-    font-family: inherit;
-    font-weight: 400;
-    letter-spacing: 0.05em;
-    word-break: break-word;
-    max-width: 70px;
+
+.certificate-icon {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #ffd700 0%, #ffed4a 100%);
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(255, 215, 0, 0.3);
+    position: relative;
 }
+
+
+
+.lock-overlay {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 24px;
+    height: 24px;
+    background: rgba(0, 0, 0, 0.8);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+    border: 2px solid #fff;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+}
+
+.lock-overlay.locked {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+}
+
+.lock-overlay.unlocked {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0);
+}
+
 .certificate-count {
-    margin-top: 8px;
+    position: absolute;
+    bottom: -10px;
+    right: -10px;
     background: #222;
     color: #fff;
-    font-size: 13px;
-    padding: 2px 10px;
+    font-size: 12px;
+    padding: 2px 8px;
     border-radius: 10px;
     border: 2px solid #fff;
     box-shadow: 0 2px 4px rgba(0,0,0,0.2);
 }
+
+@keyframes unlockAnimation {
+    0% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+    50% { transform: translate(-50%, -50%) scale(1.2); opacity: 0.5; }
+    100% { transform: translate(-50%, -50%) scale(0); opacity: 0; }
+}
+
+.lock-overlay.unlocking {
+    animation: unlockAnimation 0.5s ease forwards;
+}
 </style>
 """, unsafe_allow_html=True)
-
 # --- Set up Gemini API ---
 gemini_api_key = "AIzaSyAfzl_66GZsgaYjAM7cT2djVCBCAr86t2k"  # Replace with your Gemini API Key
 
@@ -1408,19 +1441,17 @@ elif st.session_state.quiz_started and not st.session_state.quiz_completed:
     st.markdown(f"""
     <div class="certificate-container">
         <div class="certificate-icon">
-            <div class="certificate-svg-wrap">
-                <svg width="36" height="36" viewBox="0 0 36 36" fill="none">
-                  <rect x="4" y="6" width="28" height="24" rx="4" fill="#fff8e1" stroke="#ffd700" stroke-width="2"/>
-                  <rect x="8" y="10" width="20" height="10" rx="2" fill="#fff" stroke="#ffd700" stroke-width="1"/>
-                  <circle cx="18" cy="24" r="4" fill="#ffd700" stroke="#c9a200" stroke-width="1.5"/>
-                  <path d="M18 28 v6 M18 34 l-2 -2 M18 34 l2 -2" stroke="#c9a200" stroke-width="1.5" stroke-linecap="round"/>
-                  <path d="M14 26 l-3 5 M22 26 l3 5" stroke="#c9a200" stroke-width="1.5" stroke-linecap="round"/>
-                </svg>
-                <div class="lock-overlay locked">🔒</div>
-            </div>
-            <div class="certificate-helper-text">unlock your certificate</div>
+            <!-- Advanced Certificate SVG Icon -->
+            <svg width="36" height="36" viewBox="0 0 36 36" fill="none">
+              <rect x="4" y="6" width="28" height="24" rx="4" fill="#fff8e1" stroke="#ffd700" stroke-width="2"/>
+              <rect x="8" y="10" width="20" height="10" rx="2" fill="#fff" stroke="#ffd700" stroke-width="1"/>
+              <circle cx="18" cy="24" r="4" fill="#ffd700" stroke="#c9a200" stroke-width="1.5"/>
+              <path d="M18 28 v6 M18 34 l-2 -2 M18 34 l2 -2" stroke="#c9a200" stroke-width="1.5" stroke-linecap="round"/>
+              <path d="M14 26 l-3 5 M22 26 l3 5" stroke="#c9a200" stroke-width="1.5" stroke-linecap="round"/>
+            </svg>
+            <div class="lock-overlay {('unlocked' if is_certificate_unlocked else 'locked')}">🔒</div>
         </div>
-        <div class="certificate-count">0/5</div>
+        <div class="certificate-count">{correct_answers}/5</div>
     </div>
     """, unsafe_allow_html=True)
         
@@ -2177,6 +2208,7 @@ elif st.session_state.quiz_completed:
     display_advanced_results_page(final_score , st.session_state.user_answers, analyze_performance)
     
     
+
 
 
 
