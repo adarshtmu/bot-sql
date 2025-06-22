@@ -1456,9 +1456,8 @@ elif st.session_state.quiz_started and not st.session_state.quiz_completed:
                 z-index: 2;
                 pointer-events: none;
                 ">certificate</span>
-            <!-- Certificate SVG Icon with full icon shadow -->
-            <svg width="70" height="70" viewBox="0 0 54 54" fill="none"
-                 style="filter: drop-shadow(0px 2px 6px rgba(191,164,0,0.35));">
+            <!-- Certificate SVG Icon with NO shadow -->
+            <svg width="70" height="70" viewBox="0 0 54 54" fill="none">
               <defs>
                 <radialGradient id="goldRadial" cx="50%" cy="40%" r="70%">
                   <stop offset="0%" stop-color="#fffbe5"/>
