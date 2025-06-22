@@ -69,6 +69,8 @@ hide_streamlit_style = """
     </style>
 """
 st.markdown(hide_streamlit_style, unsafe_allow_html=True)
+import streamlit as st
+
 certificate_svg = '''
 <svg width="48" height="48" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
  <rect x="8" y="12" width="48" height="32" rx="5" fill="#fffbe6" stroke="#d4af37" stroke-width="2"/>
@@ -84,15 +86,14 @@ certificate_svg = '''
 st.markdown("""
 <style>
 .certificate-container {
-    position: absolute;
-    top: 20px;
-    right: 20px;
+    position: relative;
     width: 56px;
     height: 56px;
     display: flex;
     align-items: center;
     justify-content: center;
     z-index: 10;
+    margin: 40px auto 20px auto;
 }
 .certificate-svg-holder {
     position: relative;
@@ -135,10 +136,10 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-# Example values:
-correct_answers = 0
-is_certificate_unlocked = correct_answers >= 3
-lock_class = "unlocked" if is_certificate_unlocked else "locked"
+# DEMO: Toggle lock with a button
+unlocked = st.checkbox("Unlock certificate", value=False)
+correct_answers = 0 if not unlocked else 3
+lock_class = "unlocked" if unlocked else "locked"
 
 st.markdown(f"""
 <div class="certificate-container">
@@ -149,7 +150,6 @@ st.markdown(f"""
   <span class="certificate-count">{correct_answers}/5</span>
 </div>
 """, unsafe_allow_html=True)
-
 
 # --- Set up Gemini API ---
 gemini_api_key = "AIzaSyAfzl_66GZsgaYjAM7cT2djVCBCAr86t2k"  # Replace with your Gemini API Key
