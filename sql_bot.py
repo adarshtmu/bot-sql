@@ -151,40 +151,40 @@ st.markdown(f"""
 
 <style>
 /* Container Styles */
-.certificate-container {
+.certificate-container {{
     position: relative;
     display: flex;
     flex-direction: column;
     align-items: center;
     padding: 10px;
     transition: transform 0.3s ease;
-}
+}}
 
-.certificate-container:hover {
+.certificate-container:hover {{
     transform: translateY(-5px);
-}
+}}
 
 /* Certificate Icon Styles */
-.certificate-icon {
+.certificate-icon {{
     position: relative;
     filter: drop-shadow(0 8px 16px rgba(0,0,0,0.2));
-}
+}}
 
 /* SVG Animations */
-.certificate-frame {
+.certificate-frame {{
     animation: glow 2s ease-in-out infinite alternate;
-}
+}}
 
-.star {
+.star {{
     animation: twinkle 1.5s ease-in-out infinite alternate;
-}
+}}
 
-.ribbons {
+.ribbons {{
     animation: wave 3s ease-in-out infinite;
-}
+}}
 
 /* Enhanced Lock Overlay */
-.lock-overlay {
+.lock-overlay {{
     position: absolute;
     top: 50%;
     left: 50%;
@@ -197,95 +197,95 @@ st.markdown(f"""
     align-items: center;
     justify-content: center;
     transition: all 0.3s ease;
-}
+}}
 
-.lock-icon {
+.lock-icon {{
     font-size: 12px;
     color: white;
-}
+}}
 
-.lock-pulse {
+.lock-pulse {{
     position: absolute;
     width: 100%;
     height: 100%;
     border-radius: 50%;
     background: rgba(255, 215, 0, 0.3);
     animation: pulse 2s ease-in-out infinite;
-}
+}}
 
 /* Progress Bar Styles */
-.certificate-progress {
+.certificate-progress {{
     margin-top: 10px;
     width: 100%;
     text-align: center;
-}
+}}
 
-.progress-count {
+.progress-count {{
     font-size: 14px;
     font-weight: bold;
     color: #ffd700;
     text-shadow: 0 2px 4px rgba(0,0,0,0.2);
     margin-bottom: 5px;
-}
+}}
 
-.progress-bar {
+.progress-bar {{
     width: 100%;
     height: 6px;
     background: rgba(255,255,255,0.2);
     border-radius: 3px;
     overflow: hidden;
-}
+}}
 
-.progress-fill {
+.progress-fill {{
     height: 100%;
     background: linear-gradient(90deg, #ffd700, #daa520);
     border-radius: 3px;
     transition: width 0.5s ease;
-}
+}}
 
 /* Animations */
-@keyframes glow {
-    from { filter: drop-shadow(0 0 2px #ffd700); }
-    to { filter: drop-shadow(0 0 8px #ffd700); }
-}
+@keyframes glow {{
+    from {{ filter: drop-shadow(0 0 2px #ffd700); }}
+    to {{ filter: drop-shadow(0 0 8px #ffd700); }}
+}}
 
-@keyframes twinkle {
-    from { opacity: 0.7; }
-    to { opacity: 1; }
-}
+@keyframes twinkle {{
+    from {{ opacity: 0.7; }}
+    to {{ opacity: 1; }}
+}}
 
-@keyframes wave {
-    0%, 100% { transform: rotate(0deg); }
-    50% { transform: rotate(2deg); }
-}
+@keyframes wave {{
+    0%, 100% {{ transform: rotate(0deg); }}
+    50% {{ transform: rotate(2deg); }}
+}}
 
-@keyframes pulse {
-    0% { transform: scale(1); opacity: 1; }
-    100% { transform: scale(1.5); opacity: 0; }
-}
+@keyframes pulse {{
+    0% {{ transform: scale(1); opacity: 1; }}
+    100% {{ transform: scale(1.5); opacity: 0; }}
+}}
 
 /* Locked/Unlocked States */
-.lock-overlay.locked {
+.lock-overlay.locked {{
     opacity: 1;
     transform: translate(-50%, -50%) scale(1);
-}
+}}
 
-.lock-overlay.unlocked {
+.lock-overlay.unlocked {{
     opacity: 0;
     transform: translate(-50%, -50%) scale(0);
-}
+}}
 
 /* Responsive Design */
-@media (max-width: 768px) {
-    .certificate-icon svg {
+@media (max-width: 768px) {{
+    .certificate-icon svg {{
         width: 100px;
         height: 100px;
-    }
+    }}
     
-    .progress-count {
+    .progress-count {{
         font-size: 12px;
-    }
-}
+    }}
+}}
 </style>
 """, unsafe_allow_html=True)
 # --- Set up Gemini API ---
