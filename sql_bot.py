@@ -1227,11 +1227,7 @@ if not st.session_state.quiz_started:
             <div class="feature-title">AI-Powered Mentorship</div>
             <div class="feature-description">Experience personalized learning with our advanced AI that adapts to your coding style, provides real-time feedback, and guides you through complex SQL concepts with precision.</div>
         </div>
-        # <div class="feature-card">
-        #     <div class="feature-icon">🌐</div>
-        #     <div class="feature-title">Immersive 3D Learning</div>
-        #     <div class="feature-description">Dive into interactive 3D database visualizations that make complex relationships crystal clear. See your queries come to life in our cutting-edge virtual environment.</div>
-        # </div>
+
         <div class="feature-card">
             <div class="feature-icon">📊</div>
             <div class="feature-title">Advanced Analytics</div>
