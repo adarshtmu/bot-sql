@@ -149,6 +149,53 @@ st.markdown("""
 }
 </style>
 """, unsafe_allow_html=True)
+
+
+st.markdown("""
+    <style>
+    .sql-journey-btn {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: linear-gradient(90deg, #ffd600 0%, #ffb300 100%);
+        border: none;
+        border-radius: 50px;
+        padding: 18px 36px;
+        box-shadow: 0 4px 24px 0 rgba(255, 215, 0, 0.15);
+        font-size: 1.3rem;
+        font-weight: 500;
+        color: #111;
+        cursor: pointer;
+        transition: box-shadow 0.2s;
+        width: 100%;
+        margin-bottom: 24px;
+    }
+    .sql-journey-btn:hover {
+        box-shadow: 0 8px 32px 0 rgba(255, 215, 0, 0.22);
+    }
+    .arrow-icon {
+        width: 32px;
+        height: 32px;
+        margin-right: 16px;
+        vertical-align: middle;
+    }
+    .sql-journey-btn-text {
+        letter-spacing: 2px;
+    }
+    </style>
+""", unsafe_allow_html=True)
+
+# HTML for the button
+button_html = """
+    <form action="" method="post">
+      <button class="sql-journey-btn" type="submit" name="start_quiz">
+        <img src="arrow_circle.png" class="arrow-icon" alt="Start"/>
+        <span class="sql-journey-btn-text">START YOUR SQL JOURNEY</span>
+      </button>
+    </form>
+"""
+
+
 # --- Set up Gemini API ---
 gemini_api_key = "AIzaSyAfzl_66GZsgaYjAM7cT2djVCBCAr86t2k"  # Replace with your Gemini API Key
 
@@ -1260,9 +1307,15 @@ if not st.session_state.quiz_started:
     # You must have your image accessible, either locally or hosted.
     # For this example, let's assume you have uploaded your image to the Streamlit project directory as "arrow_circle.png".
     
-    col1, col2, col3 = st.columns([1, 2, 1])
+    # Center the button using columns
+    col1, col2, col3 = st.columns([1,2,1])
     with col2:
-       if st.button("🚀 Start Your SQL Journey", key="start_quiz", use_container_width=True):
+        st.markdown(button_html, unsafe_allow_html=True)
+        # Button logic (since HTML button is outside Streamlit's event system, use st.form or st.button for logic if needed)
+        if "quiz_started" not in st.session_state:
+            st.session_state.quiz_started = False
+        # Add a hidden Streamlit button for actual logic if you want to keep the session state
+        if st.button("Start Quiz (Hidden)", key="start_quiz_hidden", help="Internal button", use_container_width=True):
             st.session_state.quiz_started = True
             st.session_state.user_answers = []
             st.session_state.current_question = 0
@@ -1270,7 +1323,6 @@ if not st.session_state.quiz_started:
             st.success("🎉 Welcome to the future of learning!")
             st.balloons()
             st.rerun()
-
 
     # --- ADVANCED STATS SECTION (REFACTORED) ---
     # By placing all cards inside one container, we let the CSS grid handle the responsive layout.
