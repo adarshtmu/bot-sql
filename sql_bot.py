@@ -158,6 +158,59 @@ st.markdown("""
 .lock-overlay.unlocking {
     animation: unlockAnimation 0.5s ease forwards;
 }
+
+.certificate-unlock-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 2rem 0;
+  gap: 18px;
+}
+
+.certificate-badge {
+  background: linear-gradient(135deg, #ffe066 0%, #ffd700 100%);
+  border-radius: 16px;
+  box-shadow: 0 6px 24px rgba(255,215,0,0.30);
+  width: 56px; height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  z-index: 2;
+  margin-right: -12px; /* visually overlaps card for "badge" effect */
+}
+
+.certificate-badge svg {
+  width: 36px;
+  height: 36px;
+  display: block;
+}
+
+.certificate-card {
+  background: #fff8e1;
+  border-radius: 12px;
+  box-shadow: 0 2px 12px rgba(255,215,0,0.08);
+  padding: 18px 28px;
+  min-width: 165px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  font-family: inherit;
+}
+
+.certificate-title {
+  font-size: 1.18rem;
+  font-weight: 600;
+  color: #b38600;
+  margin-bottom: 2px;
+  letter-spacing: 0.01em;
+}
+
+.certificate-progress {
+  font-size: 1.07rem;
+  color: #a67809;
+  font-weight: 500;
+}
 </style>
 """, unsafe_allow_html=True)
 # --- Set up Gemini API ---
@@ -1450,19 +1503,26 @@ elif st.session_state.quiz_started and not st.session_state.quiz_completed:
     is_certificate_unlocked = correct_answers >= 3
     
     st.markdown(f"""
-    <div class="certificate-container">
-        <div class="certificate-icon">
-            <!-- Advanced Certificate SVG Icon -->
-            <svg width="36" height="36" viewBox="0 0 36 36" fill="none">
-              <rect x="4" y="6" width="28" height="24" rx="4" fill="#fff8e1" stroke="#ffd700" stroke-width="2"/>
-              <rect x="8" y="10" width="20" height="10" rx="2" fill="#fff" stroke="#ffd700" stroke-width="1"/>
-              <circle cx="18" cy="24" r="4" fill="#ffd700" stroke="#c9a200" stroke-width="1.5"/>
-              <path d="M18 28 v6 M18 34 l-2 -2 M18 34 l2 -2" stroke="#c9a200" stroke-width="1.5" stroke-linecap="round"/>
-              <path d="M14 26 l-3 5 M22 26 l3 5" stroke="#c9a200" stroke-width="1.5" stroke-linecap="round"/>
-            </svg>
-            <div class="lock-overlay {('unlocked' if is_certificate_unlocked else 'locked')}">🔒</div>
-        </div>
-        <div class="certificate-hint">Unlock Certificate ({correct_answers}/5)</div>
+    <div class="certificate-unlock-wrapper">
+      <div class="certificate-badge">
+        <!-- Certificate SVG icon, replace lock as needed -->
+        <svg width="32" height="32" viewBox="0 0 36 36" fill="none">
+          <rect x="4" y="6" width="28" height="24" rx="6" fill="#fff8e1" stroke="#ffd700" stroke-width="2"/>
+          <rect x="8" y="10" width="20" height="10" rx="2" fill="#fff" stroke="#ffd700" stroke-width="1"/>
+          <circle cx="18" cy="24" r="4" fill="#ffd700" stroke="#c9a200" stroke-width="1.5"/>
+          <path d="M18 28 v6 M18 34 l-2 -2 M18 34 l2 -2" stroke="#c9a200" stroke-width="1.5" stroke-linecap="round"/>
+          <path d="M14 26 l-3 5 M22 26 l3 5" stroke="#c9a200" stroke-width="1.5" stroke-linecap="round"/>
+          <!-- Lock icon overlay -->
+          <circle cx="18" cy="18" r="8" fill="#fff" stroke="#FFD700" stroke-width="2"/>
+          <rect x="15" y="16" width="6" height="6" rx="1.5" fill="#bfa500"/>
+          <rect x="16.5" y="14" width="3" height="3" rx="1.5" fill="#bfa500"/>
+          <rect x="17.25" y="19.25" width="1.5" height="1.5" rx="0.75" fill="#fff"/>
+        </svg>
+      </div>
+      <div class="certificate-card">
+        <div class="certificate-title">Unlock Certificate</div>
+        <div class="certificate-progress">({correct_answers}/5)</div>
+      </div>
     </div>
     """, unsafe_allow_html=True)
 
