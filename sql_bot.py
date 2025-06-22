@@ -1474,7 +1474,7 @@ elif st.session_state.quiz_started and not st.session_state.quiz_completed:
                   <stop offset="0%" stop-color="#ffe268"/>
                   <stop offset="100%" stop-color="#c49000"/>
                 </radialGradient>
-                <filter id="shadow" x="-10%" y="-10%" width="120%" height="120%">
+                <filter id="shadow" x="10%" y="10%" width="120%" height="120%">
                     <feDropShadow dx="0" dy="2" stdDeviation="3" flood-color="#bfa400" flood-opacity="0.35"/>
                 </filter>
               </defs>
