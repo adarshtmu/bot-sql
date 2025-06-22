@@ -70,24 +70,20 @@ hide_streamlit_style = """
 """
 st.markdown(hide_streamlit_style, unsafe_allow_html=True)
 
-st.markdown("""
-<style>
 .certificate-container {
-    position: relative;  /* changed from absolute to relative for badge positioning */
-    margin-top: 20px;
-    margin-right: 20px;
+    position: absolute;
+    top: 32px;
+    right: 32px;
     display: flex;
     flex-direction: column;
     align-items: center;
     z-index: 10;
-    width: auto; /* let content decide width */
     min-width: 60px;
 }
 .certificate-icon {
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: flex-start;
 }
 .certificate-svg-wrap {
     position: relative;
@@ -96,7 +92,7 @@ st.markdown("""
     justify-content: center;
 }
 .certificate-helper-text {
-    font-size: 0.50rem;
+    font-size: 0.55rem;
     color: #888;
     margin-top: 4px;
     text-align: center;
@@ -108,20 +104,15 @@ st.markdown("""
     max-width: 70px;
 }
 .certificate-count {
-    position: absolute;
-    top: -10px;
-    right: -18px;
+    margin-top: 8px;
     background: #222;
     color: #fff;
-    font-size: 11px;
-    padding: 2px 8px;
+    font-size: 13px;
+    padding: 2px 10px;
     border-radius: 10px;
     border: 2px solid #fff;
     box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-    z-index: 2;
 }
-</style>
-""", unsafe_allow_html=True)
 
 
 # --- Set up Gemini API ---
@@ -1428,7 +1419,7 @@ elif st.session_state.quiz_started and not st.session_state.quiz_completed:
             </div>
             <div class="certificate-helper-text">unlock your certificate</div>
         </div>
-        <div class="certificate-count">{correct_answers}/5</div>
+        <div class="certificate-count">0/5</div>
     </div>
     """, unsafe_allow_html=True)
         
