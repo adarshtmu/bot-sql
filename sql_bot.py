@@ -1520,42 +1520,42 @@ elif st.session_state.quiz_started and not st.session_state.quiz_completed:
 
     st.markdown("---")
     
-    current_q_index = st.session_state.current_question
-    question_data = st.session_state.selected_questions[current_q_index]  # Use selected_questions
+#     current_q_index = st.session_state.current_question
+#     question_data = st.session_state.selected_questions[current_q_index]  # Use selected_questions
     
-    st.subheader(f"Question {current_q_index + 1} of {len(st.session_state.selected_questions)}")
-    st.markdown(f"**{question_data['question']}**")
-    # Calculate current score (safe for empty)
-    # Calculate number of correct answers
-     # Unlock only when 3 or more questions are correct
+#     st.subheader(f"Question {current_q_index + 1} of {len(st.session_state.selected_questions)}")
+#     st.markdown(f"**{question_data['question']}**")
+#     # Calculate current score (safe for empty)
+#     # Calculate number of correct answers
+#      # Unlock only when 3 or more questions are correct
     
-# After displaying the question
-    correct_answers = sum(1 for ans in st.session_state.user_answers if ans.get('is_correct', False))
-    is_certificate_unlocked = correct_answers >= 3
+# # After displaying the question
+#     correct_answers = sum(1 for ans in st.session_state.user_answers if ans.get('is_correct', False))
+#     is_certificate_unlocked = correct_answers >= 3
     
-    st.markdown(f"""
-    <div class="certificate-unlock-wrapper">
-      <div class="certificate-badge">
-        <!-- Certificate SVG icon, replace lock as needed -->
-        <svg width="32" height="32" viewBox="0 0 36 36" fill="none">
-          <rect x="4" y="6" width="28" height="24" rx="6" fill="#fff8e1" stroke="#ffd700" stroke-width="2"/>
-          <rect x="8" y="10" width="20" height="10" rx="2" fill="#fff" stroke="#ffd700" stroke-width="1"/>
-          <circle cx="18" cy="24" r="4" fill="#ffd700" stroke="#c9a200" stroke-width="1.5"/>
-          <path d="M18 28 v6 M18 34 l-2 -2 M18 34 l2 -2" stroke="#c9a200" stroke-width="1.5" stroke-linecap="round"/>
-          <path d="M14 26 l-3 5 M22 26 l3 5" stroke="#c9a200" stroke-width="1.5" stroke-linecap="round"/>
-          <!-- Lock icon overlay -->
-          <circle cx="18" cy="18" r="8" fill="#fff" stroke="#FFD700" stroke-width="2"/>
-          <rect x="15" y="16" width="6" height="6" rx="1.5" fill="#bfa500"/>
-          <rect x="16.5" y="14" width="3" height="3" rx="1.5" fill="#bfa500"/>
-          <rect x="17.25" y="19.25" width="1.5" height="1.5" rx="0.75" fill="#fff"/>
-        </svg>
-      </div>
-      <div class="certificate-card">
-        <div class="certificate-title">Unlock Certificate</div>
-        <div class="certificate-progress">({correct_answers}/5)</div>
-      </div>
-    </div>
-    """, unsafe_allow_html=True)
+#     st.markdown(f"""
+#     <div class="certificate-unlock-wrapper">
+#       <div class="certificate-badge">
+#         <!-- Certificate SVG icon, replace lock as needed -->
+#         <svg width="32" height="32" viewBox="0 0 36 36" fill="none">
+#           <rect x="4" y="6" width="28" height="24" rx="6" fill="#fff8e1" stroke="#ffd700" stroke-width="2"/>
+#           <rect x="8" y="10" width="20" height="10" rx="2" fill="#fff" stroke="#ffd700" stroke-width="1"/>
+#           <circle cx="18" cy="24" r="4" fill="#ffd700" stroke="#c9a200" stroke-width="1.5"/>
+#           <path d="M18 28 v6 M18 34 l-2 -2 M18 34 l2 -2" stroke="#c9a200" stroke-width="1.5" stroke-linecap="round"/>
+#           <path d="M14 26 l-3 5 M22 26 l3 5" stroke="#c9a200" stroke-width="1.5" stroke-linecap="round"/>
+#           <!-- Lock icon overlay -->
+#           <circle cx="18" cy="18" r="8" fill="#fff" stroke="#FFD700" stroke-width="2"/>
+#           <rect x="15" y="16" width="6" height="6" rx="1.5" fill="#bfa500"/>
+#           <rect x="16.5" y="14" width="3" height="3" rx="1.5" fill="#bfa500"/>
+#           <rect x="17.25" y="19.25" width="1.5" height="1.5" rx="0.75" fill="#fff"/>
+#         </svg>
+#       </div>
+#       <div class="certificate-card">
+#         <div class="certificate-title">Unlock Certificate</div>
+#         <div class="certificate-progress">({correct_answers}/5)</div>
+#       </div>
+#     </div>
+#     """, unsafe_allow_html=True)
 
     
     relevant_tables = question_data["relevant_tables"]
