@@ -69,87 +69,89 @@ hide_streamlit_style = """
     </style>
 """
 st.markdown(hide_streamlit_style, unsafe_allow_html=True)
-import streamlit as st
-
-import streamlit as st
-
-certificate_svg = '''
-<svg width="48" height="48" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
- <rect x="8" y="12" width="48" height="32" rx="5" fill="#fffbe6" stroke="#d4af37" stroke-width="2"/>
- <rect x="14" y="18" width="36" height="20" rx="3" fill="#f9e79f" stroke="#d4af37" stroke-width="1.5"/>
- <rect x="18" y="24" width="28" height="4" rx="2" fill="#fff" />
- <rect x="18" y="30" width="20" height="3" rx="1.5" fill="#fff" />
- <circle cx="48" cy="36" r="5" fill="#ffd700" stroke="#d4af37" stroke-width="1.5"/>
- <path d="M48 41 L50 45 L46 45 Z" fill="#d4af37"/>
- <path d="M48 41 L49.5 46 L46.5 46 Z" fill="#ffd700"/>
-</svg>
-'''
 
 st.markdown("""
 <style>
 .certificate-container {
-    position: relative;
-    width: 56px;
-    height: 56px;
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    width: 48px;
+    height: 48px;
     display: flex;
     align-items: center;
     justify-content: center;
     z-index: 10;
-    margin: 40px auto 20px auto;
 }
-.certificate-svg-holder {
+
+.certificate-icon {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #ffd700 0%, #ffed4a 100%);
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(255, 215, 0, 0.3);
     position: relative;
-    width: 48px;
-    height: 48px;
 }
+
+.certificate-icon::before {
+    content: '📜';  /* Certificate emoji */
+    font-size: 28px;
+    filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));
+}
+
 .lock-overlay {
     position: absolute;
-    left: 50%;
     top: 50%;
+    left: 50%;
     transform: translate(-50%, -50%);
-    font-size: 28px;
-    color: #212121;
-    background: rgba(255,255,255,0.92);
+    width: 24px;
+    height: 24px;
+    background: rgba(0, 0, 0, 0.8);
     border-radius: 50%;
-    padding: 2px 4px 2px 4px;
-    box-shadow: 0 2px 8px #f5e1bd;
-    transition: opacity 0.5s;
-    z-index: 2;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+    border: 2px solid #fff;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.3);
 }
-.lock-overlay.unlocked {
-    opacity: 0;
-    pointer-events: none;
-}
+
 .lock-overlay.locked {
     opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
 }
+
+.lock-overlay.unlocked {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0);
+}
+
 .certificate-count {
     position: absolute;
-    bottom: -14px;
+    bottom: -10px;
     right: -10px;
     background: #222;
     color: #fff;
-    font-size: 13px;
+    font-size: 12px;
     padding: 2px 8px;
     border-radius: 10px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    z-index: 3;
+    border: 2px solid #fff;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
+@keyframes unlockAnimation {
+    0% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+    50% { transform: translate(-50%, -50%) scale(1.2); opacity: 0.5; }
+    100% { transform: translate(-50%, -50%) scale(0); opacity: 0; }
+}
+
+.lock-overlay.unlocking {
+    animation: unlockAnimation 0.5s ease forwards;
 }
 </style>
-""", unsafe_allow_html=True)
-
-unlocked = st.checkbox("Unlock certificate", value=False)
-correct_answers = 0 if not unlocked else 3
-lock_class = "unlocked" if unlocked else "locked"
-
-st.markdown(f"""
-<div class="certificate-container">
-  <div class="certificate-svg-holder">
-    {certificate_svg}
-    <span class="lock-overlay {lock_class}">🔒</span>
-  </div>
-  <span class="certificate-count">{correct_answers}/5</span>
-</div>
 """, unsafe_allow_html=True)
 # --- Set up Gemini API ---
 gemini_api_key = "AIzaSyAfzl_66GZsgaYjAM7cT2djVCBCAr86t2k"  # Replace with your Gemini API Key
@@ -1436,20 +1438,18 @@ elif st.session_state.quiz_started and not st.session_state.quiz_completed:
     # Calculate number of correct answers
      # Unlock only when 3 or more questions are correct
     
-    # # After displaying the question
-    # correct_answers = sum(1 for ans in st.session_state.user_answers if ans.get('is_correct', False))
-    # is_certificate_unlocked = correct_answers >= 3
-    # lock_class = "unlocked" if is_certificate_unlocked else "locked"
+# After displaying the question
+    correct_answers = sum(1 for ans in st.session_state.user_answers if ans.get('is_correct', False))
+    is_certificate_unlocked = correct_answers >= 3
     
-    # st.markdown(f"""
-    # <div class="certificate-container">
-    #   <div class="certificate-svg-holder">
-    #     {certificate_svg}
-    #     <span class="lock-overlay {lock_class}">🔒</span>
-    #   </div>
-    #   <span class="certificate-count">{correct_answers}/5</span>
-    # </div>
-    # """, unsafe_allow_html=True)
+    st.markdown(f"""
+    <div class="certificate-container">
+        <div class="certificate-icon">
+            <div class="lock-overlay {('unlocked' if is_certificate_unlocked else 'locked')}">🔒</div>
+        </div>
+        <div class="certificate-count">{correct_answers}/5</div>
+    </div>
+    """, unsafe_allow_html=True)
         
     relevant_tables = question_data["relevant_tables"]
     if relevant_tables:
@@ -2204,6 +2204,7 @@ elif st.session_state.quiz_completed:
     display_advanced_results_page(final_score , st.session_state.user_answers, analyze_performance)
     
     
+
 
 
 
