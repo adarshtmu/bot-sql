@@ -1439,41 +1439,48 @@ elif st.session_state.quiz_started and not st.session_state.quiz_completed:
     is_certificate_unlocked = correct_answers >= 3
     
     st.markdown(f"""
-    <div style="width:80px;height:80px;display:flex;align-items:center;justify-content:center;background:#111;border-radius:10px;">
-      <svg width="70" height="70" viewBox="0 0 54 54" fill="none">
-        <defs>
-          <radialGradient id="goldRadial" cx="50%" cy="40%" r="70%">
-            <stop offset="0%" stop-color="#fffbe5"/>
-            <stop offset="60%" stop-color="#ffe268"/>
-            <stop offset="90%" stop-color="#f7b801"/>
-            <stop offset="100%" stop-color="#c49000"/>
-          </radialGradient>
-          <linearGradient id="redRibbon" x1="0" y1="0" x2="1" y2="1">
-            <stop offset="0%" stop-color="#ff5555"/>
-            <stop offset="100%" stop-color="#c40000"/>
-          </linearGradient>
-          <radialGradient id="sealRadial" cx="50%" cy="50%" r="60%">
-            <stop offset="0%" stop-color="#ffe268"/>
-            <stop offset="100%" stop-color="#c49000"/>
-          </radialGradient>
-          <filter id="shadow" x="-10%" y="-10%" width="120%" height="120%">
-            <feDropShadow dx="0" dy="2" stdDeviation="3" flood-color="#bfa400" flood-opacity="0.35"/>
-          </filter>
-        </defs>
-        <rect x="8" y="12" width="38" height="28" rx="5" fill="url(#goldRadial)" stroke="#e3c04f" stroke-width="2.2" filter="url(#shadow)"/>
-        <text x="27" y="27" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" font-size="6" font-weight="bold" fill="#fff">
-          CERTIFICATE
-        </text>
-        <rect x="15" y="32" width="24" height="1" rx="0.5" fill="#fffde2" opacity="0.8"/>
-        <rect x="15" y="34" width="18" height="1" rx="0.5" fill="#fffde2" opacity="0.7"/>
-        <rect x="15" y="36" width="13" height="1" rx="0.5" fill="#fffde2" opacity="0.6"/>
-        <path d="M13 40 l3 8 9-5 9 5 3-8" fill="url(#redRibbon)" stroke="#a30000" stroke-width="1.2"/>
-        <circle cx="27" cy="38" r="6" fill="url(#sealRadial)" stroke="#ffd700" stroke-width="2"/>
-        <circle cx="27" cy="38" r="2.8" fill="#fffbe5" opacity="0.8"/>
-        <polygon points="27,34.5 28,37 30.7,37.2 28.5,38.7 29.2,41.3 27,39.8 24.8,41.3 25.5,38.7 23.3,37.2 26,37"
-          fill="#ffaa00" stroke="#e3c04f" stroke-width="0.4"/>
-        <ellipse cx="21" cy="17" rx="4" ry="1.2" fill="#fff" opacity="0.28" transform="rotate(-9 21 17)"/>
-      </svg>
+    <div class="certificate-container">
+        <div class="certificate-icon">
+            <!-- Advanced Certificate SVG Icon with Ribbon, Gradient, and Seal -->
+            <svg width="70" height="70" viewBox="0 0 54 54" fill="none">
+              <defs>
+                <radialGradient id="goldRadial" cx="50%" cy="40%" r="70%">
+                  <stop offset="0%" stop-color="#fffbe5"/>
+                  <stop offset="60%" stop-color="#ffe268"/>
+                  <stop offset="90%" stop-color="#f7b801"/>
+                  <stop offset="100%" stop-color="#c49000"/>
+                </radialGradient>
+                <linearGradient id="redRibbon" x1="0" y1="0" x2="1" y2="1">
+                  <stop offset="0%" stop-color="#ff5555"/>
+                  <stop offset="100%" stop-color="#c40000"/>
+                </linearGradient>
+                <radialGradient id="sealRadial" cx="50%" cy="50%" r="60%">
+                  <stop offset="0%" stop-color="#ffe268"/>
+                  <stop offset="100%" stop-color="#c49000"/>
+                </radialGradient>
+                <filter id="shadow" x="-10%" y="-10%" width="120%" height="120%">
+                    <feDropShadow dx="0" dy="2" stdDeviation="3" flood-color="#bfa400" flood-opacity="0.35"/>
+                </filter>
+              </defs>
+              <!-- Certificate Body with gold gradient and shadow -->
+              <rect x="8" y="12" width="38" height="28" rx="5" fill="url(#goldRadial)" stroke="#e3c04f" stroke-width="2.2" filter="url(#shadow)"/>
+              <!-- Inner Text Lines (simulate text) -->
+              <rect x="15" y="20" width="24" height="3" rx="1.3" fill="#fffde2" opacity="0.8"/>
+              <rect x="15" y="25" width="18" height="2.2" rx="1.1" fill="#fffde2" opacity="0.7"/>
+              <rect x="15" y="29" width="13" height="2.2" rx="1.1" fill="#fffde2" opacity="0.6"/>
+              <!-- Ribbon -->
+              <path d="M13 40 l3 8 9-5 9 5 3-8" fill="url(#redRibbon)" stroke="#a30000" stroke-width="1.2"/>
+              <!-- Seal -->
+              <circle cx="27" cy="38" r="6" fill="url(#sealRadial)" stroke="#ffd700" stroke-width="2"/>
+              <circle cx="27" cy="38" r="2.8" fill="#fffbe5" opacity="0.8"/>
+              <!-- Seal star -->
+              <polygon points="27,34.5 28,37 30.7,37.2 28.5,38.7 29.2,41.3 27,39.8 24.8,41.3 25.5,38.7 23.3,37.2 26,37" fill="#ffaa00" stroke="#e3c04f" stroke-width="0.4"/>
+              <!-- Shine effect -->
+              <ellipse cx="21" cy="17" rx="4" ry="1.2" fill="#fff" opacity="0.28" transform="rotate(-9 21 17)"/>
+            </svg>
+            <div class="lock-overlay {('unlocked' if is_certificate_unlocked else 'locked')}">🔒</div>
+        </div>
+        <div class="certificate-count">{correct_answers}/5</div>
     </div>
     """, unsafe_allow_html=True)
         
@@ -2230,6 +2237,7 @@ elif st.session_state.quiz_completed:
     display_advanced_results_page(final_score , st.session_state.user_answers, analyze_performance)
     
     
+
 
 
 
