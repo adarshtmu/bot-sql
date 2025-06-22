@@ -89,8 +89,8 @@ st.markdown("""
     width: 56px;
     height: 56px;
     display: flex;
-    align-items: center;
-    justify-content: center;
+    align-items: flex-start;
+    justify-content: flex-end;
     z-index: 10;
 }
 .certificate-svg-holder {
