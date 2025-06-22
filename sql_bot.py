@@ -84,7 +84,6 @@ st.markdown("""
     z-index: 10;
 }
 
-/* Updated Certificate Icon Styles */
 .certificate-icon {
     width: 100%;
     height: 100%;
@@ -98,40 +97,11 @@ st.markdown("""
 }
 
 .certificate-icon::before {
-    content: '';
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    width: 70%;
-    height: 70%;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='3' y='3' width='18' height='18' rx='2' ry='2'%3E%3C/rect%3E%3Cpath d='M12 8v8'%3E%3C/path%3E%3Cpath d='M8 12h8'%3E%3C/path%3E%3Ccircle cx='12' cy='12' r='6'%3E%3C/circle%3E%3Cpath d='M12 3v3'%3E%3C/path%3E%3Cpath d='M12 18v3'%3E%3C/path%3E%3Cpath d='M3 12h3'%3E%3C/path%3E%3Cpath d='M18 12h3'%3E%3C/path%3E%3C/svg%3E");
-    background-repeat: no-repeat;
-    background-position: center;
+    content: '📜';  /* Certificate emoji */
+    font-size: 28px;
     filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));
 }
 
-/* Advanced Certificate Animation */
-@keyframes certificateGlow {
-    0% { box-shadow: 0 0 5px #ffd700, 0 0 10px #ffd700, 0 0 15px #ffd700; }
-    50% { box-shadow: 0 0 10px #ffd700, 0 0 20px #ffd700, 0 0 30px #ffd700; }
-    100% { box-shadow: 0 0 5px #ffd700, 0 0 10px #ffd700, 0 0 15px #ffd700; }
-}
-
-.certificate-container {
-    position: absolute;
-    top: 20px;
-    right: 20px;
-    width: 48px;
-    height: 48px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 10;
-    animation: certificateGlow 2s ease-in-out infinite;
-}
-
-/* Updated Lock Overlay */
 .lock-overlay {
     position: absolute;
     top: 50%;
@@ -149,33 +119,37 @@ st.markdown("""
     box-shadow: 0 2px 8px rgba(0,0,0,0.3);
 }
 
-.lock-overlay::before {
-    content: '';
-    position: absolute;
-    width: 14px;
-    height: 14px;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23ffffff'%3E%3Cpath d='M12 1C8.676 1 6 3.676 6 7v2H4v14h16V9h-2V7c0-3.324-2.676-6-6-6zm0 2c2.276 0 4 1.724 4 4v2H8V7c0-2.276 1.724-4 4-4z'/%3E%3C/svg%3E");
-    background-repeat: no-repeat;
-    background-position: center;
+.lock-overlay.locked {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
 }
 
-.lock-overlay.unlocked::before {
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23ffffff'%3E%3Cpath d='M12 1C8.676 1 6 3.676 6 7v2h2V7c0-2.276 1.724-4 4-4s4 1.724 4 4h2c0-3.324-2.676-6-6-6zm-8 8v14h16V9H4zm8 4c1.1 0 2 .9 2 2s-.9 2-2 2-2-.9-2-2 .9-2 2-2z'/%3E%3C/svg%3E");
+.lock-overlay.unlocked {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0);
 }
 
-/* Certificate Badge Counter */
 .certificate-count {
     position: absolute;
     bottom: -10px;
     right: -10px;
-    background: linear-gradient(135deg, #ff6b6b, #ff8e8e);
-    color: white;
+    background: #222;
+    color: #fff;
     font-size: 12px;
     padding: 2px 8px;
     border-radius: 10px;
     border: 2px solid #fff;
     box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-    font-weight: bold;
+}
+
+@keyframes unlockAnimation {
+    0% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+    50% { transform: translate(-50%, -50%) scale(1.2); opacity: 0.5; }
+    100% { transform: translate(-50%, -50%) scale(0); opacity: 0; }
+}
+
+.lock-overlay.unlocking {
+    animation: unlockAnimation 0.5s ease forwards;
 }
 </style>
 """, unsafe_allow_html=True)
@@ -1470,10 +1444,8 @@ elif st.session_state.quiz_started and not st.session_state.quiz_completed:
     
     st.markdown(f"""
     <div class="certificate-container">
-        <div class="certificate-icon" style="background: none; box-shadow: none;">
-            {"<img src='https://www.svgrepo.com/show/502556/certificate-award.svg' width='48' height='48' style='display:block;' />" if is_certificate_unlocked else ""}
-            <div class="lock-overlay {'unlocked' if is_certificate_unlocked else 'locked'}" style="{ 'display:none;' if is_certificate_unlocked else ''}">🔒</div>
-            {"" if is_certificate_unlocked else "<div style='font-size:30px;position:absolute;top:8px;left:8px;'>📜</div>"}
+        <div class="certificate-icon">
+            <div class="lock-overlay {('unlocked' if is_certificate_unlocked else 'locked')}">🔒</div>
         </div>
         <div class="certificate-count">{correct_answers}/5</div>
     </div>
@@ -2018,19 +1990,9 @@ elif st.session_state.quiz_completed:
     
         st.markdown(f"""
         <div style="text-align: center; margin-bottom: 2rem;">
-            <div class="certificate-container">
-                <div class="certificate-icon">
-                    <svg class="certificate-svg" viewBox="0 0 24 24" width="32" height="32">
-                        <defs>
-                            <linearGradient id="certGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-                                <stop offset="0%" style="stop-color:#ffd700;stop-opacity:1" />
-                                <stop offset="100%" style="stop-color:#ffed4a;stop-opacity:1" />
-                            </linearGradient>
-                        </defs>
-                        <path fill="url(#certGrad)" d="M21,4h-18c-1.657,0-3,1.343-3,3v10c0,1.657,1.343,3,3,3h18c1.657,0,3-1.343,3-3v-10c0-1.657-1.343-3-3-3zM12,17l-4-4h8l-4,4z" />
-                        <circle fill="#ffffff" cx="12" cy="10" r="3" />
-                    </svg>
-                    <div class="lock-overlay {('unlocked' if is_certificate_unlocked else 'locked')}"></div>
+            <div class="certificate-container" style="position: relative; display: inline-block; margin: 0 auto;">
+                <div class="certificate-icon" style="transform: scale(1.5);">
+                    <div class="lock-overlay {('unlocked' if is_certificate_unlocked else 'locked')}">🔒</div>
                 </div>
                 <div class="certificate-count">{correct_answers}/5</div>
             </div>
