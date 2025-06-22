@@ -1160,12 +1160,12 @@ if not st.session_state.quiz_started:
     st.markdown("""
     <div class="hero-container">
         <div style="text-align: center;">
-            <div class="hero-badge">🚀 Next-Gen AI Learning Platform</div>
+            <div class="hero-badge">🚀 Practice SQL with AI Mentor</div>
         </div>
-        <h1 class="hero-title" style="text-align: center;">Master SQL Like Never Before</h1>
+        <h1 class="hero-title" style="text-align: center;">Sharpen Your SQL Skills</h1>
         <p class="hero-subtitle" style="text-align: center;">
-            Experience the future of learning with our advanced AI-powered platform.<br>
-            Join <strong>100,000+ developers</strong> who've transformed their careers with immersive 3D learning.
+            Practice real SQL queries, get instant feedback, and become job-ready with our AI-powered SQL practice bot.<br>
+            Join <strong>100,000+ learners</strong> improving their SQL one query at a time.
         </p>
     </div>
     """, unsafe_allow_html=True)
