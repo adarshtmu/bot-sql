@@ -73,15 +73,16 @@ st.markdown(hide_streamlit_style, unsafe_allow_html=True)
 st.markdown("""
 <style>
 .certificate-container {
-    position: absolute;
-    top: 20px;
-    right: 20px;
-    width: 48px;
-    height: 48px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 10;
+    position: static !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: flex-start !important;
+    width: 70px !important;
+    height: auto !important;
+    margin: 0 auto !important;
+    box-shadow: none !important;
+    background: none !important;
 }
 
 .certificate-icon {
@@ -126,6 +127,7 @@ st.markdown("""
 }
 
 .certificate-count {
+    margin-top: 4px !important;
     position: absolute;
     bottom: -10px;
     right: -10px;
