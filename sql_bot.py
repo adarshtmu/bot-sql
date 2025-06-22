@@ -1441,7 +1441,6 @@ elif st.session_state.quiz_started and not st.session_state.quiz_completed:
     st.markdown(f"""
     <div class="certificate-container">
         <div class="certificate-icon">
-            <!-- Advanced Certificate SVG Icon with Ribbon, Gradient, Seal, and Text -->
             <svg width="70" height="70" viewBox="0 0 54 54" fill="none">
               <defs>
                 <radialGradient id="goldRadial" cx="50%" cy="40%" r="70%">
@@ -1462,30 +1461,27 @@ elif st.session_state.quiz_started and not st.session_state.quiz_completed:
                     <feDropShadow dx="0" dy="2" stdDeviation="3" flood-color="#bfa400" flood-opacity="0.35"/>
                 </filter>
               </defs>
-              <!-- Certificate Body with gold gradient and shadow -->
+              <!-- Certificate Body -->
               <rect x="8" y="12" width="38" height="28" rx="5" fill="url(#goldRadial)" stroke="#e3c04f" stroke-width="2.2" filter="url(#shadow)"/>
               
               <!-- Certificate Text -->
-              <text x="27" y="24" text-anchor="middle" font-family="Arial" font-size="4.5" font-weight="bold" fill="#ffffff" filter="url(#shadow)">
+              <text x="27" y="25" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" font-size="6" font-weight="bold" fill="#fff">
                 CERTIFICATE
               </text>
               
               <!-- Decorative Lines -->
-              <rect x="15" y="26" width="24" height="1" rx="0.5" fill="#fffde2" opacity="0.8"/>
-              <rect x="15" y="29" width="18" height="1" rx="0.5" fill="#fffde2" opacity="0.7"/>
-              <rect x="15" y="32" width="13" height="1" rx="0.5" fill="#fffde2" opacity="0.6"/>
+              <rect x="15" y="28" width="24" height="1" rx="0.5" fill="#fffde2" opacity="0.8"/>
+              <rect x="15" y="31" width="18" height="1" rx="0.5" fill="#fffde2" opacity="0.7"/>
+              <rect x="15" y="34" width="13" height="1" rx="0.5" fill="#fffde2" opacity="0.6"/>
               
               <!-- Ribbon -->
               <path d="M13 40 l3 8 9-5 9 5 3-8" fill="url(#redRibbon)" stroke="#a30000" stroke-width="1.2"/>
-              
               <!-- Seal -->
               <circle cx="27" cy="38" r="6" fill="url(#sealRadial)" stroke="#ffd700" stroke-width="2"/>
               <circle cx="27" cy="38" r="2.8" fill="#fffbe5" opacity="0.8"/>
-              
               <!-- Seal star -->
-              <polygon points="27,34.5 28,37 30.7,37.2 28.5,38.7 29.2,41.3 27,39.8 24.8,41.3 25.5,38.7 23.3,37.2 26,37" 
+              <polygon points="27,34.5 28,37 30.7,37.2 28.5,38.7 29.2,41.3 27,39.8 24.8,41.3 25.5,38.7 23.3,37.2 26,37"
                      fill="#ffaa00" stroke="#e3c04f" stroke-width="0.4"/>
-              
               <!-- Shine effect -->
               <ellipse cx="21" cy="17" rx="4" ry="1.2" fill="#fff" opacity="0.28" transform="rotate(-9 21 17)"/>
             </svg>
