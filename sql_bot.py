@@ -1256,9 +1256,50 @@ if not st.session_state.quiz_started:
     st.markdown('<div style="text-align: center; margin: 3rem 0;">', unsafe_allow_html=True)
 
     # Create three columns, use the center one for your button
+    
+    # You must have your image accessible, either locally or hosted.
+    # For this example, let's assume you have uploaded your image to the Streamlit project directory as "arrow_circle.png".
+    
     col1, col2, col3 = st.columns([1, 2, 1])
     with col2:
-        if st.button("🚀 Start Your SQL Journey", key="start_quiz", use_container_width=True):
+        # Use Markdown with HTML for custom button look
+        button_html = f"""
+        <style>
+        .circle-arrow-btn {{
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #f0f2f6;
+            border: none;
+            border-radius: 8px;
+            padding: 10px 24px;
+            cursor: pointer;
+            font-size: 1.1em;
+            width: 100%;
+            transition: background 0.2s;
+        }}
+        .circle-arrow-btn:hover {{
+            background: #e5e7eb;
+        }}
+        .circle-arrow-img {{
+            height: 32px;
+            width: 32px;
+            margin-right: 12px;
+            vertical-align: middle;
+        }}
+        </style>
+        <form action="" method="post">
+            <button class="circle-arrow-btn" type="submit" name="start_quiz">
+                <img src="app/static/arrow_circle.png" class="circle-arrow-img"/>
+                Start Your SQL Journey
+            </button>
+        </form>
+        """
+    
+        st.markdown(button_html, unsafe_allow_html=True)
+    
+        # Button click logic
+        if st.session_state.get("start_quiz_clicked") or st.experimental_get_query_params().get("start_quiz"):
             st.session_state.quiz_started = True
             st.session_state.user_answers = []
             st.session_state.current_question = 0
@@ -1266,6 +1307,11 @@ if not st.session_state.quiz_started:
             st.success("🎉 Welcome to the future of learning!")
             st.balloons()
             st.rerun()
+        else:
+            # Detect click with query param workaround
+            import urllib.parse
+            if st.experimental_get_query_params().get("start_quiz") is not None:
+                st.session_state["start_quiz_clicked"] = True
 
     # --- ADVANCED STATS SECTION (REFACTORED) ---
     # By placing all cards inside one container, we let the CSS grid handle the responsive layout.
