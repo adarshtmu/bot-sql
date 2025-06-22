@@ -68,224 +68,85 @@ hide_streamlit_style = """
         }
     </style>
 """
+st.markdown(hide_streamlit_style, unsafe_allow_html=True)
 
-st.markdown(f"""
-<div class="certificate-container">
-    <div class="certificate-icon">
-        <!-- Modern Certificate SVG Icon with Animation -->
-        <svg width="120" height="120" viewBox="0 0 48 48" fill="none">
-            <!-- Outer Frame with Gradient -->
-            <rect x="4" y="4" width="40" height="34" rx="6" 
-                  fill="url(#certificateGradient)" 
-                  stroke="url(#borderGradient)" 
-                  stroke-width="2.5"
-                  class="certificate-frame"/>
-            
-            <!-- Inner Content Area -->
-            <rect x="8" y="8" width="32" height="16" rx="3" 
-                  fill="#ffffff" 
-                  stroke="#ffd700" 
-                  stroke-width="1.5"
-                  class="content-area"/>
-            
-            <!-- Decorative Lines -->
-            <path d="M12 14 h24 M12 18 h20" 
-                  stroke="#FFD700" 
-                  stroke-width="1.5" 
-                  stroke-linecap="round"
-                  class="decorative-lines"/>
-            
-            <!-- Medal/Seal -->
-            <circle cx="24" cy="30" r="6" 
-                    fill="url(#medalGradient)" 
-                    stroke="#B8860B" 
-                    stroke-width="2"
-                    class="medal"/>
-            
-            <!-- Ribbons -->
-            <path d="M19 32 l-4 8 M24 36 v8 M29 32 l4 8" 
-                  stroke="#B8860B" 
-                  stroke-width="2" 
-                  stroke-linecap="round"
-                  class="ribbons"/>
-            
-            <!-- Star in Medal -->
-            <path d="M24 26 L25.5 29 L29 29.5 L26.5 32 L27 35.5 L24 34 L21 35.5 L21.5 32 L19 29.5 L22.5 29 Z" 
-                  fill="#ffffff"
-                  class="star"/>
-                  
-            <!-- Gradient Definitions -->
-            <defs>
-                <linearGradient id="certificateGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                    <stop offset="0%" style="stop-color:#fff8e1"/>
-                    <stop offset="100%" style="stop-color:#ffe082"/>
-                </linearGradient>
-                
-                <linearGradient id="borderGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                    <stop offset="0%" style="stop-color:#ffd700"/>
-                    <stop offset="100%" style="stop-color:#daa520"/>
-                </linearGradient>
-                
-                <linearGradient id="medalGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                    <stop offset="0%" style="stop-color:#ffd700"/>
-                    <stop offset="100%" style="stop-color:#daa520"/>
-                </linearGradient>
-            </defs>
-        </svg>
-        
-        <!-- Enhanced Lock Overlay -->
-        <div class="lock-overlay {'unlocked' if is_certificate_unlocked else 'locked'}">
-            <span class="lock-icon">🔒</span>
-            <div class="lock-pulse"></div>
-        </div>
-    </div>
-    
-    <!-- Enhanced Progress Counter -->
-    <div class="certificate-progress">
-        <div class="progress-count">{correct_answers}/5</div>
-        <div class="progress-bar">
-            <div class="progress-fill" style="width: {(correct_answers/5)*100}%"></div>
-        </div>
-    </div>
-</div>
-
+st.markdown("""
 <style>
-/* Container Styles */
-.certificate-container {{
-    position: relative;
+.certificate-container {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    width: 48px;
+    height: 48px;
     display: flex;
-    flex-direction: column;
     align-items: center;
-    padding: 10px;
-    transition: transform 0.3s ease;
-}}
+    justify-content: center;
+    z-index: 10;
+}
 
-.certificate-container:hover {{
-    transform: translateY(-5px);
-}}
-
-/* Certificate Icon Styles */
-.certificate-icon {{
+.certificate-icon {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #ffd700 0%, #ffed4a 100%);
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(255, 215, 0, 0.3);
     position: relative;
-    filter: drop-shadow(0 8px 16px rgba(0,0,0,0.2));
-}}
+}
 
-/* SVG Animations */
-.certificate-frame {{
-    animation: glow 2s ease-in-out infinite alternate;
-}}
 
-.star {{
-    animation: twinkle 1.5s ease-in-out infinite alternate;
-}}
 
-.ribbons {{
-    animation: wave 3s ease-in-out infinite;
-}}
-
-/* Enhanced Lock Overlay */
-.lock-overlay {{
+.lock-overlay {
     position: absolute;
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    width: 20px;
-    height: 20px;
+    width: 24px;
+    height: 24px;
     background: rgba(0, 0, 0, 0.8);
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
     transition: all 0.3s ease;
-}}
+    border: 2px solid #fff;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+}
 
-.lock-icon {{
-    font-size: 12px;
-    color: white;
-}}
-
-.lock-pulse {{
-    position: absolute;
-    width: 100%;
-    height: 100%;
-    border-radius: 50%;
-    background: rgba(255, 215, 0, 0.3);
-    animation: pulse 2s ease-in-out infinite;
-}}
-
-/* Progress Bar Styles */
-.certificate-progress {{
-    margin-top: 10px;
-    width: 100%;
-    text-align: center;
-}}
-
-.progress-count {{
-    font-size: 14px;
-    font-weight: bold;
-    color: #ffd700;
-    text-shadow: 0 2px 4px rgba(0,0,0,0.2);
-    margin-bottom: 5px;
-}}
-
-.progress-bar {{
-    width: 100%;
-    height: 6px;
-    background: rgba(255,255,255,0.2);
-    border-radius: 3px;
-    overflow: hidden;
-}}
-
-.progress-fill {{
-    height: 100%;
-    background: linear-gradient(90deg, #ffd700, #daa520);
-    border-radius: 3px;
-    transition: width 0.5s ease;
-}}
-
-/* Animations */
-@keyframes glow {{
-    from {{ filter: drop-shadow(0 0 2px #ffd700); }}
-    to {{ filter: drop-shadow(0 0 8px #ffd700); }}
-}}
-
-@keyframes twinkle {{
-    from {{ opacity: 0.7; }}
-    to {{ opacity: 1; }}
-}}
-
-@keyframes wave {{
-    0%, 100% {{ transform: rotate(0deg); }}
-    50% {{ transform: rotate(2deg); }}
-}}
-
-@keyframes pulse {{
-    0% {{ transform: scale(1); opacity: 1; }}
-    100% {{ transform: scale(1.5); opacity: 0; }}
-}}
-
-/* Locked/Unlocked States */
-.lock-overlay.locked {{
+.lock-overlay.locked {
     opacity: 1;
     transform: translate(-50%, -50%) scale(1);
-}}
+}
 
-.lock-overlay.unlocked {{
+.lock-overlay.unlocked {
     opacity: 0;
     transform: translate(-50%, -50%) scale(0);
-}}
+}
 
-/* Responsive Design */
-@media (max-width: 768px) {{
-    .certificate-icon svg {{
-        width: 100px;
-        height: 100px;
-    }}
-    
-    .progress-count {{
-        font-size: 12px;
-    }}
-}}
+.certificate-count {
+    position: absolute;
+    bottom: -10px;
+    right: -10px;
+    background: #222;
+    color: #fff;
+    font-size: 12px;
+    padding: 2px 8px;
+    border-radius: 10px;
+    border: 2px solid #fff;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
+@keyframes unlockAnimation {
+    0% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+    50% { transform: translate(-50%, -50%) scale(1.2); opacity: 0.5; }
+    100% { transform: translate(-50%, -50%) scale(0); opacity: 0; }
+}
+
+.lock-overlay.unlocking {
+    animation: unlockAnimation 0.5s ease forwards;
+}
 </style>
 """, unsafe_allow_html=True)
 # --- Set up Gemini API ---
@@ -1581,14 +1442,14 @@ elif st.session_state.quiz_started and not st.session_state.quiz_completed:
     <div class="certificate-container">
         <div class="certificate-icon">
             <!-- Advanced Certificate SVG Icon -->
-            <svg width="100" height="100" viewBox="0 0 36 36" fill="none">
+            <svg width="36" height="36" viewBox="0 0 36 36" fill="none">
               <rect x="4" y="6" width="28" height="24" rx="4" fill="#fff8e1" stroke="#ffd700" stroke-width="2"/>
               <rect x="8" y="10" width="20" height="10" rx="2" fill="#fff" stroke="#ffd700" stroke-width="1"/>
               <circle cx="18" cy="24" r="4" fill="#ffd700" stroke="#c9a200" stroke-width="1.5"/>
               <path d="M18 28 v6 M18 34 l-2 -2 M18 34 l2 -2" stroke="#c9a200" stroke-width="1.5" stroke-linecap="round"/>
               <path d="M14 26 l-3 5 M22 26 l3 5" stroke="#c9a200" stroke-width="1.5" stroke-linecap="round"/>
             </svg>
-                    <div class="lock-overlay {'unlocked' if is_certificate_unlocked else 'locked'}">🔒</div>
+            <div class="lock-overlay {('unlocked' if is_certificate_unlocked else 'locked')}">🔒</div>
         </div>
         <div class="certificate-count">{correct_answers}/5</div>
     </div>
@@ -2347,6 +2208,7 @@ elif st.session_state.quiz_completed:
     display_advanced_results_page(final_score , st.session_state.user_answers, analyze_performance)
     
     
+
 
 
 
