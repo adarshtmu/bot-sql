@@ -103,8 +103,8 @@ st.markdown("""
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    width: 24px;
-    height: 24px;
+    width: 32px;
+    height: 32px;
     background: rgba(0, 0, 0, 0.8);
     border-radius: 50%;
     display: flex;
