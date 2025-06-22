@@ -1440,7 +1440,6 @@ elif st.session_state.quiz_started and not st.session_state.quiz_completed:
     st.markdown(f"""
     <div class="certificate-container" style="position: relative; display: inline-block; float: right;">
         <div class="certificate-icon" style="position: relative; display: inline-block;">
-            <!-- Overlay text on icon -->
             <span style="
                 position: absolute;
                 top: 4px;
@@ -1456,7 +1455,6 @@ elif st.session_state.quiz_started and not st.session_state.quiz_completed:
                 z-index: 2;
                 pointer-events: none;
                 ">certificate</span>
-            <!-- Certificate SVG Icon with NO shadow -->
             <svg width="70" height="70" viewBox="0 0 54 54" fill="none">
               <defs>
                 <radialGradient id="goldRadial" cx="50%" cy="40%" r="70%">
@@ -1474,8 +1472,9 @@ elif st.session_state.quiz_started and not st.session_state.quiz_completed:
                   <stop offset="100%" stop-color="#c49000"/>
                 </radialGradient>
               </defs>
-              <!-- Certificate Body with gold gradient -->
-              <rect x="8" y="12" width="38" height="28" rx="5" fill="url(#goldRadial)" stroke="#e3c04f" stroke-width="2.2"/>
+              <!-- Certificate Body with gold gradient, NO shadow -->
+              <rect x="8" y="12" width="38" height="28" rx="5"
+                    fill="url(#goldRadial)" stroke="#e3c04f" stroke-width="2.2"/>
               <!-- Inner Text Lines (simulate text) -->
               <rect x="15" y="20" width="24" height="3" rx="1.3" fill="#fffde2" opacity="0.8"/>
               <rect x="15" y="25" width="18" height="2.2" rx="1.1" fill="#fffde2" opacity="0.7"/>
