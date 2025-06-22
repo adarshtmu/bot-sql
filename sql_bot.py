@@ -96,15 +96,17 @@ st.markdown("""
     position: relative;
 }
 .certificate-hint {
-    margin-top: 7px;
+    margin-top: 10px;
     color: #b38600;
     font-size: 1.05rem;
     font-weight: 500;
     text-align: center;
-    background: rgba(255, 236, 102, 0.2);
+    background: #fff8e1;
     border-radius: 8px;
-    padding: 2px 8px;
-    letter-spacing: 0.02em;
+    padding: 4px 12px;
+    letter-spacing: 0.01em;
+    display: inline-block;
+    box-shadow: 0 1px 7px rgba(255,215,0,0.12);
 }
 
 .lock-overlay {
@@ -1460,8 +1462,7 @@ elif st.session_state.quiz_started and not st.session_state.quiz_completed:
             </svg>
             <div class="lock-overlay {('unlocked' if is_certificate_unlocked else 'locked')}">🔒</div>
         </div>
-        <div class="certificate-count">{correct_answers}/5</div>
-        <div class="certificate-hint">Unlock the Certificate by answering 3 or more correctly!</div>
+        <div class="certificate-hint">Unlock Certificate ({correct_answers}/5)</div>
     </div>
     """, unsafe_allow_html=True)
 
