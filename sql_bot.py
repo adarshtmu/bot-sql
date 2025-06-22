@@ -1441,7 +1441,7 @@ elif st.session_state.quiz_started and not st.session_state.quiz_completed:
     st.markdown(f"""
     <div class="certificate-container">
         <div class="certificate-icon">
-            <!-- Advanced Certificate SVG Icon with Ribbon, Gradient, and Seal -->
+            <!-- Advanced Certificate SVG Icon, NO yellow box behind -->
             <svg width="54" height="54" viewBox="0 0 54 54" fill="none">
               <defs>
                 <radialGradient id="goldRadial" cx="50%" cy="40%" r="70%">
@@ -1462,8 +1462,9 @@ elif st.session_state.quiz_started and not st.session_state.quiz_completed:
                     <feDropShadow dx="0" dy="2" stdDeviation="3" flood-color="#bfa400" flood-opacity="0.35"/>
                 </filter>
               </defs>
-              <!-- Certificate Body with gold gradient and shadow -->
-              <rect x="8" y="12" width="38" height="28" rx="5" fill="url(#goldRadial)" stroke="#e3c04f" stroke-width="2.2" filter="url(#shadow)"/>
+              <!-- NO yellow box here! -->
+              <!-- Certificate main outline (optional, can be removed for even more minimal look) -->
+              <rect x="8" y="12" width="38" height="28" rx="5" fill="url(#goldRadial)" stroke="#e3c04f" stroke-width="2.2" filter="url(#shadow)" opacity="0.0"/>
               <!-- Inner Text Lines (simulate text) -->
               <rect x="15" y="20" width="24" height="3" rx="1.3" fill="#fffde2" opacity="0.8"/>
               <rect x="15" y="25" width="18" height="2.2" rx="1.1" fill="#fffde2" opacity="0.7"/>
