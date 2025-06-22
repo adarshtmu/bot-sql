@@ -1260,8 +1260,9 @@ if not st.session_state.quiz_started:
     # You must have your image accessible, either locally or hosted.
     # For this example, let's assume you have uploaded your image to the Streamlit project directory as "arrow_circle.png".
     
-    col1, col2, col3 = st.columns([1, 2, 1]) with col2:
-        if st.button("🚀 Start Your SQL Journey", key="start_quiz", use_container_width=True):
+    col1, col2, col3 = st.columns([1, 2, 1])
+    with col2:
+       if st.button("🚀 Start Your SQL Journey", key="start_quiz", use_container_width=True):
             st.session_state.quiz_started = True
             st.session_state.user_answers = []
             st.session_state.current_question = 0
@@ -1269,6 +1270,7 @@ if not st.session_state.quiz_started:
             st.success("🎉 Welcome to the future of learning!")
             st.balloons()
             st.rerun()
+
 
     # --- ADVANCED STATS SECTION (REFACTORED) ---
     # By placing all cards inside one container, we let the CSS grid handle the responsive layout.
