@@ -1280,22 +1280,22 @@ if not st.session_state.quiz_started:
     </div>
     """, unsafe_allow_html=True)
 
-    # --- ADDITIONAL INTERACTIVE ELEMENTS ---
-    st.markdown("""
-    <div style="text-align: center; margin: 4rem 0 2rem 0;">
-        <div style="background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05)); 
-                    backdrop-filter: blur(25px); 
-                    border: 1px solid rgba(255, 255, 255, 0.2); 
-                    border-radius: 25px; 
-                    padding: 2rem; 
-                    max-width: 600px; 
-                    margin: 0 auto;
-                    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);">
-            <h3 style="color: #ffffff; font-size: 1.8rem; font-weight: 700; margin-bottom: 1rem;">Ready to Transform Your Career?</h3>
-            <p style="color: rgba(255, 255, 255, 0.8); font-size: 1.1rem; margin-bottom: 0;">Join thousands of developers who've accelerated their careers with our cutting-edge platform.</p>
-        </div>
-    </div>
-    """, unsafe_allow_html=True)
+    # # --- ADDITIONAL INTERACTIVE ELEMENTS ---
+    # st.markdown("""
+    # <div style="text-align: center; margin: 4rem 0 2rem 0;">
+    #     <div style="background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05)); 
+    #                 backdrop-filter: blur(25px); 
+    #                 border: 1px solid rgba(255, 255, 255, 0.2); 
+    #                 border-radius: 25px; 
+    #                 padding: 2rem; 
+    #                 max-width: 600px; 
+    #                 margin: 0 auto;
+    #                 box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);">
+    #         <h3 style="color: #ffffff; font-size: 1.8rem; font-weight: 700; margin-bottom: 1rem;">Ready to Transform Your Career?</h3>
+    #         <p style="color: rgba(255, 255, 255, 0.8); font-size: 1.1rem; margin-bottom: 0;">Join thousands of developers who've accelerated their careers with our cutting-edge platform.</p>
+    #     </div>
+    # </div>
+    # """, unsafe_allow_html=True)
 
 # The rest of your quiz logic would go here, after the 'if not st.session_state.quiz_started:' block.
 # Example:
