@@ -131,7 +131,7 @@ st.markdown("""
     right: -10px;
     background: #222;
     color: #fff;
-    font-size: 12px;
+    font-size: 10px;
     padding: 2px 8px;
     border-radius: 5px;
     border: 2px solid #fff;
