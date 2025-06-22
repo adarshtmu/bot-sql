@@ -856,58 +856,74 @@ if not st.session_state.quiz_started:
     
 
     /* Updated CTA Button with yellow highlight */
-    .cta-button {
-        background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%) !important;  /* Yellow to Orange gradient */
-        color: #000000 !important;  /* Black text for better contrast on yellow */
+    /* Ultra-Modern Glowing Yellow Button */
+    .advanced-cta-btn {
+        display: inline-block;
+        background: linear-gradient(90deg, #ffe259 0%, #ffa751 100%);
+        color: #2d2d2d !important;
+        font-size: 2.2rem;
+        font-weight: 800;
+        padding: 2.2rem 5.5rem;
         border: none;
-        padding: 2rem 5rem !important;  /* Increased padding for bigger size */
-        border-radius: 60px;
-        font-size: 1.8rem !important;  /* Larger font size */
-        font-weight: 700;
-        cursor: pointer;
-        box-shadow: 0 20px 60px rgba(255, 215, 0, 0.4),
-                    0 10px 30px rgba(255, 165, 0, 0.3),
-                    inset 0 1px 0 rgba(255, 255, 255, 0.3);
-        position: relative;
-        transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-        outline: none;
-        letter-spacing: 1px;
+        border-radius: 80px;
+        box-shadow: 0 8px 40px 0 rgba(255, 215, 0, 0.4), 0 2px 8px 0 rgba(255, 140, 0, 0.2);
         text-transform: uppercase;
+        letter-spacing: 2px;
+        position: relative;
+        transition: 
+            transform 0.2s cubic-bezier(.4,2.3,.3,1),
+            box-shadow 0.2s cubic-bezier(.4,2.3,.3,1),
+            background 0.3s;
+        outline: none;
         overflow: hidden;
-        transform: perspective(1000px) rotateX(15deg);
     }
     
-    .cta-button:hover {
-        transform: perspective(1000px) rotateX(0deg) translateY(-10px) scale(1.05);
-        box-shadow: 0 30px 80px rgba(255, 215, 0, 0.5),
-                    0 20px 50px rgba(255, 165, 0, 0.4);
-        background: linear-gradient(135deg, #FFE44D 0%, #FFB347 100%) !important;  /* Lighter yellow on hover */
+    .advanced-cta-btn::after {
+        /* Animate shimmer */
+        content: "";
+        position: absolute;
+        top: 0; left: -75%;
+        width: 50%; height: 100%;
+        background: linear-gradient(120deg, rgba(255,255,200,0.0) 0%, rgba(255,255,255,0.4) 50%, rgba(255,255,200,0.0) 100%);
+        transform: skewX(-20deg);
+        animation: shimmer 2.8s infinite;
     }
     
-    .cta-button:active {
-        transform: perspective(1000px) rotateX(5deg) translateY(-5px) scale(1.02);
+    @keyframes shimmer {
+        0% { left: -75%;}
+        70% { left: 120%;}
+        100% { left: 120%;}
     }
     
-    /* Update the button style specifically */
-    .stButton > button {
-        background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%) !important;
-        color: #000000 !important;
-        border-radius: 60px !important;
-        border: none !important;
-        padding: 1.5rem 4rem !important;
-        font-weight: 700 !important;
-        font-size: 1.8rem !important;
-        transition: all 0.3s ease !important;
-        box-shadow: 0 15px 35px rgba(255, 215, 0, 0.4) !important;
-        text-transform: uppercase !important;
-        letter-spacing: 1px !important;
+    .advanced-cta-btn:hover, .advanced-cta-btn:focus {
+        background: linear-gradient(90deg, #ffe259 0%, #ffba08 100%);
+        color: #111 !important;
+        transform: scale(1.07) rotate(-1deg);
+        box-shadow: 0 16px 60px 0 rgba(255, 215, 0, 0.6), 0 4px 16px 0 rgba(255, 140, 0, 0.3);
+        border: none;
     }
     
-    .stButton > button:hover {
-        transform: translateY(-3px) !important;
-        box-shadow: 0 20px 45px rgba(255, 215, 0, 0.5) !important;
-        background: linear-gradient(135deg, #FFE44D 0%, #FFB347 100%) !important;
+    /* Glowing effect */
+    .advanced-cta-btn:active {
+        box-shadow: 0 0 0 8px rgba(255,235,59,0.19);
+        transform: scale(0.98);
     }
+    
+    /* Add animated emoji/icon before text */
+    .advanced-cta-btn .icon {
+        font-size: 2.2rem;
+        margin-right: 1rem;
+        vertical-align: middle;
+        display: inline-block;
+        animation: bounce 1.2s infinite alternate;
+    }
+    
+    @keyframes bounce {
+        0% { transform: translateY(0);}
+        100% { transform: translateY(-6px);}
+    }
+    </style>
+    """, unsafe_allow_html=True)
     
     /* Advanced Feature Cards */
     .features-grid {
