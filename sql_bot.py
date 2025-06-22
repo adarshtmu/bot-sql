@@ -151,6 +151,10 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 
+import streamlit as st
+
+# Save your new arrow-in-circle image (Image 3) as 'arrow_circle_bold.png' in your app directory.
+
 st.markdown("""
     <style>
     .sql-journey-btn {
@@ -174,8 +178,8 @@ st.markdown("""
         box-shadow: 0 8px 32px 0 rgba(255, 215, 0, 0.22);
     }
     .arrow-icon {
-        width: 32px;
-        height: 32px;
+        width: 36px;
+        height: 36px;
         margin-right: 16px;
         vertical-align: middle;
     }
@@ -185,16 +189,27 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-# HTML for the button
 button_html = """
     <form action="" method="post">
       <button class="sql-journey-btn" type="submit" name="start_quiz">
-        <img src="arrow_circle.png" class="arrow-icon" alt="Start"/>
+        <img src="arrow_circle_bold.png" class="arrow-icon" alt="Start"/>
         <span class="sql-journey-btn-text">START YOUR SQL JOURNEY</span>
       </button>
     </form>
 """
 
+col1, col2, col3 = st.columns([1,2,1])
+with col2:
+    st.markdown(button_html, unsafe_allow_html=True)
+    # Button logic (for actual Streamlit logic, use a hidden st.button or st.form as before)
+    if st.button("Start Quiz (Hidden)", key="start_quiz_hidden_2", help="Internal button", use_container_width=True):
+        st.session_state.quiz_started = True
+        st.session_state.user_answers = []
+        st.session_state.current_question = 0
+        st.session_state.quiz_completed = False
+        st.success("🎉 Welcome to the future of learning!")
+        st.balloons()
+        st.rerun()
 
 # --- Set up Gemini API ---
 gemini_api_key = "AIzaSyAfzl_66GZsgaYjAM7cT2djVCBCAr86t2k"  # Replace with your Gemini API Key
