@@ -1439,7 +1439,7 @@ elif st.session_state.quiz_started and not st.session_state.quiz_completed:
     is_certificate_unlocked = correct_answers >= 3
     
     st.markdown(f"""
-    <div style="display: flex; flex-direction: column; align-items: center; width: 90px; margin-top-right: 10px;">
+    <div style="display: flex; flex-direction: column; align-items: center; width: 90px; margin-top: 10px;">
         <span style="
             color: #fff;
             font-size: 12px;
@@ -1449,7 +1449,7 @@ elif st.session_state.quiz_started and not st.session_state.quiz_completed:
             opacity: 0.85;
             text-align: center;
             width: 100%;
-        ">certificate</span>
+        # ">certificate</span>
         <div class="certificate-container">
             <div class="certificate-icon">
                 <svg width="70" height="70" viewBox="0 0 54 54" fill="none">
