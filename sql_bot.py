@@ -1441,26 +1441,19 @@ elif st.session_state.quiz_started and not st.session_state.quiz_completed:
     st.markdown(f"""
     <div class="certificate-container">
         <div class="certificate-icon">
-            <!-- Enhanced 3D Certificate SVG Icon -->
+            <!-- Advanced 3D Certificate SVG Icon -->
             <svg width="54" height="54" viewBox="0 0 54 54" fill="none">
               <defs>
-                <!-- Enhanced gradients for 3D effect -->
                 <linearGradient id="paperGrad" x1="0%" y1="0%" x2="100%" y2="100%">
                   <stop offset="0%" stop-color="#ffffff"/>
                   <stop offset="45%" stop-color="#f8f8f8"/>
                   <stop offset="100%" stop-color="#e8e8e8"/>
-                </linearGradient>
-                <linearGradient id="edgeGrad" x1="0%" y1="0%" x2="100%" y2="0%">
-                  <stop offset="0%" stop-color="#d4d4d4"/>
-                  <stop offset="50%" stop-color="#f8f8f8"/>
-                  <stop offset="100%" stop-color="#d4d4d4"/>
                 </linearGradient>
                 <linearGradient id="sealGrad" x1="30%" y1="20%" x2="70%" y2="80%">
                   <stop offset="0%" stop-color="#ffd700"/>
                   <stop offset="50%" stop-color="#ffc800"/>
                   <stop offset="100%" stop-color="#ffb700"/>
                 </linearGradient>
-                <!-- Multiple shadows for depth -->
                 <filter id="paper-shadow" x="-20%" y="-20%" width="140%" height="140%">
                   <feDropShadow dx="1" dy="1" stdDeviation="0.5" flood-color="#000" flood-opacity="0.3"/>
                   <feDropShadow dx="2" dy="2" stdDeviation="1" flood-color="#000" flood-opacity="0.2"/>
@@ -1470,36 +1463,35 @@ elif st.session_state.quiz_started and not st.session_state.quiz_completed:
                   <feDropShadow dx="0" dy="2" stdDeviation="1" flood-color="#000" flood-opacity="0.3"/>
                 </filter>
               </defs>
-    
-              <!-- 3D Certificate Edge (side) -->
-              <path d="M10 14 L12 12 L42 12 L40 14 Z" fill="#d4d4d4"/>
-              <path d="M40 14 L42 12 L42 38 L40 40 Z" fill="#b4b4b4"/>
-    
-              <!-- Main Certificate Body with 3D lighting -->
+              <!-- 3D shadow below certificate -->
+              <ellipse cx="25" cy="44" rx="15" ry="4" fill="#000" opacity="0.18"/>
+              <!-- Certificate Edges -->
+              <path d="M10 14 L12 12 L42 12 L40 14 Z" fill="#bdbdbd"/>
+              <path d="M40 14 L42 12 L42 38 L40 40 Z" fill="#888888"/>
+              <!-- Main certificate body -->
               <rect x="10" y="14" width="30" height="26" rx="2" fill="url(#paperGrad)" filter="url(#paper-shadow)"/>
-              
-              <!-- Decorative Lines with 3D effect -->
+              <!-- Highlight/shine for bevel -->
+              <rect x="10" y="14" width="30" height="6" rx="3" fill="#fff" opacity="0.18"/>
+              <!-- Decorative lines -->
               <rect x="14" y="20" width="22" height="2" rx="1" fill="#e0e0e0" opacity="0.8"/>
               <rect x="14" y="24" width="18" height="2" rx="1" fill="#d0d0d0" opacity="0.7"/>
               <rect x="14" y="28" width="14" height="2" rx="1" fill="#c0c0c0" opacity="0.6"/>
-    
-              <!-- 3D Seal -->
+              <!-- 3D Seal with shadow and inner ring -->
               <circle cx="25" cy="34" r="6" fill="url(#sealGrad)" filter="url(#seal-shadow)"/>
+              <circle cx="25" cy="34" r="4.6" fill="none" stroke="#b79e38" stroke-width="1.3" opacity="0.25"/>
               <circle cx="25" cy="34" r="4" fill="none" stroke="#fff" stroke-width="0.5" opacity="0.6"/>
               <path d="M25 30 L26 32 L28 32.5 L26.5 34 L27 36 L25 35 L23 36 L23.5 34 L22 32.5 L24 32 Z" 
-                    fill="#ffffff" opacity="0.8"/>
-    
-              <!-- Ribbon with 3D folds -->
-              <path d="M20 38 L25 42 L30 38" fill="#ff4444" stroke="#cc0000" stroke-width="1"/>
+                fill="#ffffff" opacity="0.8"/>
+              <!-- Ribbon with 3D shadow -->
+              <path d="M20 38 L25 42 L30 38" fill="#ff4444" stroke="#cc0000" stroke-width="1" filter="url(#paper-shadow)"/>
               <path d="M20 38 L22 44 L25 42 L28 44 L30 38" fill="#ff6666" stroke="#cc0000" stroke-width="1"/>
-    
-              <!-- Highlight/Shine Effects -->
+              <!-- Shine Effects -->
               <path d="M12 16 L38 16 L37 17 L13 17 Z" fill="#ffffff" opacity="0.5"/>
               <path d="M14 26 C18 25, 32 25, 36 26" stroke="#ffffff" stroke-width="0.5" opacity="0.3"/>
             </svg>
-            <div class="lock-overlay {('unlocked' if is_certificate_unlocked else 'locked')}">🔒</div>
+            <div class="lock-overlay locked">🔒</div>
         </div>
-        <div class="certificate-count">{correct_answers}/5</div>
+        <div class="certificate-count">0/5</div>
     </div>
     """, unsafe_allow_html=True)
         
