@@ -69,7 +69,17 @@ hide_streamlit_style = """
     </style>
 """
 st.markdown(hide_streamlit_style, unsafe_allow_html=True)
-
+certificate_svg = """
+<svg width="48" height="48" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+ <rect x="6" y="10" width="52" height="38" rx="4" fill="#fffbe6" stroke="#333" stroke-width="2"/>
+ <rect x="12" y="16" width="40" height="26" rx="2" fill="#f9e79f" stroke="#d4af37" stroke-width="1.5"/>
+ <rect x="18" y="24" width="28" height="4" rx="2" fill="#fff" />
+ <rect x="18" y="30" width="20" height="3" rx="1.5" fill="#fff" />
+ <circle cx="50" cy="38" r="5" fill="#ffd700" stroke="#d4af37" stroke-width="1.5"/>
+ <path d="M50 43 L52 47 L48 47 Z" fill="#d4af37"/>
+ <path d="M50 43 L51.5 48 L48.5 48 Z" fill="#ffd700"/>
+</svg>
+"""
 st.markdown("""
 <style>
 .certificate-container {
@@ -78,57 +88,31 @@ st.markdown("""
     right: 20px;
     width: 48px;
     height: 48px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
     z-index: 10;
 }
-
-.certificate-icon {
-    width: 100%;
-    height: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: linear-gradient(135deg, #ffd700 0%, #ffed4a 100%);
-    border-radius: 8px;
-    box-shadow: 0 4px 12px rgba(255, 215, 0, 0.3);
-    position: relative;
-}
-
-.certificate-icon::before {
-    content: '📜';  /* Certificate emoji */
-    font-size: 28px;
-    filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));
-}
-
 .lock-overlay {
     position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
+    top: 12px;
+    left: 12px;
     width: 24px;
     height: 24px;
-    background: rgba(0, 0, 0, 0.8);
-    border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: all 0.3s ease;
-    border: 2px solid #fff;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+    border-radius: 50%;
+    background: rgba(0,0,0,0.8);
+    color: #fff;
+    font-size: 18px;
+    transition: opacity 0.3s;
+    z-index: 2;
 }
-
-.lock-overlay.locked {
-    opacity: 1;
-    transform: translate(-50%, -50%) scale(1);
-}
-
 .lock-overlay.unlocked {
     opacity: 0;
-    transform: translate(-50%, -50%) scale(0);
+    pointer-events: none;
 }
-
+.lock-overlay.locked {
+    opacity: 1;
+}
 .certificate-count {
     position: absolute;
     bottom: -10px;
@@ -140,16 +124,7 @@ st.markdown("""
     border-radius: 10px;
     border: 2px solid #fff;
     box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-}
-
-@keyframes unlockAnimation {
-    0% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
-    50% { transform: translate(-50%, -50%) scale(1.2); opacity: 0.5; }
-    100% { transform: translate(-50%, -50%) scale(0); opacity: 0; }
-}
-
-.lock-overlay.unlocking {
-    animation: unlockAnimation 0.5s ease forwards;
+    z-index: 3;
 }
 </style>
 """, unsafe_allow_html=True)
@@ -1444,10 +1419,11 @@ elif st.session_state.quiz_started and not st.session_state.quiz_completed:
     
     st.markdown(f"""
     <div class="certificate-container">
-        <div class="certificate-icon">
-            <div class="lock-overlay {('unlocked' if is_certificate_unlocked else 'locked')}">🔒</div>
-        </div>
+      <div style="position:relative;">
+        {certificate_svg}
+        <div class="lock-overlay {'unlocked' if is_certificate_unlocked else 'locked'}">🔒</div>
         <div class="certificate-count">{correct_answers}/5</div>
+      </div>
     </div>
     """, unsafe_allow_html=True)
         
