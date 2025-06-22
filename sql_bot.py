@@ -1442,7 +1442,7 @@ elif st.session_state.quiz_started and not st.session_state.quiz_completed:
     <div class="certificate-container">
         <div class="certificate-icon">
             <!-- Advanced Certificate SVG Icon with Ribbon, Gradient, and Seal -->
-            <svg width="54" height="54" viewBox="0 0 54 54" fill="none">
+            <svg width="70" height="70" viewBox="0 0 54 54" fill="none">
               <defs>
                 <radialGradient id="goldRadial" cx="50%" cy="40%" r="70%">
                   <stop offset="0%" stop-color="#fffbe5"/>
