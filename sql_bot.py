@@ -769,7 +769,7 @@ if not st.session_state.quiz_started:
             rgba(255, 255, 255, 0.05) 100%);
         backdrop-filter: blur(30px);
         border: 1px solid rgba(255, 255, 255, 0.2);
-        padding: 1rem 2rem;
+        padding: 0.5rem 1.7rem;
         border-radius: 40px;
         margin: 0.2rem auto 1.7rem auto;
         max-width: 1100px;
