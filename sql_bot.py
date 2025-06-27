@@ -1213,7 +1213,7 @@ if not st.session_state.quiz_started:
         .steps-container::before { display: none; }
         .stats-container { grid-template-columns: 1fr; }
         .features-grid { grid-template-columns: 1fr; }
-        .step { width: 120px; height: 120px; }
+        .step { width: 110px; height: 110px; }
         .cube-container { display: none; }
     }
     
