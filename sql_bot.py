@@ -1221,7 +1221,7 @@ if not st.session_state.quiz_started:
         .hero-title { font-size: 2.2rem; }
         .hero-subtitle { font-size: 1.2rem; }
         .feature-title { font-size: 1.3rem; }
-        .step { width: 100px; height: 100px; }
+        .step { width: 80px; height: 90px; }
         .stat-card { height: 160px; }
         .cta-button { padding: 1.2rem 2.5rem; font-size: 1.2rem;}
     }
