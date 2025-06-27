@@ -1204,7 +1204,7 @@ if not st.session_state.quiz_started:
     
     @media (max-width: 768px) {
         .hero-title { font-size: 2.8rem; letter-spacing: -1px; }
-        .hero-container { padding: 2.5rem 2rem;margin: -9rem auto -1rem auto !important;
+        .hero-container { padding: 1.5rem 1rem;margin: -9rem auto -1rem auto !important;
  }
         .steps-container { 
             flex-direction: column; 
