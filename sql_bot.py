@@ -160,7 +160,7 @@ if not gemini_api_key or gemini_api_key == "YOUR_API_KEY_HERE":
 
 try:
     genai.configure(api_key=gemini_api_key)
-    model = genai.GenerativeModel('gemini-1.5-pro')
+    model = genai.GenerativeModel('gemini-1.5-flash')
 except Exception as e:
     st.error(f"🚨 Failed to configure Gemini API or access the model: {e}")
     st.stop()
