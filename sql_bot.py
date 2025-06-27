@@ -60,7 +60,7 @@ hide_streamlit_style = """
             margin-bottom: 10px;
         }
         .feedback-section {
-            margin-top: 15px;
+            margin-top: 8px;
         }
         .strength-item, .weakness-item {
             font-size: 18px !important;
