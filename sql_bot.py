@@ -771,7 +771,7 @@ if not st.session_state.quiz_started:
         border: 1px solid rgba(255, 255, 255, 0.2);
         padding: 1rem 2rem;
         border-radius: 40px;
-        margin: 0.2rem auto 2rem auto;
+        margin: 0.2rem auto 1.7rem auto;
         max-width: 1100px;
         box-shadow: 0 40px 100px rgba(0, 0, 0, 0.3),
                     0 20px 50px rgba(120, 119, 198, 0.2),
