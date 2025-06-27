@@ -495,9 +495,13 @@ def evaluate_answer_with_llm(question_data, student_answer, original_tables_dict
             feedback_llm = f"AI response processing error: {e_resp}"
             is_correct_llm = False
     except Exception as e_call:
-        st.error(f"🚨 AI Error during evaluation: {e_call}")
-        print(f"ERROR: Gemini API call failed: {e_call}")
-        feedback_llm = f"AI feedback generation error: {e_call}"
+        error_message = str(e_call).lower()
+        if "quota" in error_message or "exceed" in error_message:
+            st.error("Please try again tomorrow or contact the admin to increase the quota")
+            feedback_llm = "❌ The AI Mentor is currently unavailable due to exceeding the daily API quota. Please try again later or contact support for assistance."
+        else:
+            st.error(f"🚨 AI Error during evaluation: {e_call}")
+            feedback_llm = f"AI feedback generation error: {e_call}"
         is_correct_llm = False
         llm_output = f"Error during AI call: {e_call}"
 
