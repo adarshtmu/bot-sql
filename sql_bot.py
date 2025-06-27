@@ -1203,7 +1203,7 @@ if not st.session_state.quiz_started:
     }
     
     @media (max-width: 768px) {
-        .hero-title { font-size: 2.0rem; letter-spacing: -1px; }
+        .hero-title { font-size: 2.0rem; letter-spacing: -3px; }
         .hero-container { padding: 1.5rem 1rem;margin: -9rem auto -1rem auto !important;
  }
         .steps-container { 
