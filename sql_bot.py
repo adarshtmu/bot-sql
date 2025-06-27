@@ -215,9 +215,9 @@ sql_questions = [
         "difficulty": "easy"
     },
     {
-        "question": "Write a SQL query to list all orders from the 'orders' table.",
-        "correct_answer_example": "SELECT * FROM orders;",
-        "sample_table": orders_table,
+        "question": "Write a SQL query to calculate the sum of the 'amount' column from the 'orders' table.",
+        "correct_answer_example": "SELECT SUM(amount) FROM orders;",
+        "sample_table": "orders_table",
         "relevant_tables": ["orders"],
         "difficulty": "easy"
     },
