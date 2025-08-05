@@ -1456,14 +1456,13 @@ if not st.session_state.quiz_started:
             </div>
         </div>
         <div class="feature-card">
-            <div class="feature-icon">🏅</div>
-            <div class="feature-title">Progress & Motivation</div>
+            <div class="feature-icon">🔥</div>
+            <div class="feature-title">Random SQL Questions</div>
             <div class="feature-description">
-                Track your improvement, celebrate your wins, and unlock achievements as you level up your SQL skills. Stay motivated and see your growth!
+                Get a fresh, random SQL question every time you practice to keep your mind sharp and stay interview-ready!
             </div>
         </div>
-    </div>
-    """, unsafe_allow_html=True)
+
 
     # --- 3D LEARNING PATH ---
     # This section was also well-structured for responsiveness.
@@ -2364,6 +2363,7 @@ elif st.session_state.quiz_completed:
     display_advanced_results_page(final_score , st.session_state.user_answers, analyze_performance)
     
     
+
 
 
 
