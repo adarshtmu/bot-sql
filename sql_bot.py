@@ -1373,7 +1373,7 @@ if not st.session_state.quiz_started:
     # Center the button using columns
     col1, col2, col3 = st.columns([1, 2, 1])
     with col2:
-        if st.button("🚀 Start Your SQL Journey", key="start_quiz", use_container_width=True):
+        if st.button("🚀 AI-Powered SQL Practice Bot", key="start_quiz", use_container_width=True):
             st.session_state.quiz_started = True
             st.session_state.user_answers = []
             st.session_state.current_question = 0
@@ -2364,6 +2364,7 @@ elif st.session_state.quiz_completed:
     display_advanced_results_page(final_score , st.session_state.user_answers, analyze_performance)
     
     
+
 
 
 
