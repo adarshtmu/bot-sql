@@ -1352,7 +1352,7 @@ if not st.session_state.quiz_started:
     st.markdown("""
     <div class="hero-container">
         <div style="text-align: center;">
-            <div class="hero-badge">🚀 Practice SQL with AI Mentor</div>
+            <div></div>
         </div>
         <h1 class="hero-title" style="text-align: center;">Sharpen Your SQL Skills</h1>
         <p class="hero-subtitle" style="text-align: center;">
@@ -2364,6 +2364,7 @@ elif st.session_state.quiz_completed:
     display_advanced_results_page(final_score , st.session_state.user_answers, analyze_performance)
     
     
+
 
 
 
