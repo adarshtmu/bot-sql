@@ -216,7 +216,7 @@ sql_questions = [
         "difficulty": "easy"
     },
     {
-        "question": "Write a SQL query to display just the name and city of each user.",
+        "question": "Write a SQL query to display just the name and city of each user from the 'users' table..",
         "correct_answer_example": "SELECT name, city FROM users;",
         "relevant_tables": ["users"],
         "difficulty": "easy"
@@ -228,31 +228,31 @@ sql_questions = [
         "difficulty": "easy"
     },
     {
-        "question": "Write a SQL query to count how many orders have been placed in total.",
+        "question": "Write a SQL query to count how many orders have been placed in total from the 'orders' table.",
         "correct_answer_example": "SELECT COUNT(order_id) FROM orders;",
         "relevant_tables": ["orders"],
         "difficulty": "easy"
     },
     {
-        "question": "Write a SQL query to calculate the total sum of all order amounts.",
+        "question": "Write a SQL query to calculate the total sum of all order amounts from the 'orders' table.",
         "correct_answer_example": "SELECT SUM(amount) FROM orders;",
         "relevant_tables": ["orders"],
         "difficulty": "easy"
     },
     {
-        "question": "Write a SQL query to find the single most expensive order amount.",
+        "question": "Write a SQL query to find the single most expensive order amount from the 'orders' table.",
         "correct_answer_example": "SELECT MAX(amount) FROM orders;",
         "relevant_tables": ["orders"],
         "difficulty": "easy"
     },
     {
-        "question": "Write a SQL query to find the amount of the least expensive order.",
+        "question": "Write a SQL query to find the amount of the least expensive order from the 'orders' table.",
         "correct_answer_example": "SELECT MIN(amount) FROM orders;",
         "relevant_tables": ["orders"],
         "difficulty": "easy"
     },
     {
-        "question": "Write a SQL query to show a list of unique cities where users live.",
+        "question": "Write a SQL query to show a list of unique cities where users live from the 'users' table.",
         "correct_answer_example": "SELECT DISTINCT city FROM users;",
         "relevant_tables": ["users"],
         "difficulty": "easy"
@@ -262,25 +262,25 @@ sql_questions = [
     # Intermediate Questions (WHERE, JOIN, ORDER BY, Basic GROUP BY)
     # ==================================
     {
-        "question": "Write a SQL query to get all users who are older than 30.",
+        "question": "Write a SQL query to get all users who are older than 30 from the 'users' table.",
         "correct_answer_example": "SELECT * FROM users WHERE age > 30;",
         "relevant_tables": ["users"],
         "difficulty": "intermediate"
     },
     {
-        "question": "Write a SQL query to get the name and age of users younger than 35.",
+        "question": "Write a SQL query to get the name and age of users younger than 35 from the 'users' table.",
         "correct_answer_example": "SELECT name, age FROM users WHERE age < 35;",
         "relevant_tables": ["users"],
         "difficulty": "intermediate"
     },
     {
-        "question": "Write a SQL query to get all orders with the status 'Completed'.",
+        "question": "Write a SQL query to get all orders with the status 'Completed' from the 'orders' table.",
         "correct_answer_example": "SELECT * FROM orders WHERE status = 'Completed';",
         "relevant_tables": ["orders"],
         "difficulty": "intermediate"
     },
      {
-        "question": "Write a SQL query to find all users who live in 'Chicago'.",
+        "question": "Write a SQL query to find all users who live in 'Chicago' from the 'users' table.",
         "correct_answer_example": "SELECT * FROM users WHERE city = 'Chicago';",
         "relevant_tables": ["users"],
         "difficulty": "intermediate"
@@ -292,19 +292,19 @@ sql_questions = [
         "difficulty": "intermediate"
     },
     {
-        "question": "Write a SQL query to find orders with an amount between $50 and $150.",
+        "question": "Write a SQL query to find orders with an amount between $50 and $150 from the 'orders' table.",
         "correct_answer_example": "SELECT * FROM orders WHERE amount BETWEEN 50 AND 150;",
         "relevant_tables": ["orders"],
         "difficulty": "intermediate"
     },
     {
-        "question": "Write a SQL query to list all users sorted by their age from oldest to youngest.",
+        "question": "Write a SQL query to list all users sorted by their age from oldest to youngest from the 'users' table.",
         "correct_answer_example": "SELECT name, age FROM users ORDER BY age DESC;",
         "relevant_tables": ["users"],
         "difficulty": "intermediate"
     },
     {
-        "question": "Write a SQL query to list all orders from the least expensive to the most expensive.",
+        "question": "Write a SQL query to list all orders from the least expensive to the most expensive from the 'orders' table.",
         "correct_answer_example": "SELECT order_id, amount FROM orders ORDER BY amount ASC;",
         "relevant_tables": ["orders"],
         "difficulty": "intermediate"
@@ -351,7 +351,7 @@ sql_questions = [
         "difficulty": "difficult"
     },
     {
-        "question": "Write a SQL query to find which cities have more than one user.",
+        "question": "Write a SQL query to find which cities have more than one user from the 'users' table.",
         "correct_answer_example": "SELECT city, COUNT(user_id) FROM users GROUP BY city HAVING COUNT(user_id) > 1;",
         "relevant_tables": ["users"],
         "difficulty": "difficult"
@@ -363,7 +363,7 @@ sql_questions = [
         "difficulty": "difficult"
     },
     {
-        "question": "Using a subquery, find all orders that have an amount greater than the average of all order amounts.",
+        "question": "Using a subquery, find all orders that have an amount greater than the average of all order amounts from the 'orders' table.",
         "correct_answer_example": "SELECT * FROM orders WHERE amount > (SELECT AVG(amount) FROM orders);",
         "relevant_tables": ["orders"],
         "difficulty": "difficult"
@@ -2368,6 +2368,7 @@ elif st.session_state.quiz_completed:
     display_advanced_results_page(final_score , st.session_state.user_answers, analyze_performance)
     
     
+
 
 
 
