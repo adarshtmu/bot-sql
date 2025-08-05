@@ -1455,13 +1455,13 @@ if not st.session_state.quiz_started:
                 Solve real-world SQL problems on sample datasets. Practice SELECTs, JOINs, GROUP BY, subqueries, and more—just like in real interviews or jobs.
             </div>
         </div>
-        <div class="feature-card">
-            <div class="feature-icon">🔥</div>
-            <div class="feature-title">Random SQL Questions</div>
-            <div class="feature-description">
-                Get a fresh, random SQL question every time you practice to keep your mind sharp and stay interview-ready!
+            <div class="feature-card">
+                <div class="feature-icon">🔥</div>
+                <div class="feature-title">Random SQL Questions</div>
+                <div class="feature-description">
+                    Get a fresh, random SQL question every time you practice to keep your mind sharp and stay interview-ready!
+                </div>
             </div>
-        </div>
 
 
     # --- 3D LEARNING PATH ---
@@ -2363,6 +2363,7 @@ elif st.session_state.quiz_completed:
     display_advanced_results_page(final_score , st.session_state.user_answers, analyze_performance)
     
     
+
 
 
 
