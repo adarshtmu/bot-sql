@@ -1348,7 +1348,7 @@ if not st.session_state.quiz_started:
     </div>
     """, unsafe_allow_html=True)
 
-    # # --- HERO SECTION ---
+    # --- HERO SECTION ---
     # st.markdown("""
     # <div class="hero-container">
     #     <div style="text-align: center;">
@@ -1363,7 +1363,7 @@ if not st.session_state.quiz_started:
     # """, unsafe_allow_html=True)
 
 
-    # st.markdown('<div style="text-align: center; margin: 3rem 0;">', unsafe_allow_html=True)
+    st.markdown('<div style="text-align: center; margin: 3rem 0;">', unsafe_allow_html=True)
 
     # Create three columns, use the center one for your button
     
@@ -2364,6 +2364,7 @@ elif st.session_state.quiz_completed:
     display_advanced_results_page(final_score , st.session_state.user_answers, analyze_performance)
     
     
+
 
 
 
