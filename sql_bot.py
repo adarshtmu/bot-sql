@@ -1354,7 +1354,7 @@ if not st.session_state.quiz_started:
         <div style="text-align: center;">
             <div></div>
         </div>
-        <h1 class="hero-title" style="text-align: center;">Sharpen Your SQL Skills</h1>
+        <h1 class="hero-title" style="text-align: center;">AI-Powered SQL Feedback</h1>
         <p class="hero-subtitle" style="text-align: center;">
             Practice real SQL queries, get instant feedback, and become job-ready with our AI-powered SQL practice bot.<br>
             Join <strong>100,000+ learners</strong> improving their SQL one query at a time.
@@ -1373,7 +1373,7 @@ if not st.session_state.quiz_started:
     # Center the button using columns
     col1, col2, col3 = st.columns([1, 2, 1])
     with col2:
-        if st.button("🚀 AI-Powered SQL Practice Bot", key="start_quiz", use_container_width=True):
+        if st.button("🚀 Practice SQL Now", key="start_quiz", use_container_width=True):
             st.session_state.quiz_started = True
             st.session_state.user_answers = []
             st.session_state.current_question = 0
@@ -1443,7 +1443,7 @@ if not st.session_state.quiz_started:
     <div class="features-grid">
         <div class="feature-card">
             <div class="feature-icon">🤖</div>
-            <div class="feature-title">AI-Powered SQL Feedback</div>
+            <div class="feature-title">START YOUR SQL PRACTICE NOW</div>
             <div class="feature-description">
                 Get instant, personalized feedback on your SQL queries. Our AI mentor helps you learn from mistakes and master new concepts with every attempt.
             </div>
@@ -2368,6 +2368,7 @@ elif st.session_state.quiz_completed:
     display_advanced_results_page(final_score , st.session_state.user_answers, analyze_performance)
     
     
+
 
 
 
