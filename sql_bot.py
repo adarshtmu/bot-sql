@@ -216,7 +216,7 @@ sql_questions = [
         "difficulty": "easy"
     },
     {
-        "question": "Write a SQL query to display just the name and city of each user from the 'users' table..",
+        "question": "Write a SQL query to display just the name and city of each user from the 'users' table.",
         "correct_answer_example": "SELECT name, city FROM users;",
         "relevant_tables": ["users"],
         "difficulty": "easy"
@@ -2368,6 +2368,7 @@ elif st.session_state.quiz_completed:
     display_advanced_results_page(final_score , st.session_state.user_answers, analyze_performance)
     
     
+
 
 
 
