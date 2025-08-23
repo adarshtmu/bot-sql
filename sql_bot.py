@@ -152,17 +152,20 @@ st.markdown("""
 
 
 # --- Set up Gemini API ---
-gemini_api_key = "AIzaSyAltIr66tk_op7o2JnzONL6_OHnFwY8lWE"  # Replace with your Gemini API Key
+grok_api_key = "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"  # Your provided Grok API key
 
-if not gemini_api_key or gemini_api_key == "YOUR_API_KEY_HERE":
-    st.error("🚨 Gemini API Key is missing or hasn't been replaced. Please add your key in the code.")
+if not grok_api_key:
+    st.error("🚨 Grok API Key is missing. Please ensure the key is provided in the code.")
     st.stop()
 
 try:
-    genai.configure(api_key=gemini_api_key)
-    model = genai.GenerativeModel('gemini-1.5-flash')
+    client = OpenAI(
+        api_key=grok_api_key,
+        base_url="https://api.x.ai/v1"  # Replace with the actual xAI API base URL if different
+    )
+    model = "grok-1"  # Replace with the actual Grok model name if different
 except Exception as e:
-    st.error(f"🚨 Failed to configure Gemini API or access the model: {e}")
+    st.error(f"🚨 Failed to configure Grok API or access the model: {e}")
     st.stop()
 
 # --- Sample Data ---
@@ -560,18 +563,22 @@ def evaluate_answer_with_llm(question_data, student_answer, original_tables_dict
 
     feedback_llm = "AI feedback generation failed."; is_correct_llm = False; llm_output = "Error: No LLM response received."
     try:
-        response = model.generate_content(prompt)
+        response = client.chat.completions.create(
+            model=model,
+            messages=[
+                {"role": "system", "content": "You are an expert SQL evaluator acting as a friendly SQL mentor."},
+                {"role": "user", "content": prompt}
+            ],
+            max_tokens=1500,  # Adjust based on xAI API requirements
+            temperature=0.7   # Adjust for desired response creativity
+        )
         extracted_text = None
         try:
-            if hasattr(response, 'text'):
-                extracted_text = response.text
-            elif hasattr(response, 'parts') and response.parts:
-                extracted_text = "".join(part.text for part in response.parts if hasattr(part, 'text'))
+            if hasattr(response, 'choices') and response.choices:
+                extracted_text = response.choices[0].message.content.strip()
             else:
-                try:
-                    extracted_text = f"AI Response Blocked or Empty. Prompt Feedback: {response.prompt_feedback}"
-                except Exception:
-                    extracted_text = "Error: Received unexpected or empty response structure from AI."
+                extracted_text = "Error: Received unexpected or empty response structure from Grok API."
+            # ... rest of the response parsing logic remains the same ...
 
             if not extracted_text or not extracted_text.strip():
                 llm_output = "Error: Received empty response from AI."
@@ -2368,6 +2375,7 @@ elif st.session_state.quiz_completed:
     display_advanced_results_page(final_score , st.session_state.user_answers, analyze_performance)
     
     
+
 
 
 
