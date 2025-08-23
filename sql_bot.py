@@ -161,7 +161,7 @@ if not grok_api_key:
 try:
     client = openai.OpenAI(  # Use openai.OpenAI
         api_key=grok_api_key,
-        base_url="https://console.groq.com/keys"  # xAI API endpoint
+        base_url="https://api.x.ai/v1"  # xAI API endpoint
     )
     model = "grok-1"  # Replace with the actual Grok model name
 except Exception as e:
@@ -2379,6 +2379,7 @@ elif st.session_state.quiz_completed:
     display_advanced_results_page(final_score , st.session_state.user_answers, analyze_performance)
     
     
+
 
 
 
