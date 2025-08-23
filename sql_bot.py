@@ -714,7 +714,7 @@ def analyze_performance(user_answers):
         else:
             generated_feedback = "Error: Received unexpected or empty response from Grok API for summary."
         # ... rest of the feedback handling remains the same ...
-            except Exception:
+        except Exception:
                 generated_feedback = "Error: Received unexpected or empty response from AI for summary."
 
         if generated_feedback:
@@ -2381,6 +2381,7 @@ elif st.session_state.quiz_completed:
     display_advanced_results_page(final_score , st.session_state.user_answers, analyze_performance)
     
     
+
 
 
 
