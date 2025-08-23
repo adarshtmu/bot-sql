@@ -3,3 +3,4 @@ google-generativeai
 pandas
 duckdb
 mysql-connector-python
+openai
