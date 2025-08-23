@@ -4,7 +4,7 @@ import pandas as pd
 import re
 import duckdb
 import streamlit as st
-
+import openai
 st.set_page_config(page_title="AI SQL Mastery - EdTech Platform")
 
 # --- Custom CSS ---
@@ -2379,6 +2379,7 @@ elif st.session_state.quiz_completed:
     display_advanced_results_page(final_score , st.session_state.user_answers, analyze_performance)
     
     
+
 
 
 
