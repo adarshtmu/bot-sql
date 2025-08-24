@@ -38,7 +38,7 @@ def make_api_call_with_fallback(model, prompt):
         if any(keyword in error_message for keyword in ["quota", "exceed", "limit", "resource_exhausted"]):
             # If we haven't used fallback yet and we have a different backup key
             if not st.session_state.api_key_fallback_used and FALLBACK_API_KEY != PRIMARY_API_KEY:
-                st.warning("Primary API key quota exceeded. Switching to backup key...")
+                # st.warning("Primary API key quota exceeded. Switching to backup key...")
                 
                 # Switch to backup API key
                 st.session_state.current_api_key = FALLBACK_API_KEY
@@ -2333,6 +2333,7 @@ elif st.session_state.quiz_completed:
     final_score = calculate_score(st.session_state.user_answers)
 
     display_advanced_results_page(final_score , st.session_state.user_answers, analyze_performance)
+
 
 
 
