@@ -2152,16 +2152,16 @@ elif st.session_state.quiz_completed:
         correct_answers = int((final_score / 100) * total_questions)
         is_certificate_unlocked = correct_answers >= 3
     
-        st.markdown(f"""
-        <div style="text-align: center; margin-bottom: 2rem;">
-            <div class="certificate-container" style="position: relative; display: inline-block; margin: 0 auto;">
-                <div class="certificate-icon" style="transform: scale(1.5);">
-                    <div class="lock-overlay {('unlocked' if is_certificate_unlocked else 'locked')}">🔒</div>
-                </div>
-                <div class="certificate-count">{correct_answers}/5</div>
-            </div>
-        </div>
-        """, unsafe_allow_html=True)
+        # st.markdown(f"""
+        # <div style="text-align: center; margin-bottom: 2rem;">
+        #     <div class="certificate-container" style="position: relative; display: inline-block; margin: 0 auto;">
+        #         <div class="certificate-icon" style="transform: scale(1.5);">
+        #             <div class="lock-overlay {('unlocked' if is_certificate_unlocked else 'locked')}">🔒</div>
+        #         </div>
+        #         <div class="certificate-count">{correct_answers}/5</div>
+        #     </div>
+        # </div>
+        # """, unsafe_allow_html=True)
     
         if is_certificate_unlocked:
             st.markdown("""
@@ -2366,6 +2366,7 @@ elif st.session_state.quiz_completed:
     final_score = calculate_score(st.session_state.user_answers)
 
     display_advanced_results_page(final_score , st.session_state.user_answers, analyze_performance)
+
 
 
 
