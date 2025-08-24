@@ -249,13 +249,174 @@ original_tables = {
 
 # [Keep your existing SQL questions list - truncated for brevity]
 sql_questions = [
+    # ==================================
+    # Easy Questions (Basic SELECT, Aggregates)
+    # ==================================
     {
         "question": "Write a SQL query to get all columns for all users from the 'users' table.",
         "correct_answer_example": "SELECT * FROM users;",
         "relevant_tables": ["users"],
         "difficulty": "easy"
     },
-    # ... (include all your other questions)
+    {
+        "question": "Write a SQL query to fetch all data from the 'orders' table.",
+        "correct_answer_example": "SELECT * FROM orders;",
+        "relevant_tables": ["orders"],
+        "difficulty": "easy"
+    },
+    {
+        "question": "Write a SQL query to display just the name and city of each user from the 'users' table.",
+        "correct_answer_example": "SELECT name, city FROM users;",
+        "relevant_tables": ["users"],
+        "difficulty": "easy"
+    },
+    {
+        "question": "Write a SQL query to count the total number of users in the 'users' table.",
+        "correct_answer_example": "SELECT COUNT(*) FROM users;",
+        "relevant_tables": ["users"],
+        "difficulty": "easy"
+    },
+    {
+        "question": "Write a SQL query to count how many orders have been placed in total from the 'orders' table.",
+        "correct_answer_example": "SELECT COUNT(order_id) FROM orders;",
+        "relevant_tables": ["orders"],
+        "difficulty": "easy"
+    },
+    {
+        "question": "Write a SQL query to calculate the total sum of all order amounts from the 'orders' table.",
+        "correct_answer_example": "SELECT SUM(amount) FROM orders;",
+        "relevant_tables": ["orders"],
+        "difficulty": "easy"
+    },
+    {
+        "question": "Write a SQL query to find the single most expensive order amount from the 'orders' table.",
+        "correct_answer_example": "SELECT MAX(amount) FROM orders;",
+        "relevant_tables": ["orders"],
+        "difficulty": "easy"
+    },
+    {
+        "question": "Write a SQL query to find the amount of the least expensive order from the 'orders' table.",
+        "correct_answer_example": "SELECT MIN(amount) FROM orders;",
+        "relevant_tables": ["orders"],
+        "difficulty": "easy"
+    },
+    {
+        "question": "Write a SQL query to show a list of unique cities where users live from the 'users' table.",
+        "correct_answer_example": "SELECT DISTINCT city FROM users;",
+        "relevant_tables": ["users"],
+        "difficulty": "easy"
+    },
+
+    # ==================================
+    # Intermediate Questions (WHERE, JOIN, ORDER BY, Basic GROUP BY)
+    # ==================================
+    {
+        "question": "Write a SQL query to get all users who are older than 30 from the 'users' table.",
+        "correct_answer_example": "SELECT * FROM users WHERE age > 30;",
+        "relevant_tables": ["users"],
+        "difficulty": "intermediate"
+    },
+    {
+        "question": "Write a SQL query to get the name and age of users younger than 35 from the 'users' table.",
+        "correct_answer_example": "SELECT name, age FROM users WHERE age < 35;",
+        "relevant_tables": ["users"],
+        "difficulty": "intermediate"
+    },
+    {
+        "question": "Write a SQL query to get all orders with the status 'Completed' from the 'orders' table.",
+        "correct_answer_example": "SELECT * FROM orders WHERE status = 'Completed';",
+        "relevant_tables": ["orders"],
+        "difficulty": "intermediate"
+    },
+     {
+        "question": "Write a SQL query to find all users who live in 'Chicago' from the 'users' table.",
+        "correct_answer_example": "SELECT * FROM users WHERE city = 'Chicago';",
+        "relevant_tables": ["users"],
+        "difficulty": "intermediate"
+    },
+    {
+        "question": "Write a SQL query to find the average order amount from the 'orders' table.",
+        "correct_answer_example": "SELECT AVG(amount) AS average_amount FROM orders;",
+        "relevant_tables": ["orders"],
+        "difficulty": "intermediate"
+    },
+    {
+        "question": "Write a SQL query to find orders with an amount between $50 and $150 from the 'orders' table.",
+        "correct_answer_example": "SELECT * FROM orders WHERE amount BETWEEN 50 AND 150;",
+        "relevant_tables": ["orders"],
+        "difficulty": "intermediate"
+    },
+    {
+        "question": "Write a SQL query to list all users sorted by their age from oldest to youngest from the 'users' table.",
+        "correct_answer_example": "SELECT name, age FROM users ORDER BY age DESC;",
+        "relevant_tables": ["users"],
+        "difficulty": "intermediate"
+    },
+    {
+        "question": "Write a SQL query to list all orders from the least expensive to the most expensive from the 'orders' table.",
+        "correct_answer_example": "SELECT order_id, amount FROM orders ORDER BY amount ASC;",
+        "relevant_tables": ["orders"],
+        "difficulty": "intermediate"
+    },
+    {
+        "question": "Write a SQL query to show user names and their corresponding order amounts by joining 'users' and 'orders'.",
+        "correct_answer_example": "SELECT u.name, o.amount FROM users u JOIN orders o ON u.user_id = o.user_id;",
+        "relevant_tables": ["users", "orders"],
+        "difficulty": "intermediate"
+    },
+     {
+        "question": "Write a SQL query to find all orders placed by the user named 'Alice'.",
+        "correct_answer_example": "SELECT o.* FROM orders o JOIN users u ON o.user_id = u.user_id WHERE u.name = 'Alice';",
+        "relevant_tables": ["users", "orders"],
+        "difficulty": "intermediate"
+    },
+
+
+    # ==================================
+    # Difficult Questions (Advanced JOIN, GROUP BY, HAVING, Subqueries)
+    # ==================================
+    {
+        "question": "Write a SQL query to calculate the total amount spent by each user.",
+        "correct_answer_example": "SELECT u.name, SUM(o.amount) AS total_spent FROM users u JOIN orders o ON u.user_id = o.user_id GROUP BY u.name;",
+        "relevant_tables": ["users", "orders"],
+        "difficulty": "difficult"
+    },
+    {
+        "question": "Write a SQL query to count the number of orders placed by each user.",
+        "correct_answer_example": "SELECT u.name, COUNT(o.order_id) AS number_of_orders FROM users u JOIN orders o ON u.user_id = o.user_id GROUP BY u.name;",
+        "relevant_tables": ["users", "orders"],
+        "difficulty": "difficult"
+    },
+    {
+        "question": "Write a SQL query to find users who have not placed any orders.",
+        "correct_answer_example": "SELECT u.name FROM users u LEFT JOIN orders o ON u.user_id = o.user_id WHERE o.order_id IS NULL;",
+        "relevant_tables": ["users", "orders"],
+        "difficulty": "difficult"
+    },
+    {
+        "question": "Write a SQL query to find the average order amount for each user who has placed an order.",
+        "correct_answer_example": "SELECT u.name, AVG(o.amount) AS avg_order_amount FROM users u JOIN orders o ON u.user_id = o.user_id GROUP BY u.name;",
+        "relevant_tables": ["users", "orders"],
+        "difficulty": "difficult"
+    },
+    {
+        "question": "Write a SQL query to find which cities have more than one user from the 'users' table.",
+        "correct_answer_example": "SELECT city, COUNT(user_id) FROM users GROUP BY city HAVING COUNT(user_id) > 1;",
+        "relevant_tables": ["users"],
+        "difficulty": "difficult"
+    },
+    {
+        "question": "Write a SQL query to find users who have spent more than $100 in total.",
+        "correct_answer_example": "SELECT u.name, SUM(o.amount) AS total_spent FROM users u JOIN orders o ON u.user_id = o.user_id GROUP BY u.name HAVING SUM(o.amount) > 100;",
+        "relevant_tables": ["users", "orders"],
+        "difficulty": "difficult"
+    },
+    {
+        "question": "Using a subquery, find all orders that have an amount greater than the average of all order amounts from the 'orders' table.",
+        "correct_answer_example": "SELECT * FROM orders WHERE amount > (SELECT AVG(amount) FROM orders);",
+        "relevant_tables": ["orders"],
+        "difficulty": "difficult"
+    }
 ]
 
 import random
@@ -2172,4 +2333,5 @@ elif st.session_state.quiz_completed:
     final_score = calculate_score(st.session_state.user_answers)
 
     display_advanced_results_page(final_score , st.session_state.user_answers, analyze_performance)
+
 
