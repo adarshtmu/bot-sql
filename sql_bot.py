@@ -1466,8 +1466,18 @@ if not st.session_state.quiz_started:
     # --- ENHANCED TESTIMONIAL ---
     st.markdown("""
     <div class="testimonial">
-        <p class="testimonial-text">"This platform completely transformed my understanding of SQL! The 3D visualizations made complex joins and subqueries incredibly intuitive. Within 3 weeks, I landed a senior data engineer role at Google with a 40% salary increase!"</p>
+        <p class="testimonial-text">"This platform completely transformed my understanding of SQL! The Platform made complex joins and subqueries incredibly intuitive. Within 3 weeks, I landed a senior data engineer role at Google with a 40% salary increase!"</p>
         <div class="testimonial-author">— Priya Sharma, Senior Data Engineer at Google</div>
+    </div>
+    
+    <div class="testimonial">
+        <p class="testimonial-text">"I used this SQL Practice Bot to prepare for my campus placements. The AI feedback was super helpful, and I finally felt confident solving real interview questions. I cracked my TCS NQT and got placed as a Data Analyst!"</p>
+        <div class="testimonial-author">— Rohan Verma, Final Year Student, NIT Trichy</div>
+    </div>
+    
+    <div class="testimonial">
+        <p class="testimonial-text">"As a second-year engineering student, I struggled with SQL assignments. Practicing here made everything click! My grades improved, and my professor even recommended this platform to the whole class."</p>
+        <div class="testimonial-author">— Ananya Singh, B.Tech CSE, SRM University</div>
     </div>
     """, unsafe_allow_html=True)
 
@@ -2356,6 +2366,7 @@ elif st.session_state.quiz_completed:
     final_score = calculate_score(st.session_state.user_answers)
 
     display_advanced_results_page(final_score , st.session_state.user_answers, analyze_performance)
+
 
 
 
