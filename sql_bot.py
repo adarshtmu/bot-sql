@@ -1349,6 +1349,27 @@ if not st.session_state.quiz_started:
             st.balloons()
             st.rerun()
 
+    st.markdown('<div style="text-align: center; margin: 3rem 0;">', unsafe_allow_html=True)
+
+    st.markdown("""
+    <div style="background: linear-gradient(90deg, #1f2937 60%, #374151 100%);
+                border-radius: 14px; 
+                box-shadow: 0 6px 32px 0 rgba(0,0,0,0.12); 
+                padding: 2rem 2rem 1rem 2rem; 
+                margin-bottom: 2rem;">
+      <h2 style="color: #60a5fa; margin-bottom: 1rem;">🚀 What Topics Are Covered?</h2>
+      <ul style="color: #f3f4f6; font-size: 1.1rem; line-height: 2;">
+        <li>🧑‍💻 <b>Advanced SELECT and Filtering</b></li>
+        <li>📊 <b>Aggregate Functions & Grouping</b></li>
+        <li>🔎 <b>Subqueries</b></li>
+        <li>🔗 <b>JOINs</b></li>
+        <li>📑 <b>CTEs</b></li>
+        <li>🪟 <b>Window Functions</b></li>
+        <li>📈 <b>Advanced Aggregation</b></li>
+        <li>🗃️ <b>Multi-table Analysis</b></li>
+      </ul>
+    </div>
+    """, unsafe_allow_html=True)
 
     # --- ADVANCED STATS SECTION (REFACTORED) ---
     # By placing all cards inside one container, we let the CSS grid handle the responsive layout.
@@ -2333,6 +2354,7 @@ elif st.session_state.quiz_completed:
     final_score = calculate_score(st.session_state.user_answers)
 
     display_advanced_results_page(final_score , st.session_state.user_answers, analyze_performance)
+
 
 
 
