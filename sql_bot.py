@@ -698,8 +698,8 @@ def display_simulation(title, result_data):
         st.error(f"_(Unexpected simulation result type: {type(result_data)})_")
 
 # --- Display API Status ---
-if st.session_state.api_key_fallback_used:
-    st.info("🔄 Currently using backup API key due to quota limits on primary key.")
+# if st.session_state.api_key_fallback_used:
+#     st.info("🔄 Currently using backup API key due to quota limits on primary key.")
 
 
 # --- Streamlit App UI ---
@@ -2333,6 +2333,7 @@ elif st.session_state.quiz_completed:
     final_score = calculate_score(st.session_state.user_answers)
 
     display_advanced_results_page(final_score , st.session_state.user_answers, analyze_performance)
+
 
 
 
