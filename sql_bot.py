@@ -152,7 +152,7 @@ st.markdown("""
 
 
 # --- Set up Gemini API ---
-grok_api_key = "xai-RzpVt6OWXnY7kdTbpxmMGwdgQgE6kRM9KPJXS2DSBc9tgLupaUhkfHiGeZk743gkdx603qZUELnK1ike"
+grok_api_key = st.secrets["GROK_API_KEY"]
 
 if not grok_api_key:
     st.error("🚨 Grok API Key is missing. Please ensure the key is provided in the code.")
@@ -2379,6 +2379,7 @@ elif st.session_state.quiz_completed:
     display_advanced_results_page(final_score , st.session_state.user_answers, analyze_performance)
     
     
+
 
 
 
