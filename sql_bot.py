@@ -4,7 +4,7 @@ import pandas as pd
 import re
 import duckdb
 import streamlit as st
-import openai
+
 st.set_page_config(page_title="AI SQL Mastery - EdTech Platform")
 
 # --- Custom CSS ---
@@ -152,20 +152,17 @@ st.markdown("""
 
 
 # --- Set up Gemini API ---
-grok_api_key = st.secrets["GROK_API_KEY"]
+gemini_api_key = "AIzaSyAltIr66tk_op7o2JnzONL6_OHnFwY8lWE"  # Replace with your Gemini API Key
 
-if not grok_api_key:
-    st.error("🚨 Grok API Key is missing. Please ensure the key is provided in the code.")
+if not gemini_api_key or gemini_api_key == "YOUR_API_KEY_HERE":
+    st.error("🚨 Gemini API Key is missing or hasn't been replaced. Please add your key in the code.")
     st.stop()
 
 try:
-    client = openai.OpenAI(  # Use openai.OpenAI
-        api_key=grok_api_key,
-        base_url="https://api.x.ai/v1"  # xAI API endpoint
-    )
-    model = "grok-1"  # Replace with the actual Grok model name
+    genai.configure(api_key=gemini_api_key)
+    model = genai.GenerativeModel('gemini-1.5-flash')
 except Exception as e:
-    st.error(f"🚨 Failed to configure Grok API or access the model: {e}")
+    st.error(f"🚨 Failed to configure Gemini API or access the model: {e}")
     st.stop()
 
 # --- Sample Data ---
@@ -563,22 +560,18 @@ def evaluate_answer_with_llm(question_data, student_answer, original_tables_dict
 
     feedback_llm = "AI feedback generation failed."; is_correct_llm = False; llm_output = "Error: No LLM response received."
     try:
-        response = client.chat.completions.create(
-            model=model,
-            messages=[
-                {"role": "system", "content": "You are an expert SQL evaluator acting as a friendly SQL mentor."},
-                {"role": "user", "content": prompt}
-            ],
-            max_tokens=1500,  # Adjust based on xAI API requirements
-            temperature=0.7   # Adjust for desired response creativity
-        )
+        response = model.generate_content(prompt)
         extracted_text = None
         try:
-            if hasattr(response, 'choices') and response.choices:
-                extracted_text = response.choices[0].message.content.strip()
+            if hasattr(response, 'text'):
+                extracted_text = response.text
+            elif hasattr(response, 'parts') and response.parts:
+                extracted_text = "".join(part.text for part in response.parts if hasattr(part, 'text'))
             else:
-                extracted_text = "Error: Received unexpected or empty response structure from Grok API."
-            # ... rest of the response parsing logic remains the same ...
+                try:
+                    extracted_text = f"AI Response Blocked or Empty. Prompt Feedback: {response.prompt_feedback}"
+                except Exception:
+                    extracted_text = "Error: Received unexpected or empty response structure from AI."
 
             if not extracted_text or not extracted_text.strip():
                 llm_output = "Error: Received empty response from AI."
@@ -699,21 +692,17 @@ def analyze_performance(user_answers):
         return performance_data
 
     try:
-        response = client.chat.completions.create(
-            model=model,
-            messages=[
-                {"role": "system", "content": "You are a friendly SQL mentor providing performance analysis for a learner."},
-                {"role": "user", "content": prompt}
-            ],
-            max_tokens=1500,  # Adjust based on xAI API requirements
-            temperature=0.7   # Adjust for desired response creativity
-        )
+        response = model.generate_content(prompt)
         generated_feedback = None
-        if hasattr(response, 'choices') and response.choices:
-            generated_feedback = response.choices[0].message.content.strip()
+        if hasattr(response, 'text'):
+            generated_feedback = response.text.strip()
+        elif hasattr(response, 'parts') and response.parts:
+            generated_feedback = "".join(part.text for part in response.parts if hasattr(part, 'text')).strip()
         else:
-            generated_feedback = "Error: Received unexpected or empty response from Grok API for summary."
-        # ... rest of the feedback handling remains the same ...
+            try:
+                generated_feedback = f"AI Response Blocked or Empty. Prompt Feedback: {response.prompt_feedback}"
+            except Exception:
+                generated_feedback = "Error: Received unexpected or empty response from AI for summary."
 
         if generated_feedback:
             performance_data["overall_feedback"] = generated_feedback
@@ -2377,41 +2366,3 @@ elif st.session_state.quiz_completed:
     final_score = calculate_score(st.session_state.user_answers)
 
     display_advanced_results_page(final_score , st.session_state.user_answers, analyze_performance)
-    
-    
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
