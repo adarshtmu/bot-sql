@@ -1324,7 +1324,7 @@ if not st.session_state.quiz_started:
         <h1 class="hero-title" style="text-align: center;">AI-Powered SQL Practice Bot (Intermediate)</h1>
         <p class="hero-subtitle" style="text-align: center;">
             Practice real SQL queries, get instant feedback, and become job-ready with our AI-Powered SQL Practice Bot.<br>
-            Join <strong>100,000+ learners</strong> improving their SQL one query at a time.
+            Join <strong>2,000+ learners</strong> improving their SQL one query at a time.
         </p>
     </div>
     """, unsafe_allow_html=True)
@@ -1394,7 +1394,7 @@ if not st.session_state.quiz_started:
         </div>
         <div class="stat-card">
             <div class="stat-icon">🎓</div>
-            <span class="stat-number">Pro</span>
+            <span class="stat-number">Intermediate</span>
             <div class="stat-label">Certification</div>
         </div>
     </div>
@@ -1433,7 +1433,7 @@ if not st.session_state.quiz_started:
     <div class="features-grid">
         <div class="feature-card">
             <div class="feature-icon">🤖</div>
-            <div class="feature-title">START YOUR SQL PRACTICE NOW</div>
+            <div class="feature-title">PERSONALIZED FEEDBACK</div>
             <div class="feature-description">
                 Get instant, personalized feedback on your SQL queries. Our AI mentor helps you learn from mistakes and master new concepts with every attempt.
             </div>
@@ -2367,6 +2367,7 @@ elif st.session_state.quiz_completed:
     final_score = calculate_score(st.session_state.user_answers)
 
     display_advanced_results_page(final_score , st.session_state.user_answers, analyze_performance)
+
 
 
 
