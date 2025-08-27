@@ -8,7 +8,7 @@ import streamlit as st
 st.set_page_config(page_title="AI SQL Mastery - EdTech Platform")
 
 # --- API Key Configuration with Fallback ---
-PRIMARY_API_KEY = "AIzaSyAfzl_66GZsgaYjAM7cT2djVCBCAr86t2k"
+PRIMARY_API_KEY = "AIzaSyCNhdM--Itg4WYqkZ5JJc0vZ21WvywcvaY"
 FALLBACK_API_KEY = "AIzaSyAltIr66tk_op7o2JnzONL6_OHnFwY8lWE"  # Your backup API key
 
 # Session state to track which API key is currently being used
@@ -2367,6 +2367,7 @@ elif st.session_state.quiz_completed:
     final_score = calculate_score(st.session_state.user_answers)
 
     display_advanced_results_page(final_score , st.session_state.user_answers, analyze_performance)
+
 
 
 
