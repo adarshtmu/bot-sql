@@ -158,10 +158,11 @@ st.markdown("""
     display: flex;
     align-items: center;
     justify-content: center;
-    background: #111; /* pure black, or use #000 for true black */
+    background: #000000 !important; /* Force pure black background */
     border-radius: 8px;
     box-shadow: 0 4px 12px rgba(255, 215, 0, 0.3);
     position: relative;
+    color: #ffffff !important; /* Ensure text/icons are visible */
 }
 
 .lock-overlay {
@@ -2367,6 +2368,7 @@ elif st.session_state.quiz_completed:
     final_score = calculate_score(st.session_state.user_answers)
 
     display_advanced_results_page(final_score , st.session_state.user_answers, analyze_performance)
+
 
 
 
