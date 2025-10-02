@@ -76,12 +76,37 @@ if not model:
     st.stop()
 
 # --- Custom CSS (keeping your existing styles) ---
+# Add this CSS at the beginning of your custom CSS section
+# Replace the existing hide_streamlit_style section with this:
+
 hide_streamlit_style = """
     <style>
+        /* Force black background regardless of theme */
+        .stApp, .main, .block-container, [data-testid="stAppViewContainer"], 
+        [data-testid="stHeader"], [data-testid="stToolbar"],
+        section[data-testid="stSidebar"], .css-1d391kg, .css-18e3th9 {
+            background-color: #000000 !important;
+            background: #000000 !important;
+        }
+        
+        /* Override Streamlit's theme variables */
+        :root {
+            --background-color: #000000 !important;
+            --secondary-background-color: #111111 !important;
+            --text-color: #ffffff !important;
+        }
+        
+        /* Force dark theme colors */
+        [data-testid="stAppViewContainer"] > section:first-child {
+            background-color: #000000 !important;
+        }
+        
         /* Apply zoom-out effect to the entire app */
         html, body, .stApp {
-            zoom: 1.0 !important; /* Adjust this value to control zoom level (e.g., 0.85 = 85% zoom) */
+            zoom: 1.0 !important;
+            background: #000000 !important;
         }
+        
         header {visibility: hidden;}
         #MainMenu {visibility: hidden;}
         footer {visibility: hidden;}
@@ -92,13 +117,17 @@ hide_streamlit_style = """
         [data-testid="stDeployButton"] {display: none !important;}
         .st-emotion-cache-1r8d6ul {display: none !important;}
         .st-emotion-cache-1jicfl2 {display: none !important;}
+        
         /* Increase global font size */
         body, .stMarkdown, .stText, .stTextArea, .stButton button, .stLinkButton a {
             font-size: 18px !important;
+            color: #ffffff !important;
         }
-        h1 {font-size: 48px !important;}
-        h2 {font-size: 36px !important;}
-        h3 {font-size: 30px !important;}
+        
+        h1 {font-size: 48px !important; color: #ffffff !important;}
+        h2 {font-size: 36px !important; color: #ffffff !important;}
+        h3 {font-size: 30px !important; color: #ffffff !important;}
+        
         /* Style for Start SQL Challenge! button */
         button[kind="primary"] {
             font-size: 24px !important;
@@ -107,31 +136,39 @@ hide_streamlit_style = """
             background-color: red;
             border-radius: 10px;
         }
-        /* Style for other buttons (Submit, Analysis, Retry) */
+        
+        /* Style for other buttons */
         .stButton button:not([kind="primary"]), .stLinkButton a {
             font-size: 20px !important;
             padding: 12px 24px !important;
             border-radius: 8px;
         }
+        
         /* Feedback container styling */
         .feedback-container {
-            background-color: #f9f9f9;
+            background-color: #1a1a1a !important;
             padding: 20px;
             border-radius: 10px;
             box-shadow: 0 4px 8px rgba(0,0,0,0.1);
             font-size: 18px !important;
+            color: #ffffff !important;
         }
+        
         .feedback-header {
             font-size: 24px !important;
-            color: #1f77b4;
+            color: #4a9eff;
             margin-bottom: 10px;
         }
+        
         .feedback-section {
             margin-top: 8px;
+            color: #ffffff !important;
         }
+        
         .strength-item, .weakness-item {
             font-size: 18px !important;
             margin: 5px 0;
+            color: #ffffff !important;
         }
     </style>
 """
@@ -158,11 +195,10 @@ st.markdown("""
     display: flex;
     align-items: center;
     justify-content: center;
-    background: #000000 !important; /* Force pure black background */
+    background: #000000 !important; /* Force true black */
     border-radius: 8px;
     box-shadow: 0 4px 12px rgba(255, 215, 0, 0.3);
     position: relative;
-    color: #ffffff !important; /* Ensure text/icons are visible */
 }
 
 .lock-overlay {
@@ -213,6 +249,16 @@ st.markdown("""
 
 .lock-overlay.unlocking {
     animation: unlockAnimation 0.5s ease forwards;
+}
+
+/* Force all text to be visible on black background */
+p, span, div, label {
+    color: #ffffff !important;
+}
+
+/* Override any inherited light theme colors */
+* {
+    color-scheme: dark !important;
 }
 </style>
 """, unsafe_allow_html=True)
@@ -2368,6 +2414,7 @@ elif st.session_state.quiz_completed:
     final_score = calculate_score(st.session_state.user_answers)
 
     display_advanced_results_page(final_score , st.session_state.user_answers, analyze_performance)
+
 
 
 
