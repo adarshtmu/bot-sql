@@ -79,6 +79,10 @@ if not model:
 # Add this CSS at the beginning of your custom CSS section
 # Replace the existing hide_streamlit_style section with this:
 
+
+# Add this CSS at the beginning of your custom CSS section
+# Replace the existing hide_streamlit_style section with this:
+
 hide_streamlit_style = """
     <style>
         /* Force black background regardless of theme */
@@ -169,6 +173,64 @@ hide_streamlit_style = """
             font-size: 18px !important;
             margin: 5px 0;
             color: #ffffff !important;
+        }
+        
+        /* Force dark background for dataframes/tables */
+        [data-testid="stDataFrame"], [data-testid="stTable"],
+        .stDataFrame, .dataframe, table {
+            background-color: #1a1a1a !important;
+            color: #ffffff !important;
+        }
+        
+        /* Table headers and cells */
+        .stDataFrame thead tr th, .dataframe thead tr th,
+        table thead tr th {
+            background-color: #2d2d2d !important;
+            color: #ffffff !important;
+            border-color: #444444 !important;
+        }
+        
+        .stDataFrame tbody tr td, .dataframe tbody tr td,
+        table tbody tr td {
+            background-color: #1a1a1a !important;
+            color: #ffffff !important;
+            border-color: #333333 !important;
+        }
+        
+        /* Alternate row colors for better readability */
+        .stDataFrame tbody tr:nth-child(even), .dataframe tbody tr:nth-child(even),
+        table tbody tr:nth-child(even) {
+            background-color: #252525 !important;
+        }
+        
+        /* Force dark background for text areas and inputs */
+        textarea, input, [data-testid="stTextArea"] textarea,
+        [data-testid="stTextInput"] input {
+            background-color: #1a1a1a !important;
+            color: #ffffff !important;
+            border: 1px solid #444444 !important;
+        }
+        
+        /* Text area specific styling */
+        .stTextArea textarea {
+            background-color: #1a1a1a !important;
+            color: #ffffff !important;
+        }
+        
+        /* Code blocks */
+        code, pre, .stCodeBlock {
+            background-color: #1a1a1a !important;
+            color: #00ff00 !important;
+        }
+        
+        /* Expander styling */
+        [data-testid="stExpander"] {
+            background-color: #1a1a1a !important;
+            border: 1px solid #333333 !important;
+        }
+        
+        [data-testid="stExpanderDetails"] {
+            background-color: #0d0d0d !important;
         }
     </style>
 """
@@ -2414,6 +2476,7 @@ elif st.session_state.quiz_completed:
     final_score = calculate_score(st.session_state.user_answers)
 
     display_advanced_results_page(final_score , st.session_state.user_answers, analyze_performance)
+
 
 
 
