@@ -1,4 +1,4 @@
-	import streamlit as st
+import streamlit as st
 import google.generativeai as genai
 import pandas as pd
 import re
@@ -2414,6 +2414,7 @@ elif st.session_state.quiz_completed:
     final_score = calculate_score(st.session_state.user_answers)
 
     display_advanced_results_page(final_score , st.session_state.user_answers, analyze_performance)
+
 
 
 
