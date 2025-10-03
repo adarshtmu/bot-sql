@@ -10,7 +10,7 @@ st.set_page_config(page_title="AI SQL Mastery - EdTech Platform")
 # --- API Key Configuration with Fallback ---
 PRIMARY_API_KEY = "AIzaSyCWvBDvRiriOvHr0QBCDQJ3Y6N7Ubl0BNs"
 # FALLBACK_API_KEY = "AIzaSyAltIr66tk_op7o2JnzONL6_OHnFwY8lWE"  # Your backup API key
-FALLBACK_API_KEY = "AIzaSyCWvBDvRiriOvHr0QBCDQJ3Y6N7Ubl0BNs"  # Your backup API key
+FALLBACK_API_KEY = "AIzaSyD018j8B37OauGH1Np1M1GSyDgHi3WhuX8"  # Your backup API key
 
 # Session state to track which API key is currently being used
 if "current_api_key" not in st.session_state:
@@ -2415,6 +2415,7 @@ elif st.session_state.quiz_completed:
     final_score = calculate_score(st.session_state.user_answers)
 
     display_advanced_results_page(final_score , st.session_state.user_answers, analyze_performance)
+
 
 
 
