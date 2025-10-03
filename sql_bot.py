@@ -21,7 +21,7 @@ def configure_gemini_api(api_key):
     """Configure Gemini API with given key"""
     try:
         genai.configure(api_key=api_key)
-        model = genai.GenerativeModel('gemini-1.5-pro')
+        model = genai.GenerativeModel('gemini-2.5-flash-preview-09-2025')
         return model
     except Exception as e:
         st.error(f"Failed to configure Gemini API: {e}")
@@ -2415,6 +2415,7 @@ elif st.session_state.quiz_completed:
     final_score = calculate_score(st.session_state.user_answers)
 
     display_advanced_results_page(final_score , st.session_state.user_answers, analyze_performance)
+
 
 
 
