@@ -5,6 +5,9 @@ import re
 import duckdb
 import streamlit as st
 
+
+st.set_page_config(page_title="AI SQL Mastery - EdTech Platform")
+
 # --- ENFORCE STATIC DARK THEME COLORS FOR COMPONENTS (THE FIX) ---
 static_theme_fix = """
 <style>
@@ -39,7 +42,6 @@ static_theme_fix = """
 """
 st.markdown(static_theme_fix, unsafe_allow_html=True)
 
-st.set_page_config(page_title="AI SQL Mastery - EdTech Platform")
 
 # --- API Key Configuration with Fallback ---
 PRIMARY_API_KEY = "AIzaSyCNhdM--Itg4WYqkZ5JJc0vZ21WvywcvaY"
@@ -2401,6 +2403,7 @@ elif st.session_state.quiz_completed:
     final_score = calculate_score(st.session_state.user_answers)
 
     display_advanced_results_page(final_score , st.session_state.user_answers, analyze_performance)
+
 
 
 
