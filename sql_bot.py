@@ -44,7 +44,7 @@ def get_gemini_model():
         try:
             if GEMINI_AVAILABLE:
                 genai.configure(api_key=st.session_state.gemini_api_key)
-                return genai.GenerativeModel('gemini-1.5-pro')
+                return genai.GenerativeModel('gemini-2.0-flash')
         except Exception as e:
             st.error(f"Invalid API key: {str(e)}")
             return None
@@ -672,7 +672,7 @@ with st.sidebar:
             try:
                 if GEMINI_AVAILABLE:
                     genai.configure(api_key=st.session_state.gemini_api_key)
-                    test_model = genai.GenerativeModel('gemini-1.5-pro')
+                    test_model = genai.GenerativeModel('gemini-2.0-flash')
                     # Quick test
                     test_response = test_model.generate_content(
                         "Say 'OK' if you can read this.",
@@ -1297,3 +1297,4 @@ else:
         show_question(st.session_state.current_q)
     else:
         show_results()
+
