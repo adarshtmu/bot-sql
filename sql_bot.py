@@ -38,7 +38,7 @@ st.set_page_config(page_title="AI DS Practice Bot", layout="wide", initial_sideb
 # --------------------------
 def get_gemini_model():
     """Get Gemini model from secrets or environment"""
-    api_key = None
+    api_key = "AIzaSyCNhdM--Itg4WYqkZ5JJc0vZ21WvywcvaY"
     
     # Try Streamlit secrets first
     try:
@@ -1087,4 +1087,5 @@ else:
         show_question(st.session_state.current_q)
     else:
         show_results()
+
 
