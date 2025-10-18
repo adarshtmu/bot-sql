@@ -981,77 +981,46 @@ with st.sidebar:
 
 # Main Content
 if not st.session_state.started:
-    # Platform Header
-    st.markdown("""
-    <div class="platform-header">
-        <div class="header-content">
-            <div class="logo-section">
-                <div class="logo">
-                    <span class="logo-icon">🎓</span>
-                    <span>DataMentor AI</span>
+    # --- Welcome / Hero Screen ---
+    st.markdown(
+        f"""
+        <div class="hero-section fade-in">
+            <div class="hero-content">
+                <div class="hero-title">Master Data Science</div>
+                <div class="hero-subtitle">AI-powered practice platform with personalized feedback and adaptive learning.</div>
+                <div class="feature-grid">
+                    <div class="feature-item">
+                        <div class="feature-icon">🧠</div>
+                        <div class="feature-title">Challenges</div>
+                        <div class="feature-desc">Theory + Coding</div>
+                    </div>
+                    <div class="feature-item">
+                        <div class="feature-icon">🤖</div>
+                        <div class="feature-title">AI Mentor</div>
+                        <div class="feature-desc">Real-time Feedback</div>
+                    </div>
+                    <div class="feature-item">
+                        <div class="feature-icon">📈</div>
+                        <div class="feature-title">Analytics</div>
+                        <div class="feature-desc">Track Progress</div>
+                    </div>
+                    <div class="feature-item">
+                        <div class="feature-icon">🧭</div>
+                        <div class="feature-title">Personalized</div>
+                        <div class="feature-desc">Custom Learning Path</div>
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
-    """, unsafe_allow_html=True)
+        """, unsafe_allow_html=True
+    )
     
-    # Hero Section
-    st.markdown("""
-    <div class="hero-section">
-        <div class="hero-content">
-            <div class="hero-title">Master Data Science</div>
-            <div class="hero-subtitle">AI-powered practice platform with personalized feedback and adaptive learning</div>
-            
-            <div class="feature-grid">
-                <div class="feature-item">
-                    <div class="feature-icon">🧠</div>
-                    <div class="feature-title">8 Challenges</div>
-                    <div class="feature-desc">Theory + Coding</div>
-                </div>
-                <div class="feature-item">
-                    <div class="feature-icon">🤖</div>
-                    <div class="feature-title">AI Mentor</div>
-                    <div class="feature-desc">Real-time feedback</div>
-                </div>
-                <div class="feature-item">
-                    <div class="feature-icon">📊</div>
-                    <div class="feature-title">Analytics</div>
-                    <div class="feature-desc">Track progress</div>
-                </div>
-                <div class="feature-item">
-                    <div class="feature-icon">🎯</div>
-                    <div class="feature-title">Personalized</div>
-                    <div class="feature-desc">Custom learning path</div>
-                </div>
-            </div>
-        </div>
-    </div>
-    """, unsafe_allow_html=True)
-    
-    col1, col2, col3 = st.columns([1, 2, 1])
-    with col2:
-        if st.button("🚀 Start Practice Session", use_container_width=True, type="primary"):
-            st.session_state.started = True
-            st.session_state.start_time = datetime.now()
-            st.rerun()
-    
-    # Info sections
-    st.markdown('<div class="modern-card fade-in">', unsafe_allow_html=True)
-    st.markdown("### 📚 What You'll Practice")
-    col1, col2 = st.columns(2)
-    with col1:
-        st.markdown("**Theory Questions (4)**")
-        st.markdown("- Bias-Variance Tradeoff")
-        st.markdown("- Cross-Validation")
-        st.markdown("- Feature Scaling")
-        st.markdown("- Precision & Recall")
-    with col2:
-        st.markdown("**Coding Challenges (4)**")
-        st.markdown("- Correlation Analysis")
-        st.markdown("- Train-Test Split")
-        st.markdown("- Data Aggregation")
-        st.markdown("- Feature Engineering")
-    st.markdown('</div>', unsafe_allow_html=True)
+    if st.button("🚀 Start Your Practice Session", use_container_width=True):
+        st.session_state.started = True
+        st.session_state.current_q = 0
+        st.session_state.user_answers = []
+        st.session_state.completed = False
+        st.rerun()
 
 elif st.session_state.completed:
     # Platform Header
@@ -1067,6 +1036,252 @@ elif st.session_state.completed:
         </div>
     </div>
     """, unsafe_allow_html=True)
+
+    def display_report(report_data):
+        total_points = sum(q["points"] for q in QUESTIONS)
+        points_earned = sum(a.get("points_earned", 0) for a in st.session_state.user_answers)
+        
+        st.markdown(f"""
+            <div class="modern-card fade-in">
+                <div class="card-title">🎉 Practice Session Complete!</div>
+                <div class="feedback-score">
+                    <div class="score-circle">
+                        <div class="score-content">
+                            <div class="score-number">{points_earned}</div>
+                            <div class="score-label">Points Earned</div>
+                        </div>
+                    </div>
+                    <h3 style="color: #6366f1;">{report_data.get('overall_feedback', 'Great effort! Review your performance below.')}</h3>
+                </div>
+            </div>
+        """, unsafe_allow_html=True)
+        
+        st.markdown("---")
+        
+        col1, col2 = st.columns(2)
+        
+        with col1:
+            st.markdown(f"""
+                <div class="insight-box insight-strength">
+                    <div class="insight-title">💪 Top Strengths</div>
+                    <ul>
+                    {"".join(f'<li>{s}</li>' for s in report_data.get('strengths', ['N/A']))}
+                    </ul>
+                </div>
+            """, unsafe_allow_html=True)
+            
+            st.markdown(f"""
+                <div class="insight-box insight-weakness">
+                    <div class="insight-title">⚠️ Areas for Improvement</div>
+                    <ul>
+                    {"".join(f'<li>{w}</li>' for w in report_data.get('weaknesses', ['N/A']))}
+                    </ul>
+                </div>
+            """, unsafe_allow_html=True)
+            
+        with col2:
+            st.markdown(f"""
+                <div class="insight-box insight-recommendation">
+                    <div class="insight-title">📚 Next Steps & Recommendations</div>
+                    <ul>
+                    {"".join(f'<li>{r}</li>' for r in report_data.get('recommendations', ['N/A']))}
+                    </ul>
+                </div>
+            """, unsafe_allow_html=True)
+        
+        st.markdown("---")
+        st.header("🎯 Personalized Learning Path")
+        
+        for item in report_data.get('learning_path', []):
+            priority_class = f"priority-{item['priority'].lower()}" if item.get('priority') else "priority-low"
+            st.markdown(f"""
+                <div class="learning-path-item {priority_class}">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <h4 style="margin: 0;">{item.get('topic', 'Unknown Topic')}</h4>
+                        <span style="font-weight: 700; color: #6366f1;">Priority: {item.get('priority', 'Low').upper()}</span>
+                    </div>
+                    <p style="margin-top: 8px;">**Resources:** {item.get('resources', 'Search for relevant tutorials and articles.')}</p>
+                </div>
+            """, unsafe_allow_html=True)
+            
+        st.markdown(f"<p style='text-align: center; font-size: 18px; font-style: italic; margin-top: 40px;'>{report_data.get('closing_message', 'Keep up the great work on your Data Science journey!')}</p>", unsafe_allow_html=True)
+
+    if not st.session_state.final_report:
+        with st.spinner("Generating AI Performance Report..."):
+            st.session_state.final_report = generate_final_report(st.session_state.user_answers, ai_model)
+            time.sleep(2) # To show the spinner
+            st.rerun() # Rerun to display the report once generated
+    else:
+        display_report(st.session_state.final_report)
+        
+        if st.button("🔄 Restart Practice", use_container_width=True):
+            for key in ["started", "completed", "user_answers", "current_q", "final_report"]:
+                del st.session_state[key]
+            st.rerun()
+
+else:
+    # --- Practice Screen ---
+    
+    q_index = st.session_state.current_q
+    if q_index >= len(QUESTIONS):
+        # Should not happen if logic is correct, but safe guard
+        st.session_state.completed = True
+        st.rerun()
+
+    current_q = QUESTIONS[q_index]
+    q_id = current_q["id"]
+    
+    difficulty_class = f"diff-{current_q['difficulty']}"
+    
+    st.markdown(f"""
+        <div class="question-card fade-in">
+            <div class="question-header">
+                <div style="flex-grow: 1;">
+                    <div class="question-number">Q{q_index + 1}</div>
+                </div>
+                <div class="question-meta">
+                    <span class="difficulty-badge {difficulty_class}">{current_q['difficulty'].upper()}</span>
+                    <span class="points-badge">⭐ {current_q['points']} PTS</span>
+                </div>
+            </div>
+            
+            <h2 style="margin-top: 0;">{current_q['title']} ({current_q['type'].title()})</h2>
+            <p style="font-size: 18px; line-height: 1.6;">{current_q['prompt']}</p>
+        </div>
+    """, unsafe_allow_html=True)
+
+    st.markdown("---")
+
+    # Submission Form
+    with st.form(key=f"q_form_{q_id}"):
+        
+        if current_q["type"] == "theory":
+            user_input = st.text_area("Your Answer:", height=300, key="theory_answer", placeholder="Type your detailed explanation here...")
+            
+        elif current_q["type"] == "code":
+            st.markdown(f"**Dataset Available as `df`:** `{current_q['dataset'].title()}` ({DATASETS[current_q['dataset']].shape[0]} rows, {DATASETS[current_q['dataset']].shape[1]} columns)")
+            st.dataframe(DATASETS[current_q["dataset"]].head(), use_container_width=True)
+            
+            user_input = st.code(current_q.get("starter_code", "# Write your Python code here..."), language="python", line_numbers=True)
+            
+        col_submit, col_hint = st.columns([3, 1])
+        with col_submit:
+            submit_button = st.form_submit_button("Submit & Get AI Feedback", use_container_width=True)
+        with col_hint:
+            # Placeholder for future hint feature
+            if st.button("💡 Hint (Cost -5 Pts)", disabled=True, use_container_width=True):
+                st.info("Hints feature coming soon!")
+
+        if submit_button:
+            
+            new_answer = current_q.copy()
+            new_answer["timestamp"] = str(datetime.now())
+            
+            if current_q["type"] == "theory":
+                new_answer["student_answer"] = user_input
+                
+                if not user_input.strip():
+                    st.error("Please provide an answer before submitting.")
+                    st.stop()
+                    
+                with st.spinner("Analyzing theory answer with AI Mentor..."):
+                    ai_analysis = get_ai_feedback_theory(current_q, user_input, ai_model)
+                    time.sleep(1)
+                    new_answer["is_correct"] = ai_analysis["is_correct"]
+                    new_answer["points_earned"] = ai_analysis["points_earned"]
+                    new_answer["ai_analysis"] = ai_analysis
+                
+            elif current_q["type"] == "code":
+                new_answer["student_code"] = user_input
+                
+                if "result" not in user_input:
+                    st.error("Your code must assign the final answer to a variable named `result`.")
+                    st.stop()
+                    
+                exec_success, result_value, exec_msg, stats = safe_execute_code(user_input, DATASETS[current_q["dataset"]])
+                new_answer["execution_stats"] = stats
+                
+                if not exec_success:
+                    st.error(exec_msg)
+                    st.stop()
+                
+                expected_value = REFERENCE_RESULTS[q_id]
+                validator = globals()[f"validator_{current_q['validator']}"]
+                is_correct, validation_msg = validator(result_value, expected_value)
+                
+                new_answer["result_value"] = result_value
+                new_answer["expected_value"] = expected_value
+                new_answer["is_correct"] = is_correct
+
+                if is_correct:
+                    st.success(f"Execution Successful! {validation_msg}")
+                else:
+                    st.warning(f"Execution Successful, but Result Incorrect: {validation_msg}")
+                
+                with st.spinner("Analyzing code quality and logic with AI Mentor..."):
+                    ai_analysis = get_ai_feedback_code(current_q, user_input, result_value, expected_value, is_correct, stats, ai_model)
+                    time.sleep(1)
+                    new_answer["points_earned"] = ai_analysis["points_earned"]
+                    new_answer["ai_analysis"] = ai_analysis
+
+            # Add to answers and move to next question
+            st.session_state.user_answers.append(new_answer)
+            st.session_state.current_q += 1
+            
+            if st.session_state.current_q >= len(QUESTIONS):
+                st.session_state.completed = True
+            
+            st.toast(f"Question {q_index + 1} Submitted! Points Earned: {new_answer['points_earned']}", icon="✅")
+            st.rerun()
+
+    # If the user has just submitted and moved to the next question, show the feedback for the *previous* question
+    if st.session_state.current_q > 0 and not st.session_state.completed:
+        last_answer = st.session_state.user_answers[-1]
+        analysis = last_answer.get("ai_analysis", {})
+        
+        st.markdown("---")
+        st.markdown(f"""
+            <div class="ai-feedback-container fade-in">
+                <div class="ai-badge">🤖 AI Mentor Feedback for Q{st.session_state.current_q}</div>
+                <div class="feedback-content">
+                    <h4 style="color: {'#22c55e' if analysis.get('is_correct') else '#ef4444'}; font-size: 20px;">
+                        {'✅ Correct' if analysis.get('is_correct') else '❌ Incorrect'} | Score: {analysis.get('score', 0)*100:.0f}%
+                    </h4>
+                    
+                    <p>{analysis.get('feedback', 'No detailed feedback available.')}</p>
+
+                    <div class="stats-grid" style="margin-top: 20px;">
+                        <div class="stat-card">
+                            <div class="stat-value">{last_answer.get('points_earned', 0)}</div>
+                            <div class="stat-label">Points Earned</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value">{'Excellent' if analysis.get('score', 0) > 0.8 else 'Fair' if analysis.get('score', 0) > 0.5 else 'Poor'}</div>
+                            <div class="stat-label">Overall Grade</div>
+                        </div>
+                        {"<div class='stat-card'><div class='stat-value'>" + analysis.get('code_quality', 'N/A') + "</div><div class='stat-label'>Code Quality</div></div>" if last_answer["type"] == "code" else ""}
+                        {"<div class='stat-card'><div class='stat-value'>" + f"{last_answer.get('execution_stats', {}).get('execution_time', 0):.2f}s" + "</div><div class='stat-label'>Exec Time</div></div>" if last_answer["type"] == "code" else ""}
+                    </div>
+
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 24px;">
+                        <div class="insight-box insight-strength">
+                            <div class="insight-title">💪 Strengths</div>
+                            <ul>
+                                {"".join(f'<li>{s}</li>' for s in analysis.get('strengths', ['N/A']))}
+                            </ul>
+                        </div>
+                        <div class="insight-box insight-weakness">
+                            <div class="insight-title">⚠️ Improvements</div>
+                            <ul>
+                                {"".join(f'<li>{i}</li>' for i in analysis.get('improvements', ['N/A']))}
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        """, unsafe_allow_html=True)
+        
+        st.markdown(f"<h3 style='text-align: center; margin-top: 30px;'>Next up: Question {st.session_state.current_q + 1} of {len(QUESTIONS)}</h3>", unsafe_allow_html=True)
     
     # Calculate stats
     total_points = sum(a.get("points_earned", 0) for a in st.session_state.user_answers)
@@ -1379,5 +1594,6 @@ st.markdown("""
     <div>Powered by Gemini AI | Built with Streamlit</div>
 </div>
 """, unsafe_allow_html=True)
+
 
 
