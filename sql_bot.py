@@ -1392,143 +1392,65 @@ else:
                     del st.session_state[key]
             st.rerun()
 
-else:
-    # Platform Header
-    st.markdown("""
-    <div class="platform-header">
-        <div class="header-content">
-            <div class="logo-section">
-                <div class="logo">
-                    <span class="logo-icon">🎓</span>
-                    <span>DataMentor AI</span>
+    else:
+        # Platform Header
+        st.markdown("""
+        <div class="platform-header">
+            <div class="header-content">
+                <div class="logo-section">
+                    <div class="logo">
+                        <span class="logo-icon">🎓</span>
+                        <span>DataMentor AI</span>
+                    </div>
                 </div>
-            </div>
-        </div>
-    </div>
-    """, unsafe_allow_html=True)
-    
-    # Active Question
-    if st.session_state.current_q < len(QUESTIONS):
-        q = QUESTIONS[st.session_state.current_q]
-        
-        # Question Card
-        st.markdown(f"""
-        <div class="question-card fade-in">
-            <div class="question-header">
-                <div class="question-number">{q['id']}</div>
-                <div class="question-meta">
-                    <span class="difficulty-badge diff-{q['difficulty']}">{q['difficulty']}</span>
-                    <span class="points-badge">{q['points']} points</span>
-                </div>
-            </div>
-            <div style="margin-bottom: 24px;">
-                <div style="font-size: 24px; font-weight: 700; margin-bottom: 12px;">{q['title']}</div>
-                <div style="font-size: 16px; line-height: 1.6; color: {'#94a3b8' if st.session_state.theme == 'dark' else '#64748b'};">{q['prompt']}</div>
             </div>
         </div>
         """, unsafe_allow_html=True)
         
-        if q['type'] == 'theory':
-            answer = st.text_area("Your Answer:", height=200, placeholder="Write your detailed answer here...")
+        # Active Question
+        if st.session_state.current_q < len(QUESTIONS):
+            q = QUESTIONS[st.session_state.current_q]
             
-            if st.button("Submit Answer", type="primary"):
-                if answer.strip():
-                    with st.spinner("🤖 AI Mentor analyzing your answer..."):
-                        ai_analysis = get_ai_feedback_theory(q, answer, ai_model)
-                        
-                        st.session_state.user_answers.append({
-                            "id": q['id'],
-                            "title": q['title'],
-                            "type": q['type'],
-                            "difficulty": q['difficulty'],
-                            "answer": answer,
-                            "ai_analysis": ai_analysis,
-                            "is_correct": ai_analysis.get("is_correct"),
-                            "points_earned": ai_analysis.get("points_earned"),
-                            "max_points": q['points']
-                        })
-                        
-                        # Show feedback
-                        score = ai_analysis.get("score", 0)
-                        is_correct = ai_analysis.get("is_correct", False)
-                        
-                        if is_correct:
-                            status_color = "#22c55e"
-                            emoji = "✅"
-                        elif score >= 0.5:
-                            status_color = "#f59e0b"
-                            emoji = "⚡"
-                        else:
-                            status_color = "#ef4444"
-                            emoji = "📚"
-                        
-                        st.markdown(f"""
-                        <div class="ai-feedback-container fade-in">
-                            <div class="feedback-content">
-                                <div class="ai-badge">{emoji} AI MENTOR FEEDBACK</div>
-                                <div style="font-size: 20px; font-weight: 700; color: {status_color}; margin-bottom: 16px;">
-                                    Score: {ai_analysis.get('points_earned', 0)}/{q['points']} points ({score*100:.0f}%)
-                                </div>
-                                <div style="margin-bottom: 20px;">{ai_analysis.get('feedback', '')}</div>
-                                
-                                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 24px;">
-                                    <div>
-                                        <div class="insight-title">💪 Strengths</div>
-                                        {''.join([f'<div class="insight-box insight-strength">{s}</div>' for s in ai_analysis.get('strengths', [])])}
-                                    </div>
-                                    <div>
-                                        <div class="insight-title">📈 Improvements</div>
-                                        {''.join([f'<div class="insight-box insight-weakness">{i}</div>' for i in ai_analysis.get('improvements', [])])}
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        """, unsafe_allow_html=True)
-                        
-                        st.session_state.current_q += 1
-                        if st.session_state.current_q >= len(QUESTIONS):
-                            st.session_state.completed = True
-                        
-                        if st.button("➡️ Next Question", type="primary"):
-                            st.rerun()
-                else:
-                    st.warning("Please provide an answer before submitting.")
-        
-        else:  # Code question
-            if 'dataset' in q:
-                with st.expander("📊 View Dataset"):
-                    st.dataframe(DATASETS[q['dataset']], use_container_width=True)
+            # Question Card
+            st.markdown(f"""
+            <div class="question-card fade-in">
+                <div class="question-header">
+                    <div class="question-number">{q['id']}</div>
+                    <div class="question-meta">
+                        <span class="difficulty-badge diff-{q['difficulty']}">{q['difficulty']}</span>
+                        <span class="points-badge">{q['points']} points</span>
+                    </div>
+                </div>
+                <div style="margin-bottom: 24px;">
+                    <div style="font-size: 24px; font-weight: 700; margin-bottom: 12px;">{q['title']}</div>
+                    <div style="font-size: 16px; line-height: 1.6; color: {'#94a3b8' if st.session_state.theme == 'dark' else '#64748b'};">{q['prompt']}</div>
+                </div>
+            </div>
+            """, unsafe_allow_html=True)
             
-            code = st.text_area("Your Code:", value=q.get('starter_code', ''), height=200)
-            
-            if st.button("▶️ Run Code", type="primary"):
-                if code.strip():
-                    success, result, error, stats = safe_execute_code(code, DATASETS.get(q['dataset'], pd.DataFrame()))
-                    
-                    if success and result is not None:
-                        expected = REFERENCE_RESULTS.get(q['id'])
-                        validator = globals()[f"validator_{q['validator']}"]
-                        is_correct, msg = validator(result, expected)
-                        
-                        with st.spinner("🤖 AI Mentor analyzing your code..."):
-                            ai_analysis = get_ai_feedback_code(q, code, result, expected, is_correct, stats, ai_model)
+            if q['type'] == 'theory':
+                answer = st.text_area("Your Answer:", height=200, placeholder="Write your detailed answer here...")
+                
+                if st.button("Submit Answer", type="primary"):
+                    if answer.strip():
+                        with st.spinner("🤖 AI Mentor analyzing your answer..."):
+                            ai_analysis = get_ai_feedback_theory(q, answer, ai_model)
                             
                             st.session_state.user_answers.append({
                                 "id": q['id'],
                                 "title": q['title'],
                                 "type": q['type'],
                                 "difficulty": q['difficulty'],
-                                "code": code,
-                                "result": result,
-                                "expected": expected,
+                                "answer": answer,
                                 "ai_analysis": ai_analysis,
-                                "is_correct": is_correct,
+                                "is_correct": ai_analysis.get("is_correct"),
                                 "points_earned": ai_analysis.get("points_earned"),
                                 "max_points": q['points']
                             })
                             
                             # Show feedback
                             score = ai_analysis.get("score", 0)
+                            is_correct = ai_analysis.get("is_correct", False)
                             
                             if is_correct:
                                 status_color = "#22c55e"
@@ -1538,7 +1460,7 @@ else:
                                 emoji = "⚡"
                             else:
                                 status_color = "#ef4444"
-                                emoji = "❌"
+                                emoji = "📚"
                             
                             st.markdown(f"""
                             <div class="ai-feedback-container fade-in">
@@ -1547,23 +1469,11 @@ else:
                                     <div style="font-size: 20px; font-weight: 700; color: {status_color}; margin-bottom: 16px;">
                                         Score: {ai_analysis.get('points_earned', 0)}/{q['points']} points ({score*100:.0f}%)
                                     </div>
-                                    
-                                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px;">
-                                        <div>
-                                            <div style="font-weight: 600; margin-bottom: 8px;">Your Result:</div>
-                                            <code>{result}</code>
-                                        </div>
-                                        <div>
-                                            <div style="font-weight: 600; margin-bottom: 8px;">Expected:</div>
-                                            <code>{expected}</code>
-                                        </div>
-                                    </div>
-                                    
                                     <div style="margin-bottom: 20px;">{ai_analysis.get('feedback', '')}</div>
                                     
                                     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 24px;">
                                         <div>
-                                            <div class="insight-title">💪 Code Strengths</div>
+                                            <div class="insight-title">💪 Strengths</div>
                                             {''.join([f'<div class="insight-box insight-strength">{s}</div>' for s in ai_analysis.get('strengths', [])])}
                                         </div>
                                         <div>
@@ -1582,9 +1492,99 @@ else:
                             if st.button("➡️ Next Question", type="primary"):
                                 st.rerun()
                     else:
-                        st.error(error)
-                else:
-                    st.warning("Please write code before running.")
+                        st.warning("Please provide an answer before submitting.")
+            
+            else:  # Code question
+                if 'dataset' in q:
+                    with st.expander("📊 View Dataset"):
+                        st.dataframe(DATASETS[q['dataset']], use_container_width=True)
+                
+                code = st.text_area("Your Code:", value=q.get('starter_code', ''), height=200)
+                
+                if st.button("▶️ Run Code", type="primary"):
+                    if code.strip():
+                        success, result, error, stats = safe_execute_code(code, DATASETS.get(q['dataset'], pd.DataFrame()))
+                        
+                        if success and result is not None:
+                            expected = REFERENCE_RESULTS.get(q['id'])
+                            validator = globals()[f"validator_{q['validator']}"]
+                            is_correct, msg = validator(result, expected)
+                            
+                            with st.spinner("🤖 AI Mentor analyzing your code..."):
+                                ai_analysis = get_ai_feedback_code(q, code, result, expected, is_correct, stats, ai_model)
+                                
+                                st.session_state.user_answers.append({
+                                    "id": q['id'],
+                                    "title": q['title'],
+                                    "type": q['type'],
+                                    "difficulty": q['difficulty'],
+                                    "code": code,
+                                    "result": result,
+                                    "expected": expected,
+                                    "ai_analysis": ai_analysis,
+                                    "is_correct": is_correct,
+                                    "points_earned": ai_analysis.get("points_earned"),
+                                    "max_points": q['points']
+                                })
+                                
+                                # Show feedback
+                                score = ai_analysis.get("score", 0)
+                                
+                                if is_correct:
+                                    status_color = "#22c55e"
+                                    emoji = "✅"
+                                elif score >= 0.5:
+                                    status_color = "#f59e0b"
+                                    emoji = "⚡"
+                                else:
+                                    status_color = "#ef4444"
+                                    emoji = "❌"
+                                
+                                st.markdown(f"""
+                                <div class="ai-feedback-container fade-in">
+                                    <div class="feedback-content">
+                                        <div class="ai-badge">{emoji} AI MENTOR FEEDBACK</div>
+                                        <div style="font-size: 20px; font-weight: 700; color: {status_color}; margin-bottom: 16px;">
+                                            Score: {ai_analysis.get('points_earned', 0)}/{q['points']} points ({score*100:.0f}%)
+                                        </div>
+                                        
+                                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px;">
+                                            <div>
+                                                <div style="font-weight: 600; margin-bottom: 8px;">Your Result:</div>
+                                                <code>{result}</code>
+                                            </div>
+                                            <div>
+                                                <div style="font-weight: 600; margin-bottom: 8px;">Expected:</div>
+                                                <code>{expected}</code>
+                                            </div>
+                                        </div>
+                                        
+                                        <div style="margin-bottom: 20px;">{ai_analysis.get('feedback', '')}</div>
+                                        
+                                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 24px;">
+                                            <div>
+                                                <div class="insight-title">💪 Code Strengths</div>
+                                                {''.join([f'<div class="insight-box insight-strength">{s}</div>' for s in ai_analysis.get('strengths', [])])}
+                                            </div>
+                                            <div>
+                                                <div class="insight-title">📈 Improvements</div>
+                                                {''.join([f'<div class="insight-box insight-weakness">{i}</div>' for i in ai_analysis.get('improvements', [])])}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                """, unsafe_allow_html=True)
+                                
+                                st.session_state.current_q += 1
+                                if st.session_state.current_q >= len(QUESTIONS):
+                                    st.session_state.completed = True
+                                
+                                if st.button("➡️ Next Question", type="primary"):
+                                    st.rerun()
+                        else:
+                            st.error(error)
+                    else:
+                        st.warning("Please write code before running.")
 
 # Footer
 st.markdown("---")
@@ -1594,6 +1594,7 @@ st.markdown("""
     <div>Powered by Gemini AI | Built with Streamlit</div>
 </div>
 """, unsafe_allow_html=True)
+
 
 
 
