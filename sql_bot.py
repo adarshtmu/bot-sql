@@ -994,61 +994,60 @@ if not st.session_state.started:
     </div>
     """, unsafe_allow_html=True)
     
-# Replace the hero section code (around line 700-730) with this:
-
-# Hero Section
-st.markdown("""
-<div class="hero-section">
-    <div class="hero-content">
-        <div class="hero-title">Master Data Science</div>
-        <div class="hero-subtitle">AI-powered practice platform with personalized feedback and adaptive learning</div>
-    </div>
-</div>
-""", unsafe_allow_html=True)
-
-# Feature Grid - Use Streamlit columns instead of HTML
-st.markdown("<br>", unsafe_allow_html=True)
-col1, col2, col3, col4 = st.columns(4)
-
-with col1:
+    # Hero Section
     st.markdown("""
-    <div class="feature-item">
-        <div class="feature-icon">🧠</div>
-        <div class="feature-title">8 Challenges</div>
-        <div class="feature-desc">Theory + Coding</div>
+    <div class="hero-section">
+        <div class="hero-content">
+            <div class="hero-title">Master Data Science</div>
+            <div class="hero-subtitle">AI-powered practice platform with personalized feedback and adaptive learning</div>
+        </div>
     </div>
     """, unsafe_allow_html=True)
 
-with col2:
-    st.markdown("""
-    <div class="feature-item">
-        <div class="feature-icon">🤖</div>
-        <div class="feature-title">AI Mentor</div>
-        <div class="feature-desc">Real-time feedback</div>
-    </div>
-    """, unsafe_allow_html=True)
+    # Feature Grid - Use Streamlit columns instead of HTML
+    st.markdown("<br>", unsafe_allow_html=True)
+    col1, col2, col3, col4 = st.columns(4)
 
-with col3:
-    st.markdown("""
-    <div class="feature-item">
-        <div class="feature-icon">📊</div>
-        <div class="feature-title">Analytics</div>
-        <div class="feature-desc">Track progress</div>
-    </div>
-    """, unsafe_allow_html=True)
+    with col1:
+        st.markdown("""
+        <div class="feature-item">
+            <div class="feature-icon">🧠</div>
+            <div class="feature-title">8 Challenges</div>
+            <div class="feature-desc">Theory + Coding</div>
+        </div>
+        """, unsafe_allow_html=True)
 
-with col4:
-    st.markdown("""
-    <div class="feature-item">
-        <div class="feature-icon">🎯</div>
-        <div class="feature-title">Personalized</div>
-        <div class="feature-desc">Custom learning path</div>
-    </div>
-    """, unsafe_allow_html=True)
+    with col2:
+        st.markdown("""
+        <div class="feature-item">
+            <div class="feature-icon">🤖</div>
+            <div class="feature-title">AI Mentor</div>
+            <div class="feature-desc">Real-time feedback</div>
+        </div>
+        """, unsafe_allow_html=True)
 
-st.markdown("<br>", unsafe_allow_html=True)
+    with col3:
+        st.markdown("""
+        <div class="feature-item">
+            <div class="feature-icon">📊</div>
+            <div class="feature-title">Analytics</div>
+            <div class="feature-desc">Track progress</div>
+        </div>
+        """, unsafe_allow_html=True)
+
+    with col4:
+        st.markdown("""
+        <div class="feature-item">
+            <div class="feature-icon">🎯</div>
+            <div class="feature-title">Personalized</div>
+            <div class="feature-desc">Custom learning path</div>
+        </div>
+        """, unsafe_allow_html=True)
+
+    st.markdown("<br>", unsafe_allow_html=True)
 
 elif st.session_state.completed:
+    # ... rest of completed branch ...
     # Platform Header
     st.markdown("""
     <div class="platform-header">
@@ -1374,6 +1373,7 @@ st.markdown("""
     <div>Powered by Gemini AI | Built with Streamlit</div>
 </div>
 """, unsafe_allow_html=True)
+
 
 
 
