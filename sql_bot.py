@@ -1009,7 +1009,7 @@ if not st.session_state.started:
     st.markdown("<br>", unsafe_allow_html=True)
     col1, col2, col3, col4 = st.columns(4)
 
-    with col1:
+    with col1
         st.markdown("""
         <div class="feature-item">
             <div class="feature-icon">🧠</div>
@@ -1047,7 +1047,6 @@ if not st.session_state.started:
 
     st.markdown("<br>", unsafe_allow_html=True)
 
-elif st.session_state.completed:
     # ... rest of completed branch ...
     # Platform Header
     st.markdown("""
@@ -1374,4 +1373,5 @@ st.markdown("""
     <div>Powered by Gemini AI | Built with Streamlit</div>
 </div>
 """, unsafe_allow_html=True)
+
 
