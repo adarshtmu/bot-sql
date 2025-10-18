@@ -52,7 +52,7 @@ def get_gemini_model():
     
     if api_key and GEMINI_AVAILABLE:
         genai.configure(api_key=api_key)
-        return genai.GenerativeModel('gemini-1.5-pro')
+        return genai.GenerativeModel('gemini-2.0-flash')
     return None
 
 # --------------------------
@@ -1087,3 +1087,4 @@ else:
         show_question(st.session_state.current_q)
     else:
         show_results()
+
