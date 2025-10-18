@@ -18,6 +18,7 @@ import json
 import time
 from typing import Tuple, Any, Dict, List
 from datetime import datetime
+from textwrap import dedent
 
 # LLM Integration
 try:
@@ -705,7 +706,7 @@ QUESTIONS = [
     {
         "id": 8, "type": "code", "difficulty": "hard",
         "title": "Feature Engineering",
-        "prompt": "Create a new feature `performance_score` = (score * 0.7) + (attendance * 0.3). Calculate correlation between `performance_score` and `passed`. Round to 3 decimals, assign to `result`.",
+        "prompt": "Create a new feature `performance_score` = (score * 0.7) + (attendance * 0.3). Calculate correlation between `performance_score` and `passed`. Round to 3 decimals, assign to `result`",
         "dataset": "students", "validator": "numeric_tol", "points": 20,
         "starter_code": "# Create performance_score feature\n# Calculate correlation with 'passed'\n\nresult = None"
     }
@@ -774,7 +775,6 @@ Question ({question['difficulty']}, {question['points']} points):
 Code:
 ```python
 {code}
-```
 
 Expected: {expected}
 Got: {result_value}
@@ -1379,3 +1379,4 @@ st.markdown("""
     <div>Powered by Gemini AI | Built with Streamlit</div>
 </div>
 """, unsafe_allow_html=True)
+
