@@ -728,34 +728,27 @@ def get_ai_feedback_theory(question: dict, student_answer: str, model) -> Dict:
             "is_correct": len(student_answer.split()) >= 30,
             "score": 0.7,
             "feedback": "AI mentor unavailable. Basic length check passed.",
-            "strengths": ["Attempted the question", "Provided detailed response"],
-            "improvements": ["Configure AI for detailed feedback", "Add more specific examples"],
+            "strengths": ["Attempted the question"],
+            "improvements": ["Configure AI for detailed feedback"],
             "points_earned": int(question["points"] * 0.7)
         }
     
-    prompt = f"""You are an expert Data Science mentor providing detailed, constructive feedback.
+    prompt = f"""You are an expert Data Science mentor. Analyze this student answer.
 
 Question ({question['difficulty']}, {question['points']} points):
 {question['prompt']}
 
-Student's Answer:
+Student Answer:
 {student_answer}
 
-Analyze this answer comprehensively and provide feedback in JSON format:
+Provide JSON response:
 {{
     "is_correct": true/false,
     "score": 0.0-1.0,
-    "feedback": "2-3 sentences explaining what's good and what's missing",
-    "strengths": ["specific strength 1", "specific strength 2"],
-    "improvements": ["specific improvement 1", "specific improvement 2"]
-}}
-
-IMPORTANT:
-- Always provide at least 2 strengths and 2 improvements
-- Even if mostly correct, suggest ways to enhance understanding (add examples, discuss edge cases, relate to real-world scenarios)
-- Be specific in improvements (e.g., "Include mathematical formulas", "Add a practical example from healthcare/finance", "Discuss computational complexity")
-- Be encouraging but honest
-- Focus on learning, not just correctness"""
+    "feedback": "2-3 sentences",
+    "strengths": ["strength1", "strength2"],
+    "improvements": ["improvement1", "improvement2"]
+}}"""
 
     try:
         response = model.generate_content(prompt, generation_config=genai.types.GenerationConfig(temperature=0.7, max_output_tokens=1000))
@@ -771,14 +764,14 @@ IMPORTANT:
 def get_ai_feedback_code(question: dict, code: str, result_value: Any, expected: Any, is_correct: bool, stats: dict, model) -> Dict:
     if not model:
         score = 1.0 if is_correct else 0.3
-        return {"is_correct": is_correct, "score": score, "feedback": "Correct!" if is_correct else "Incorrect", "code_quality": "N/A", "strengths": ["Executed"], "improvements": ["Review approach"], "points_earned": int(question["points"] * score)}
+        return {"is_correct": is_correct, "score": score, "feedback": "Correct!" if is_correct else "Incorrect", "code_quality": "N/A", "strengths": ["Executed"], "improvements": ["Review"], "points_earned": int(question["points"] * score)}
     
-    prompt = f"""Analyze this Data Science code solution as an expert mentor.
+    prompt = f"""Analyze this Data Science code solution.
 
 Question ({question['difficulty']}, {question['points']} points):
 {question['prompt']}
 
-Student's Code:
+Code:
 ```python
 {code}
 ```
@@ -786,23 +779,17 @@ Student's Code:
 Expected: {expected}
 Got: {result_value}
 Correct: {is_correct}
-Execution Time: {stats.get('execution_time', 0):.4f}s
+Time: {stats.get('execution_time', 0):.4f}s
 
-Provide detailed feedback in JSON format:
+JSON response:
 {{
     "is_correct": true/false,
     "score": 0.0-1.0,
-    "feedback": "2-3 sentences explaining approach, correctness, and efficiency",
+    "feedback": "explanation",
     "code_quality": "excellent/good/fair/poor",
-    "strengths": ["specific strength 1", "specific strength 2"],
-    "improvements": ["specific improvement 1", "specific improvement 2"]
-}}
-
-IMPORTANT: 
-- Always provide at least 2 strengths and 2 improvements
-- Even if the answer is correct, suggest best practices, alternative approaches, or advanced techniques
-- For improvements, be specific and educational (e.g., "Consider adding comments", "Could use vectorized operations", "Try method chaining for better readability")
-- Be constructive and encouraging"""
+    "strengths": ["strength1", "strength2"],
+    "improvements": ["improvement1", "improvement2"]
+}}"""
 
     try:
         response = model.generate_content(prompt, generation_config=genai.types.GenerationConfig(temperature=0.7, max_output_tokens=1200))
@@ -1276,7 +1263,7 @@ else:
                                     </div>
                                     <div>
                                         <div class="insight-title">📈 Improvements</div>
-                                        {''.join([f'<div class="insight-box insight-weakness">{i}</div>' for i in ai_analysis.get('improvements', ['Keep practicing!'])]) if ai_analysis.get('improvements') else '<div class="insight-box insight-recommendation">Excellent! Consider exploring advanced techniques.</div>'}
+                                        {''.join([f'<div class="insight-box insight-weakness">{i}</div>' for i in ai_analysis.get('improvements', [])])}
                                     </div>
                                 </div>
                             </div>
@@ -1366,7 +1353,7 @@ else:
                                         </div>
                                         <div>
                                             <div class="insight-title">📈 Improvements</div>
-                                            {''.join([f'<div class="insight-box insight-weakness">{i}</div>' for i in ai_analysis.get('improvements', ['Keep practicing!'])]) if ai_analysis.get('improvements') else '<div class="insight-box insight-recommendation">Excellent work! Keep building on these skills.</div>'}
+                                            {''.join([f'<div class="insight-box insight-weakness">{i}</div>' for i in ai_analysis.get('improvements', [])])}
                                         </div>
                                     </div>
                                 </div>
