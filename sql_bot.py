@@ -44,7 +44,7 @@ def get_gemini_model():
         try:
             if GEMINI_AVAILABLE:
                 genai.configure(api_key=st.session_state.gemini_api_key)
-                return genai.GenerativeModel('gemini-2.0-flash')
+                return genai.GenerativeModel('gemini-1.5-pro')
         except Exception as e:
             st.error(f"Invalid API key: {str(e)}")
             return None
@@ -672,7 +672,7 @@ with st.sidebar:
             try:
                 if GEMINI_AVAILABLE:
                     genai.configure(api_key=st.session_state.gemini_api_key)
-                    test_model = genai.GenerativeModel('gemini-2.0-flash')
+                    test_model = genai.GenerativeModel('gemini-1.5-pro')
                     # Quick test
                     test_response = test_model.generate_content(
                         "Say 'OK' if you can read this.",
@@ -726,6 +726,151 @@ with st.sidebar:
             total_points = sum(a.get("points_earned", 0) for a in st.session_state.user_answers)
             st.metric("Correct", f"{correct}/{len(st.session_state.user_answers)}")
             st.metric("Points", total_points)
+
+# --------------------------
+# Immediate Feedback Display Function
+# --------------------------
+def show_immediate_feedback(ai_analysis: Dict, question: dict, student_answer: str, 
+                           answer_type: str, result_value=None, expected_value=None, stats=None):
+    """Display immediate detailed feedback after each answer submission"""
+    
+    st.markdown("---")
+    
+    # Header with score
+    is_correct = ai_analysis.get("is_correct", False)
+    points_earned = ai_analysis.get("points_earned", 0)
+    max_points = question["points"]
+    score = ai_analysis.get("score", 0)
+    
+    if is_correct:
+        header_color = "#22c55e"
+        status_emoji = "✅"
+        status_text = "Excellent Work!"
+    elif score >= 0.5:
+        header_color = "#f59e0b"
+        status_emoji = "⚡"
+        status_text = "Good Attempt!"
+    else:
+        header_color = "#ef4444"
+        status_emoji = "📚"
+        status_text = "Keep Learning!"
+    
+    st.markdown(f"""
+    <div style="background: linear-gradient(135deg, {header_color}15, {header_color}05); 
+                border: 2px solid {header_color}; border-radius: 12px; padding: 20px; margin: 20px 0;">
+        <div style="text-align: center;">
+            <div style="font-size: 48px; margin-bottom: 10px;">{status_emoji}</div>
+            <div style="font-size: 28px; font-weight: 700; color: {header_color};">{status_text}</div>
+            <div style="font-size: 20px; margin-top: 10px; color: #64748b;">
+                Score: <strong style="color: {header_color};">{points_earned}/{max_points}</strong> points 
+                ({score*100:.0f}% accuracy)
+            </div>
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
+    
+    # AI Mentor's Detailed Feedback
+    st.markdown('<div class="ai-feedback">', unsafe_allow_html=True)
+    st.markdown('<div class="ai-badge">🤖 AI MENTOR\'S DETAILED FEEDBACK</div>', unsafe_allow_html=True)
+    
+    # Main feedback
+    feedback = ai_analysis.get("feedback", "Good effort!")
+    st.markdown(f"### 📝 Analysis")
+    st.markdown(feedback)
+    
+    # For code questions, show results comparison
+    if answer_type == "code" and result_value is not None:
+        st.markdown("### 💻 Code Execution Results")
+        col1, col2 = st.columns(2)
+        with col1:
+            st.markdown(f"""
+            **Your Result:**  
+            `{result_value}`
+            """)
+            if stats:
+                st.markdown(f"⏱️ Execution time: `{stats.get('execution_time', 0):.4f}s`")
+        with col2:
+            st.markdown(f"""
+            **Expected Result:**  
+            `{expected_value}`
+            """)
+            if result_value == expected_value or (isinstance(result_value, (int, float)) and isinstance(expected_value, (int, float)) and abs(result_value - expected_value) < 0.001):
+                st.success("✅ Perfect match!")
+            else:
+                st.warning("⚠️ Results don't match")
+        
+        # Code quality assessment
+        code_quality = ai_analysis.get("code_quality", "N/A")
+        if code_quality != "N/A":
+            quality_colors = {
+                "excellent": "#22c55e",
+                "good": "#3b82f6", 
+                "fair": "#f59e0b",
+                "poor": "#ef4444"
+            }
+            quality_color = quality_colors.get(code_quality.lower(), "#64748b")
+            st.markdown(f"""
+            **Code Quality:** <span style="background: {quality_color}; color: white; padding: 4px 12px; 
+            border-radius: 12px; font-weight: 600;">{code_quality.upper()}</span>
+            """, unsafe_allow_html=True)
+    
+    # Strengths and Improvements side by side
+    st.markdown("---")
+    col1, col2 = st.columns(2)
+    
+    with col1:
+        strengths = ai_analysis.get("strengths", [])
+        if strengths:
+            st.markdown("### ✨ What You Did Well")
+            for i, strength in enumerate(strengths, 1):
+                st.markdown(f"""
+                <div style="background: rgba(34, 197, 94, 0.1); padding: 12px; 
+                            border-radius: 8px; margin: 8px 0; border-left: 3px solid #22c55e;">
+                    <strong>{i}.</strong> {strength}
+                </div>
+                """, unsafe_allow_html=True)
+    
+    with col2:
+        improvements = ai_analysis.get("improvements", [])
+        if improvements:
+            st.markdown("### 📈 Areas to Improve")
+            for i, improvement in enumerate(improvements, 1):
+                st.markdown(f"""
+                <div style="background: rgba(59, 130, 246, 0.1); padding: 12px; 
+                            border-radius: 8px; margin: 8px 0; border-left: 3px solid #3b82f6;">
+                    <strong>{i}.</strong> {improvement}
+                </div>
+                """, unsafe_allow_html=True)
+    
+    # Better approach suggestion (if available)
+    better_approach = ai_analysis.get("better_approach")
+    if better_approach:
+        st.markdown("---")
+        st.markdown("### 💡 Pro Tip: Better Approach")
+        st.info(better_approach)
+    
+    # Concept understanding (for theory)
+    if answer_type == "theory":
+        core_understood = ai_analysis.get("core_concepts_understood")
+        if core_understood is not None:
+            if core_understood:
+                st.success("✅ **Core concepts understood** - You have a solid grasp of the fundamentals!")
+            else:
+                st.warning("⚠️ **Review core concepts** - Revisit the key definitions and principles.")
+    
+    st.markdown('</div>', unsafe_allow_html=True)
+    
+    # Encouragement message
+    if is_correct:
+        encouragement = "🎉 Outstanding! You're mastering this topic. Keep up the excellent work!"
+    elif score >= 0.7:
+        encouragement = "👍 Great job! You're on the right track. Review the feedback to perfect your understanding."
+    elif score >= 0.5:
+        encouragement = "💪 Good effort! You've got the basics. Focus on the improvement areas to level up."
+    else:
+        encouragement = "📚 Don't worry! Learning takes time. Review the concepts and try similar problems for practice."
+    
+    st.info(encouragement)
 
 # --------------------------
 # UI Functions
@@ -818,6 +963,10 @@ def show_question(qidx: int):
                     with st.spinner("🤖 AI Mentor is analyzing your answer..."):
                         ai_analysis = get_ai_feedback_theory(q, answer, ai_model)
                     
+                    # Show immediate feedback
+                    show_immediate_feedback(ai_analysis, q, answer, "theory")
+                    
+                    # Save answer
                     st.session_state.user_answers.append({
                         "id": q["id"],
                         "type": q["type"],
@@ -832,11 +981,18 @@ def show_question(qidx: int):
                         "timestamp": datetime.now().isoformat()
                     })
                     
-                    if qidx + 1 < len(QUESTIONS):
-                        st.session_state.current_q = qidx + 1
-                    else:
-                        st.session_state.completed = True
-                    st.rerun()
+                    # Show next question button
+                    st.markdown("---")
+                    col_next1, col_next2, col_next3 = st.columns([1, 2, 1])
+                    with col_next2:
+                        if qidx + 1 < len(QUESTIONS):
+                            if st.button("➡️ Continue to Next Question", key=f"next_{qidx}", use_container_width=True):
+                                st.session_state.current_q = qidx + 1
+                                st.rerun()
+                        else:
+                            if st.button("🎯 Complete & View Final Report", key=f"finish_{qidx}", use_container_width=True):
+                                st.session_state.completed = True
+                                st.rerun()
         
         with col2:
             with st.popover("💡 Hint"):
@@ -873,6 +1029,10 @@ def show_question(qidx: int):
                     with st.spinner("🤖 AI Mentor is reviewing your code..."):
                         ai_analysis = get_ai_feedback_code(q, answer_code, res, expected, ok, stats, ai_model)
                     
+                    # Show immediate feedback
+                    show_immediate_feedback(ai_analysis, q, answer_code, "code", res, expected, stats)
+                    
+                    # Save answer
                     st.session_state.user_answers.append({
                         "id": q["id"],
                         "type": q["type"],
@@ -890,11 +1050,18 @@ def show_question(qidx: int):
                         "timestamp": datetime.now().isoformat()
                     })
                     
-                    if qidx + 1 < len(QUESTIONS):
-                        st.session_state.current_q = qidx + 1
-                    else:
-                        st.session_state.completed = True
-                    st.rerun()
+                    # Show next question button
+                    st.markdown("---")
+                    col_next1, col_next2, col_next3 = st.columns([1, 2, 1])
+                    with col_next2:
+                        if qidx + 1 < len(QUESTIONS):
+                            if st.button("➡️ Continue to Next Question", key=f"next_{qidx}", use_container_width=True):
+                                st.session_state.current_q = qidx + 1
+                                st.rerun()
+                        else:
+                            if st.button("🎯 Complete & View Final Report", key=f"finish_{qidx}", use_container_width=True):
+                                st.session_state.completed = True
+                                st.rerun()
         
         with col2:
             if st.button("▶️ Test Run", key=f"test_{qidx}", use_container_width=True):
