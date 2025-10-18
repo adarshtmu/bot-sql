@@ -25,33 +25,34 @@ import os
 
 # For LLM integration
 try:
-    import anthropic
-    ANTHROPIC_AVAILABLE = True
+    import google.generativeai as genai
+    GEMINI_AVAILABLE = True
 except ImportError:
-    ANTHROPIC_AVAILABLE = False
-    st.warning("⚠️ Install anthropic package for AI mentor: `pip install anthropic`")
+    GEMINI_AVAILABLE = False
+    st.warning("⚠️ Install google-generativeai package for AI mentor: `pip install google-generativeai`")
 
 st.set_page_config(page_title="AI DS Practice Bot", layout="wide", initial_sidebar_state="expanded")
 
 # --------------------------
 # LLM Configuration
 # --------------------------
-def get_anthropic_client():
-    """Get Anthropic client from secrets or environment"""
+def get_gemini_model():
+    """Get Gemini model from secrets or environment"""
     api_key = None
     
     # Try Streamlit secrets first
     try:
-        api_key = st.secrets.get("ANTHROPIC_API_KEY")
+        api_key = st.secrets.get("GEMINI_API_KEY")
     except:
         pass
     
     # Fall back to environment variable
     if not api_key:
-        api_key = os.getenv("ANTHROPIC_API_KEY")
+        api_key = os.getenv("GEMINI_API_KEY")
     
-    if api_key and ANTHROPIC_AVAILABLE:
-        return anthropic.Anthropic(api_key=api_key)
+    if api_key and GEMINI_AVAILABLE:
+        genai.configure(api_key=api_key)
+        return genai.GenerativeModel('gemini-1.5-pro')
     return None
 
 # --------------------------
@@ -324,9 +325,9 @@ QUESTIONS = [
 # --------------------------
 # LLM-Powered Evaluation Functions
 # --------------------------
-def get_ai_feedback_theory(question: dict, student_answer: str, client) -> Dict:
+def get_ai_feedback_theory(question: dict, student_answer: str, model) -> Dict:
     """Get detailed AI mentor feedback for theory answers"""
-    if not client:
+    if not model:
         return {
             "is_correct": len(student_answer.split()) >= 30,
             "score": 0.7,
@@ -365,13 +366,23 @@ Respond in JSON format:
 Be encouraging but honest. Focus on learning, not just correctness."""
 
     try:
-        response = client.messages.create(
-            model="claude-sonnet-4-20250514",
-            max_tokens=1000,
-            messages=[{"role": "user", "content": prompt}]
+        response = model.generate_content(
+            prompt,
+            generation_config=genai.types.GenerationConfig(
+                temperature=0.7,
+                max_output_tokens=1000,
+            )
         )
         
-        result = json.loads(response.content[0].text)
+        # Extract JSON from response
+        response_text = response.text.strip()
+        # Remove markdown code blocks if present
+        if "```json" in response_text:
+            response_text = response_text.split("```json")[1].split("```")[0].strip()
+        elif "```" in response_text:
+            response_text = response_text.split("```")[1].split("```")[0].strip()
+        
+        result = json.loads(response_text)
         result["points_earned"] = int(result["score"] * question["points"])
         return result
     except Exception as e:
@@ -385,9 +396,9 @@ Be encouraging but honest. Focus on learning, not just correctness."""
         }
 
 def get_ai_feedback_code(question: dict, student_code: str, result_value: Any, 
-                         expected: Any, is_correct: bool, execution_stats: dict, client) -> Dict:
+                         expected: Any, is_correct: bool, execution_stats: dict, model) -> Dict:
     """Get detailed AI mentor feedback for code answers"""
-    if not client:
+    if not model:
         return {
             "is_correct": is_correct,
             "score": 1.0 if is_correct else 0.3,
@@ -435,13 +446,22 @@ Respond in JSON format:
 Be specific and educational. Praise good practices, suggest improvements."""
 
     try:
-        response = client.messages.create(
-            model="claude-sonnet-4-20250514",
-            max_tokens=1200,
-            messages=[{"role": "user", "content": prompt}]
+        response = model.generate_content(
+            prompt,
+            generation_config=genai.types.GenerationConfig(
+                temperature=0.7,
+                max_output_tokens=1200,
+            )
         )
         
-        result = json.loads(response.content[0].text)
+        # Extract JSON from response
+        response_text = response.text.strip()
+        if "```json" in response_text:
+            response_text = response_text.split("```json")[1].split("```")[0].strip()
+        elif "```" in response_text:
+            response_text = response_text.split("```")[1].split("```")[0].strip()
+        
+        result = json.loads(response_text)
         result["points_earned"] = int(result["score"] * question["points"])
         return result
     except Exception as e:
@@ -456,14 +476,14 @@ Be specific and educational. Praise good practices, suggest improvements."""
             "points_earned": int(question["points"] * fallback_score)
         }
 
-def generate_final_report(all_answers: List[Dict], client) -> Dict:
+def generate_final_report(all_answers: List[Dict], model) -> Dict:
     """Generate comprehensive final report with AI analysis"""
-    if not client:
+    if not model:
         return {
             "overall_feedback": "Complete! Add API key for detailed analysis.",
             "strengths": ["Completed all questions"],
             "weaknesses": ["AI analysis unavailable"],
-            "recommendations": ["Set up Anthropic API key"],
+            "recommendations": ["Set up Gemini API key"],
             "learning_path": []
         }
     
@@ -509,13 +529,22 @@ Respond in JSON format:
 Be specific, actionable, and encouraging. This is a learning experience."""
 
     try:
-        response = client.messages.create(
-            model="claude-sonnet-4-20250514",
-            max_tokens=2000,
-            messages=[{"role": "user", "content": prompt}]
+        response = model.generate_content(
+            prompt,
+            generation_config=genai.types.GenerationConfig(
+                temperature=0.8,
+                max_output_tokens=2000,
+            )
         )
         
-        return json.loads(response.content[0].text)
+        # Extract JSON from response
+        response_text = response.text.strip()
+        if "```json" in response_text:
+            response_text = response_text.split("```json")[1].split("```")[0].strip()
+        elif "```" in response_text:
+            response_text = response_text.split("```")[1].split("```")[0].strip()
+        
+        return json.loads(response_text)
     except Exception as e:
         return {
             "overall_feedback": "Good effort completing all questions!",
@@ -614,8 +643,8 @@ if "final_report" not in st.session_state:
 # Apply theme
 st.markdown(get_theme_css(st.session_state.theme), unsafe_allow_html=True)
 
-# Get AI client
-ai_client = get_anthropic_client()
+# Get AI model
+ai_model = get_gemini_model()
 
 # --------------------------
 # Sidebar
@@ -628,22 +657,23 @@ with st.sidebar:
         st.rerun()
     
     # API Status
-    if ai_client:
+    if ai_model:
         st.success("🤖 AI Mentor: Active")
     else:
         st.warning("🤖 AI Mentor: Inactive")
         with st.expander("Setup AI Mentor"):
             st.markdown("""
-            Add your Anthropic API key:
-            1. Get key from console.anthropic.com
+            Add your Gemini API key:
+            1. Get free key from https://aistudio.google.com/app/apikey
             2. Add to `.streamlit/secrets.toml`:
             ```toml
-            ANTHROPIC_API_KEY = "your-key-here"
+            GEMINI_API_KEY = "AIzaSyCNhdM--Itg4WYqkZ5JJc0vZ21WvywcvaY"
             ```
             Or set environment variable:
             ```bash
-            export ANTHROPIC_API_KEY="your-key"
+            export GEMINI_API_KEY="your-key"
             ```
+            Then install: `pip install google-generativeai`
             """)
     
     st.markdown("---")
@@ -743,7 +773,7 @@ def show_question(qidx: int):
                     st.error("⚠️ Please write a more detailed answer (at least 20 characters)")
                 else:
                     with st.spinner("🤖 AI Mentor is analyzing your answer..."):
-                        ai_analysis = get_ai_feedback_theory(q, answer, ai_client)
+                        ai_analysis = get_ai_feedback_theory(q, answer, ai_model)
                     
                     st.session_state.user_answers.append({
                         "id": q["id"],
@@ -798,7 +828,7 @@ def show_question(qidx: int):
                         message = f"Expected: {expected}, Got: {res}"
                     
                     with st.spinner("🤖 AI Mentor is reviewing your code..."):
-                        ai_analysis = get_ai_feedback_code(q, answer_code, res, expected, ok, stats, ai_client)
+                        ai_analysis = get_ai_feedback_code(q, answer_code, res, expected, ok, stats, ai_model)
                     
                     st.session_state.user_answers.append({
                         "id": q["id"],
@@ -857,7 +887,7 @@ def show_results():
     # Generate final report if not already done
     if not st.session_state.final_report:
         with st.spinner("🤖 AI Mentor is preparing your comprehensive performance report..."):
-            st.session_state.final_report = generate_final_report(st.session_state.user_answers, ai_client)
+            st.session_state.final_report = generate_final_report(st.session_state.user_answers, ai_model)
     
     report = st.session_state.final_report
     
