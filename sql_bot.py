@@ -315,6 +315,27 @@ def get_advanced_css(theme="light"):
         font-weight: 700;
     }}
     
+    /* Navigation Badge */
+    .nav-badge {{
+        padding: 4px 8px;
+        border-radius: 12px;
+        font-size: 10px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-left: 8px;
+    }}
+    
+    .nav-completed {{
+        background: #10b981;
+        color: white;
+    }}
+    
+    .nav-pending {{
+        background: #f3f4f6;
+        color: #6b7280;
+    }}
+    
     /* Progress Components */
     .progress-section {{
         background: linear-gradient(135deg, {bg_card}, {bg_secondary});
@@ -558,6 +579,19 @@ def get_advanced_css(theme="light"):
         box-shadow: 0 8px 24px rgba(99, 102, 241, 0.4) !important;
     }}
     
+    /* Secondary Buttons */
+    .btn-secondary > button {{
+        background: {bg_secondary} !important;
+        color: {text_primary} !important;
+        border: 2px solid {border_color} !important;
+    }}
+    
+    .btn-secondary > button:hover {{
+        background: {accent_primary} !important;
+        color: white !important;
+        border-color: {accent_primary} !important;
+    }}
+    
     /* Code Editor Styling */
     .stCodeBlock {{
         border-radius: 12px !important;
@@ -624,6 +658,21 @@ def get_advanced_css(theme="light"):
         border-left: 4px solid #22c55e;
     }}
     
+    /* Hint Box */
+    .hint-box {{
+        background: linear-gradient(135deg, rgba(34, 197, 94, 0.05), rgba(34, 197, 94, 0.02));
+        border: 1px solid #22c55e;
+        border-radius: 12px;
+        padding: 16px;
+        margin: 16px 0;
+    }}
+    
+    .hint-title {{
+        font-weight: 600;
+        color: #059669;
+        margin-bottom: 8px;
+    }}
+    
     /* Sidebar Styling */
     [data-testid="stSidebar"] {{
         background: {bg_secondary} !important;
@@ -632,6 +681,17 @@ def get_advanced_css(theme="light"):
     
     [data-testid="stSidebar"] .element-container {{
         padding: 8px 0;
+    }}
+    
+    /* Selectbox Styling */
+    .stSelectbox > div > div > select {{
+        border-radius: 12px !important;
+        border: 2px solid {border_color} !important;
+        padding: 12px !important;
+    }}
+    
+    .stSelectbox > div > div > select:focus {{
+        border-color: {accent_primary} !important;
     }}
     </style>
     """
@@ -661,53 +721,61 @@ QUESTIONS = [
         "id": 1, "type": "theory", "difficulty": "easy",
         "title": "Bias-Variance Tradeoff",
         "prompt": "Explain the bias-variance tradeoff in supervised machine learning. What do high bias and high variance indicate? Provide one method to reduce each.",
-        "points": 10
+        "points": 10,
+        "hint": "Remember: Bias is underfitting, variance is overfitting. Think about model complexity."
     },
     {
         "id": 2, "type": "theory", "difficulty": "medium",
         "title": "Cross-Validation",
         "prompt": "Explain k-fold cross-validation in detail. How does it work, why is it better than a single train/test split, and what are potential drawbacks?",
-        "points": 15
+        "points": 15,
+        "hint": "K-fold divides data into K parts, trains on K-1, tests on 1, rotates. Better for small datasets."
     },
     {
         "id": 3, "type": "theory", "difficulty": "easy",
         "title": "Feature Scaling",
         "prompt": "Why is feature scaling important in machine learning? Explain standardization vs normalization and give two examples of algorithms that require scaling.",
-        "points": 10
+        "points": 10,
+        "hint": "Scaling ensures features contribute equally. Standardization: z-score, Normalization: min-max."
     },
     {
         "id": 4, "type": "theory", "difficulty": "hard",
         "title": "Precision vs Recall",
         "prompt": "Explain precision and recall in classification. When would you prioritize one over the other? Provide a real-world scenario for each case and explain the F1 score.",
-        "points": 20
+        "points": 20,
+        "hint": "Precision: TP/(TP+FP), Recall: TP/(TP+FN). Prioritize recall in medical diagnosis."
     },
     {
         "id": 5, "type": "code", "difficulty": "easy",
         "title": "Correlation Analysis",
         "prompt": "Using the `students` DataFrame as `df`, calculate the Pearson correlation coefficient between `hours_studied` and `score`. Round to 3 decimal places and assign to `result`.",
         "dataset": "students", "validator": "numeric_tol", "points": 10,
-        "starter_code": "# Calculate correlation between hours_studied and score\n# Round to 3 decimal places\n\nresult = None"
+        "starter_code": "# Calculate correlation between hours_studied and score\n# Round to 3 decimal places\n\ndf = students_df\nresult = None",
+        "hint": "Use df['col1'].corr(df['col2']) and round(result, 3)"
     },
     {
         "id": 6, "type": "code", "difficulty": "medium",
         "title": "Train-Test Split",
         "prompt": "Split the `students` DataFrame into 70% train and 30% test sets using random_state=42. Calculate the mean `score` of the test set, round to 2 decimal places, assign to `result`.",
         "dataset": "students", "validator": "numeric_tol", "points": 15,
-        "starter_code": "# Split data: 70% train, 30% test\n# Calculate mean score of test set\n\nresult = None"
+        "starter_code": "# Split data: 70% train, 30% test\n# Calculate mean score of test set\n\ndf = students_df\nfrom sklearn.model_selection import train_test_split\nresult = None",
+        "hint": "Use train_test_split(df, test_size=0.3, random_state=42), then test['score'].mean()"
     },
     {
         "id": 7, "type": "code", "difficulty": "medium",
         "title": "Group Aggregation",
         "prompt": "Using the `sales` DataFrame, find the total sales for each region. Return a dictionary where keys are region names and values are total sales. Assign to `result`.",
         "dataset": "sales", "validator": "dict_compare", "points": 15,
-        "starter_code": "# Group by region and sum sales\n# Return as dictionary\n\nresult = None"
+        "starter_code": "# Group by region and sum sales\n# Return as dictionary\n\ndf = sales_df\nresult = None",
+        "hint": "Use df.groupby('region')['sales'].sum().to_dict()"
     },
     {
         "id": 8, "type": "code", "difficulty": "hard",
         "title": "Feature Engineering",
         "prompt": "Create a new feature `performance_score` = (score * 0.7) + (attendance * 0.3). Calculate correlation between `performance_score` and `passed`. Round to 3 decimals, assign to `result`.",
         "dataset": "students", "validator": "numeric_tol", "points": 20,
-        "starter_code": "# Create performance_score feature\n# Calculate correlation with 'passed'\n\nresult = None"
+        "starter_code": "# Create performance_score feature\n# Calculate correlation with 'passed'\n\ndf = students_df\nresult = None",
+        "hint": "df['performance_score'] = ..., then df['performance_score'].corr(df['passed'])"
     }
 ]
 
@@ -717,7 +785,7 @@ def get_gemini_model():
         try:
             if GEMINI_AVAILABLE:
                 genai.configure(api_key=st.session_state.gemini_api_key)
-                return genai.GenerativeModel('gemini-2.0-flash-exp')
+                return genai.GenerativeModel('gemini-1.5-flash')
         except Exception as e:
             return None
     return None
@@ -774,7 +842,6 @@ Question ({question['difficulty']}, {question['points']} points):
 Code:
 ```python
 {code}
-```
 
 Expected: {expected}
 Got: {result_value}
@@ -1379,3 +1446,4 @@ st.markdown("""
     <div>Powered by Gemini AI | Built with Streamlit</div>
 </div>
 """, unsafe_allow_html=True)
+
