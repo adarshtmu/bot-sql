@@ -1,19 +1,14 @@
 """
-DataMentor AI - Enterprise EdTech Platform
-Advanced AI-Powered Data Science Learning Experience
+AI-Powered Data Science Practice Platform
+Enterprise-Grade EdTech UI with Advanced Features
 
-NEW FEATURES:
-- Gamification with achievements and badges
-- Real-time progress analytics with charts
-- Smart hints system
-- Code snippets library
-- Performance leaderboard simulation
-- Interactive onboarding tour
-- Keyboard shortcuts
-- Export report as PDF-ready HTML
-- Question bookmarking
-- Time tracking per question
-- Difficulty progression system
+Features:
+- Modern, professional UI inspired by leading EdTech platforms
+- Real-time AI mentor feedback with Gemini integration
+- Interactive progress tracking and analytics dashboard
+- Smooth animations and transitions
+- Responsive design with dark/light themes
+- Comprehensive performance reports with visualizations
 """
 
 import streamlit as st
@@ -22,7 +17,7 @@ import numpy as np
 import json
 import time
 from typing import Tuple, Any, Dict, List
-from datetime import datetime, timedelta
+from datetime import datetime
 
 # LLM Integration
 try:
@@ -32,25 +27,13 @@ except ImportError:
     GEMINI_AVAILABLE = False
 
 st.set_page_config(
-    page_title="DataMentor AI - Advanced Learning Platform",
+    page_title="DataMentor AI - Practice Platform",
     page_icon="🎓",
     layout="wide",
     initial_sidebar_state="expanded"
 )
 
-# Achievement System
-ACHIEVEMENTS = {
-    "first_blood": {"name": "First Blood", "desc": "Complete your first question", "icon": "🎯", "points": 10},
-    "speed_demon": {"name": "Speed Demon", "desc": "Answer a question in under 2 minutes", "icon": "⚡", "points": 20},
-    "perfectionist": {"name": "Perfectionist", "desc": "Get 100% on any question", "icon": "💯", "points": 25},
-    "code_warrior": {"name": "Code Warrior", "desc": "Complete all coding challenges", "icon": "⚔️", "points": 50},
-    "theory_master": {"name": "Theory Master", "desc": "Complete all theory questions", "icon": "📚", "points": 50},
-    "champion": {"name": "Champion", "desc": "Score above 90% overall", "icon": "🏆", "points": 100},
-    "streak_3": {"name": "Three in a Row", "desc": "Get 3 correct answers in a row", "icon": "🔥", "points": 30},
-    "night_owl": {"name": "Night Owl", "desc": "Practice after 10 PM", "icon": "🦉", "points": 15},
-}
-
-# Enhanced CSS with Gamification Elements
+# Enhanced CSS with Modern EdTech Design
 def get_advanced_css(theme="light"):
     if theme == "dark":
         bg_primary = "#0a0e27"
@@ -61,9 +44,6 @@ def get_advanced_css(theme="light"):
         accent_primary = "#6366f1"
         accent_secondary = "#8b5cf6"
         border_color = "#2d3561"
-        success_color = "#22c55e"
-        warning_color = "#f59e0b"
-        error_color = "#ef4444"
     else:
         bg_primary = "#f8fafc"
         bg_secondary = "#ffffff"
@@ -73,17 +53,13 @@ def get_advanced_css(theme="light"):
         accent_primary = "#6366f1"
         accent_secondary = "#8b5cf6"
         border_color = "#e2e8f0"
-        success_color = "#10b981"
-        warning_color = "#f59e0b"
-        error_color = "#dc2626"
     
     return f"""
     <style>
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
     
     * {{
         font-family: 'Inter', sans-serif;
-        transition: background-color 0.3s ease, color 0.3s ease;
     }}
     
     .stApp {{
@@ -91,106 +67,67 @@ def get_advanced_css(theme="light"):
         color: {text_primary};
     }}
     
+    /* Hide Streamlit branding */
     #MainMenu {{visibility: hidden;}}
     footer {{visibility: hidden;}}
     header {{visibility: hidden;}}
     
-    /* Premium Header with Glassmorphism */
+    /* Custom Header */
     .platform-header {{
         background: linear-gradient(135deg, {accent_primary}, {accent_secondary});
-        padding: 20px 40px;
-        border-radius: 0 0 32px 32px;
-        margin: -60px -48px 40px -48px;
-        box-shadow: 0 20px 60px rgba(99, 102, 241, 0.3);
-        backdrop-filter: blur(10px);
-        position: relative;
-        overflow: hidden;
-    }}
-    
-    .platform-header::before {{
-        content: '';
-        position: absolute;
-        top: -50%;
-        left: -50%;
-        width: 200%;
-        height: 200%;
-        background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
-        animation: headerPulse 8s ease-in-out infinite;
-    }}
-    
-    @keyframes headerPulse {{
-        0%, 100% {{ transform: translate(0, 0) scale(1); }}
-        50% {{ transform: translate(10px, 10px) scale(1.05); }}
+        padding: 24px 32px;
+        border-radius: 0 0 24px 24px;
+        margin: -60px -48px 32px -48px;
+        box-shadow: 0 10px 40px rgba(99, 102, 241, 0.2);
     }}
     
     .header-content {{
         display: flex;
         justify-content: space-between;
         align-items: center;
-        max-width: 1600px;
+        max-width: 1400px;
         margin: 0 auto;
-        position: relative;
-        z-index: 1;
     }}
     
-    .logo {{
-        font-size: 36px;
-        font-weight: 900;
-        color: white;
+    .logo-section {{
         display: flex;
         align-items: center;
         gap: 16px;
-        text-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    }}
+    
+    .logo {{
+        font-size: 32px;
+        font-weight: 800;
+        color: white;
+        display: flex;
+        align-items: center;
+        gap: 12px;
     }}
     
     .logo-icon {{
-        font-size: 48px;
+        font-size: 40px;
         animation: float 3s ease-in-out infinite;
-        filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.3));
     }}
     
     @keyframes float {{
-        0%, 100% {{ transform: translateY(0px) rotate(0deg); }}
-        50% {{ transform: translateY(-12px) rotate(5deg); }}
+        0%, 100% {{ transform: translateY(0px); }}
+        50% {{ transform: translateY(-10px); }}
     }}
     
-    .header-stats {{
-        display: flex;
-        gap: 24px;
-        align-items: center;
-    }}
-    
-    .header-stat-item {{
-        background: rgba(255, 255, 255, 0.15);
-        backdrop-filter: blur(10px);
-        padding: 12px 20px;
-        border-radius: 16px;
-        border: 1px solid rgba(255, 255, 255, 0.2);
-        text-align: center;
-    }}
-    
-    .header-stat-value {{
-        font-size: 24px;
-        font-weight: 800;
-        color: white;
-        display: block;
-    }}
-    
-    .header-stat-label {{
-        font-size: 11px;
+    .tagline {{
         color: rgba(255, 255, 255, 0.9);
-        text-transform: uppercase;
-        letter-spacing: 1px;
-        font-weight: 600;
+        font-size: 14px;
+        font-weight: 500;
+        letter-spacing: 0.5px;
     }}
     
-    /* Enhanced Hero Section */
+    /* Hero Section */
     .hero-section {{
         background: linear-gradient(135deg, {bg_card}, {bg_secondary});
-        border-radius: 32px;
-        padding: 60px;
-        margin: 40px 0;
-        box-shadow: 0 30px 80px rgba(0, 0, 0, 0.12);
+        border-radius: 24px;
+        padding: 48px;
+        margin: 32px 0;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.08);
         border: 1px solid {border_color};
         text-align: center;
         position: relative;
@@ -204,8 +141,8 @@ def get_advanced_css(theme="light"):
         left: -50%;
         width: 200%;
         height: 200%;
-        background: radial-gradient(circle, rgba(99, 102, 241, 0.08) 0%, transparent 70%);
-        animation: rotate 25s linear infinite;
+        background: radial-gradient(circle, rgba(99, 102, 241, 0.05) 0%, transparent 70%);
+        animation: rotate 20s linear infinite;
     }}
     
     @keyframes rotate {{
@@ -219,230 +156,152 @@ def get_advanced_css(theme="light"):
     }}
     
     .hero-title {{
-        font-size: 64px;
-        font-weight: 900;
-        background: linear-gradient(135deg, {accent_primary}, {accent_secondary}, {accent_primary});
-        background-size: 200% auto;
+        font-size: 56px;
+        font-weight: 800;
+        background: linear-gradient(135deg, {accent_primary}, {accent_secondary});
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
-        margin-bottom: 20px;
-        line-height: 1.1;
-        animation: gradientShift 4s ease infinite;
-    }}
-    
-    @keyframes gradientShift {{
-        0%, 100% {{ background-position: 0% 50%; }}
-        50% {{ background-position: 100% 50%; }}
+        margin-bottom: 16px;
+        line-height: 1.2;
     }}
     
     .hero-subtitle {{
-        font-size: 22px;
+        font-size: 20px;
         color: {text_secondary};
-        margin-bottom: 40px;
+        margin-bottom: 32px;
         font-weight: 500;
-        line-height: 1.6;
     }}
     
-    /* Feature Grid with Hover Effects */
     .feature-grid {{
         display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-        gap: 20px;
-        margin-top: 40px;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 16px;
+        margin-top: 32px;
     }}
     
     .feature-item {{
         background: {bg_card};
-        padding: 28px;
-        border-radius: 20px;
-        border: 2px solid {border_color};
+        padding: 20px;
+        border-radius: 16px;
+        border: 1px solid {border_color};
         text-align: center;
-        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-        cursor: pointer;
-        position: relative;
-        overflow: hidden;
-    }}
-    
-    .feature-item::before {{
-        content: '';
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        background: linear-gradient(135deg, {accent_primary}, {accent_secondary});
-        opacity: 0;
-        transition: opacity 0.4s ease;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
     }}
     
     .feature-item:hover {{
-        transform: translateY(-8px) scale(1.02);
-        box-shadow: 0 20px 40px rgba(99, 102, 241, 0.25);
-        border-color: {accent_primary};
-    }}
-    
-    .feature-item:hover::before {{
-        opacity: 0.1;
+        transform: translateY(-4px);
+        box-shadow: 0 12px 24px rgba(99, 102, 241, 0.15);
     }}
     
     .feature-icon {{
-        font-size: 40px;
-        margin-bottom: 16px;
-        display: inline-block;
-        transition: transform 0.4s ease;
-        position: relative;
-        z-index: 1;
-    }}
-    
-    .feature-item:hover .feature-icon {{
-        transform: scale(1.2) rotate(10deg);
+        font-size: 32px;
+        margin-bottom: 12px;
     }}
     
     .feature-title {{
-        font-size: 16px;
-        font-weight: 700;
+        font-size: 14px;
+        font-weight: 600;
         color: {text_primary};
-        margin-bottom: 8px;
-        position: relative;
-        z-index: 1;
+        margin-bottom: 4px;
     }}
     
     .feature-desc {{
-        font-size: 13px;
+        font-size: 12px;
         color: {text_secondary};
-        position: relative;
-        z-index: 1;
     }}
     
-    /* Achievement Badge System */
-    .achievement-badge {{
-        background: linear-gradient(135deg, {bg_card}, {bg_secondary});
-        border: 3px solid {accent_primary};
-        border-radius: 16px;
-        padding: 16px;
-        margin: 12px 0;
+    /* Card Components */
+    .modern-card {{
+        background: {bg_card};
+        border-radius: 20px;
+        padding: 32px;
+        margin: 24px 0;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.06);
+        border: 1px solid {border_color};
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }}
+    
+    .modern-card:hover {{
+        transform: translateY(-2px);
+        box-shadow: 0 12px 40px rgba(0, 0, 0, 0.1);
+    }}
+    
+    .card-header {{
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 24px;
+        padding-bottom: 16px;
+        border-bottom: 2px solid {border_color};
+    }}
+    
+    .card-title {{
+        font-size: 24px;
+        font-weight: 700;
+        color: {text_primary};
         display: flex;
         align-items: center;
-        gap: 16px;
-        transition: all 0.3s ease;
-        position: relative;
-        overflow: hidden;
+        gap: 12px;
     }}
     
-    .achievement-badge::before {{
-        content: '';
-        position: absolute;
-        top: 0;
-        left: -100%;
-        width: 100%;
-        height: 100%;
-        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
-        transition: left 0.5s ease;
-    }}
-    
-    .achievement-badge:hover::before {{
-        left: 100%;
-    }}
-    
-    .achievement-badge:hover {{
-        transform: translateX(8px);
-        box-shadow: 0 8px 24px rgba(99, 102, 241, 0.3);
-    }}
-    
-    .achievement-icon {{
-        font-size: 36px;
-        filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
-    }}
-    
-    .achievement-locked {{
-        opacity: 0.4;
-        border-color: {border_color};
-    }}
-    
-    /* Question Card with Enhanced Visual Hierarchy */
+    /* Question Card */
     .question-card {{
         background: {bg_card};
-        border-radius: 24px;
-        padding: 40px;
-        box-shadow: 0 12px 48px rgba(0, 0, 0, 0.08);
+        border-radius: 20px;
+        padding: 32px;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.06);
         border: 2px solid {border_color};
-        margin: 32px 0;
-        position: relative;
-        overflow: hidden;
-    }}
-    
-    .question-card::before {{
-        content: '';
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        height: 6px;
-        background: linear-gradient(90deg, {accent_primary}, {accent_secondary});
+        margin: 24px 0;
     }}
     
     .question-header {{
         display: flex;
         justify-content: space-between;
         align-items: start;
-        margin-bottom: 32px;
+        margin-bottom: 24px;
     }}
     
     .question-number {{
         background: linear-gradient(135deg, {accent_primary}, {accent_secondary});
         color: white;
-        width: 56px;
-        height: 56px;
-        border-radius: 16px;
+        width: 48px;
+        height: 48px;
+        border-radius: 12px;
         display: flex;
         align-items: center;
         justify-content: center;
-        font-size: 24px;
-        font-weight: 800;
-        box-shadow: 0 8px 20px rgba(99, 102, 241, 0.4);
-        position: relative;
-    }}
-    
-    .question-number::after {{
-        content: '';
-        position: absolute;
-        inset: -4px;
-        border-radius: 18px;
-        background: linear-gradient(135deg, {accent_primary}, {accent_secondary});
-        opacity: 0.3;
-        filter: blur(8px);
-        z-index: -1;
+        font-size: 20px;
+        font-weight: 700;
+        box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
     }}
     
     .question-meta {{
         display: flex;
         gap: 12px;
-        flex-wrap: wrap;
         align-items: center;
     }}
     
     .difficulty-badge {{
-        padding: 8px 20px;
-        border-radius: 24px;
-        font-size: 13px;
-        font-weight: 700;
+        padding: 6px 16px;
+        border-radius: 20px;
+        font-size: 12px;
+        font-weight: 600;
         text-transform: uppercase;
-        letter-spacing: 0.8px;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        letter-spacing: 0.5px;
     }}
     
     .diff-easy {{
-        background: linear-gradient(135deg, {success_color}, #059669);
+        background: linear-gradient(135deg, #10b981, #059669);
         color: white;
     }}
     
     .diff-medium {{
-        background: linear-gradient(135deg, {warning_color}, #d97706);
+        background: linear-gradient(135deg, #f59e0b, #d97706);
         color: white;
     }}
     
     .diff-hard {{
-        background: linear-gradient(135deg, {error_color}, #dc2626);
+        background: linear-gradient(135deg, #ef4444, #dc2626);
         color: white;
     }}
     
@@ -450,142 +309,120 @@ def get_advanced_css(theme="light"):
         background: {bg_secondary};
         border: 2px solid {accent_primary};
         color: {accent_primary};
-        padding: 8px 20px;
-        border-radius: 24px;
-        font-size: 13px;
-        font-weight: 800;
-        box-shadow: 0 4px 12px rgba(99, 102, 241, 0.2);
-    }}
-    
-    .time-badge {{
-        background: {bg_secondary};
-        border: 2px solid {text_secondary};
-        color: {text_secondary};
-        padding: 8px 16px;
-        border-radius: 24px;
-        font-size: 13px;
+        padding: 6px 16px;
+        border-radius: 20px;
+        font-size: 12px;
         font-weight: 700;
-        display: flex;
-        align-items: center;
-        gap: 6px;
     }}
     
-    /* Enhanced Progress Visualization */
-    .progress-ring {{
-        width: 120px;
-        height: 120px;
-        border-radius: 50%;
-        background: conic-gradient(
-            {accent_primary} 0%,
-            {accent_primary} var(--progress),
-            {bg_secondary} var(--progress),
-            {bg_secondary} 100%
-        );
+    /* Progress Components */
+    .progress-section {{
+        background: linear-gradient(135deg, {bg_card}, {bg_secondary});
+        border-radius: 20px;
+        padding: 24px;
+        margin: 24px 0;
+        border: 1px solid {border_color};
+    }}
+    
+    .progress-header {{
         display: flex;
+        justify-content: space-between;
         align-items: center;
-        justify-content: center;
+        margin-bottom: 16px;
+    }}
+    
+    .progress-title {{
+        font-size: 16px;
+        font-weight: 600;
+        color: {text_primary};
+    }}
+    
+    .progress-value {{
+        font-size: 14px;
+        font-weight: 700;
+        color: {accent_primary};
+    }}
+    
+    .progress-bar-container {{
+        background: {bg_secondary};
+        border-radius: 12px;
+        height: 12px;
+        overflow: hidden;
         position: relative;
-        box-shadow: 0 8px 24px rgba(99, 102, 241, 0.3);
     }}
     
-    .progress-ring::before {{
+    .progress-bar-fill {{
+        height: 100%;
+        background: linear-gradient(90deg, {accent_primary}, {accent_secondary});
+        border-radius: 12px;
+        transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+        position: relative;
+        overflow: hidden;
+    }}
+    
+    .progress-bar-fill::after {{
         content: '';
         position: absolute;
-        inset: 8px;
-        background: {bg_card};
-        border-radius: 50%;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+        animation: shimmer 2s infinite;
     }}
     
-    .progress-ring-content {{
-        position: relative;
-        z-index: 1;
-        text-align: center;
+    @keyframes shimmer {{
+        0% {{ transform: translateX(-100%); }}
+        100% {{ transform: translateX(100%); }}
     }}
     
-    .progress-percentage {{
-        font-size: 28px;
-        font-weight: 900;
-        background: linear-gradient(135deg, {accent_primary}, {accent_secondary});
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-    }}
-    
-    /* Stats Dashboard */
-    .stats-dashboard {{
+    /* Stats Grid */
+    .stats-grid {{
         display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
         gap: 20px;
-        margin: 32px 0;
+        margin: 24px 0;
     }}
     
     .stat-card {{
         background: linear-gradient(135deg, {bg_card}, {bg_secondary});
-        border-radius: 20px;
-        padding: 28px;
-        border: 2px solid {border_color};
+        border-radius: 16px;
+        padding: 24px;
+        border: 1px solid {border_color};
         text-align: center;
-        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-        position: relative;
-        overflow: hidden;
-    }}
-    
-    .stat-card::before {{
-        content: '';
-        position: absolute;
-        top: -50%;
-        left: -50%;
-        width: 200%;
-        height: 200%;
-        background: radial-gradient(circle, rgba(99, 102, 241, 0.1) 0%, transparent 70%);
-        opacity: 0;
-        transition: opacity 0.4s ease;
+        transition: transform 0.3s ease;
     }}
     
     .stat-card:hover {{
-        transform: translateY(-8px) scale(1.05);
-        border-color: {accent_primary};
-        box-shadow: 0 16px 40px rgba(99, 102, 241, 0.2);
-    }}
-    
-    .stat-card:hover::before {{
-        opacity: 1;
-        animation: rotate 4s linear infinite;
-    }}
-    
-    .stat-icon {{
-        font-size: 40px;
-        margin-bottom: 12px;
-        display: block;
+        transform: scale(1.05);
     }}
     
     .stat-value {{
-        font-size: 42px;
-        font-weight: 900;
+        font-size: 36px;
+        font-weight: 800;
         background: linear-gradient(135deg, {accent_primary}, {accent_secondary});
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
         margin-bottom: 8px;
-        line-height: 1;
     }}
     
     .stat-label {{
-        font-size: 13px;
+        font-size: 14px;
         color: {text_secondary};
-        font-weight: 700;
+        font-weight: 600;
         text-transform: uppercase;
-        letter-spacing: 1.2px;
+        letter-spacing: 1px;
     }}
     
-    /* AI Feedback with Premium Design */
+    /* AI Feedback */
     .ai-feedback-container {{
-        background: linear-gradient(135deg, rgba(99, 102, 241, 0.12), rgba(139, 92, 246, 0.12));
-        border: 3px solid {accent_primary};
-        border-radius: 24px;
-        padding: 36px;
-        margin: 32px 0;
+        background: linear-gradient(135deg, rgba(99, 102, 241, 0.1), rgba(139, 92, 246, 0.1));
+        border: 2px solid {accent_primary};
+        border-radius: 20px;
+        padding: 28px;
+        margin: 24px 0;
         position: relative;
         overflow: hidden;
-        box-shadow: 0 12px 40px rgba(99, 102, 241, 0.2);
     }}
     
     .ai-feedback-container::before {{
@@ -595,241 +432,211 @@ def get_advanced_css(theme="light"):
         right: -50%;
         width: 200%;
         height: 200%;
-        background: radial-gradient(circle, rgba(99, 102, 241, 0.15) 0%, transparent 70%);
-        animation: pulse 5s ease-in-out infinite;
+        background: radial-gradient(circle, rgba(99, 102, 241, 0.1) 0%, transparent 70%);
+        animation: pulse 4s ease-in-out infinite;
     }}
     
     @keyframes pulse {{
-        0%, 100% {{ opacity: 0.4; transform: scale(1); }}
-        50% {{ opacity: 0.8; transform: scale(1.05); }}
+        0%, 100% {{ opacity: 0.5; }}
+        50% {{ opacity: 1; }}
     }}
     
     .ai-badge {{
         background: linear-gradient(135deg, {accent_primary}, {accent_secondary});
         color: white;
-        padding: 10px 24px;
-        border-radius: 24px;
-        font-size: 13px;
-        font-weight: 800;
+        padding: 8px 16px;
+        border-radius: 20px;
+        font-size: 12px;
+        font-weight: 700;
         display: inline-flex;
         align-items: center;
-        gap: 10px;
-        margin-bottom: 20px;
-        box-shadow: 0 6px 20px rgba(99, 102, 241, 0.4);
-        text-transform: uppercase;
-        letter-spacing: 1px;
+        gap: 8px;
+        margin-bottom: 16px;
+        box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
     }}
     
-    /* Hint System */
-    .hint-box {{
-        background: {bg_card};
-        border-left: 4px solid {accent_primary};
-        border-radius: 12px;
-        padding: 20px;
-        margin: 20px 0;
+    .feedback-content {{
+        position: relative;
+        z-index: 1;
+    }}
+    
+    .feedback-score {{
+        text-align: center;
+        padding: 32px;
+        margin: 24px 0;
+    }}
+    
+    .score-circle {{
+        width: 160px;
+        height: 160px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, {accent_primary}, {accent_secondary});
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 16px;
+        box-shadow: 0 12px 40px rgba(99, 102, 241, 0.4);
         position: relative;
     }}
     
-    .hint-icon {{
-        font-size: 24px;
-        margin-right: 12px;
-    }}
-    
-    /* Code Snippet Library */
-    .snippet-card {{
+    .score-circle::before {{
+        content: '';
+        position: absolute;
+        inset: 8px;
         background: {bg_card};
-        border: 2px solid {border_color};
-        border-radius: 16px;
-        padding: 20px;
-        margin: 12px 0;
-        transition: all 0.3s ease;
-        cursor: pointer;
+        border-radius: 50%;
     }}
     
-    .snippet-card:hover {{
-        border-color: {accent_primary};
-        transform: translateX(4px);
-        box-shadow: 0 8px 24px rgba(99, 102, 241, 0.15);
+    .score-content {{
+        position: relative;
+        z-index: 1;
+        text-align: center;
     }}
     
-    .snippet-title {{
-        font-size: 16px;
-        font-weight: 700;
-        color: {text_primary};
-        margin-bottom: 8px;
-    }}
-    
-    .snippet-code {{
-        font-family: 'JetBrains Mono', monospace;
-        font-size: 13px;
-        background: {bg_secondary};
-        padding: 12px;
-        border-radius: 8px;
-        color: {text_secondary};
-        overflow-x: auto;
-    }}
-    
-    /* Enhanced Buttons */
-    .stButton > button {{
-        background: linear-gradient(135deg, {accent_primary}, {accent_secondary}) !important;
-        color: white !important;
-        font-weight: 700 !important;
-        padding: 16px 40px !important;
-        border-radius: 14px !important;
-        border: none !important;
-        font-size: 16px !important;
-        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
-        box-shadow: 0 8px 20px rgba(99, 102, 241, 0.4) !important;
-        text-transform: uppercase !important;
-        letter-spacing: 0.5px !important;
-        position: relative !important;
-        overflow: hidden !important;
-    }}
-    
-    .stButton > button::before {{
-        content: '' !important;
-        position: absolute !important;
-        top: 50% !important;
-        left: 50% !important;
-        width: 0 !important;
-        height: 0 !important;
-        border-radius: 50% !important;
-        background: rgba(255, 255, 255, 0.3) !important;
-        transform: translate(-50%, -50%) !important;
-        transition: width 0.6s ease, height 0.6s ease !important;
-    }}
-    
-    .stButton > button:hover::before {{
-        width: 300px !important;
-        height: 300px !important;
-    }}
-    
-    .stButton > button:hover {{
-        transform: translateY(-3px) scale(1.02) !important;
-        box-shadow: 0 12px 32px rgba(99, 102, 241, 0.5) !important;
-    }}
-    
-    .stButton > button:active {{
-        transform: translateY(-1px) scale(0.98) !important;
-    }}
-    
-    /* Leaderboard */
-    .leaderboard-item {{
-        background: {bg_card};
-        border: 2px solid {border_color};
-        border-radius: 16px;
-        padding: 20px;
-        margin: 12px 0;
-        display: flex;
-        align-items: center;
-        gap: 20px;
-        transition: all 0.3s ease;
-    }}
-    
-    .leaderboard-item:hover {{
-        border-color: {accent_primary};
-        transform: translateX(8px);
-    }}
-    
-    .leaderboard-rank {{
-        font-size: 32px;
-        font-weight: 900;
+    .score-number {{
+        font-size: 48px;
+        font-weight: 800;
         background: linear-gradient(135deg, {accent_primary}, {accent_secondary});
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
-        min-width: 50px;
     }}
     
-    .rank-1 {{
-        color: #fbbf24 !important;
-        font-size: 40px !important;
+    .score-label {{
+        font-size: 14px;
+        color: {text_secondary};
+        font-weight: 600;
     }}
     
-    .rank-2 {{
-        color: #94a3b8 !important;
-        font-size: 36px !important;
-    }}
-    
-    .rank-3 {{
-        color: #cd7f32 !important;
-        font-size: 34px !important;
-    }}
-    
-    /* Toast Notifications */
-    .toast-notification {{
-        position: fixed;
-        top: 100px;
-        right: 30px;
-        background: {bg_card};
-        border: 2px solid {accent_primary};
+    /* Insight Boxes */
+    .insight-box {{
         border-radius: 16px;
-        padding: 20px 28px;
-        box-shadow: 0 12px 40px rgba(0, 0, 0, 0.3);
-        z-index: 9999;
-        animation: slideIn 0.4s ease, slideOut 0.4s ease 2.6s;
+        padding: 20px;
+        margin: 16px 0;
+        border-left: 4px solid;
     }}
     
-    @keyframes slideIn {{
-        from {{ transform: translateX(400px); opacity: 0; }}
-        to {{ transform: translateX(0); opacity: 1; }}
+    .insight-strength {{
+        background: linear-gradient(135deg, rgba(34, 197, 94, 0.1), rgba(34, 197, 94, 0.05));
+        border-left-color: #22c55e;
     }}
     
-    @keyframes slideOut {{
-        from {{ transform: translateX(0); opacity: 1; }}
-        to {{ transform: translateX(400px); opacity: 0; }}
+    .insight-weakness {{
+        background: linear-gradient(135deg, rgba(239, 68, 68, 0.1), rgba(239, 68, 68, 0.05));
+        border-left-color: #ef4444;
     }}
     
-    /* Sidebar Enhancement */
-    [data-testid="stSidebar"] {{
-        background: {bg_secondary} !important;
-        border-right: 2px solid {border_color} !important;
+    .insight-recommendation {{
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(59, 130, 246, 0.05));
+        border-left-color: #3b82f6;
+    }}
+    
+    .insight-title {{
+        font-size: 16px;
+        font-weight: 700;
+        margin-bottom: 12px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }}
+    
+    /* Buttons */
+    .stButton > button {{
+        background: linear-gradient(135deg, {accent_primary}, {accent_secondary}) !important;
+        color: white !important;
+        font-weight: 600 !important;
+        padding: 14px 32px !important;
+        border-radius: 12px !important;
+        border: none !important;
+        font-size: 16px !important;
+        transition: all 0.3s ease !important;
+        box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3) !important;
+    }}
+    
+    .stButton > button:hover {{
+        transform: translateY(-2px) !important;
+        box-shadow: 0 8px 24px rgba(99, 102, 241, 0.4) !important;
+    }}
+    
+    /* Code Editor Styling */
+    .stCodeBlock {{
+        border-radius: 12px !important;
+        border: 1px solid {border_color} !important;
+    }}
+    
+    /* Input Fields */
+    .stTextInput > div > div > input,
+    .stTextArea > div > div > textarea {{
+        border-radius: 12px !important;
+        border: 2px solid {border_color} !important;
+        padding: 12px 16px !important;
+        font-size: 14px !important;
+        transition: border-color 0.3s ease !important;
+    }}
+    
+    .stTextInput > div > div > input:focus,
+    .stTextArea > div > div > textarea:focus {{
+        border-color: {accent_primary} !important;
+        box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1) !important;
+    }}
+    
+    /* Success/Error Messages */
+    .element-container .stAlert {{
+        border-radius: 12px !important;
+        border: none !important;
+        padding: 16px 20px !important;
     }}
     
     /* Animations */
     @keyframes fadeIn {{
-        from {{ opacity: 0; transform: translateY(30px); }}
+        from {{ opacity: 0; transform: translateY(20px); }}
         to {{ opacity: 1; transform: translateY(0); }}
     }}
     
     .fade-in {{
-        animation: fadeIn 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+        animation: fadeIn 0.6s ease;
     }}
     
-    @keyframes fadeInScale {{
-        from {{ opacity: 0; transform: scale(0.9); }}
-        to {{ opacity: 1; transform: scale(1); }}
+    /* Learning Path */
+    .learning-path-item {{
+        background: {bg_card};
+        border: 2px solid {border_color};
+        border-radius: 16px;
+        padding: 24px;
+        margin: 16px 0;
+        transition: all 0.3s ease;
     }}
     
-    .fade-in-scale {{
-        animation: fadeInScale 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    .learning-path-item:hover {{
+        border-color: {accent_primary};
+        transform: translateX(8px);
     }}
     
-    /* Loading Spinner */
-    .loading-spinner {{
-        border: 4px solid {border_color};
-        border-top: 4px solid {accent_primary};
-        border-radius: 50%;
-        width: 50px;
-        height: 50px;
-        animation: spin 1s linear infinite;
-        margin: 0 auto;
+    .priority-high {{
+        border-left: 4px solid #ef4444;
     }}
     
-    @keyframes spin {{
-        0% {{ transform: rotate(0deg); }}
-        100% {{ transform: rotate(360deg); }}
+    .priority-medium {{
+        border-left: 4px solid #f59e0b;
     }}
     
-    /* Responsive adjustments */
-    @media (max-width: 768px) {{
-        .hero-title {{ font-size: 42px; }}
-        .platform-header {{ padding: 16px 24px; }}
-        .question-card {{ padding: 24px; }}
+    .priority-low {{
+        border-left: 4px solid #22c55e;
+    }}
+    
+    /* Sidebar Styling */
+    [data-testid="stSidebar"] {{
+        background: {bg_secondary} !important;
+        border-right: 1px solid {border_color} !important;
+    }}
+    
+    [data-testid="stSidebar"] .element-container {{
+        padding: 8px 0;
     }}
     </style>
     """
 
-# [Previous dataset and question definitions remain the same]
+# Datasets
 students_df = pd.DataFrame({
     "student_id": range(1, 21),
     "hours_studied": [2, 3, 5, 1, 4, 6, 2, 8, 7, 3, 5, 9, 4, 6, 3, 7, 8, 2, 5, 4],
@@ -848,151 +655,72 @@ sales_df = pd.DataFrame({
 
 DATASETS = {"students": students_df, "sales": sales_df}
 
+# Questions Bank
 QUESTIONS = [
     {
         "id": 1, "type": "theory", "difficulty": "easy",
         "title": "Bias-Variance Tradeoff",
         "prompt": "Explain the bias-variance tradeoff in supervised machine learning. What do high bias and high variance indicate? Provide one method to reduce each.",
-        "points": 10,
-        "hint": "Think about underfitting vs overfitting. High bias = too simple model, high variance = too complex model."
+        "points": 10
     },
     {
         "id": 2, "type": "theory", "difficulty": "medium",
         "title": "Cross-Validation",
         "prompt": "Explain k-fold cross-validation in detail. How does it work, why is it better than a single train/test split, and what are potential drawbacks?",
-        "points": 15,
-        "hint": "Consider how the data is split into k parts and how each part gets used for validation."
+        "points": 15
     },
     {
         "id": 3, "type": "theory", "difficulty": "easy",
         "title": "Feature Scaling",
         "prompt": "Why is feature scaling important in machine learning? Explain standardization vs normalization and give two examples of algorithms that require scaling.",
-        "points": 10,
-        "hint": "Think about distance-based algorithms like KNN and gradient-based algorithms like neural networks."
+        "points": 10
     },
     {
         "id": 4, "type": "theory", "difficulty": "hard",
         "title": "Precision vs Recall",
         "prompt": "Explain precision and recall in classification. When would you prioritize one over the other? Provide a real-world scenario for each case and explain the F1 score.",
-        "points": 20,
-        "hint": "Consider medical diagnosis (recall important) vs spam detection (precision important)."
+        "points": 20
     },
     {
         "id": 5, "type": "code", "difficulty": "easy",
         "title": "Correlation Analysis",
         "prompt": "Using the `students` DataFrame as `df`, calculate the Pearson correlation coefficient between `hours_studied` and `score`. Round to 3 decimal places and assign to `result`.",
         "dataset": "students", "validator": "numeric_tol", "points": 10,
-        "starter_code": "# Calculate correlation between hours_studied and score\n# Round to 3 decimal places\n\nresult = None",
-        "hint": "Use pandas .corr() method or numpy corrcoef(). Don't forget to round!"
+        "starter_code": "# Calculate correlation between hours_studied and score\n# Round to 3 decimal places\n\nresult = None"
     },
     {
         "id": 6, "type": "code", "difficulty": "medium",
         "title": "Train-Test Split",
         "prompt": "Split the `students` DataFrame into 70% train and 30% test sets using random_state=42. Calculate the mean `score` of the test set, round to 2 decimal places, assign to `result`.",
         "dataset": "students", "validator": "numeric_tol", "points": 15,
-        "starter_code": "# Split data: 70% train, 30% test\n# Calculate mean score of test set\n\nresult = None",
-        "hint": "Use df.sample() with frac parameter. Remember to set random_state for reproducibility."
+        "starter_code": "# Split data: 70% train, 30% test\n# Calculate mean score of test set\n\nresult = None"
     },
     {
         "id": 7, "type": "code", "difficulty": "medium",
         "title": "Group Aggregation",
         "prompt": "Using the `sales` DataFrame, find the total sales for each region. Return a dictionary where keys are region names and values are total sales. Assign to `result`.",
         "dataset": "sales", "validator": "dict_compare", "points": 15,
-        "starter_code": "# Group by region and sum sales\n# Return as dictionary\n\nresult = None",
-        "hint": "Use groupby('region')['sales'].sum() and convert to dict with .to_dict()"
+        "starter_code": "# Group by region and sum sales\n# Return as dictionary\n\nresult = None"
     },
     {
         "id": 8, "type": "code", "difficulty": "hard",
         "title": "Feature Engineering",
         "prompt": "Create a new feature `performance_score` = (score * 0.7) + (attendance * 0.3). Calculate correlation between `performance_score` and `passed`. Round to 3 decimals, assign to `result`.",
         "dataset": "students", "validator": "numeric_tol", "points": 20,
-        "starter_code": "# Create performance_score feature\n# Calculate correlation with 'passed'\n\nresult = None",
-        "hint": "First create the new column, then use .corr() between the new feature and 'passed' column."
+        "starter_code": "# Create performance_score feature\n# Calculate correlation with 'passed'\n\nresult = None"
     }
 ]
 
-# Code Snippets Library
-CODE_SNIPPETS = {
-    "correlation": {
-        "title": "Calculate Correlation",
-        "code": "df['col1'].corr(df['col2'])",
-        "desc": "Pearson correlation between two columns"
-    },
-    "train_test": {
-        "title": "Train-Test Split",
-        "code": "test = df.sample(frac=0.3, random_state=42)\ntrain = df.drop(test.index)",
-        "desc": "Split data into train and test sets"
-    },
-    "groupby": {
-        "title": "Group and Aggregate",
-        "code": "df.groupby('column')['value'].sum().to_dict()",
-        "desc": "Group by column and sum values"
-    },
-    "new_feature": {
-        "title": "Create New Feature",
-        "code": "df['new_col'] = df['col1'] * 0.7 + df['col2'] * 0.3",
-        "desc": "Weighted combination of features"
-    }
-}
-
-# Helper Functions
+# LLM Functions
 def get_gemini_model():
     if "gemini_api_key" in st.session_state and st.session_state.gemini_api_key:
         try:
             if GEMINI_AVAILABLE:
                 genai.configure(api_key=st.session_state.gemini_api_key)
                 return genai.GenerativeModel('gemini-2.0-flash-exp')
-        except:
+        except Exception as e:
             return None
     return None
-
-def check_achievements(answers):
-    """Check and award achievements based on performance"""
-    earned = []
-    
-    if len(answers) >= 1 and "first_blood" not in st.session_state.get("earned_achievements", []):
-        earned.append("first_blood")
-    
-    # Check for perfect score
-    for ans in answers:
-        if ans.get("ai_analysis", {}).get("score", 0) >= 0.99:
-            if "perfectionist" not in st.session_state.get("earned_achievements", []):
-                earned.append("perfectionist")
-                break
-    
-    # Check for streak
-    if len(answers) >= 3:
-        last_three = answers[-3:]
-        if all(a.get("is_correct") for a in last_three):
-            if "streak_3" not in st.session_state.get("earned_achievements", []):
-                earned.append("streak_3")
-    
-    # Check code warrior
-    code_questions = [a for a in answers if a.get("type") == "code"]
-    if len(code_questions) == 4 and all(a.get("is_correct") for a in code_questions):
-        if "code_warrior" not in st.session_state.get("earned_achievements", []):
-            earned.append("code_warrior")
-    
-    # Check theory master
-    theory_questions = [a for a in answers if a.get("type") == "theory"]
-    if len(theory_questions) == 4 and all(a.get("is_correct") for a in theory_questions):
-        if "theory_master" not in st.session_state.get("earned_achievements", []):
-            earned.append("theory_master")
-    
-    # Check night owl
-    current_hour = datetime.now().hour
-    if current_hour >= 22 or current_hour <= 5:
-        if "night_owl" not in st.session_state.get("earned_achievements", []):
-            earned.append("night_owl")
-    
-    # Check speed demon
-    if len(answers) > 0:
-        last_answer = answers[-1]
-        if "time_taken" in last_answer and last_answer["time_taken"] < 120:
-            if "speed_demon" not in st.session_state.get("earned_achievements", []):
-                earned.append("speed_demon")
-    
-    return earned
 
 def get_ai_feedback_theory(question: dict, student_answer: str, model) -> Dict:
     if not model:
@@ -1017,7 +745,7 @@ Provide JSON response:
 {{
     "is_correct": true/false,
     "score": 0.0-1.0,
-    "feedback": "2-3 sentences of constructive feedback",
+    "feedback": "2-3 sentences",
     "strengths": ["strength1", "strength2"],
     "improvements": ["improvement1", "improvement2"]
 }}"""
@@ -1031,7 +759,7 @@ Provide JSON response:
         result["points_earned"] = int(result["score"] * question["points"])
         return result
     except:
-        return {"is_correct": False, "score": 0.5, "feedback": "AI error occurred", "strengths": ["Attempt"], "improvements": ["Review"], "points_earned": int(question["points"] * 0.5)}
+        return {"is_correct": False, "score": 0.5, "feedback": "AI error", "strengths": ["Attempt"], "improvements": ["Review"], "points_earned": int(question["points"] * 0.5)}
 
 def get_ai_feedback_code(question: dict, code: str, result_value: Any, expected: Any, is_correct: bool, stats: dict, model) -> Dict:
     if not model:
@@ -1082,8 +810,7 @@ def generate_final_report(all_answers: List[Dict], model) -> Dict:
             "strengths": ["Completed all questions"],
             "weaknesses": ["AI unavailable"],
             "recommendations": ["Set up AI mentor"],
-            "learning_path": [],
-            "closing_message": "Keep practicing!"
+            "learning_path": []
         }
     
     summary = [{"question": a["title"], "type": a["type"], "difficulty": a["difficulty"], 
@@ -1116,6 +843,7 @@ JSON response:
     except:
         return {"overall_feedback": "Great effort!", "strengths": ["Persistence"], "weaknesses": ["Review"], "recommendations": ["Practice more"], "learning_path": [{"topic": "Review basics", "priority": "high", "resources": "Online courses"}], "closing_message": "Keep learning!"}
 
+# Code Execution
 def safe_execute_code(user_code: str, dataframe: pd.DataFrame) -> Tuple[bool, Any, str, dict]:
     allowed_globals = {
         "__builtins__": {"abs": abs, "min": min, "max": max, "round": round, "len": len, "range": range, "sum": sum, "sorted": sorted, "list": list, "dict": dict, "set": set, "int": int, "float": float, "str": str},
@@ -1168,7 +896,7 @@ def compute_reference(q):
 
 REFERENCE_RESULTS = {q["id"]: compute_reference(q) for q in QUESTIONS if q["type"] == "code"}
 
-# Initialize Session State
+# Session State
 if "theme" not in st.session_state:
     st.session_state.theme = "light"
 if "user_answers" not in st.session_state:
@@ -1185,14 +913,6 @@ if "api_key_validated" not in st.session_state:
     st.session_state.api_key_validated = False
 if "final_report" not in st.session_state:
     st.session_state.final_report = None
-if "earned_achievements" not in st.session_state:
-    st.session_state.earned_achievements = []
-if "show_hints" not in st.session_state:
-    st.session_state.show_hints = {}
-if "question_start_time" not in st.session_state:
-    st.session_state.question_start_time = None
-if "show_snippets" not in st.session_state:
-    st.session_state.show_snippets = False
 
 # Apply CSS
 st.markdown(get_advanced_css(st.session_state.theme), unsafe_allow_html=True)
@@ -1200,15 +920,13 @@ st.markdown(get_advanced_css(st.session_state.theme), unsafe_allow_html=True)
 # Get AI Model
 ai_model = get_gemini_model()
 
-# Enhanced Sidebar
+# Sidebar
 with st.sidebar:
     st.markdown("### 🎓 DataMentor AI")
-    st.markdown('<div style="font-size: 12px; color: #64748b; margin-bottom: 20px;">Your Personal DS Coach</div>', unsafe_allow_html=True)
     st.markdown("---")
     
-    # AI Setup Section
     st.markdown("#### 🤖 AI Mentor Setup")
-    api_key_input = st.text_input("Gemini API Key", type="password", value=st.session_state.gemini_api_key, placeholder="Enter API key for personalized feedback")
+    api_key_input = st.text_input("Gemini API Key", type="password", value=st.session_state.gemini_api_key, placeholder="Enter API key")
     
     if api_key_input != st.session_state.gemini_api_key:
         st.session_state.gemini_api_key = api_key_input
@@ -1216,103 +934,61 @@ with st.sidebar:
         st.rerun()
     
     if st.session_state.gemini_api_key and not st.session_state.api_key_validated:
-        if st.button("🔑 Validate & Activate", use_container_width=True):
+        if st.button("🔑 Validate Key", use_container_width=True):
             try:
                 if GEMINI_AVAILABLE:
                     genai.configure(api_key=st.session_state.gemini_api_key)
                     test_model = genai.GenerativeModel('gemini-2.0-flash-exp')
                     test_model.generate_content("Test", generation_config=genai.types.GenerationConfig(max_output_tokens=10))
                     st.session_state.api_key_validated = True
-                    st.success("✅ AI Mentor Activated!")
+                    st.success("✅ API Key Valid!")
                     time.sleep(1)
                     st.rerun()
             except Exception as e:
-                st.error(f"❌ Invalid API Key")
+                st.error(f"❌ Invalid Key")
     
     if st.session_state.api_key_validated:
-        st.success("🤖 AI Mentor: **ACTIVE**")
+        st.success("🤖 AI Mentor Active")
     else:
-        st.warning("⚠️ AI Mentor: **INACTIVE**")
-        with st.expander("📖 How to get FREE API Key"):
+        st.warning("⚠️ AI Mentor Inactive")
+        with st.expander("📖 Get API Key"):
             st.markdown("""
-            **Get your FREE Gemini API Key:**
-            1. Visit [AI Studio](https://aistudio.google.com/app/apikey)
-            2. Sign in with Google account
-            3. Click "Create API Key"
-            4. Copy and paste above
-            5. Enjoy personalized feedback!
+            **Get FREE Gemini API Key:**
+            1. Visit: [AI Studio](https://aistudio.google.com/app/apikey)
+            2. Sign in with Google
+            3. Create API Key
+            4. Paste above
             """)
     
     st.markdown("---")
     
-    # Theme Toggle
-    theme_icon = "🌙" if st.session_state.theme == "light" else "☀️"
-    if st.button(f"{theme_icon} Switch to {'Dark' if st.session_state.theme == 'light' else 'Light'} Mode", use_container_width=True):
+    if st.button("🌓 Toggle Theme", use_container_width=True):
         st.session_state.theme = "dark" if st.session_state.theme == "light" else "light"
         st.rerun()
     
-    # Progress Section
     if st.session_state.started and not st.session_state.completed:
         st.markdown("---")
-        st.markdown("#### 📊 Live Progress")
-        
+        st.markdown("#### 📊 Progress")
         progress = len(st.session_state.user_answers) / len(QUESTIONS)
-        progress_percent = int(progress * 100)
-        
-        st.markdown(f"""
-        <div class="progress-ring" style="--progress: {progress_percent}%; margin: 20px auto;">
-            <div class="progress-ring-content">
-                <div class="progress-percentage">{progress_percent}%</div>
-            </div>
-        </div>
-        """, unsafe_allow_html=True)
-        
-        st.markdown(f'<div style="text-align: center; font-weight: 600; margin-bottom: 20px;">{len(st.session_state.user_answers)}/{len(QUESTIONS)} Questions</div>', unsafe_allow_html=True)
+        st.markdown(f'<div class="progress-bar-container"><div class="progress-bar-fill" style="width: {progress*100}%"></div></div>', unsafe_allow_html=True)
+        st.markdown(f"**{len(st.session_state.user_answers)}/{len(QUESTIONS)}** completed")
         
         if st.session_state.user_answers:
             correct = sum(1 for a in st.session_state.user_answers if a.get("is_correct"))
             points = sum(a.get("points_earned", 0) for a in st.session_state.user_answers)
-            accuracy = (correct / len(st.session_state.user_answers)) * 100
-            
-            col1, col2 = st.columns(2)
-            with col1:
-                st.metric("✅ Accuracy", f"{accuracy:.0f}%")
-            with col2:
-                st.metric("⭐ Points", points)
-        
-        # Achievements in sidebar
-        if st.session_state.earned_achievements:
-            st.markdown("---")
-            st.markdown("#### 🏆 Achievements Earned")
-            for ach_id in st.session_state.earned_achievements[-3:]:
-                ach = ACHIEVEMENTS[ach_id]
-                st.markdown(f"""
-                <div style="background: linear-gradient(135deg, rgba(99, 102, 241, 0.1), rgba(139, 92, 246, 0.1)); 
-                     border: 2px solid #6366f1; border-radius: 12px; padding: 12px; margin: 8px 0;">
-                    <div style="font-size: 24px; text-align: center; margin-bottom: 4px;">{ach['icon']}</div>
-                    <div style="font-size: 13px; font-weight: 700; text-align: center;">{ach['name']}</div>
-                    <div style="font-size: 11px; color: #64748b; text-align: center; margin-top: 4px;">+{ach['points']} pts</div>
-                </div>
-                """, unsafe_allow_html=True)
+            st.metric("✅ Correct", f"{correct}/{len(st.session_state.user_answers)}")
+            st.metric("⭐ Points", points)
 
 # Main Content
 if not st.session_state.started:
-    # Premium Header
+    # Platform Header
     st.markdown("""
     <div class="platform-header">
         <div class="header-content">
-            <div class="logo">
-                <span class="logo-icon">🎓</span>
-                <span>DataMentor AI</span>
-            </div>
-            <div class="header-stats">
-                <div class="header-stat-item">
-                    <span class="header-stat-value">8</span>
-                    <span class="header-stat-label">Challenges</span>
-                </div>
-                <div class="header-stat-item">
-                    <span class="header-stat-value">120</span>
-                    <span class="header-stat-label">Max Points</span>
+            <div class="logo-section">
+                <div class="logo">
+                    <span class="logo-icon">🎓</span>
+                    <span>DataMentor AI</span>
                 </div>
             </div>
         </div>
@@ -1321,51 +997,31 @@ if not st.session_state.started:
     
     # Hero Section
     st.markdown("""
-    <div class="hero-section fade-in">
+    <div class="hero-section">
         <div class="hero-content">
             <div class="hero-title">Master Data Science</div>
-            <div class="hero-subtitle">AI-powered adaptive learning platform with real-time feedback, gamification, and personalized growth paths</div>
+            <div class="hero-subtitle">AI-powered practice platform with personalized feedback and adaptive learning</div>
             
             <div class="feature-grid">
                 <div class="feature-item">
                     <div class="feature-icon">🧠</div>
                     <div class="feature-title">8 Challenges</div>
-                    <div class="feature-desc">Theory + Hands-on Coding</div>
+                    <div class="feature-desc">Theory + Coding</div>
                 </div>
                 <div class="feature-item">
                     <div class="feature-icon">🤖</div>
                     <div class="feature-title">AI Mentor</div>
-                    <div class="feature-desc">Personalized Feedback</div>
+                    <div class="feature-desc">Real-time feedback</div>
                 </div>
                 <div class="feature-item">
                     <div class="feature-icon">📊</div>
-                    <div class="feature-title">Live Analytics</div>
-                    <div class="feature-desc">Track Your Progress</div>
-                </div>
-                <div class="feature-item">
-                    <div class="feature-icon">🏆</div>
-                    <div class="feature-title">Achievements</div>
-                    <div class="feature-desc">Gamified Learning</div>
-                </div>
-                <div class="feature-item">
-                    <div class="feature-icon">💡</div>
-                    <div class="feature-title">Smart Hints</div>
-                    <div class="feature-desc">Guided Problem Solving</div>
-                </div>
-                <div class="feature-item">
-                    <div class="feature-icon">📚</div>
-                    <div class="feature-title">Code Library</div>
-                    <div class="feature-desc">Quick Reference Snippets</div>
-                </div>
-                <div class="feature-item">
-                    <div class="feature-icon">⚡</div>
-                    <div class="feature-title">Speed Tracking</div>
-                    <div class="feature-desc">Performance Metrics</div>
+                    <div class="feature-title">Analytics</div>
+                    <div class="feature-desc">Track progress</div>
                 </div>
                 <div class="feature-item">
                     <div class="feature-icon">🎯</div>
-                    <div class="feature-title">Adaptive Path</div>
-                    <div class="feature-desc">Custom Learning Journey</div>
+                    <div class="feature-title">Personalized</div>
+                    <div class="feature-desc">Custom learning path</div>
                 </div>
             </div>
         </div>
@@ -1374,39 +1030,352 @@ if not st.session_state.started:
     
     col1, col2, col3 = st.columns([1, 2, 1])
     with col2:
-        if st.button("🚀 Start Your Learning Journey", use_container_width=True, type="primary"):
+        if st.button("🚀 Start Practice Session", use_container_width=True, type="primary"):
             st.session_state.started = True
             st.session_state.start_time = datetime.now()
-            st.session_state.question_start_time = datetime.now()
             st.rerun()
     
-    st.markdown('<div style="text-align: center; margin-top: 12px; color: #64748b; font-size: 14px;">No signup required • 100% Free • AI-Powered</div>', unsafe_allow_html=True)
-    
-    # Detailed Info Sections
+    # Info sections
+    st.markdown('<div class="modern-card fade-in">', unsafe_allow_html=True)
+    st.markdown("### 📚 What You'll Practice")
     col1, col2 = st.columns(2)
+    with col1:
+        st.markdown("**Theory Questions (4)**")
+        st.markdown("- Bias-Variance Tradeoff")
+        st.markdown("- Cross-Validation")
+        st.markdown("- Feature Scaling")
+        st.markdown("- Precision & Recall")
+    with col2:
+        st.markdown("**Coding Challenges (4)**")
+        st.markdown("- Correlation Analysis")
+        st.markdown("- Train-Test Split")
+        st.markdown("- Data Aggregation")
+        st.markdown("- Feature Engineering")
+    st.markdown('</div>', unsafe_allow_html=True)
+
+elif st.session_state.completed:
+    # Platform Header
+    st.markdown("""
+    <div class="platform-header">
+        <div class="header-content">
+            <div class="logo-section">
+                <div class="logo">
+                    <span class="logo-icon">🎓</span>
+                    <span>DataMentor AI</span>
+                </div>
+            </div>
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
     
+    # Calculate stats
+    total_points = sum(a.get("points_earned", 0) for a in st.session_state.user_answers)
+    max_points = sum(q["points"] for q in QUESTIONS)
+    correct = sum(1 for a in st.session_state.user_answers if a.get("is_correct"))
+    percentage = (total_points / max_points) * 100
+    
+    # Score Display
+    st.markdown(f"""
+    <div class="modern-card fade-in">
+        <div class="feedback-score">
+            <div style="font-size: 48px; margin-bottom: 16px;">🎉</div>
+            <div style="font-size: 32px; font-weight: 800; margin-bottom: 24px;">Practice Session Complete!</div>
+            <div class="score-circle">
+                <div class="score-content">
+                    <div class="score-number">{percentage:.0f}%</div>
+                    <div class="score-label">SCORE</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
+    
+    # Stats Grid
+    st.markdown('<div class="stats-grid">', unsafe_allow_html=True)
+    col1, col2, col3, col4 = st.columns(4)
+    with col1:
+        st.markdown(f'<div class="stat-card"><div class="stat-value">{total_points}</div><div class="stat-label">Total Points</div></div>', unsafe_allow_html=True)
+    with col2:
+        st.markdown(f'<div class="stat-card"><div class="stat-value">{correct}/8</div><div class="stat-label">Correct</div></div>', unsafe_allow_html=True)
+    with col3:
+        st.markdown(f'<div class="stat-card"><div class="stat-value">{len(st.session_state.user_answers)}</div><div class="stat-label">Completed</div></div>', unsafe_allow_html=True)
+    with col4:
+        duration = (datetime.now() - st.session_state.start_time).seconds // 60
+        st.markdown(f'<div class="stat-card"><div class="stat-value">{duration}</div><div class="stat-label">Minutes</div></div>', unsafe_allow_html=True)
+    st.markdown('</div>', unsafe_allow_html=True)
+    
+    # Generate report if not exists
+    if not st.session_state.final_report:
+        with st.spinner("🤖 AI Mentor analyzing your performance..."):
+            st.session_state.final_report = generate_final_report(st.session_state.user_answers, ai_model)
+    
+    report = st.session_state.final_report
+    
+    # Overall Feedback
+    st.markdown('<div class="modern-card fade-in">', unsafe_allow_html=True)
+    st.markdown("### 🤖 AI Mentor's Overall Assessment")
+    st.markdown(f"_{report.get('overall_feedback', 'Great effort!')}_")
+    st.markdown('</div>', unsafe_allow_html=True)
+    
+    # Strengths & Weaknesses
+    col1, col2 = st.columns(2)
     with col1:
         st.markdown('<div class="modern-card fade-in">', unsafe_allow_html=True)
-        st.markdown("### 📚 Theory Mastery (4 Questions)")
-        st.markdown("""
-        - **Bias-Variance Tradeoff** (Easy - 10 pts)
-        - **Cross-Validation Techniques** (Medium - 15 pts)  
-        - **Feature Scaling Methods** (Easy - 10 pts)
-        - **Precision & Recall Analysis** (Hard - 20 pts)
-        
-        *Master the foundational concepts with AI-guided explanations*
-        """)
+        st.markdown("### 💪 Strengths")
+        for strength in report.get('strengths', [])[:3]:
+            st.markdown(f'<div class="insight-box insight-strength">✅ {strength}</div>', unsafe_allow_html=True)
         st.markdown('</div>', unsafe_allow_html=True)
     
     with col2:
         st.markdown('<div class="modern-card fade-in">', unsafe_allow_html=True)
-        st.markdown("### 💻 Coding Challenges (4 Questions)")
-        st.markdown("""
-        - **Correlation Analysis** (Easy - 10 pts)
-        - **Train-Test Splitting** (Medium - 15 pts)
-        - **Data Aggregation** (Medium - 15 pts)
-        - **Feature Engineering** (Hard - 20 pts)
-        
-        *Apply your skills with real datasets and instant code validation*
-        """)
+        st.markdown("### 📈 Areas to Improve")
+        for weakness in report.get('weaknesses', [])[:3]:
+            st.markdown(f'<div class="insight-box insight-weakness">📚 {weakness}</div>', unsafe_allow_html=True)
         st.markdown('</div>', unsafe_allow_html=True)
+    
+    # Recommendations
+    st.markdown('<div class="modern-card fade-in">', unsafe_allow_html=True)
+    st.markdown("### 🎯 Personalized Recommendations")
+    for rec in report.get('recommendations', [])[:3]:
+        st.markdown(f'<div class="insight-box insight-recommendation">💡 {rec}</div>', unsafe_allow_html=True)
+    st.markdown('</div>', unsafe_allow_html=True)
+    
+    # Learning Path
+    learning_path = report.get('learning_path', [])
+    if learning_path:
+        st.markdown('<div class="modern-card fade-in">', unsafe_allow_html=True)
+        st.markdown("### 🗺️ Your Personalized Learning Path")
+        for item in learning_path[:3]:
+            priority = item.get('priority', 'medium')
+            st.markdown(f"""
+            <div class="learning-path-item priority-{priority}">
+                <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 12px;">
+                    <div style="font-size: 18px; font-weight: 700;">{item.get('topic', 'Topic')}</div>
+                    <span class="difficulty-badge diff-{'hard' if priority == 'high' else 'medium' if priority == 'medium' else 'easy'}">{priority} priority</span>
+                </div>
+                <div style="color: {st.session_state.theme == 'dark' and '#94a3b8' or '#64748b'};">{item.get('resources', 'Practice recommended')}</div>
+            </div>
+            """, unsafe_allow_html=True)
+        st.markdown('</div>', unsafe_allow_html=True)
+    
+    # Closing Message
+    if 'closing_message' in report:
+        st.markdown(f"""
+        <div class="modern-card fade-in" style="text-align: center; padding: 40px;">
+            <div style="font-size: 24px; font-weight: 700; margin-bottom: 16px;">💫</div>
+            <div style="font-size: 18px; font-style: italic; color: {'#94a3b8' if st.session_state.theme == 'dark' else '#64748b'};">
+                "{report['closing_message']}"
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
+    
+    col1, col2, col3 = st.columns([1, 2, 1])
+    with col2:
+        if st.button("🔄 Start New Session", use_container_width=True, type="primary"):
+            for key in ['user_answers', 'current_q', 'started', 'completed', 'final_report']:
+                if key in st.session_state:
+                    del st.session_state[key]
+            st.rerun()
+
+else:
+    # Platform Header
+    st.markdown("""
+    <div class="platform-header">
+        <div class="header-content">
+            <div class="logo-section">
+                <div class="logo">
+                    <span class="logo-icon">🎓</span>
+                    <span>DataMentor AI</span>
+                </div>
+            </div>
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
+    
+    # Active Question
+    if st.session_state.current_q < len(QUESTIONS):
+        q = QUESTIONS[st.session_state.current_q]
+        
+        # Question Card
+        st.markdown(f"""
+        <div class="question-card fade-in">
+            <div class="question-header">
+                <div class="question-number">{q['id']}</div>
+                <div class="question-meta">
+                    <span class="difficulty-badge diff-{q['difficulty']}">{q['difficulty']}</span>
+                    <span class="points-badge">{q['points']} points</span>
+                </div>
+            </div>
+            <div style="margin-bottom: 24px;">
+                <div style="font-size: 24px; font-weight: 700; margin-bottom: 12px;">{q['title']}</div>
+                <div style="font-size: 16px; line-height: 1.6; color: {'#94a3b8' if st.session_state.theme == 'dark' else '#64748b'};">{q['prompt']}</div>
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
+        
+        if q['type'] == 'theory':
+            answer = st.text_area("Your Answer:", height=200, placeholder="Write your detailed answer here...")
+            
+            if st.button("Submit Answer", type="primary"):
+                if answer.strip():
+                    with st.spinner("🤖 AI Mentor analyzing your answer..."):
+                        ai_analysis = get_ai_feedback_theory(q, answer, ai_model)
+                        
+                        st.session_state.user_answers.append({
+                            "id": q['id'],
+                            "title": q['title'],
+                            "type": q['type'],
+                            "difficulty": q['difficulty'],
+                            "answer": answer,
+                            "ai_analysis": ai_analysis,
+                            "is_correct": ai_analysis.get("is_correct"),
+                            "points_earned": ai_analysis.get("points_earned"),
+                            "max_points": q['points']
+                        })
+                        
+                        # Show feedback
+                        score = ai_analysis.get("score", 0)
+                        is_correct = ai_analysis.get("is_correct", False)
+                        
+                        if is_correct:
+                            status_color = "#22c55e"
+                            emoji = "✅"
+                        elif score >= 0.5:
+                            status_color = "#f59e0b"
+                            emoji = "⚡"
+                        else:
+                            status_color = "#ef4444"
+                            emoji = "📚"
+                        
+                        st.markdown(f"""
+                        <div class="ai-feedback-container fade-in">
+                            <div class="feedback-content">
+                                <div class="ai-badge">{emoji} AI MENTOR FEEDBACK</div>
+                                <div style="font-size: 20px; font-weight: 700; color: {status_color}; margin-bottom: 16px;">
+                                    Score: {ai_analysis.get('points_earned', 0)}/{q['points']} points ({score*100:.0f}%)
+                                </div>
+                                <div style="margin-bottom: 20px;">{ai_analysis.get('feedback', '')}</div>
+                                
+                                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 24px;">
+                                    <div>
+                                        <div class="insight-title">💪 Strengths</div>
+                                        {''.join([f'<div class="insight-box insight-strength">{s}</div>' for s in ai_analysis.get('strengths', [])])}
+                                    </div>
+                                    <div>
+                                        <div class="insight-title">📈 Improvements</div>
+                                        {''.join([f'<div class="insight-box insight-weakness">{i}</div>' for i in ai_analysis.get('improvements', [])])}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        """, unsafe_allow_html=True)
+                        
+                        st.session_state.current_q += 1
+                        if st.session_state.current_q >= len(QUESTIONS):
+                            st.session_state.completed = True
+                        
+                        if st.button("➡️ Next Question", type="primary"):
+                            st.rerun()
+                else:
+                    st.warning("Please provide an answer before submitting.")
+        
+        else:  # Code question
+            if 'dataset' in q:
+                with st.expander("📊 View Dataset"):
+                    st.dataframe(DATASETS[q['dataset']], use_container_width=True)
+            
+            code = st.text_area("Your Code:", value=q.get('starter_code', ''), height=200)
+            
+            if st.button("▶️ Run Code", type="primary"):
+                if code.strip():
+                    success, result, error, stats = safe_execute_code(code, DATASETS.get(q['dataset'], pd.DataFrame()))
+                    
+                    if success and result is not None:
+                        expected = REFERENCE_RESULTS.get(q['id'])
+                        validator = globals()[f"validator_{q['validator']}"]
+                        is_correct, msg = validator(result, expected)
+                        
+                        with st.spinner("🤖 AI Mentor analyzing your code..."):
+                            ai_analysis = get_ai_feedback_code(q, code, result, expected, is_correct, stats, ai_model)
+                            
+                            st.session_state.user_answers.append({
+                                "id": q['id'],
+                                "title": q['title'],
+                                "type": q['type'],
+                                "difficulty": q['difficulty'],
+                                "code": code,
+                                "result": result,
+                                "expected": expected,
+                                "ai_analysis": ai_analysis,
+                                "is_correct": is_correct,
+                                "points_earned": ai_analysis.get("points_earned"),
+                                "max_points": q['points']
+                            })
+                            
+                            # Show feedback
+                            score = ai_analysis.get("score", 0)
+                            
+                            if is_correct:
+                                status_color = "#22c55e"
+                                emoji = "✅"
+                            elif score >= 0.5:
+                                status_color = "#f59e0b"
+                                emoji = "⚡"
+                            else:
+                                status_color = "#ef4444"
+                                emoji = "❌"
+                            
+                            st.markdown(f"""
+                            <div class="ai-feedback-container fade-in">
+                                <div class="feedback-content">
+                                    <div class="ai-badge">{emoji} AI MENTOR FEEDBACK</div>
+                                    <div style="font-size: 20px; font-weight: 700; color: {status_color}; margin-bottom: 16px;">
+                                        Score: {ai_analysis.get('points_earned', 0)}/{q['points']} points ({score*100:.0f}%)
+                                    </div>
+                                    
+                                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px;">
+                                        <div>
+                                            <div style="font-weight: 600; margin-bottom: 8px;">Your Result:</div>
+                                            <code>{result}</code>
+                                        </div>
+                                        <div>
+                                            <div style="font-weight: 600; margin-bottom: 8px;">Expected:</div>
+                                            <code>{expected}</code>
+                                        </div>
+                                    </div>
+                                    
+                                    <div style="margin-bottom: 20px;">{ai_analysis.get('feedback', '')}</div>
+                                    
+                                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 24px;">
+                                        <div>
+                                            <div class="insight-title">💪 Code Strengths</div>
+                                            {''.join([f'<div class="insight-box insight-strength">{s}</div>' for s in ai_analysis.get('strengths', [])])}
+                                        </div>
+                                        <div>
+                                            <div class="insight-title">📈 Improvements</div>
+                                            {''.join([f'<div class="insight-box insight-weakness">{i}</div>' for i in ai_analysis.get('improvements', [])])}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            """, unsafe_allow_html=True)
+                            
+                            st.session_state.current_q += 1
+                            if st.session_state.current_q >= len(QUESTIONS):
+                                st.session_state.completed = True
+                            
+                            if st.button("➡️ Next Question", type="primary"):
+                                st.rerun()
+                    else:
+                        st.error(error)
+                else:
+                    st.warning("Please write code before running.")
+
+# Footer
+st.markdown("---")
+st.markdown("""
+<div style="text-align: center; padding: 20px; color: #94a3b8; font-size: 14px;">
+    <div style="margin-bottom: 8px;">🎓 <strong>DataMentor AI</strong> - Your Personal Data Science Practice Platform</div>
+    <div>Powered by Gemini AI | Built with Streamlit</div>
+</div>
+""", unsafe_allow_html=True)
