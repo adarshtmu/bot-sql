@@ -1049,20 +1049,20 @@ with col4:
 
 st.markdown("<br>", unsafe_allow_html=True)
 
-elif st.session_state.completed:
-    # Platform Header
-    st.markdown("""
-    <div class="platform-header">
-        <div class="header-content">
-            <div class="logo-section">
-                <div class="logo">
-                    <span class="logo-icon">🎓</span>
-                    <span>DataMentor AI</span>
-                </div>
-            </div>
-        </div>
-    </div>
-    """, unsafe_allow_html=True)
+# elif st.session_state.completed:
+#     # Platform Header
+#     st.markdown("""
+#     <div class="platform-header">
+#         <div class="header-content">
+#             <div class="logo-section">
+#                 <div class="logo">
+#                     <span class="logo-icon">🎓</span>
+#                     <span>DataMentor AI</span>
+#                 </div>
+#             </div>
+#         </div>
+#     </div>
+#     """, unsafe_allow_html=True)
     
     # Calculate stats
     total_points = sum(a.get("points_earned", 0) for a in st.session_state.user_answers)
@@ -1375,4 +1375,5 @@ st.markdown("""
     <div>Powered by Gemini AI | Built with Streamlit</div>
 </div>
 """, unsafe_allow_html=True)
+
 
