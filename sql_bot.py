@@ -774,7 +774,6 @@ Question ({question['difficulty']}, {question['points']} points):
 Code:
 ```python
 {code}
-```
 
 Expected: {expected}
 Got: {result_value}
@@ -1375,6 +1374,7 @@ st.markdown("""
     <div>Powered by Gemini AI | Built with Streamlit</div>
 </div>
 """, unsafe_allow_html=True)
+
 
 
 
