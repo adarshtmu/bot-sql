@@ -1,17 +1,15 @@
 """
-Advanced Data Science Practice Bot (Streamlit)
+AI-Powered Data Science Practice Bot with LLM Mentor
 
-Enhanced Features:
-- 8 questions: 4 theory (text) + 4 coding (Python)
-- Multi-difficulty levels with adaptive feedback
-- Advanced execution sandbox with timeout protection
-- Smart NLP-based theory evaluation (TF-IDF similarity + keyword matching)
-- Real-time code hints and syntax checking
-- Progress tracking with detailed analytics
-- Export results as PDF report
-- Dark/Light theme toggle
-- Code execution history
-- Interactive visualizations for results
+Advanced Features:
+- 8 questions: 4 theory + 4 coding with multiple difficulty levels
+- LLM-powered mentor feedback for every answer (detailed, personalized)
+- Comprehensive final report with strengths, weaknesses, and learning path
+- Real-time AI analysis of code quality and theory understanding
+- Beautiful modern UI with theme support
+- Progress tracking and detailed analytics
+
+NOTE: Requires Anthropic API key. Set via Streamlit secrets or environment variable.
 """
 
 import streamlit as st
@@ -23,16 +21,47 @@ import time
 from typing import Tuple, Any, Dict, List
 from datetime import datetime
 import json
+import os
 
-st.set_page_config(page_title="Advanced DS Practice Bot", layout="wide", initial_sidebar_state="expanded")
+# For LLM integration
+try:
+    import anthropic
+    ANTHROPIC_AVAILABLE = True
+except ImportError:
+    ANTHROPIC_AVAILABLE = False
+    st.warning("⚠️ Install anthropic package for AI mentor: `pip install anthropic`")
+
+st.set_page_config(page_title="AI DS Practice Bot", layout="wide", initial_sidebar_state="expanded")
 
 # --------------------------
-# Enhanced CSS with theme support
+# LLM Configuration
+# --------------------------
+def get_anthropic_client():
+    """Get Anthropic client from secrets or environment"""
+    api_key = None
+    
+    # Try Streamlit secrets first
+    try:
+        api_key = st.secrets.get("ANTHROPIC_API_KEY")
+    except:
+        pass
+    
+    # Fall back to environment variable
+    if not api_key:
+        api_key = os.getenv("ANTHROPIC_API_KEY")
+    
+    if api_key and ANTHROPIC_AVAILABLE:
+        return anthropic.Anthropic(api_key=api_key)
+    return None
+
+# --------------------------
+# Enhanced CSS with animations
 # --------------------------
 def get_theme_css(theme="light"):
     if theme == "dark":
         return """
         <style>
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
         .stApp {
             background: linear-gradient(135deg, #0f2027 0%, #203a43 50%, #2c5364 100%);
             color: #e8eef2;
@@ -41,21 +70,35 @@ def get_theme_css(theme="light"):
             background: rgba(30, 41, 59, 0.85);
             border: 1px solid rgba(148, 163, 184, 0.2);
             color: #e8eef2;
+            animation: fadeIn 0.5s ease;
         }
         .hero-title { color: #60a5fa; }
-        .metric-box {
-            background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
-            border: 1px solid rgba(148, 163, 184, 0.3);
+        .ai-feedback {
+            background: linear-gradient(135deg, rgba(59, 130, 246, 0.15), rgba(139, 92, 246, 0.15));
+            border: 2px solid rgba(59, 130, 246, 0.3);
+            border-radius: 12px;
+            padding: 20px;
+            margin: 20px 0;
+            position: relative;
         }
-        .progress-bar-fill { background: linear-gradient(90deg, #3b82f6, #8b5cf6); }
-        .hint-box { background: rgba(59, 130, 246, 0.1); border-left: 4px solid #3b82f6; }
-        .success-box { background: rgba(34, 197, 94, 0.1); border-left: 4px solid #22c55e; }
-        .error-box { background: rgba(239, 68, 68, 0.1); border-left: 4px solid #ef4444; }
+        .ai-badge {
+            background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+            color: white;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            display: inline-block;
+            margin-bottom: 10px;
+        }
         </style>
         """
     else:
         return """
         <style>
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.8; } }
+        
         .stApp {
             background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 50%, #dbeafe 100%);
             color: #0f172a;
@@ -68,6 +111,7 @@ def get_theme_css(theme="light"):
             margin-bottom: 20px;
             border: 1px solid rgba(148, 163, 184, 0.2);
             backdrop-filter: blur(10px);
+            animation: fadeIn 0.5s ease;
         }
         .hero-title {
             font-size: 48px;
@@ -123,24 +167,45 @@ def get_theme_css(theme="light"):
             background: linear-gradient(90deg, #3b82f6 0%, #8b5cf6 100%);
             transition: width 0.4s ease;
         }
-        .hint-box {
-            background: rgba(59, 130, 246, 0.05);
-            border-left: 4px solid #3b82f6;
-            padding: 12px 16px;
-            border-radius: 8px;
-            margin: 12px 0;
+        .ai-feedback {
+            background: linear-gradient(135deg, rgba(59, 130, 246, 0.05), rgba(139, 92, 246, 0.05));
+            border: 2px solid rgba(59, 130, 246, 0.2);
+            border-radius: 12px;
+            padding: 20px;
+            margin: 20px 0;
+            position: relative;
         }
-        .success-box {
-            background: rgba(34, 197, 94, 0.05);
+        .ai-badge {
+            background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+            color: white;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            display: inline-block;
+            margin-bottom: 10px;
+        }
+        .analyzing {
+            animation: pulse 1.5s ease-in-out infinite;
+        }
+        .strength-box {
+            background: linear-gradient(135deg, rgba(34, 197, 94, 0.1), rgba(34, 197, 94, 0.05));
             border-left: 4px solid #22c55e;
-            padding: 12px 16px;
+            padding: 16px;
             border-radius: 8px;
             margin: 12px 0;
         }
-        .error-box {
-            background: rgba(239, 68, 68, 0.05);
+        .weakness-box {
+            background: linear-gradient(135deg, rgba(239, 68, 68, 0.1), rgba(239, 68, 68, 0.05));
             border-left: 4px solid #ef4444;
-            padding: 12px 16px;
+            padding: 16px;
+            border-radius: 8px;
+            margin: 12px 0;
+        }
+        .recommendation-box {
+            background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(59, 130, 246, 0.05));
+            border-left: 4px solid #3b82f6;
+            padding: 16px;
             border-radius: 8px;
             margin: 12px 0;
         }
@@ -156,23 +221,29 @@ def get_theme_css(theme="light"):
         .stButton > button:hover {
             transform: translateY(-2px);
         }
-        .code-stats {
-            display: flex;
-            gap: 12px;
-            margin-top: 8px;
+        .report-section {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            margin: 16px 0;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
         }
-        .stat-chip {
-            background: #f1f5f9;
-            padding: 4px 10px;
-            border-radius: 6px;
-            font-size: 12px;
-            color: #475569;
+        .score-ring {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 36px;
+            font-weight: 700;
+            margin: 20px auto;
         }
         </style>
         """
 
 # --------------------------
-# Enhanced datasets with more variety
+# Datasets
 # --------------------------
 students_df = pd.DataFrame({
     "student_id": range(1, 21),
@@ -190,230 +261,287 @@ sales_df = pd.DataFrame({
     "quarter": ['Q1', 'Q1', 'Q1', 'Q1', 'Q1', 'Q1', 'Q2', 'Q2', 'Q2', 'Q2', 'Q2', 'Q2', 'Q3', 'Q3', 'Q3']
 })
 
-DATASETS = {
-    "students": students_df,
-    "sales": sales_df
-}
+DATASETS = {"students": students_df, "sales": sales_df}
 
 # --------------------------
-# Enhanced questions with difficulty levels
+# Questions
 # --------------------------
 QUESTIONS = [
-    # Theory Questions
     {
-        "id": 1,
-        "type": "theory",
-        "difficulty": "easy",
+        "id": 1, "type": "theory", "difficulty": "easy",
         "title": "Bias-Variance Tradeoff",
         "prompt": "Explain the bias-variance tradeoff in supervised machine learning. What do high bias and high variance indicate? Provide one method to reduce each.",
-        "keywords": ["bias", "variance", "overfitting", "underfitting", "tradeoff", "complexity", "regularization", "ensemble"],
-        "ideal_answer": "The bias-variance tradeoff is a fundamental concept where increasing model complexity reduces bias (underfitting) but increases variance (overfitting). High bias means the model is too simple and misses patterns. High variance means the model is too complex and captures noise. Reduce bias by adding features or using more complex models. Reduce variance through regularization, cross-validation, or ensemble methods.",
-        "min_words": 50,
         "points": 10
     },
     {
-        "id": 2,
-        "type": "theory",
-        "difficulty": "medium",
+        "id": 2, "type": "theory", "difficulty": "medium",
         "title": "Cross-Validation",
         "prompt": "Explain k-fold cross-validation in detail. How does it work, why is it better than a single train/test split, and what are potential drawbacks?",
-        "keywords": ["k-fold", "validation", "train", "test", "variance", "average", "stratified", "computational cost"],
-        "ideal_answer": "K-fold cross-validation divides data into k equal folds, training on k-1 folds and testing on the remaining fold, repeating k times. It provides more robust performance estimates by averaging results across folds, reducing variance compared to single splits. It also uses data more efficiently. Drawbacks include higher computational cost and potential data leakage if not implemented carefully with time-series data.",
-        "min_words": 60,
         "points": 15
     },
     {
-        "id": 3,
-        "type": "theory",
-        "difficulty": "easy",
+        "id": 3, "type": "theory", "difficulty": "easy",
         "title": "Feature Scaling",
         "prompt": "Why is feature scaling important in machine learning? Explain standardization vs normalization and give two examples of algorithms that require scaling.",
-        "keywords": ["scaling", "standardization", "normalization", "min-max", "gradient descent", "distance", "svm", "neural network", "knn"],
-        "ideal_answer": "Feature scaling ensures all features contribute equally to model training. Standardization (z-score) transforms data to mean=0, std=1, while normalization (min-max) scales to a range like [0,1]. Algorithms using distance metrics (KNN, SVM) or gradient descent (neural networks, logistic regression) require scaling because unscaled features can dominate calculations and slow convergence.",
-        "min_words": 50,
         "points": 10
     },
     {
-        "id": 4,
-        "type": "theory",
-        "difficulty": "hard",
+        "id": 4, "type": "theory", "difficulty": "hard",
         "title": "Precision vs Recall",
         "prompt": "Explain precision and recall in classification. When would you prioritize one over the other? Provide a real-world scenario for each case and explain the F1 score.",
-        "keywords": ["precision", "recall", "false positive", "false negative", "f1", "harmonic mean", "imbalanced", "threshold"],
-        "ideal_answer": "Precision measures correctness of positive predictions (TP/(TP+FP)), while recall measures coverage of actual positives (TP/(TP+FN)). Prioritize precision when false positives are costly (spam detection, medical diagnosis). Prioritize recall when false negatives are costly (cancer screening, fraud detection). F1 score is the harmonic mean of precision and recall, providing a balanced metric especially useful for imbalanced datasets.",
-        "min_words": 70,
         "points": 20
     },
-    
-    # Coding Questions
     {
-        "id": 5,
-        "type": "code",
-        "difficulty": "easy",
+        "id": 5, "type": "code", "difficulty": "easy",
         "title": "Correlation Analysis",
-        "prompt": textwrap.dedent("""\
-            Using the `students` DataFrame as `df`, calculate the Pearson correlation coefficient
-            between `hours_studied` and `score`. Round your answer to 3 decimal places and assign it to `result`.
-            
-            Hint: Use pandas corr() method
-            """),
-        "dataset": "students",
-        "validator": "numeric_tol",
-        "starter_code": "# Calculate correlation between hours_studied and score\n# Round to 3 decimal places\n\nresult = None  # Your code here",
-        "points": 10,
-        "time_limit": 5
+        "prompt": "Using the `students` DataFrame as `df`, calculate the Pearson correlation coefficient between `hours_studied` and `score`. Round to 3 decimal places and assign to `result`.",
+        "dataset": "students", "validator": "numeric_tol", "points": 10,
+        "starter_code": "# Calculate correlation between hours_studied and score\n# Round to 3 decimal places\n\nresult = None"
     },
     {
-        "id": 6,
-        "type": "code",
-        "difficulty": "medium",
-        "title": "Train-Test Split Mean",
-        "prompt": textwrap.dedent("""\
-            Split the `students` DataFrame into 70% train and 30% test sets using random_state=42.
-            Calculate the mean `score` of the test set, round to 2 decimal places, and assign to `result`.
-            
-            Hint: Use sample() with frac parameter
-            """),
-        "dataset": "students",
-        "validator": "numeric_tol",
-        "starter_code": "# Split data: 70% train, 30% test (random_state=42)\n# Calculate mean score of test set\n\nresult = None  # Your code here",
-        "points": 15,
-        "time_limit": 5
+        "id": 6, "type": "code", "difficulty": "medium",
+        "title": "Train-Test Split",
+        "prompt": "Split the `students` DataFrame into 70% train and 30% test sets using random_state=42. Calculate the mean `score` of the test set, round to 2 decimal places, assign to `result`.",
+        "dataset": "students", "validator": "numeric_tol", "points": 15,
+        "starter_code": "# Split data: 70% train, 30% test\n# Calculate mean score of test set\n\nresult = None"
     },
     {
-        "id": 7,
-        "type": "code",
-        "difficulty": "medium",
+        "id": 7, "type": "code", "difficulty": "medium",
         "title": "Group Aggregation",
-        "prompt": textwrap.dedent("""\
-            Using the `sales` DataFrame as `df`, find the total sales for each region.
-            Return a dictionary where keys are region names and values are total sales.
-            Assign this dictionary to `result`.
-            
-            Hint: Use groupby() and to_dict()
-            """),
-        "dataset": "sales",
-        "validator": "dict_compare",
-        "starter_code": "# Group by region and sum sales\n# Convert to dictionary {region: total_sales}\n\nresult = None  # Your code here",
-        "points": 15,
-        "time_limit": 5
+        "prompt": "Using the `sales` DataFrame, find the total sales for each region. Return a dictionary where keys are region names and values are total sales. Assign to `result`.",
+        "dataset": "sales", "validator": "dict_compare", "points": 15,
+        "starter_code": "# Group by region and sum sales\n# Return as dictionary\n\nresult = None"
     },
     {
-        "id": 8,
-        "type": "code",
-        "difficulty": "hard",
+        "id": 8, "type": "code", "difficulty": "hard",
         "title": "Feature Engineering",
-        "prompt": textwrap.dedent("""\
-            Using the `students` DataFrame as `df`, create a new feature `performance_score` which is:
-            (score * 0.7) + (attendance * 0.3)
-            
-            Then calculate the correlation between `performance_score` and `passed`.
-            Round to 3 decimal places and assign to `result`.
-            
-            Hint: Create new column first, then calculate correlation
-            """),
-        "dataset": "students",
-        "validator": "numeric_tol",
-        "starter_code": "# Create performance_score feature\n# Calculate correlation with 'passed'\n\nresult = None  # Your code here",
-        "points": 20,
-        "time_limit": 5
+        "prompt": "Create a new feature `performance_score` = (score * 0.7) + (attendance * 0.3). Calculate correlation between `performance_score` and `passed`. Round to 3 decimals, assign to `result`.",
+        "dataset": "students", "validator": "numeric_tol", "points": 20,
+        "starter_code": "# Create performance_score feature\n# Calculate correlation with 'passed'\n\nresult = None"
     }
 ]
 
 # --------------------------
-# Advanced evaluation functions
+# LLM-Powered Evaluation Functions
 # --------------------------
-def compute_text_similarity(text1: str, text2: str) -> float:
-    """Simple TF-IDF based similarity (without sklearn)"""
-    from collections import Counter
-    import math
+def get_ai_feedback_theory(question: dict, student_answer: str, client) -> Dict:
+    """Get detailed AI mentor feedback for theory answers"""
+    if not client:
+        return {
+            "is_correct": len(student_answer.split()) >= 30,
+            "score": 0.7,
+            "feedback": "AI mentor unavailable. Basic check: answer length is adequate.",
+            "strengths": ["Attempted the question"],
+            "improvements": ["Add API key for detailed feedback"],
+            "points_earned": int(question["points"] * 0.7)
+        }
     
-    def get_words(text):
-        return re.findall(r'\w+', text.lower())
-    
-    words1 = get_words(text1)
-    words2 = get_words(text2)
-    
-    if not words1 or not words2:
-        return 0.0
-    
-    # Calculate word frequencies
-    freq1 = Counter(words1)
-    freq2 = Counter(words2)
-    
-    # Simple cosine similarity
-    common = set(freq1.keys()) & set(freq2.keys())
-    numerator = sum(freq1[w] * freq2[w] for w in common)
-    
-    sum1 = sum(freq1[w]**2 for w in freq1)
-    sum2 = sum(freq2[w]**2 for w in freq2)
-    denominator = math.sqrt(sum1) * math.sqrt(sum2)
-    
-    return numerator / denominator if denominator else 0.0
+    prompt = f"""You are an expert Data Science mentor providing detailed, constructive feedback to a student.
 
-def advanced_theory_check(answer_text: str, question: dict) -> Tuple[bool, str, int]:
-    """Enhanced theory evaluation with NLP similarity and keyword matching"""
-    if not answer_text or len(answer_text.strip()) < 20:
-        return False, "❌ Answer too short. Please provide a more detailed explanation.", 0
-    
-    text = answer_text.lower()
-    words = text.split()
-    
-    # Check minimum word count
-    min_words = question.get("min_words", 50)
-    if len(words) < min_words:
-        return False, f"⚠️ Answer should be at least {min_words} words (you wrote {len(words)}). Add more details.", 0
-    
-    # Keyword matching
-    keywords = question.get("keywords", [])
-    hits = [kw for kw in keywords if kw in text]
-    keyword_score = len(hits) / len(keywords) if keywords else 0
-    
-    # Similarity with ideal answer
-    ideal = question.get("ideal_answer", "")
-    similarity = compute_text_similarity(answer_text, ideal) if ideal else 0
-    
-    # Combined scoring
-    total_score = (keyword_score * 0.6) + (similarity * 0.4)
-    
-    points = question.get("points", 10)
-    earned_points = int(total_score * points)
-    
-    if total_score >= 0.7:
-        feedback = f"✅ Excellent! You covered key concepts: {', '.join(hits[:3])}. Similarity score: {similarity:.2f}"
-        return True, feedback, earned_points
-    elif total_score >= 0.5:
-        missing = [kw for kw in keywords if kw not in text]
-        feedback = f"⚡ Good attempt! Consider including: {', '.join(missing[:3])}. Similarity: {similarity:.2f}"
-        return True, feedback, earned_points
-    elif total_score >= 0.3:
-        missing = [kw for kw in keywords if kw not in text]
-        feedback = f"⚠️ Partial answer. Key missing concepts: {', '.join(missing[:4])}. Review the topic."
-        return False, feedback, earned_points
-    else:
-        feedback = f"❌ Answer lacks key concepts. Focus on: {', '.join(keywords[:5])}. Try again!"
-        return False, feedback, 0
+Question ({question['difficulty']} difficulty, {question['points']} points):
+{question['prompt']}
 
+Student's Answer:
+{student_answer}
+
+Analyze this answer as a mentor and provide:
+1. Overall assessment (correct/partially correct/incorrect)
+2. Score from 0.0 to 1.0 (how well they answered)
+3. Detailed feedback (2-3 sentences explaining what's good and what's missing)
+4. 2-3 specific strengths (what they did well)
+5. 2-3 specific areas for improvement (what to study more)
+6. Whether the core concepts are understood
+
+Respond in JSON format:
+{{
+    "is_correct": true/false,
+    "score": 0.0-1.0,
+    "feedback": "detailed feedback here",
+    "strengths": ["strength1", "strength2"],
+    "improvements": ["improvement1", "improvement2"],
+    "core_concepts_understood": true/false
+}}
+
+Be encouraging but honest. Focus on learning, not just correctness."""
+
+    try:
+        response = client.messages.create(
+            model="claude-sonnet-4-20250514",
+            max_tokens=1000,
+            messages=[{"role": "user", "content": prompt}]
+        )
+        
+        result = json.loads(response.content[0].text)
+        result["points_earned"] = int(result["score"] * question["points"])
+        return result
+    except Exception as e:
+        return {
+            "is_correct": False,
+            "score": 0.5,
+            "feedback": f"AI analysis error: {str(e)}. Please check your answer manually.",
+            "strengths": ["Attempted the question"],
+            "improvements": ["Review the topic"],
+            "points_earned": int(question["points"] * 0.5)
+        }
+
+def get_ai_feedback_code(question: dict, student_code: str, result_value: Any, 
+                         expected: Any, is_correct: bool, execution_stats: dict, client) -> Dict:
+    """Get detailed AI mentor feedback for code answers"""
+    if not client:
+        return {
+            "is_correct": is_correct,
+            "score": 1.0 if is_correct else 0.3,
+            "feedback": "Correct!" if is_correct else "Incorrect result.",
+            "code_quality": "AI unavailable",
+            "strengths": ["Code executed"],
+            "improvements": ["Add API key for detailed feedback"],
+            "points_earned": question["points"] if is_correct else int(question["points"] * 0.3)
+        }
+    
+    prompt = f"""You are an expert Data Science coding mentor providing detailed code review.
+
+Question ({question['difficulty']} difficulty, {question['points']} points):
+{question['prompt']}
+
+Student's Code:
+```python
+{student_code}
+```
+
+Expected Result: {expected}
+Student's Result: {result_value}
+Correctness: {"✓ Correct" if is_correct else "✗ Incorrect"}
+Execution Time: {execution_stats.get('execution_time', 0):.4f}s
+
+Analyze this code and provide:
+1. Overall code quality assessment
+2. Score from 0.0 to 1.0 (correctness + code quality)
+3. Detailed feedback (explain approach, correctness, efficiency)
+4. 2-3 code strengths (what they did well)
+5. 2-3 areas for improvement (better approaches, optimization, style)
+6. Any potential issues or edge cases they missed
+
+Respond in JSON format:
+{{
+    "is_correct": true/false,
+    "score": 0.0-1.0,
+    "feedback": "detailed feedback",
+    "code_quality": "excellent/good/fair/poor",
+    "strengths": ["strength1", "strength2"],
+    "improvements": ["improvement1", "improvement2"],
+    "better_approach": "optional: suggest better method if applicable"
+}}
+
+Be specific and educational. Praise good practices, suggest improvements."""
+
+    try:
+        response = client.messages.create(
+            model="claude-sonnet-4-20250514",
+            max_tokens=1200,
+            messages=[{"role": "user", "content": prompt}]
+        )
+        
+        result = json.loads(response.content[0].text)
+        result["points_earned"] = int(result["score"] * question["points"])
+        return result
+    except Exception as e:
+        fallback_score = 1.0 if is_correct else 0.3
+        return {
+            "is_correct": is_correct,
+            "score": fallback_score,
+            "feedback": f"AI analysis error: {str(e)}",
+            "code_quality": "unknown",
+            "strengths": ["Code executed"],
+            "improvements": ["Review approach"],
+            "points_earned": int(question["points"] * fallback_score)
+        }
+
+def generate_final_report(all_answers: List[Dict], client) -> Dict:
+    """Generate comprehensive final report with AI analysis"""
+    if not client:
+        return {
+            "overall_feedback": "Complete! Add API key for detailed analysis.",
+            "strengths": ["Completed all questions"],
+            "weaknesses": ["AI analysis unavailable"],
+            "recommendations": ["Set up Anthropic API key"],
+            "learning_path": []
+        }
+    
+    # Prepare summary for AI
+    summary = []
+    for ans in all_answers:
+        summary.append({
+            "question": ans["title"],
+            "type": ans["type"],
+            "difficulty": ans["difficulty"],
+            "correct": ans.get("is_correct", False),
+            "score": ans.get("ai_analysis", {}).get("score", 0),
+            "points": f"{ans.get('points_earned', 0)}/{ans.get('max_points', 10)}"
+        })
+    
+    prompt = f"""You are a senior Data Science mentor writing a comprehensive performance report.
+
+Student completed 8 questions (4 theory + 4 coding). Here's their performance:
+
+{json.dumps(summary, indent=2)}
+
+Create a detailed mentor report with:
+1. Overall performance summary (2-3 sentences, be encouraging)
+2. Top 3-4 strengths (specific skills they demonstrated well)
+3. Top 3-4 weaknesses (areas needing improvement)
+4. Detailed recommendations (3-4 specific actionable items)
+5. Personalized learning path (3-4 topics to study next with resources)
+6. Motivational closing message
+
+Respond in JSON format:
+{{
+    "overall_feedback": "comprehensive summary",
+    "strengths": ["strength1", "strength2", "strength3"],
+    "weaknesses": ["weakness1", "weakness2", "weakness3"],
+    "recommendations": ["rec1", "rec2", "rec3"],
+    "learning_path": [
+        {{"topic": "topic name", "priority": "high/medium/low", "resources": "suggested resources"}},
+        ...
+    ],
+    "closing_message": "motivational message"
+}}
+
+Be specific, actionable, and encouraging. This is a learning experience."""
+
+    try:
+        response = client.messages.create(
+            model="claude-sonnet-4-20250514",
+            max_tokens=2000,
+            messages=[{"role": "user", "content": prompt}]
+        )
+        
+        return json.loads(response.content[0].text)
+    except Exception as e:
+        return {
+            "overall_feedback": "Good effort completing all questions!",
+            "strengths": ["Persistence", "Attempted all questions"],
+            "weaknesses": ["AI analysis unavailable"],
+            "recommendations": ["Review incorrect answers", "Practice more"],
+            "learning_path": [{"topic": "Review basics", "priority": "high", "resources": "Online courses"}],
+            "closing_message": "Keep learning!"
+        }
+
+# --------------------------
+# Code Execution
+# --------------------------
 def safe_execute_code(user_code: str, dataframe: pd.DataFrame, timeout: int = 5) -> Tuple[bool, Any, str, dict]:
-    """Enhanced code execution with timeout and detailed stats"""
+    """Execute student code safely"""
     allowed_globals = {
         "__builtins__": {
             "abs": abs, "min": min, "max": max, "round": round, "len": len,
             "range": range, "sum": sum, "sorted": sorted, "list": list,
             "dict": dict, "set": set, "int": int, "float": float, "str": str
         },
-        "pd": pd,
-        "np": np,
+        "pd": pd, "np": np,
     }
     
     local_vars = {"df": dataframe.copy()}
-    
-    # Collect stats
-    stats = {
-        "lines": len(user_code.split('\n')),
-        "chars": len(user_code),
-        "execution_time": 0
-    }
+    stats = {"lines": len(user_code.split('\n')), "chars": len(user_code), "execution_time": 0}
     
     try:
         start_time = time.time()
@@ -421,54 +549,42 @@ def safe_execute_code(user_code: str, dataframe: pd.DataFrame, timeout: int = 5)
         stats["execution_time"] = time.time() - start_time
         
         if "result" not in local_vars:
-            return False, None, "⚠️ Please assign your final answer to variable `result`", stats
+            return False, None, "⚠️ Assign your answer to variable `result`", stats
         
         return True, local_vars["result"], "", stats
     except Exception as e:
         stats["execution_time"] = time.time() - start_time
-        error_msg = f"❌ Execution Error: {str(e)}"
-        return False, None, error_msg, stats
+        return False, None, f"❌ Error: {str(e)}", stats
 
 def validator_numeric_tol(student_value: Any, expected_value: Any, tol=1e-3) -> Tuple[bool, str]:
-    """Enhanced numeric validator"""
     try:
-        s = float(student_value)
-        e = float(expected_value)
+        s, e = float(student_value), float(expected_value)
         diff = abs(s - e)
         if diff <= tol:
-            return True, f"✅ Perfect! Expected: {e}, Got: {s} (diff: {diff:.6f})"
-        else:
-            return False, f"❌ Close but not quite. Expected: {e}, Got: {s} (diff: {diff:.4f})"
-    except Exception as ex:
-        return False, f"❌ Cannot compare values: {ex}"
+            return True, f"✅ Correct! (Expected: {e}, Got: {s})"
+        return False, f"❌ Expected: {e}, Got: {s}"
+    except:
+        return False, "❌ Cannot compare values"
 
 def validator_dict_compare(student_value: Any, expected_value: Any) -> Tuple[bool, str]:
-    """Validator for dictionary results"""
     if not isinstance(student_value, dict):
-        return False, f"❌ Expected a dictionary, got {type(student_value).__name__}"
-    
+        return False, f"❌ Expected dictionary, got {type(student_value).__name__}"
     if set(student_value.keys()) != set(expected_value.keys()):
-        return False, f"❌ Keys don't match. Expected: {sorted(expected_value.keys())}, Got: {sorted(student_value.keys())}"
-    
+        return False, "❌ Keys don't match"
     for key in expected_value:
         if abs(student_value[key] - expected_value[key]) > 0.01:
-            return False, f"❌ Value mismatch for '{key}': Expected {expected_value[key]}, Got {student_value[key]}"
-    
-    return True, f"✅ Perfect! All {len(expected_value)} regions calculated correctly"
+            return False, f"❌ Wrong value for '{key}'"
+    return True, "✅ Perfect!"
 
-# Precompute reference solutions
+# Reference solutions
 def compute_reference(q):
     qid = q["id"]
     if qid == 5:
-        df = DATASETS[q["dataset"]]
-        return round(df["hours_studied"].corr(df["score"]), 3)
+        return round(DATASETS[q["dataset"]]["hours_studied"].corr(DATASETS[q["dataset"]]["score"]), 3)
     elif qid == 6:
-        df = DATASETS[q["dataset"]]
-        test = df.sample(frac=0.3, random_state=42)
-        return round(test["score"].mean(), 2)
+        return round(DATASETS[q["dataset"]].sample(frac=0.3, random_state=42)["score"].mean(), 2)
     elif qid == 7:
-        df = DATASETS[q["dataset"]]
-        return df.groupby('region')['sales'].sum().to_dict()
+        return DATASETS[q["dataset"]].groupby('region')['sales'].sum().to_dict()
     elif qid == 8:
         df = DATASETS[q["dataset"]].copy()
         df['performance_score'] = (df['score'] * 0.7) + (df['attendance'] * 0.3)
@@ -478,7 +594,7 @@ def compute_reference(q):
 REFERENCE_RESULTS = {q["id"]: compute_reference(q) for q in QUESTIONS if q["type"] == "code"}
 
 # --------------------------
-# Session state initialization
+# Session State
 # --------------------------
 if "theme" not in st.session_state:
     st.session_state.theme = "light"
@@ -492,11 +608,14 @@ if "completed" not in st.session_state:
     st.session_state.completed = False
 if "start_time" not in st.session_state:
     st.session_state.start_time = None
-if "code_history" not in st.session_state:
-    st.session_state.code_history = {}
+if "final_report" not in st.session_state:
+    st.session_state.final_report = None
 
 # Apply theme
 st.markdown(get_theme_css(st.session_state.theme), unsafe_allow_html=True)
+
+# Get AI client
+ai_client = get_anthropic_client()
 
 # --------------------------
 # Sidebar
@@ -504,10 +623,28 @@ st.markdown(get_theme_css(st.session_state.theme), unsafe_allow_html=True)
 with st.sidebar:
     st.markdown("### ⚙️ Settings")
     
-    # Theme toggle
     if st.button("🌓 Toggle Theme"):
         st.session_state.theme = "dark" if st.session_state.theme == "light" else "light"
         st.rerun()
+    
+    # API Status
+    if ai_client:
+        st.success("🤖 AI Mentor: Active")
+    else:
+        st.warning("🤖 AI Mentor: Inactive")
+        with st.expander("Setup AI Mentor"):
+            st.markdown("""
+            Add your Anthropic API key:
+            1. Get key from console.anthropic.com
+            2. Add to `.streamlit/secrets.toml`:
+            ```toml
+            ANTHROPIC_API_KEY = "your-key-here"
+            ```
+            Or set environment variable:
+            ```bash
+            export ANTHROPIC_API_KEY="your-key"
+            ```
+            """)
     
     st.markdown("---")
     
@@ -515,70 +652,62 @@ with st.sidebar:
         st.markdown("### 📊 Progress")
         progress = len(st.session_state.user_answers) / len(QUESTIONS)
         st.markdown(f'<div class="progress-bar"><div class="progress-bar-fill" style="width: {progress*100}%"></div></div>', unsafe_allow_html=True)
-        st.markdown(f"**{len(st.session_state.user_answers)}/{len(QUESTIONS)}** questions completed")
+        st.markdown(f"**{len(st.session_state.user_answers)}/{len(QUESTIONS)}** completed")
         
         if st.session_state.user_answers:
             correct = sum(1 for a in st.session_state.user_answers if a.get("is_correct"))
-            st.metric("Correct", f"{correct}/{len(st.session_state.user_answers)}")
-            
             total_points = sum(a.get("points_earned", 0) for a in st.session_state.user_answers)
-            max_points = sum(q.get("points", 10) for q in QUESTIONS[:len(st.session_state.user_answers)])
-            st.metric("Points", f"{total_points}/{max_points}")
-    
-    st.markdown("---")
-    st.markdown("### 📚 Datasets")
-    for name, df in DATASETS.items():
-        with st.expander(f"📊 {name.title()} ({len(df)} rows)"):
-            st.dataframe(df.head(3), use_container_width=True)
+            st.metric("Correct", f"{correct}/{len(st.session_state.user_answers)}")
+            st.metric("Points", total_points)
 
 # --------------------------
-# Main UI
+# UI Functions
 # --------------------------
 def show_home():
     st.markdown('<div class="card">', unsafe_allow_html=True)
-    st.markdown('<div class="hero-title">🚀 Advanced Data Science Practice Bot</div>', unsafe_allow_html=True)
-    st.markdown('<div class="hero-sub">Master DS concepts through 8 carefully crafted questions with intelligent feedback</div>', unsafe_allow_html=True)
+    st.markdown('<div class="hero-title">🤖 AI-Powered DS Practice Bot</div>', unsafe_allow_html=True)
+    st.markdown('<div class="hero-sub">Master Data Science with personalized AI mentor feedback on every answer</div>', unsafe_allow_html=True)
     
     col1, col2, col3, col4 = st.columns(4)
     with col1:
         st.markdown('<div class="metric-box"><div class="metric-value">8</div><div class="metric-label">Questions</div></div>', unsafe_allow_html=True)
     with col2:
-        st.markdown('<div class="metric-box"><div class="metric-value">4+4</div><div class="metric-label">Theory + Code</div></div>', unsafe_allow_html=True)
+        st.markdown('<div class="metric-box"><div class="metric-value">4+4</div><div class="metric-label">Theory+Code</div></div>', unsafe_allow_html=True)
     with col3:
         st.markdown('<div class="metric-box"><div class="metric-value">110</div><div class="metric-label">Total Points</div></div>', unsafe_allow_html=True)
     with col4:
-        st.markdown('<div class="metric-box"><div class="metric-value">~25min</div><div class="metric-label">Duration</div></div>', unsafe_allow_html=True)
+        st.markdown('<div class="metric-box"><div class="metric-value">AI</div><div class="metric-label">Mentor</div></div>', unsafe_allow_html=True)
     
     st.markdown("---")
     
     st.markdown("""
-    ### ✨ Features
+    ### ✨ What Makes This Special
     
-    - **🎯 Smart Evaluation**: NLP-powered theory checks + automated code testing
-    - **💡 Real-time Hints**: Get contextual help while solving problems
-    - **📈 Progress Tracking**: Monitor your performance with detailed analytics
-    - **🔍 Code History**: Review and learn from previous attempts
-    - **🎨 Beautiful UI**: Modern glassmorphism design with dark mode
-    - **📊 Detailed Feedback**: Understand exactly where you can improve
+    - **🤖 AI Mentor Feedback**: Every answer gets detailed, personalized feedback from Claude
+    - **📊 Comprehensive Analysis**: Deep dive into your strengths and weaknesses
+    - **🎯 Smart Evaluation**: Not just right/wrong - understand WHY and HOW
+    - **📈 Learning Path**: Get personalized recommendations for what to study next
+    - **💡 Code Reviews**: Detailed analysis of your coding approach and quality
+    - **📋 Final Report**: Complete performance analysis with actionable insights
     
-    ### 📖 Topics Covered
-    - Bias-Variance Tradeoff & Model Selection
-    - Cross-Validation & Evaluation Metrics
-    - Feature Engineering & Scaling
-    - Data Analysis with Pandas & NumPy
+    ### 🎓 You'll Practice
+    - Machine Learning fundamentals (Bias-Variance, Cross-Validation)
+    - Model Evaluation (Precision, Recall, F1 Score)
+    - Data Analysis with Pandas (Correlation, Grouping, Feature Engineering)
+    - Statistical Analysis and Data Manipulation
     """)
     
     st.markdown('</div>', unsafe_allow_html=True)
     
     col1, col2, col3 = st.columns([1, 2, 1])
     with col2:
-        if st.button("🎯 Start Practice Session", use_container_width=True):
+        if st.button("🚀 Start AI-Mentored Practice", use_container_width=True):
             st.session_state.started = True
             st.session_state.start_time = datetime.now()
             st.session_state.user_answers = []
             st.session_state.current_q = 0
             st.session_state.completed = False
-            st.session_state.code_history = {}
+            st.session_state.final_report = None
             st.rerun()
 
 def show_question(qidx: int):
@@ -586,7 +715,6 @@ def show_question(qidx: int):
     
     st.markdown('<div class="card">', unsafe_allow_html=True)
     
-    # Header
     col1, col2 = st.columns([3, 1])
     with col1:
         st.markdown(f"### Question {qidx+1}/{len(QUESTIONS)}: {q['title']}")
@@ -594,81 +722,64 @@ def show_question(qidx: int):
         diff_class = f"diff-{q['difficulty']}"
         st.markdown(f'<div class="difficulty-badge {diff_class}">{q["difficulty"]}</div>', unsafe_allow_html=True)
     
-    st.markdown(f"**Points:** {q.get('points', 10)} | **Type:** {q['type'].upper()}")
+    st.markdown(f"**Points:** {q['points']} | **Type:** {q['type'].upper()}")
     st.markdown("---")
-    
-    # Question prompt
     st.markdown(q["prompt"])
     
-    # Show dataset preview for code questions
     if q.get("dataset"):
         with st.expander(f"📊 View `{q['dataset']}` Dataset"):
             st.dataframe(DATASETS[q["dataset"]], use_container_width=True)
-            st.markdown(f"**Shape:** {DATASETS[q['dataset']].shape} | **Columns:** {', '.join(DATASETS[q['dataset']].columns)}")
     
     # Answer input
     if q["type"] == "theory":
-        answer = st.text_area(
-            "✍️ Your Answer:",
-            height=200,
-            key=f"theory_{qidx}",
-            help=f"Write at least {q.get('min_words', 50)} words for full credit"
-        )
-        
-        # Word count
+        answer = st.text_area("✍️ Your Answer:", height=200, key=f"theory_{qidx}")
         word_count = len(answer.split()) if answer else 0
-        st.markdown(f"<div class='stat-chip'>📝 Words: {word_count}/{q.get('min_words', 50)}</div>", unsafe_allow_html=True)
+        st.markdown(f"<small>📝 Words: {word_count}</small>", unsafe_allow_html=True)
         
         col1, col2 = st.columns([3, 1])
         with col1:
-            if st.button("✅ Submit Answer", key=f"submit_theory_{qidx}", use_container_width=True):
-                is_correct, feedback, points = advanced_theory_check(answer, q)
-                st.session_state.user_answers.append({
-                    "id": q["id"],
-                    "type": q["type"],
-                    "title": q["title"],
-                    "difficulty": q["difficulty"],
-                    "question": q["prompt"],
-                    "student_answer": answer,
-                    "is_correct": is_correct,
-                    "feedback": feedback,
-                    "points_earned": points,
-                    "max_points": q.get("points", 10),
-                    "timestamp": datetime.now().isoformat()
-                })
-                
-                if qidx + 1 < len(QUESTIONS):
-                    st.session_state.current_q = qidx + 1
+            if st.button("✅ Submit & Get AI Feedback", key=f"submit_{qidx}", use_container_width=True):
+                if not answer or len(answer.strip()) < 20:
+                    st.error("⚠️ Please write a more detailed answer (at least 20 characters)")
                 else:
-                    st.session_state.completed = True
-                st.rerun()
+                    with st.spinner("🤖 AI Mentor is analyzing your answer..."):
+                        ai_analysis = get_ai_feedback_theory(q, answer, ai_client)
+                    
+                    st.session_state.user_answers.append({
+                        "id": q["id"],
+                        "type": q["type"],
+                        "title": q["title"],
+                        "difficulty": q["difficulty"],
+                        "question": q["prompt"],
+                        "student_answer": answer,
+                        "is_correct": ai_analysis["is_correct"],
+                        "ai_analysis": ai_analysis,
+                        "points_earned": ai_analysis["points_earned"],
+                        "max_points": q["points"],
+                        "timestamp": datetime.now().isoformat()
+                    })
+                    
+                    if qidx + 1 < len(QUESTIONS):
+                        st.session_state.current_q = qidx + 1
+                    else:
+                        st.session_state.completed = True
+                    st.rerun()
         
         with col2:
             with st.popover("💡 Hint"):
-                st.markdown(f"**Key concepts to cover:**")
-                for kw in q.get("keywords", [])[:5]:
-                    st.markdown(f"- {kw}")
+                st.markdown("Think about:")
+                st.markdown("- Key definitions")
+                st.markdown("- Real-world examples")
+                st.markdown("- Trade-offs involved")
     
     elif q["type"] == "code":
-        # Code editor with starter code
-        starter = q.get("starter_code", "# Write your code here\n\nresult = None")
-        answer_code = st.text_area(
-            "💻 Python Code:",
-            value=starter,
-            height=300,
-            key=f"code_{qidx}",
-            help="Write your solution and assign the final answer to `result`"
-        )
+        starter = q.get("starter_code", "result = None")
+        answer_code = st.text_area("💻 Python Code:", value=starter, height=280, key=f"code_{qidx}")
         
-        # Code stats
-        lines = len(answer_code.split('\n'))
-        chars = len(answer_code)
-        st.markdown(f'<div class="code-stats"><span class="stat-chip">📏 Lines: {lines}</span><span class="stat-chip">📝 Characters: {chars}</span></div>', unsafe_allow_html=True)
-        
-        col1, col2, col3, col4 = st.columns(4)
+        col1, col2, col3 = st.columns(3)
         
         with col1:
-            if st.button("🚀 Run & Submit", key=f"submit_code_{qidx}", use_container_width=True):
+            if st.button("🚀 Run & Submit", key=f"submit_{qidx}", use_container_width=True):
                 df = DATASETS[q["dataset"]]
                 success, res, stderr, stats = safe_execute_code(answer_code, df, q.get("time_limit", 5))
                 
@@ -686,17 +797,8 @@ def show_question(qidx: int):
                         ok = (res == expected)
                         message = f"Expected: {expected}, Got: {res}"
                     
-                    points = q.get("points", 10) if ok else int(q.get("points", 10) * 0.3)
-                    
-                    # Save to history
-                    if qidx not in st.session_state.code_history:
-                        st.session_state.code_history[qidx] = []
-                    st.session_state.code_history[qidx].append({
-                        "code": answer_code,
-                        "result": res,
-                        "correct": ok,
-                        "timestamp": datetime.now().isoformat()
-                    })
+                    with st.spinner("🤖 AI Mentor is reviewing your code..."):
+                        ai_analysis = get_ai_feedback_code(q, answer_code, res, expected, ok, stats, ai_client)
                     
                     st.session_state.user_answers.append({
                         "id": q["id"],
@@ -706,11 +808,11 @@ def show_question(qidx: int):
                         "question": q["prompt"],
                         "student_answer": answer_code,
                         "is_correct": ok,
-                        "feedback": message,
                         "student_result": res,
                         "expected_result": expected,
-                        "points_earned": points,
-                        "max_points": q.get("points", 10),
+                        "ai_analysis": ai_analysis,
+                        "points_earned": ai_analysis["points_earned"],
+                        "max_points": q["points"],
                         "execution_stats": stats,
                         "timestamp": datetime.now().isoformat()
                     })
@@ -722,148 +824,146 @@ def show_question(qidx: int):
                     st.rerun()
         
         with col2:
-            if st.button("▶️ Test Run", key=f"test_code_{qidx}", use_container_width=True):
+            if st.button("▶️ Test Run", key=f"test_{qidx}", use_container_width=True):
                 df = DATASETS[q["dataset"]]
-                success, res, stderr, stats = safe_execute_code(answer_code, df, q.get("time_limit", 5))
+                success, res, stderr, stats = safe_execute_code(answer_code, df)
                 
                 if not success:
-                    st.markdown(f'<div class="error-box">{stderr}</div>', unsafe_allow_html=True)
+                    st.error(stderr)
                 else:
-                    st.markdown(f'<div class="success-box">✅ Code executed successfully!<br><b>Result:</b> <code>{res}</code><br><b>Execution time:</b> {stats["execution_time"]:.4f}s</div>', unsafe_allow_html=True)
+                    st.success(f"✅ Executed! Result: `{res}` (Time: {stats['execution_time']:.4f}s)")
         
         with col3:
             with st.popover("💡 Hint"):
                 st.markdown("**Tips:**")
-                if q["difficulty"] == "easy":
-                    st.markdown("- Use pandas built-in methods")
-                    st.markdown("- Check the documentation")
-                elif q["difficulty"] == "medium":
-                    st.markdown("- Break problem into steps")
-                    st.markdown("- Test with small data first")
-                else:
-                    st.markdown("- Create intermediate variables")
-                    st.markdown("- Verify each step's output")
-                st.markdown(f"\n**Expected output type:** `{type(REFERENCE_RESULTS.get(q['id'])).__name__}`")
-        
-        with col4:
-            with st.popover("🔍 History"):
-                if qidx in st.session_state.code_history:
-                    history = st.session_state.code_history[qidx]
-                    st.markdown(f"**{len(history)} attempt(s)**")
-                    for i, attempt in enumerate(reversed(history[-3:]), 1):
-                        status = "✅" if attempt["correct"] else "❌"
-                        st.markdown(f"{status} Attempt {len(history)-i+1}")
-                        with st.expander("View code"):
-                            st.code(attempt["code"], language="python")
-                else:
-                    st.markdown("No attempts yet")
+                st.markdown("- Use pandas methods")
+                st.markdown("- Assign to `result`")
+                st.markdown(f"- Return type: `{type(REFERENCE_RESULTS.get(q['id'])).__name__}`")
     
     st.markdown('</div>', unsafe_allow_html=True)
     
     # Navigation
     col1, col2, col3 = st.columns([1, 2, 1])
     with col1:
-        if qidx > 0:
-            if st.button("⬅️ Previous", use_container_width=True):
-                st.session_state.current_q = qidx - 1
-                st.rerun()
+        if qidx > 0 and st.button("⬅️ Previous", use_container_width=True):
+            st.session_state.current_q = qidx - 1
+            st.rerun()
     with col3:
-        if qidx < len(QUESTIONS) - 1:
-            if st.button("Skip ➡️", use_container_width=True):
-                st.session_state.current_q = qidx + 1
-                st.rerun()
+        if qidx < len(QUESTIONS) - 1 and st.button("Skip ➡️", use_container_width=True):
+            st.session_state.current_q = qidx + 1
+            st.rerun()
 
 def show_results():
-    st.markdown('<div class="card">', unsafe_allow_html=True)
-    st.markdown("## 🎉 Practice Session Complete!")
+    # Generate final report if not already done
+    if not st.session_state.final_report:
+        with st.spinner("🤖 AI Mentor is preparing your comprehensive performance report..."):
+            st.session_state.final_report = generate_final_report(st.session_state.user_answers, ai_client)
+    
+    report = st.session_state.final_report
     
     # Calculate metrics
     total_q = len(st.session_state.user_answers)
     correct = sum(1 for a in st.session_state.user_answers if a.get("is_correct"))
     total_points = sum(a.get("points_earned", 0) for a in st.session_state.user_answers)
-    max_points = sum(q.get("points", 10) for q in QUESTIONS[:total_q])
-    
+    max_points = sum(q["points"] for q in QUESTIONS[:total_q])
     score_pct = (total_points / max_points * 100) if max_points else 0
-    accuracy = (correct / total_q * 100) if total_q else 0
     
-    # Time taken
     if st.session_state.start_time:
         duration = datetime.now() - st.session_state.start_time
-        minutes = int(duration.total_seconds() / 60)
-        seconds = int(duration.total_seconds() % 60)
-        time_str = f"{minutes}m {seconds}s"
+        time_str = f"{int(duration.total_seconds() / 60)}m {int(duration.total_seconds() % 60)}s"
     else:
         time_str = "N/A"
     
-    # Performance level
+    # Header
+    st.markdown('<div class="card">', unsafe_allow_html=True)
+    st.markdown("## 🎓 Your Comprehensive Performance Report")
+    
     if score_pct >= 90:
-        level = "🏆 Outstanding"
-        color = "#22c55e"
+        grade, color = "🏆 Outstanding", "#22c55e"
     elif score_pct >= 75:
-        level = "🌟 Excellent"
-        color = "#3b82f6"
+        grade, color = "🌟 Excellent", "#3b82f6"
     elif score_pct >= 60:
-        level = "👍 Good"
-        color = "#f59e0b"
+        grade, color = "👍 Good", "#f59e0b"
     else:
-        level = "📚 Keep Learning"
-        color = "#ef4444"
+        grade, color = "📚 Keep Learning", "#ef4444"
     
-    st.markdown(f'<div style="text-align:center; font-size:36px; font-weight:700; color:{color}; margin:20px 0;">{level}</div>', unsafe_allow_html=True)
+    st.markdown(f'<div style="text-align:center; font-size:42px; font-weight:800; color:{color}; margin:20px 0;">{grade}</div>', unsafe_allow_html=True)
     
-    # Metrics
     col1, col2, col3, col4 = st.columns(4)
     with col1:
-        st.markdown(f'<div class="metric-box"><div class="metric-value">{total_points}/{max_points}</div><div class="metric-label">Points Earned</div></div>', unsafe_allow_html=True)
+        st.markdown(f'<div class="metric-box"><div class="metric-value">{total_points}/{max_points}</div><div class="metric-label">Points</div></div>', unsafe_allow_html=True)
     with col2:
         st.markdown(f'<div class="metric-box"><div class="metric-value">{score_pct:.1f}%</div><div class="metric-label">Score</div></div>', unsafe_allow_html=True)
     with col3:
         st.markdown(f'<div class="metric-box"><div class="metric-value">{correct}/{total_q}</div><div class="metric-label">Correct</div></div>', unsafe_allow_html=True)
     with col4:
-        st.markdown(f'<div class="metric-box"><div class="metric-value">{time_str}</div><div class="metric-label">Time Taken</div></div>', unsafe_allow_html=True)
+        st.markdown(f'<div class="metric-box"><div class="metric-value">{time_str}</div><div class="metric-label">Duration</div></div>', unsafe_allow_html=True)
     
-    st.markdown("---")
+    st.markdown('</div>', unsafe_allow_html=True)
     
-    # Performance by category
-    st.markdown("### 📊 Performance Analysis")
+    # AI Mentor's Overall Feedback
+    st.markdown('<div class="card ai-feedback">', unsafe_allow_html=True)
+    st.markdown('<div class="ai-badge">🤖 AI MENTOR OVERALL ASSESSMENT</div>', unsafe_allow_html=True)
+    st.markdown(f"### {report.get('overall_feedback', 'Great work on completing all questions!')}")
+    st.markdown('</div>', unsafe_allow_html=True)
     
-    theory_answers = [a for a in st.session_state.user_answers if a["type"] == "theory"]
-    code_answers = [a for a in st.session_state.user_answers if a["type"] == "code"]
-    
+    # Strengths and Weaknesses
     col1, col2 = st.columns(2)
+    
     with col1:
-        if theory_answers:
-            theory_correct = sum(1 for a in theory_answers if a["is_correct"])
-            theory_points = sum(a.get("points_earned", 0) for a in theory_answers)
-            theory_max = sum(a.get("max_points", 10) for a in theory_answers)
-            st.markdown(f"""
-            **📝 Theory Questions**
-            - Correct: {theory_correct}/{len(theory_answers)}
-            - Points: {theory_points}/{theory_max}
-            - Score: {(theory_points/theory_max*100):.1f}%
-            """)
+        st.markdown('<div class="strength-box">', unsafe_allow_html=True)
+        st.markdown("### 💪 Your Strengths")
+        for strength in report.get("strengths", []):
+            st.markdown(f"✅ **{strength}**")
+        st.markdown('</div>', unsafe_allow_html=True)
     
     with col2:
-        if code_answers:
-            code_correct = sum(1 for a in code_answers if a["is_correct"])
-            code_points = sum(a.get("points_earned", 0) for a in code_answers)
-            code_max = sum(a.get("max_points", 10) for a in code_answers)
-            st.markdown(f"""
-            **💻 Coding Questions**
-            - Correct: {code_correct}/{len(code_answers)}
-            - Points: {code_points}/{code_max}
-            - Score: {(code_points/code_max*100):.1f}%
-            """)
+        st.markdown('<div class="weakness-box">', unsafe_allow_html=True)
+        st.markdown("### 🎯 Areas for Growth")
+        for weakness in report.get("weaknesses", []):
+            st.markdown(f"📌 **{weakness}**")
+        st.markdown('</div>', unsafe_allow_html=True)
     
-    st.markdown("---")
-    st.markdown("### 📝 Detailed Results")
+    # Recommendations
+    st.markdown('<div class="recommendation-box">', unsafe_allow_html=True)
+    st.markdown("### 🚀 Personalized Recommendations")
+    for i, rec in enumerate(report.get("recommendations", []), 1):
+        st.markdown(f"{i}. **{rec}**")
+    st.markdown('</div>', unsafe_allow_html=True)
     
-    # Show each question result
+    # Learning Path
+    st.markdown('<div class="card">', unsafe_allow_html=True)
+    st.markdown("## 📚 Your Personalized Learning Path")
+    
+    for item in report.get("learning_path", []):
+        priority_color = {"high": "#ef4444", "medium": "#f59e0b", "low": "#22c55e"}
+        priority = item.get("priority", "medium")
+        color = priority_color.get(priority, "#3b82f6")
+        
+        st.markdown(f"""
+        <div style="background: rgba(59, 130, 246, 0.05); padding: 16px; border-radius: 8px; margin: 12px 0; border-left: 4px solid {color};">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <h4 style="margin: 0;">📖 {item.get('topic', 'Topic')}</h4>
+                <span style="background: {color}; color: white; padding: 4px 12px; border-radius: 12px; font-size: 12px; font-weight: 600;">
+                    {priority.upper()} PRIORITY
+                </span>
+            </div>
+            <p style="margin: 8px 0 0 0; color: #64748b;">{item.get('resources', 'Practice more on this topic')}</p>
+        </div>
+        """, unsafe_allow_html=True)
+    
+    st.markdown('</div>', unsafe_allow_html=True)
+    
+    # Detailed Question Breakdown
+    st.markdown('<div class="card">', unsafe_allow_html=True)
+    st.markdown("## 📝 Detailed Question-by-Question Analysis")
+    
     for i, ans in enumerate(st.session_state.user_answers, start=1):
+        ai = ans.get("ai_analysis", {})
         status_icon = "✅" if ans["is_correct"] else "❌"
         diff_class = f"diff-{ans['difficulty']}"
         
-        with st.expander(f"{status_icon} Q{i}: {ans['title']} ({ans['points_earned']}/{ans['max_points']} pts)", expanded=False):
+        with st.expander(f"{status_icon} Q{i}: {ans['title']} - {ans['points_earned']}/{ans['max_points']} pts", expanded=False):
             st.markdown(f'<span class="difficulty-badge {diff_class}">{ans["difficulty"]}</span>', unsafe_allow_html=True)
             
             st.markdown("**Question:**")
@@ -871,63 +971,89 @@ def show_results():
             
             st.markdown("**Your Answer:**")
             if ans["type"] == "theory":
-                st.write(ans["student_answer"] or "_No answer provided_")
+                st.write(ans["student_answer"])
             else:
                 st.code(ans["student_answer"], language="python")
-                st.markdown(f"**Your Result:** `{ans.get('student_result', 'N/A')}`")
-                st.markdown(f"**Expected:** `{ans.get('expected_result', 'N/A')}`")
-                
-                if "execution_stats" in ans:
-                    stats = ans["execution_stats"]
-                    st.markdown(f"**Execution Time:** {stats['execution_time']:.4f}s")
+                st.markdown(f"**Result:** `{ans.get('student_result')}` | **Expected:** `{ans.get('expected_result')}`")
             
-            feedback_class = "success-box" if ans["is_correct"] else "error-box"
-            st.markdown(f'<div class="{feedback_class}"><b>Feedback:</b><br>{ans["feedback"]}</div>', unsafe_allow_html=True)
+            # AI Feedback
+            st.markdown('<div class="ai-feedback">', unsafe_allow_html=True)
+            st.markdown('<div class="ai-badge">🤖 AI MENTOR FEEDBACK</div>', unsafe_allow_html=True)
+            st.markdown(f"**{ai.get('feedback', 'Good attempt!')}**")
+            
+            col1, col2 = st.columns(2)
+            with col1:
+                if ai.get("strengths"):
+                    st.markdown("**✨ What you did well:**")
+                    for s in ai["strengths"]:
+                        st.markdown(f"- {s}")
+            
+            with col2:
+                if ai.get("improvements"):
+                    st.markdown("**📈 How to improve:**")
+                    for imp in ai["improvements"]:
+                        st.markdown(f"- {imp}")
+            
+            if ai.get("better_approach"):
+                st.info(f"💡 **Better approach:** {ai['better_approach']}")
+            
+            st.markdown('</div>', unsafe_allow_html=True)
     
     st.markdown('</div>', unsafe_allow_html=True)
     
-    # Action buttons
+    # Closing Message
+    if report.get("closing_message"):
+        st.markdown('<div class="card ai-feedback">', unsafe_allow_html=True)
+        st.markdown('<div class="ai-badge">🤖 MENTOR\'S MESSAGE</div>', unsafe_allow_html=True)
+        st.markdown(f"### {report['closing_message']}")
+        st.markdown('</div>', unsafe_allow_html=True)
+    
+    # Action Buttons
     col1, col2, col3 = st.columns(3)
     with col1:
         if st.button("🔄 Retry Practice", use_container_width=True):
-            for k in ["user_answers", "current_q", "started", "completed", "start_time", "code_history"]:
+            for k in ["user_answers", "current_q", "started", "completed", "start_time", "final_report"]:
                 if k in st.session_state:
                     del st.session_state[k]
             st.rerun()
     
     with col2:
         if st.button("🏠 Back to Home", use_container_width=True):
-            for k in ["user_answers", "current_q", "started", "completed", "start_time", "code_history"]:
+            for k in ["user_answers", "current_q", "started", "completed", "start_time", "final_report"]:
                 if k in st.session_state:
                     del st.session_state[k]
             st.rerun()
     
     with col3:
-        # Export results
-        results_json = json.dumps({
-            "score": f"{total_points}/{max_points}",
-            "percentage": f"{score_pct:.1f}%",
-            "time": time_str,
-            "answers": st.session_state.user_answers
-        }, indent=2)
+        # Export comprehensive report
+        export_data = {
+            "summary": {
+                "score": f"{total_points}/{max_points}",
+                "percentage": f"{score_pct:.1f}%",
+                "correct": f"{correct}/{total_q}",
+                "time": time_str
+            },
+            "ai_report": report,
+            "detailed_answers": st.session_state.user_answers
+        }
+        
         st.download_button(
-            "📥 Download Results",
-            data=results_json,
-            file_name=f"ds_practice_results_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json",
+            "📥 Download Full Report",
+            data=json.dumps(export_data, indent=2),
+            file_name=f"ds_mentor_report_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json",
             mime="application/json",
             use_container_width=True
         )
 
 # --------------------------
-# Main app routing
+# Main Routing
 # --------------------------
-st.title("🎓 Data Science Practice Bot")
+st.title("🎓 AI-Powered Data Science Practice Bot")
 
 if not st.session_state.started:
     show_home()
 else:
     if not st.session_state.completed:
-        current_index = st.session_state.current_q
-        show_question(current_index)
+        show_question(st.session_state.current_q)
     else:
         show_results()
