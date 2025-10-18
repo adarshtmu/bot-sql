@@ -1370,12 +1370,3 @@ else:
                         st.error(error)
                 else:
                     st.warning("Please write code before running.")
-
-# Footer
-st.markdown("---")
-st.markdown("""
-<div style="text-align: center; padding: 20px; color: #94a3b8; font-size: 14px;">
-    <div style="margin-bottom: 8px;">🎓 <strong>DataMentor AI</strong> - Your Personal Data Science Practice Platform</div>
-    <div>Powered by Gemini AI | Built with Streamlit</div>
-</div>
-""", unsafe_allow_html=True)
