@@ -996,8 +996,8 @@ if not st.session_state.started:
     </div>
     """, unsafe_allow_html=True)
     
-    # Hero Section
-    st.markdown("""
+# Hero Section
+    components.html("""
     <div class="hero-section">
         <div class="hero-content">
             <div class="hero-title">Master Data Science</div>
@@ -1027,7 +1027,7 @@ if not st.session_state.started:
             </div>
         </div>
     </div>
-    """, unsafe_allow_html=True)
+    """, height=400)
     
     col1, col2, col3 = st.columns([1, 2, 1])
     with col2:
@@ -1380,6 +1380,7 @@ st.markdown("""
     <div>Powered by Gemini AI | Built with Streamlit</div>
 </div>
 """, unsafe_allow_html=True)
+
 
 
 
