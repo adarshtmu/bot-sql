@@ -1,4 +1,4 @@
-url=https://github.com/adarshtmu/bot-sql/blob/80275efc1740814f1865d0e06d7f9dec6d18cf8a/sql_bot.py
+# url=https://github.com/adarshtmu/bot-sql/blob/80275efc1740814f1865d0e06d7f9dec6d18cf8a/sql_bot.py
 """
 AI-Powered Data Science Practice Platform
 Enterprise-Grade EdTech UI with Advanced Features
@@ -1387,6 +1387,7 @@ st.markdown("""
     <div>Powered by Gemini AI | Built with Streamlit</div>
 </div>
 """, unsafe_allow_html=True)
+
 
 
 
