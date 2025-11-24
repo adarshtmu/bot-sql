@@ -832,9 +832,8 @@ JSON response:
         result["points_earned"] = int(result["score"] * question["points"])
         return result
     except:
-        score = 1.0 if is_correct else 0.3
-        return {"is_correct": is_correct, "score": score, "feedback": "AI error", "code_quality": "unknown", "strengths": ["Executed"], "improvements": ["Review"], "points_earned": int(question["point[...]
-
+            score = 1.0 if is_correct else 0.3
+            return {"is_correct": is_correct, "score": score, "feedback": "AI error", "code_quality": "unknown", "strengths": ["Executed"], "improvements": ["Review"], "points_earned": int(question["points"] * score)}
 def generate_final_report(all_answers: List[Dict], model) -> Dict:
     if not model:
         return {
@@ -1411,6 +1410,7 @@ st.markdown("""
     <div>Powered by Gemini AI | Built with Streamlit</div>
 </div>
 """, unsafe_allow_html=True)
+
 
 
 
