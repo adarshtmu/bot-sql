@@ -664,7 +664,6 @@ sales_df = pd.DataFrame({
 
 DATASETS = {"students": students_df, "sales": sales_df}
 
-# Questions Bank
 QUESTIONS = [
     {
         "id": 1, "type": "theory", "difficulty": "easy",
@@ -714,7 +713,7 @@ QUESTIONS = [
     {
         "id": 8, "type": "code", "difficulty": "hard",
         "title": "Feature Engineering",
-        "prompt": "Create a new feature `performance_score` = (score * 0.7) + (attendance * 0.3). Calculate correlation between `performance_score` and `passed`. Round to 3 decimals, assign to `result[...]
+        "prompt": "Create a new feature `performance_score` = (score * 0.7) + (attendance * 0.3). Calculate correlation between `performance_score` and `passed`. Round to 3 decimals and assign to `result`.",
         "dataset": "students", "validator": "numeric_tol", "points": 20,
         "starter_code": "# Create performance_score feature\n# Calculate correlation with 'passed'\n\nresult = None"
     }
@@ -1387,6 +1386,7 @@ st.markdown("""
     <div>Powered by Gemini AI | Built with Streamlit</div>
 </div>
 """, unsafe_allow_html=True)
+
 
 
 
