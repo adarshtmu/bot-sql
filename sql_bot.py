@@ -41,6 +41,17 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
+# small helper to escape user/AI-returned text before injecting into HTML
+def escape_html(s: Any) -> str:
+    if s is None:
+        return ""
+    s = str(s)
+    # remove triple-backticks which would open a markdown code block
+    s = s.replace("```", "")
+    # escape HTML-sensitive characters
+    s = s.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;").replace("`", "&#96;")
+    return s
+
 # Enhanced CSS with Modern EdTech Design
 def get_advanced_css(theme="light"):
     if theme == "dark":
@@ -833,7 +844,8 @@ JSON response:
         return result
     except:
             score = 1.0 if is_correct else 0.3
-            return {"is_correct": is_correct, "score": score, "feedback": "AI error", "code_quality": "unknown", "strengths": ["Executed"], "improvements": ["Review"], "points_earned": int(question["points"] * score)}
+            return {"is_correct": is_correct, "score": score, "feedback": "AI error", "code_quality": "unknown", "strengths": ["Executed"], "improvements": ["Review"], "points_earned": int(question.get("points", 0) * score)}
+
 def generate_final_report(all_answers: List[Dict], model) -> Dict:
     if not model:
         return {
@@ -872,8 +884,8 @@ JSON response:
             text = text.split("```json")[1].split("```")[0].strip()
         return json.loads(text)
     except:
-        return {"overall_feedback": "Great effort!", "strengths": ["Persistence"], "weaknesses": ["Review"], "recommendations": ["Practice more"], "learning_path": [{"topic": "Review basics", "priority": "high", "resources": "Online courses"}], "closing_message": "Keep learning!"}
-
+        return {"overall_feedback": "Great effort!", "strengths": ["Persistence"], "weaknesses": ["Review"], "recommendations": ["Practice more"], "learning_path": [{"topic": "Review basics", "priority": "medium", "resources": "Revisit core concepts"}], "closing_message": "Keep going!"}
+    
 # Code Execution
 def safe_execute_code(user_code: str, dataframe: pd.DataFrame) -> Tuple[bool, Any, str, dict]:
     allowed_globals = {
@@ -1237,7 +1249,7 @@ else:
                             "max_points": q['points']
                         })
                         
-                        # Show feedback
+                        # Show feedback (sanitized)
                         score = ai_analysis.get("score", 0)
                         is_correct = ai_analysis.get("is_correct", False)
                         
@@ -1250,29 +1262,35 @@ else:
                         else:
                             status_color = "#ef4444"
                             emoji = "📚"
+
+                        feedback_text = escape_html(ai_analysis.get('feedback', ''))
+                        strengths_html = ''.join([f'<div class="insight-box insight-strength">✅ {escape_html(s)}</div>' for s in ai_analysis.get('strengths', [])])
+                        improvements_html = ''.join([f'<div class="insight-box insight-weakness">📚 {escape_html(i)}</div>' for i in ai_analysis.get('improvements', [])])
                         
-                        st.markdown(f"""
+                        html = f"""
                         <div class="ai-feedback-container fade-in">
                             <div class="feedback-content">
                                 <div class="ai-badge">{emoji} AI MENTOR FEEDBACK</div>
                                 <div style="font-size: 20px; font-weight: 700; color: {status_color}; margin-bottom: 16px;">
                                     Score: {ai_analysis.get('points_earned', 0)}/{q['points']} points ({score*100:.0f}%)
                                 </div>
-                                <div style="margin-bottom: 20px;">{ai_analysis.get('feedback', '')}</div>
+                                <div style="margin-bottom: 20px;">{feedback_text}</div>
                                 
                                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 24px;">
                                     <div>
                                         <div class="insight-title">💪 Strengths</div>
-                                        {''.join([f'<div class="insight-box insight-strength">{s}</div>' for s in ai_analysis.get('strengths', [])])}
+                                        {strengths_html}
                                     </div>
                                     <div>
                                         <div class="insight-title">📈 Improvements</div>
-                                        {''.join([f'<div class="insight-box insight-weakness">{i}</div>' for i in ai_analysis.get('improvements', [])])}
+                                        {improvements_html}
                                     </div>
                                 </div>
                             </div>
                         </div>
-                        """, unsafe_allow_html=True)
+                        """
+                        # Use components.html to avoid accidental markdown code-block parsing
+                        components.html(html, height=360, scrolling=True)
                         
                         st.session_state.current_q += 1
                         if st.session_state.current_q >= len(QUESTIONS):
@@ -1316,7 +1334,7 @@ else:
                                 "max_points": q['points']
                             })
                             
-                            # Show feedback
+                            # Show feedback (sanitized)
                             score = ai_analysis.get("score", 0)
                             
                             if is_correct:
@@ -1329,7 +1347,14 @@ else:
                                 status_color = "#ef4444"
                                 emoji = "❌"
                             
-                            st.markdown(f"""
+                            # Present result/expected without letting any backticks or raw HTML break the UI
+                            result_display = escape_html(json.dumps(result, indent=2)) if not isinstance(result, str) else escape_html(result)
+                            expected_display = escape_html(json.dumps(expected, indent=2)) if not isinstance(expected, str) else escape_html(expected)
+                            feedback_text = escape_html(ai_analysis.get('feedback', ''))
+                            strengths_html = ''.join([f'<div class="insight-box insight-strength">✅ {escape_html(s)}</div>' for s in ai_analysis.get('strengths', [])])
+                            improvements_html = ''.join([f'<div class="insight-box insight-weakness">📚 {escape_html(i)}</div>' for i in ai_analysis.get('improvements', [])])
+                            
+                            html = f"""
                             <div class="ai-feedback-container fade-in">
                                 <div class="feedback-content">
                                     <div class="ai-badge">{emoji} AI MENTOR FEEDBACK</div>
@@ -1340,29 +1365,30 @@ else:
                                     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px;">
                                         <div>
                                             <div style="font-weight: 600; margin-bottom: 8px;">Your Result:</div>
-                                            <code>{result}</code>
+                                            <pre style="background:#f6f8fa;padding:12px;border-radius:8px;white-space:pre-wrap;">{result_display}</pre>
                                         </div>
                                         <div>
                                             <div style="font-weight: 600; margin-bottom: 8px;">Expected:</div>
-                                            <code>{expected}</code>
+                                            <pre style="background:#f6f8fa;padding:12px;border-radius:8px;white-space:pre-wrap;">{expected_display}</pre>
                                         </div>
                                     </div>
                                     
-                                    <div style="margin-bottom: 20px;">{ai_analysis.get('feedback', '')}</div>
+                                    <div style="margin-bottom: 20px;">{feedback_text}</div>
                                     
                                     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 24px;">
                                         <div>
                                             <div class="insight-title">💪 Code Strengths</div>
-                                            {''.join([f'<div class="insight-box insight-strength">{s}</div>' for s in ai_analysis.get('strengths', [])])}
+                                            {strengths_html}
                                         </div>
                                         <div>
                                             <div class="insight-title">📈 Improvements</div>
-                                            {''.join([f'<div class="insight-box insight-weakness">{i}</div>' for i in ai_analysis.get('improvements', [])])}
+                                            {improvements_html}
                                         </div>
                                     </div>
                                 </div>
                             </div>
-                            """, unsafe_allow_html=True)
+                            """
+                            components.html(html, height=460, scrolling=True)
                             
                             st.session_state.current_q += 1
                             if st.session_state.current_q >= len(QUESTIONS):
@@ -1383,18 +1409,3 @@ st.markdown("""
     <div>Powered by Gemini AI | Built with Streamlit</div>
 </div>
 """, unsafe_allow_html=True)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
