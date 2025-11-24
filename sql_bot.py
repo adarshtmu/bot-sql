@@ -781,7 +781,11 @@ Provide JSON response:
         return {"is_correct": False, "score": 0.5, "feedback": "AI error", "strengths": ["Attempt"], "improvements": ["Review"], "points_earned": int(question["points"] * 0.5)}
 
 def get_ai_feedback_code(question: dict, code: str, result_value: Any, expected: Any, is_correct: bool, stats: dict, model) -> Dict:
-    # When model unavailable, give a simple deterministic response
+    """
+    Analyze code answers using Gemini model when available.
+    Robust fallback when model is None or an error occurs.
+    """
+    # Fallback deterministic response when model is not available
     if not model:
         score = 1.0 if is_correct else 0.3
         return {
@@ -793,11 +797,12 @@ def get_ai_feedback_code(question: dict, code: str, result_value: Any, expected:
             "improvements": ["Review"],
             "points_earned": int(score * question.get("points", 0))
         }
-    
+
+    # Construct prompt for the LLM
     prompt = f"""Analyze this Data Science code solution.
 
-Question ({question['difficulty']}, {question['points']} points):
-{question['prompt']}
+Question ({question.get('difficulty')}, {question.get('points')} points):
+{question.get('prompt')}
 
 Code:
 ```python
@@ -1406,6 +1411,7 @@ st.markdown("""
     <div>Powered by Gemini AI | Built with Streamlit</div>
 </div>
 """, unsafe_allow_html=True)
+
 
 
 
