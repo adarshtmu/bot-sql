@@ -1,3 +1,4 @@
+ url=https://github.com/adarshtmu/bot-sql/blob/80275efc1740814f1865d0e06d7f9dec6d18cf8a/sql_bot.py
 """
 AI-Powered Data Science Practice Platform
 Enterprise-Grade EdTech UI with Advanced Features
@@ -27,6 +28,12 @@ try:
     GEMINI_AVAILABLE = True
 except ImportError:
     GEMINI_AVAILABLE = False
+
+# HARD-CODED GEMINI KEY (set your key here)
+# WARNING: Hard-coding secrets in source files is insecure for production.
+# Replace the placeholder below with your actual key if you understand the risks,
+# or better: set via environment variable and load from os.environ.
+HARD_CODED_GEMINI_API_KEY = "REPLACE_WITH_YOUR_GEMINI_KEY"
 
 st.set_page_config(
     page_title="DataMentor AI - Practice Platform",
@@ -707,7 +714,7 @@ QUESTIONS = [
     {
         "id": 8, "type": "code", "difficulty": "hard",
         "title": "Feature Engineering",
-        "prompt": "Create a new feature `performance_score` = (score * 0.7) + (attendance * 0.3). Calculate correlation between `performance_score` and `passed`. Round to 3 decimals, assign to `result`.",
+        "prompt": "Create a new feature `performance_score` = (score * 0.7) + (attendance * 0.3). Calculate correlation between `performance_score` and `passed`. Round to 3 decimals, assign to `result[...]
         "dataset": "students", "validator": "numeric_tol", "points": 20,
         "starter_code": "# Create performance_score feature\n# Calculate correlation with 'passed'\n\nresult = None"
     }
@@ -766,7 +773,7 @@ Provide JSON response:
 def get_ai_feedback_code(question: dict, code: str, result_value: Any, expected: Any, is_correct: bool, stats: dict, model) -> Dict:
     if not model:
         score = 1.0 if is_correct else 0.3
-        return {"is_correct": is_correct, "score": score, "feedback": "Correct!" if is_correct else "Incorrect", "code_quality": "N/A", "strengths": ["Executed"], "improvements": ["Review"], "points_earned": int(question["points"] * score)}
+        return {"is_correct": is_correct, "score": score, "feedback": "Correct!" if is_correct else "Incorrect", "code_quality": "N/A", "strengths": ["Executed"], "improvements": ["Review"], "points_e[...]
     
     prompt = f"""Analyze this Data Science code solution.
 
@@ -802,7 +809,7 @@ JSON response:
         return result
     except:
         score = 1.0 if is_correct else 0.3
-        return {"is_correct": is_correct, "score": score, "feedback": "AI error", "code_quality": "unknown", "strengths": ["Executed"], "improvements": ["Review"], "points_earned": int(question["points"] * score)}
+        return {"is_correct": is_correct, "score": score, "feedback": "AI error", "code_quality": "unknown", "strengths": ["Executed"], "improvements": ["Review"], "points_earned": int(question["point[...]
 
 def generate_final_report(all_answers: List[Dict], model) -> Dict:
     if not model:
@@ -1380,6 +1387,7 @@ st.markdown("""
     <div>Powered by Gemini AI | Built with Streamlit</div>
 </div>
 """, unsafe_allow_html=True)
+
 
 
 
