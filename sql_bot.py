@@ -952,44 +952,17 @@ st.markdown(get_advanced_css(st.session_state.theme), unsafe_allow_html=True)
 ai_model = get_gemini_model()
 
 # Sidebar
+# Sidebar
 with st.sidebar:
     st.markdown("### 🎓 DataMentor AI")
     st.markdown("---")
     
-    st.markdown("#### 🤖 AI Mentor Setup")
-    api_key_input = st.text_input("Gemini API Key", type="password", value=st.session_state.gemini_api_key, placeholder="Enter API key")
-    
-    if api_key_input != st.session_state.gemini_api_key:
-        st.session_state.gemini_api_key = api_key_input
-        st.session_state.api_key_validated = False
-        st.rerun()
-    
-    if st.session_state.gemini_api_key and not st.session_state.api_key_validated:
-        if st.button("🔑 Validate Key", use_container_width=True):
-            try:
-                if GEMINI_AVAILABLE:
-                    genai.configure(api_key=st.session_state.gemini_api_key)
-                    test_model = genai.GenerativeModel('gemini-2.0-flash-exp')
-                    test_model.generate_content("Test", generation_config=genai.types.GenerationConfig(max_output_tokens=10))
-                    st.session_state.api_key_validated = True
-                    st.success("✅ API Key Valid!")
-                    time.sleep(1)
-                    st.rerun()
-            except Exception as e:
-                st.error(f"❌ Invalid Key")
-    
-    if st.session_state.api_key_validated:
+    # Show AI Mentor status
+    if ai_model:
         st.success("🤖 AI Mentor Active")
     else:
         st.warning("⚠️ AI Mentor Inactive")
-        with st.expander("📖 Get API Key"):
-            st.markdown("""
-            **Get FREE Gemini API Key:**
-            1. Visit: [AI Studio](https://aistudio.google.com/app/apikey)
-            2. Sign in with Google
-            3. Create API Key
-            4. Paste above
-            """)
+        st.info("💡 Configure API key in code")
     
     st.markdown("---")
     
@@ -1410,6 +1383,7 @@ st.markdown("""
     <div>Powered by Gemini AI | Built with Streamlit</div>
 </div>
 """, unsafe_allow_html=True)
+
 
 
 
