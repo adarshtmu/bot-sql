@@ -33,7 +33,7 @@ except ImportError:
 # WARNING: Hard-coding secrets in source files is insecure for production.
 # Replace the placeholder below with your actual key if you understand the risks,
 # or better: set via environment variable and load from os.environ.
-HARD_CODED_GEMINI_API_KEY = "REPLACE_WITH_YOUR_GEMINI_KEY"
+HARD_CODED_GEMINI_API_KEY = "AIzaSyCipiGM8HxiPiVtfePpGN-TiIk5JVBO6_M"
 
 st.set_page_config(
     page_title="DataMentor AI - Practice Platform",
@@ -1387,6 +1387,7 @@ st.markdown("""
     <div>Powered by Gemini AI | Built with Streamlit</div>
 </div>
 """, unsafe_allow_html=True)
+
 
 
 
