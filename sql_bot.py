@@ -11,6 +11,7 @@ Features:
 - Comprehensive performance reports with visualizations
 """
 
+import os
 import streamlit as st
 import pandas as pd
 import numpy as np
@@ -18,6 +19,7 @@ import json
 import time
 from typing import Tuple, Any, Dict, List
 from datetime import datetime
+import streamlit.components.v1 as components
 
 # LLM Integration
 try:
@@ -718,7 +720,7 @@ def get_gemini_model():
             if GEMINI_AVAILABLE:
                 genai.configure(api_key=st.session_state.gemini_api_key)
                 return genai.GenerativeModel('gemini-2.0-flash-exp')
-        except Exception as e:
+        except Exception:
             return None
     return None
 
@@ -774,7 +776,6 @@ Question ({question['difficulty']}, {question['points']} points):
 Code:
 ```python
 {code}
-```
 
 Expected: {expected}
 Got: {result_value}
@@ -1379,5 +1380,6 @@ st.markdown("""
     <div>Powered by Gemini AI | Built with Streamlit</div>
 </div>
 """, unsafe_allow_html=True)
+
 
 
