@@ -1,4 +1,3 @@
-# url=https://github.com/adarshtmu/bot-sql/blob/80275efc1740814f1865d0e06d7f9dec6d18cf8a/sql_bot.py
 """
 AI-Powered Data Science Practice Platform
 Enterprise-Grade EdTech UI with Advanced Features
@@ -664,6 +663,7 @@ sales_df = pd.DataFrame({
 
 DATASETS = {"students": students_df, "sales": sales_df}
 
+# Questions Bank
 QUESTIONS = [
     {
         "id": 1, "type": "theory", "difficulty": "easy",
@@ -721,13 +721,24 @@ QUESTIONS = [
 
 # LLM Functions
 def get_gemini_model():
-    if "gemini_api_key" in st.session_state and st.session_state.gemini_api_key:
-        try:
-            if GEMINI_AVAILABLE:
-                genai.configure(api_key=st.session_state.gemini_api_key)
-                return genai.GenerativeModel('gemini-2.0-flash-exp')
-        except Exception:
-            return None
+    # Prefer explicit hard-coded key if provided, otherwise session state or environment
+    api_key = None
+    if HARD_CODED_GEMINI_API_KEY and HARD_CODED_GEMINI_API_KEY != "REPLACE_WITH_YOUR_GEMINI_KEY":
+        api_key = HARD_CODED_GEMINI_API_KEY
+    elif "gemini_api_key" in st.session_state and st.session_state.gemini_api_key:
+        api_key = st.session_state.gemini_api_key
+    elif "GEMINI_API_KEY" in os.environ:
+        api_key = os.environ.get("GEMINI_API_KEY")
+
+    if not api_key:
+        return None
+
+    try:
+        if GEMINI_AVAILABLE:
+            genai.configure(api_key=api_key)
+            return genai.GenerativeModel('gemini-2.0-flash-exp')
+    except Exception:
+        return None
     return None
 
 def get_ai_feedback_theory(question: dict, student_answer: str, model) -> Dict:
@@ -766,13 +777,22 @@ Provide JSON response:
         result = json.loads(text)
         result["points_earned"] = int(result["score"] * question["points"])
         return result
-    except:
+    except Exception:
         return {"is_correct": False, "score": 0.5, "feedback": "AI error", "strengths": ["Attempt"], "improvements": ["Review"], "points_earned": int(question["points"] * 0.5)}
 
 def get_ai_feedback_code(question: dict, code: str, result_value: Any, expected: Any, is_correct: bool, stats: dict, model) -> Dict:
+    # When model unavailable, give a simple deterministic response
     if not model:
         score = 1.0 if is_correct else 0.3
-        return {"is_correct": is_correct, "score": score, "feedback": "Correct!" if is_correct else "Incorrect", "code_quality": "N/A", "strengths": ["Executed"], "improvements": ["Review"], "points_e[...]
+        return {
+            "is_correct": is_correct,
+            "score": score,
+            "feedback": "Correct!" if is_correct else "Incorrect",
+            "code_quality": "N/A",
+            "strengths": ["Executed"],
+            "improvements": ["Review"],
+            "points_earned": int(score * question.get("points", 0))
+        }
     
     prompt = f"""Analyze this Data Science code solution.
 
@@ -1386,6 +1406,7 @@ st.markdown("""
     <div>Powered by Gemini AI | Built with Streamlit</div>
 </div>
 """, unsafe_allow_html=True)
+
 
 
 
