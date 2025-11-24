@@ -752,17 +752,113 @@ def get_gemini_model():
         return None
     return None
 
+# ---- Add / Replace these helper functions and AI handlers ----
+
+import re
+import ast
+import html
+
+def parse_json_from_text(text: str) -> dict:
+    """
+    Robustly try to extract the first JSON object from model text.
+    - Handles triple-backtick blocks with ```json ... ```
+    - If plain JSON-like object appears, tries to find balanced {...} substring.
+    - Falls back to ast.literal_eval (sometimes models return Python dict-like)
+    """
+    if not text:
+        raise ValueError("Empty text")
+
+    # try fenced ```json blocks first
+    m = re.search(r"```json\s*(\{.*?\})\s*```", text, flags=re.S)
+    if m:
+        candidate = m.group(1)
+        try:
+            return json.loads(candidate)
+        except Exception:
+            pass
+
+    # try fenced ``` blocks that might include JSON
+    m = re.search(r"```(?:json|python)?\s*(\{.*?\})\s*```", text, flags=re.S)
+    if m:
+        candidate = m.group(1)
+        try:
+            return json.loads(candidate)
+        except Exception:
+            pass
+
+    # try to find the first balanced {...}
+    start = text.find('{')
+    if start != -1:
+        # scan forward to find a balanced close
+        depth = 0
+        for i in range(start, len(text)):
+            if text[i] == '{':
+                depth += 1
+            elif text[i] == '}':
+                depth -= 1
+                if depth == 0:
+                    candidate = text[start:i+1]
+                    try:
+                        return json.loads(candidate)
+                    except Exception:
+                        # try ast.literal_eval (some LLMs output single quotes / Python dict style)
+                        try:
+                            return ast.literal_eval(candidate)
+                        except Exception:
+                            break
+                    break
+
+    # final fallback: try to parse the whole text as JSON or Python literal
+    try:
+        return json.loads(text)
+    except Exception:
+        try:
+            return ast.literal_eval(text)
+        except Exception as e:
+            raise ValueError("Could not extract JSON from text") from e
+
+def simple_local_theory_analyzer(question: dict, student_answer: str) -> dict:
+    """
+    Lightweight deterministic analyzer used when LLM unavailable or when parsing fails.
+    - Uses keyword overlap and length heuristics to produce a score and short feedback.
+    """
+    text = (student_answer or "").lower()
+    tokens = set(re.findall(r"\w+", text))
+    # small keyword lists per question id (extendable)
+    keywords_by_q = {
+        1: {"bias", "variance", "overfitting", "underfitting", "regularization"},
+        2: {"k-fold", "cross", "validation", "folds", "train", "test"},
+        3: {"scaling", "standardization", "normalization", "z-score", "min-max"},
+        4: {"precision", "recall", "f1", "false", "positive", "negative"},
+    }
+    kws = keywords_by_q.get(question.get("id"), set())
+    hits = len([k for k in kws if k in text])
+    # length score
+    length_score = min(max(len(text.split()) / 60, 0.0), 1.0)
+    kw_score = min(hits / max(len(kws), 1), 1.0)
+    score = 0.6 * kw_score + 0.4 * length_score
+    feedback = "Good attempt. "
+    if score > 0.7:
+        feedback += "You covered the main points."
+    elif score > 0.4:
+        feedback += "You mentioned some concepts but can expand with examples and definitions."
+    else:
+        feedback += "Your answer is too short or missing key terms; expand on definitions and provide examples."
+    return {
+        "is_correct": score > 0.6,
+        "score": float(round(score, 3)),
+        "feedback": feedback,
+        "strengths": ["Attempted the question"] if score > 0 else [],
+        "improvements": ["Expand answer, mention key concepts and examples"],
+        "points_earned": int(round(score * question.get("points", 0)))
+    }
+
+# Replace get_ai_feedback_theory with robust parsing + fallback
 def get_ai_feedback_theory(question: dict, student_answer: str, model) -> Dict:
+    # if no model, use local analyzer
     if not model:
-        return {
-            "is_correct": len(student_answer.split()) >= 30,
-            "score": 0.7,
-            "feedback": "AI mentor unavailable. Basic length check passed.",
-            "strengths": ["Attempted the question"],
-            "improvements": ["Configure AI for detailed feedback"],
-            "points_earned": int(question["points"] * 0.7)
-        }
-    
+        return simple_local_theory_analyzer(question, student_answer)
+
     prompt = f"""You are an expert Data Science mentor. Analyze this student answer.
 
 Question ({question['difficulty']}, {question['points']} points):
@@ -771,32 +867,33 @@ Question ({question['difficulty']}, {question['points']} points):
 Student Answer:
 {student_answer}
 
-Provide JSON response:
+Provide a JSON-only response (no extra commentary). Example:
 {{
-    "is_correct": true/false,
-    "score": 0.0-1.0,
-    "feedback": "2-3 sentences",
-    "strengths": ["strength1", "strength2"],
-    "improvements": ["improvement1", "improvement2"]
-}}"""
-
+  "is_correct": true,
+  "score": 0.0,
+  "feedback": "2-3 sentences",
+  "strengths": ["strength1"],
+  "improvements": ["improvement1"]
+}}
+"""
     try:
-        response = model.generate_content(prompt, generation_config=genai.types.GenerationConfig(temperature=0.7, max_output_tokens=1000))
-        text = response.text.strip()
-        if "```json" in text:
-            text = text.split("```json")[1].split("```")[0].strip()
-        result = json.loads(text)
-        result["points_earned"] = int(result["score"] * question["points"])
-        return result
-    except Exception:
-        return {"is_correct": False, "score": 0.5, "feedback": "AI error", "strengths": ["Attempt"], "improvements": ["Review"], "points_earned": int(question["points"] * 0.5)}
+        response = model.generate_content(prompt, generation_config=genai.types.GenerationConfig(temperature=0.7, max_output_tokens=800))
+        raw_text = getattr(response, "text", str(response)).strip()
+        # store raw for debugging (visible in session state)
+        st.session_state["last_ai_raw_theory"] = raw_text
+        parsed = parse_json_from_text(raw_text)
+        # guard types & compute points
+        parsed["score"] = float(parsed.get("score", 0.0))
+        parsed["points_earned"] = int(parsed.get("points_earned", int(parsed["score"] * question["points"])) if parsed.get("points_earned") is not None else int(parsed["score"] * question["points"]))
+        return parsed
+    except Exception as e:
+        # parsing/LLM error: fallback deterministic analyzer and record raw
+        st.session_state["last_ai_error_theory"] = {"error": str(e), "raw": st.session_state.get("last_ai_raw_theory", "")}
+        return simple_local_theory_analyzer(question, student_answer)
 
+# Replace get_ai_feedback_code with robust parsing + fallback
 def get_ai_feedback_code(question: dict, code: str, result_value: Any, expected: Any, is_correct: bool, stats: dict, model) -> Dict:
-    """
-    Analyze code answers using Gemini model when available.
-    Robust fallback when model is None or an error occurs.
-    """
-    # Fallback deterministic response when model is not available
+    stats = stats or {}
     if not model:
         score = 1.0 if is_correct else 0.3
         return {
@@ -805,11 +902,10 @@ def get_ai_feedback_code(question: dict, code: str, result_value: Any, expected:
             "feedback": "Correct!" if is_correct else "Incorrect",
             "code_quality": "N/A",
             "strengths": ["Executed"],
-            "improvements": ["Review"],
-            "points_earned": int(score * question.get("points", 0))
+            "improvements": ["Review logic or edge-cases"],
+            "points_earned": int(round(score * question.get("points", 0)))
         }
 
-    # Construct prompt for the LLM
     prompt = f"""Analyze this Data Science code solution.
 
 Question ({question.get('difficulty')}, {question.get('points')} points):
@@ -818,7 +914,6 @@ Question ({question.get('difficulty')}, {question.get('points')} points):
 Code:
 ```python
 {code}
-
 Expected: {expected}
 Got: {result_value}
 Correct: {is_correct}
@@ -1409,3 +1504,4 @@ st.markdown("""
     <div>Powered by Gemini AI | Built with Streamlit</div>
 </div>
 """, unsafe_allow_html=True)
+
