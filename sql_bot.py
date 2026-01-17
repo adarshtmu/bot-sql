@@ -1313,9 +1313,11 @@ else:
 st.markdown("---")
 st.markdown("""
 <div style="text-align: center; padding: 20px; color: #94a3b8; font-size: 14px;">
-    <div>🎓 <strong>DataMentor AI</strong> - Master Data Science with AI Guidance</div>
-    <div>Powered by Gemini AI | Built with Streamlit</div>
+    <h3>🎓 Corporate Bhaiya Learning Platform</h3>
+    <p>Empowering careers through expert mentorship</p>
+    <p style='opacity: 0.8; font-size: 0.9rem;'>© 2025 All rights reserved</p>
 </div>
 """, unsafe_allow_html=True)
+
 
 
