@@ -813,143 +813,143 @@ if not st.session_state.started:
         </div>
     </div>
     """, unsafe_allow_html=True)
+        
+    # Hero Section
+    # Replace the previous components.html(...) hero section with this block:
     
-# Hero Section
-# Replace the previous components.html(...) hero section with this block:
-
-components.html("""
-<div class="hero-section-root">
-  <style>
-    /* Styles inside the component iframe — these affect only the hero HTML */
-    :root {
-      --hero-bg: transparent;
-      --text-color: #ffffff;
-      --muted: rgba(255,255,255,0.9);
-      --feature-gap: 1.25rem;
-    }
-
-    body {
-      margin: 0;
-      padding: 0;
-      font-family: 'Space Grotesk', -apple-system, BlinkMacSystemFont, sans-serif;
-      background: var(--hero-bg);
-      color: var(--text-color);
-    }
-
-    .hero-section {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      flex-direction: column;
-      padding: 18px 24px;
-      width: 100%;
-      box-sizing: border-box;
-    }
-
-    .hero-content {
-      max-width: 1100px;
-      width: 100%;
-      text-align: center;
-      padding: 0 8px;
-    }
-
-    .hero-title {
-      font-size: 2.6rem;
-      line-height: 1.05;
-      font-weight: 800;
-      margin: 0 0 8px 0;
-      color: var(--text-color) !important;
-      text-shadow: 0 6px 18px rgba(0,0,0,0.5);
-    }
-
-    .hero-subtitle {
-      font-size: 1.05rem;
-      margin: 0 auto 18px auto;
-      max-width: 820px;
-      color: var(--muted) !important;
-      line-height: 1.45;
-    }
-
-    .feature-grid {
-      display: flex;
-      justify-content: center;
-      gap: var(--feature-gap);
-      margin-top: 12px;
-      flex-wrap: wrap;
-    }
-
-    .feature-item {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      min-width: 140px;
-      padding: 10px 12px;
-      color: var(--text-color) !important;
-      background: transparent;
-      border-radius: 10px;
-    }
-
-    .feature-icon {
-      font-size: 1.9rem;
-      margin-bottom: 6px;
-    }
-
-    .feature-title {
-      font-weight: 700;
-      font-size: 1rem;
-      margin-bottom: 4px;
-      color: var(--text-color) !important;
-    }
-
-    .feature-desc {
-      color: var(--muted) !important;
-      font-size: 0.95rem;
-    }
-
-    /* Responsive tweaks */
-    @media (max-width: 640px) {
-      .hero-title { font-size: 1.9rem; }
-      .feature-item { min-width: 110px; padding: 8px; }
-      .feature-grid { gap: 0.75rem; }
-    }
-  </style>
-
-  <div class="hero-section" role="region" aria-label="Hero">
-    <div class="hero-content">
-      <div class="hero-title">Master Data Science</div>
-      <div class="hero-subtitle">
-        AI-powered practice platform with personalized feedback and adaptive learning
-      </div>
-
-      <div class="feature-grid" aria-hidden="false">
-        <div class="feature-item">
-          <div class="feature-icon">🧠</div>
-          <div class="feature-title">8 Challenges</div>
-          <div class="feature-desc">Theory + Coding</div>
-        </div>
-
-        <div class="feature-item">
-          <div class="feature-icon">🤖</div>
-          <div class="feature-title">AI Mentor</div>
-          <div class="feature-desc">Real-time feedback</div>
-        </div>
-
-        <div class="feature-item">
-          <div class="feature-icon">📊</div>
-          <div class="feature-title">Analytics</div>
-          <div class="feature-desc">Track progress</div>
-        </div>
-
-        <div class="feature-item">
-          <div class="feature-icon">🎯</div>
-          <div class="feature-title">Personalized</div>
-          <div class="feature-desc">Custom learning path</div>
+    components.html("""
+    <div class="hero-section-root">
+      <style>
+        /* Styles inside the component iframe — these affect only the hero HTML */
+        :root {
+          --hero-bg: transparent;
+          --text-color: #ffffff;
+          --muted: rgba(255,255,255,0.9);
+          --feature-gap: 1.25rem;
+        }
+    
+        body {
+          margin: 0;
+          padding: 0;
+          font-family: 'Space Grotesk', -apple-system, BlinkMacSystemFont, sans-serif;
+          background: var(--hero-bg);
+          color: var(--text-color);
+        }
+    
+        .hero-section {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          flex-direction: column;
+          padding: 18px 24px;
+          width: 100%;
+          box-sizing: border-box;
+        }
+    
+        .hero-content {
+          max-width: 1100px;
+          width: 100%;
+          text-align: center;
+          padding: 0 8px;
+        }
+    
+        .hero-title {
+          font-size: 2.6rem;
+          line-height: 1.05;
+          font-weight: 800;
+          margin: 0 0 8px 0;
+          color: var(--text-color) !important;
+          text-shadow: 0 6px 18px rgba(0,0,0,0.5);
+        }
+    
+        .hero-subtitle {
+          font-size: 1.05rem;
+          margin: 0 auto 18px auto;
+          max-width: 820px;
+          color: var(--muted) !important;
+          line-height: 1.45;
+        }
+    
+        .feature-grid {
+          display: flex;
+          justify-content: center;
+          gap: var(--feature-gap);
+          margin-top: 12px;
+          flex-wrap: wrap;
+        }
+    
+        .feature-item {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          min-width: 140px;
+          padding: 10px 12px;
+          color: var(--text-color) !important;
+          background: transparent;
+          border-radius: 10px;
+        }
+    
+        .feature-icon {
+          font-size: 1.9rem;
+          margin-bottom: 6px;
+        }
+    
+        .feature-title {
+          font-weight: 700;
+          font-size: 1rem;
+          margin-bottom: 4px;
+          color: var(--text-color) !important;
+        }
+    
+        .feature-desc {
+          color: var(--muted) !important;
+          font-size: 0.95rem;
+        }
+    
+        /* Responsive tweaks */
+        @media (max-width: 640px) {
+          .hero-title { font-size: 1.9rem; }
+          .feature-item { min-width: 110px; padding: 8px; }
+          .feature-grid { gap: 0.75rem; }
+        }
+      </style>
+    
+      <div class="hero-section" role="region" aria-label="Hero">
+        <div class="hero-content">
+          <div class="hero-title">Master Data Science</div>
+          <div class="hero-subtitle">
+            AI-powered practice platform with personalized feedback and adaptive learning
+          </div>
+    
+          <div class="feature-grid" aria-hidden="false">
+            <div class="feature-item">
+              <div class="feature-icon">🧠</div>
+              <div class="feature-title">8 Challenges</div>
+              <div class="feature-desc">Theory + Coding</div>
+            </div>
+    
+            <div class="feature-item">
+              <div class="feature-icon">🤖</div>
+              <div class="feature-title">AI Mentor</div>
+              <div class="feature-desc">Real-time feedback</div>
+            </div>
+    
+            <div class="feature-item">
+              <div class="feature-icon">📊</div>
+              <div class="feature-title">Analytics</div>
+              <div class="feature-desc">Track progress</div>
+            </div>
+    
+            <div class="feature-item">
+              <div class="feature-icon">🎯</div>
+              <div class="feature-title">Personalized</div>
+              <div class="feature-desc">Custom learning path</div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
-  </div>
-</div>
-""", height=420)
+    """, height=420)
     
     col1, col2, col3 = st.columns([1, 2, 1])
     with col2:
@@ -1317,4 +1317,5 @@ st.markdown("""
     <div>Powered by Gemini AI | Built with Streamlit</div>
 </div>
 """, unsafe_allow_html=True)
+
 
