@@ -770,6 +770,32 @@ if not st.session_state.started:
     """, unsafe_allow_html=True)
     
 # Hero Section
+/* Make hero and feature text white */
+.hero-section,
+.hero-section .hero-content,
+.hero-section .hero-title,
+.hero-section .hero-subtitle,
+.hero-section .feature-grid,
+.hero-section .feature-item,
+.hero-section .feature-title,
+.hero-section .feature-desc,
+.hero-section .feature-icon {
+  color: #ffffff !important;
+}
+
+/* Optional: tweak subtitle and feature text opacity */
+.hero-section .hero-subtitle,
+.hero-section .feature-desc {
+  color: rgba(255,255,255,0.9) !important;
+}
+
+/* Optional: larger hero title if you want */
+.hero-section .hero-title {
+  font-weight: 700;
+  font-size: 2.4rem;
+  color: #ffffff !important;
+}
+    
     components.html("""
     <div class="hero-section">
         <div class="hero-content">
@@ -1168,6 +1194,7 @@ st.markdown("""
     <div>Powered by Gemini AI | Built with Streamlit</div>
 </div>
 """, unsafe_allow_html=True)
+
 
 
 
