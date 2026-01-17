@@ -1142,7 +1142,7 @@ else:
         # ensure current question index is defined from session_state
         current_q_index = int(st.session_state.get("current_question", 0))
         
-        user_query = st.text_area("Write your SQL query here:", height=150, key=f"query_input_{current_q_index}")
+        #user_query = st.text_area("Write your SQL query here:", height=150, key=f"query_input_{current_q_index}")
         
         if st.button("✅ Submit Query", key=f"submit_{current_q_index}"):
             if user_query and user_query.strip():
@@ -1299,6 +1299,7 @@ st.markdown("""
     <p style='opacity: 0.8; font-size: 0.9rem;'>© 2025 All rights reserved</p>
 </div>
 """, unsafe_allow_html=True)
+
 
 
 
