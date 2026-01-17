@@ -1218,12 +1218,6 @@ else:
         code = st.text_area("Your Code:", value=q.get('starter_code', ''), height=200)
 
 
-else:  # Code question
-    if 'dataset' in q:
-        with st.expander("📊 View Dataset"):
-            st.dataframe(DATASETS[q['dataset']], use_container_width=True)
-    
-    code = st.text_area("Your Code:", value=q.get('starter_code', ''), height=200)
             
             if st.button("▶️ Run Code", type="primary"):
                 if code.strip():
@@ -1328,6 +1322,7 @@ st.markdown("""
     <p style='opacity: 0.8; font-size: 0.9rem;'>© 2025 All rights reserved</p>
 </div>
 """, unsafe_allow_html=True)
+
 
 
 
