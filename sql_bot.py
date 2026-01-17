@@ -14,6 +14,8 @@ from datetime import datetime
 import streamlit.components.v1 as components
 import re
 import ast
+import html
+escape_html = html.escape
 
 # LLM Integration
 try:
@@ -1323,6 +1325,7 @@ st.markdown("""
     <p style='opacity: 0.8; font-size: 0.9rem;'>© 2025 All rights reserved</p>
 </div>
 """, unsafe_allow_html=True)
+
 
 
 
