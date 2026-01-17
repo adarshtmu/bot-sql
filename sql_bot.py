@@ -729,7 +729,7 @@ if "final_report" not in st.session_state:
     st.session_state.final_report = None
 
 # Apply CSS
-st.markdown(get_advanced_css(st.session_state.theme), unsafe_allow_html=True)
+#st.markdown(get_advanced_css(st.session_state.theme), unsafe_allow_html=True)
 
 # Get AI Model
 ai_model = get_gemini_model()
@@ -1168,6 +1168,7 @@ st.markdown("""
     <div>Powered by Gemini AI | Built with Streamlit</div>
 </div>
 """, unsafe_allow_html=True)
+
 
 
 
