@@ -1172,7 +1172,7 @@ else:
                             status_color = "#ef4444"
                             emoji = "📚"
 
-                        feedback_text = escape_html(ai_analysis.get('feedback', ''))
+                        feedback_text = html.escape(ai_analysis.get('feedback', ''))
                         strengths_html = ''.join([f'<div class="insight-box insight-strength">✅ {escape_html(s)}</div>' for s in ai_analysis.get('strengths', [])])
                         improvements_html = ''.join([f'<div class="insight-box insight-weakness">📚 {escape_html(i)}</div>' for i in ai_analysis.get('improvements', [])])
                         
@@ -1323,6 +1323,7 @@ st.markdown("""
     <p style='opacity: 0.8; font-size: 0.9rem;'>© 2025 All rights reserved</p>
 </div>
 """, unsafe_allow_html=True)
+
 
 
 
