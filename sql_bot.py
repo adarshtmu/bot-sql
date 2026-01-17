@@ -1171,7 +1171,7 @@ else:
                         else:
                             status_color = "#ef4444"
                             emoji = "📚"
-    
+
                         feedback_text = escape_html(ai_analysis.get('feedback', ''))
                         strengths_html = ''.join([f'<div class="insight-box insight-strength">✅ {escape_html(s)}</div>' for s in ai_analysis.get('strengths', [])])
                         improvements_html = ''.join([f'<div class="insight-box insight-weakness">📚 {escape_html(i)}</div>' for i in ai_analysis.get('improvements', [])])
@@ -1204,18 +1204,19 @@ else:
                         st.session_state.current_q += 1
                         if st.session_state.current_q >= len(QUESTIONS):
                             st.session_state.completed = True
-                    
-                    if st.button("➡️ Next Question", type="primary"):
-                        st.rerun()
-            else:
-                st.warning("Please provide an answer before submitting.")
-    
-          else:  # Code question
+                        
+                        if st.button("➡️ Next Question", type="primary"):
+                            st.rerun()
+                else:
+                    st.warning("Please provide an answer before submitting.")
+        
+        else:  # Code question
             if 'dataset' in q:
                 with st.expander("📊 View Dataset"):
                     st.dataframe(DATASETS[q['dataset']], use_container_width=True)
             
             code = st.text_area("Your Code:", value=q.get('starter_code', ''), height=200)
+
 
 
             
@@ -1322,6 +1323,7 @@ st.markdown("""
     <p style='opacity: 0.8; font-size: 0.9rem;'>© 2025 All rights reserved</p>
 </div>
 """, unsafe_allow_html=True)
+
 
 
 
