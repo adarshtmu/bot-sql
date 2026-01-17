@@ -1138,7 +1138,12 @@ else:
         
         if q['type'] == 'theory':
             answer = st.text_area("Your Answer:", height=200, placeholder="Write your detailed answer here...")
-                
+                        
+        # ensure current question index is defined from session_state
+        current_q_index = int(st.session_state.get("current_question", 0))
+        
+        user_query = st.text_area("Write your SQL query here:", height=150, key=f"query_input_{current_q_index}")
+        
         if st.button("✅ Submit Query", key=f"submit_{current_q_index}"):
             if user_query and user_query.strip():
                 with st.spinner("🔄 Your query is being checked... AI Mentor is generating feedback and simulation results..."):
@@ -1147,7 +1152,7 @@ else:
                         user_query,
                         original_tables
                     )
-                    
+        
                     st.session_state.user_answers.append({
                         "question_number": current_q_index + 1,
                         "question": question_data["question"],
@@ -1158,28 +1163,28 @@ else:
                         "actual_result": actual_res,
                         "raw_llm_output": raw_llm
                     })
-                    
-                    # Store the previous key so we can clear it
+        
+                    # Clear the previous input so next question starts empty
                     prev_key = f"query_input_{current_q_index}"
-                    
+        
                     if current_q_index + 1 < len(st.session_state.selected_questions):
                         # advance to next question
-                        st.session_state.current_question += 1
-    
-                        # Clear the previous input value (so it's not preserved in session_state)
+                        st.session_state.current_question = current_q_index + 1
+        
+                        # Remove previous text area value from session_state (best-effort)
                         if prev_key in st.session_state:
                             try:
                                 del st.session_state[prev_key]
                             except Exception:
-                                # best-effort delete; ignore errors
                                 st.session_state[prev_key] = ""
-    
-                        # Ensure the next question's input widget starts empty (defensive)
+        
+                        # Ensure the next question input widget key exists and starts empty
                         next_key = f"query_input_{st.session_state.current_question}"
                         st.session_state[next_key] = ""
                     else:
                         st.session_state.quiz_completed = True
-                    
+        
+                    # Rerun so cleared/updated session_state takes effect
                     st.rerun()
             else:
                 st.warning("⚠️ Please enter your SQL query before submitting.")
@@ -1294,6 +1299,7 @@ st.markdown("""
     <p style='opacity: 0.8; font-size: 0.9rem;'>© 2025 All rights reserved</p>
 </div>
 """, unsafe_allow_html=True)
+
 
 
 
