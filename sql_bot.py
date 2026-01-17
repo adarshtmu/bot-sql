@@ -1210,7 +1210,7 @@ else:
             else:
                 st.warning("Please provide an answer before submitting.")
     
-       else:  # Code question
+          else:  # Code question
             if 'dataset' in q:
                 with st.expander("📊 View Dataset"):
                     st.dataframe(DATASETS[q['dataset']], use_container_width=True)
@@ -1322,6 +1322,7 @@ st.markdown("""
     <p style='opacity: 0.8; font-size: 0.9rem;'>© 2025 All rights reserved</p>
 </div>
 """, unsafe_allow_html=True)
+
 
 
 
