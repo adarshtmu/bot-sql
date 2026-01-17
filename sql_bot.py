@@ -1263,7 +1263,7 @@ else:
                             result_display = html.escape(json.dumps(result, indent=2)) if not isinstance(result, str) else html.escape(result)
                             expected_display = html.escape(json.dumps(expected, indent=2)) if not isinstance(expected, str) else html.escape(expected)
                             feedback_text = html.escape(ai_analysis.get('feedback', ''))
-                            strengths_html = ''.join([f'<div class="insight-box insight-strength">✅ {html.escape(s)}</div>' for s in ai_analysis.get('strengths', [])])
+                            strengths_html = ''.join([f'<div class="insight-box insight-strength">✅ {html.escape(s)}</div>' for s in ai_analysis.get('strengths', [])])                            
                             improvements_html = ''.join([f'<div class="insight-box insight-weakness">📚 {html.escape(i)}</div>' for i in ai_analysis.get('improvements', [])])
                             
                             html_content = f"""
@@ -1323,6 +1323,7 @@ st.markdown("""
     <p style='opacity: 0.8; font-size: 0.9rem;'>© 2025 All rights reserved</p>
 </div>
 """, unsafe_allow_html=True)
+
 
 
 
