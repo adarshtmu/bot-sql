@@ -1,14 +1,6 @@
 """
 AI-Powered Data Science Practice Platform
 Enterprise-Grade EdTech UI with Advanced Features
-
-Features:
-- Modern, professional UI inspired by leading EdTech platforms
-- Real-time AI mentor feedback with Gemini integration
-- Interactive progress tracking and analytics dashboard
-- Smooth animations and transitions
-- Responsive design with dark/light themes
-- Comprehensive performance reports with visualizations
 """
 
 import os
@@ -20,6 +12,8 @@ import time
 from typing import Tuple, Any, Dict, List
 from datetime import datetime
 import streamlit.components.v1 as components
+import re
+import ast
 
 # LLM Integration
 try:
@@ -28,10 +22,7 @@ try:
 except ImportError:
     GEMINI_AVAILABLE = False
 
-# HARD-CODED GEMINI KEY (set your key here)
-# WARNING: Hard-coding secrets in source files is insecure for production.
-# Replace the placeholder below with your actual key if you understand the risks,
-# or better: set via environment variable and load from os.environ.
+# HARD-CODED GEMINI KEY
 HARD_CODED_GEMINI_API_KEY = "AIzaSyCipiGM8HxiPiVtfePpGN-TiIk5JVBO6_M"
 
 st.set_page_config(
@@ -41,621 +32,25 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# small helper to escape user/AI-returned text before injecting into HTML
-def escape_html(s: Any) -> str:
-    if s is None:
-        return ""
-    s = str(s)
-    # remove triple-backticks which would open a markdown code block
-    s = s.replace("```", "")
-    # escape HTML-sensitive characters
-    s = s.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;").replace("`", "&#96;")
-    return s
+# Session State
+if "theme" not in st.session_state:
+    st.session_state.theme = "light"
+if "user_answers" not in st.session_state:
+    st.session_state.user_answers = []
+if "current_q" not in st.session_state:
+    st.session_state.current_q = 0
+if "started" not in st.session_state:
+    st.session_state.started = False
+if "completed" not in st.session_state:
+    st.session_state.completed = False
+if "gemini_api_key" not in st.session_state:
+    st.session_state.gemini_api_key = ""
+if "api_key_validated" not in st.session_state:
+    st.session_state.api_key_validated = False
+if "final_report" not in st.session_state:
+    st.session_state.final_report = None
 
-# Enhanced CSS with Modern EdTech Design
-def get_advanced_css(theme="light"):
-    if theme == "dark":
-        bg_primary = "#0a0e27"
-        bg_secondary = "#151b3d"
-        bg_card = "#1e2544"
-        text_primary = "#e8eef2"
-        text_secondary = "#94a3b8"
-        accent_primary = "#6366f1"
-        accent_secondary = "#8b5cf6"
-        border_color = "#2d3561"
-    else:
-        bg_primary = "#f8fafc"
-        bg_secondary = "#ffffff"
-        bg_card = "#ffffff"
-        text_primary = "#0f172a"
-        text_secondary = "#64748b"
-        accent_primary = "#6366f1"
-        accent_secondary = "#8b5cf6"
-        border_color = "#e2e8f0"
-    
-    return f"""
-    <style>
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
-    
-    * {{
-        font-family: 'Inter', sans-serif;
-    }}
-    
-    .stApp {{
-        background: {bg_primary};
-        color: {text_primary};
-    }}
-    
-    /* Hide Streamlit branding */
-    #MainMenu {{visibility: hidden;}}
-    footer {{visibility: hidden;}}
-    header {{visibility: hidden;}}
-    
-    /* Custom Header */
-    .platform-header {{
-        background: linear-gradient(135deg, {accent_primary}, {accent_secondary});
-        padding: 24px 32px;
-        border-radius: 0 0 24px 24px;
-        margin: -60px -48px 32px -48px;
-        box-shadow: 0 10px 40px rgba(99, 102, 241, 0.2);
-    }}
-    
-    .header-content {{
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        max-width: 1400px;
-        margin: 0 auto;
-    }}
-    
-    .logo-section {{
-        display: flex;
-        align-items: center;
-        gap: 16px;
-    }}
-    
-    .logo {{
-        font-size: 32px;
-        font-weight: 800;
-        color: white;
-        display: flex;
-        align-items: center;
-        gap: 12px;
-    }}
-    
-    .logo-icon {{
-        font-size: 40px;
-        animation: float 3s ease-in-out infinite;
-    }}
-    
-    @keyframes float {{
-        0%, 100% {{ transform: translateY(0px); }}
-        50% {{ transform: translateY(-10px); }}
-    }}
-    
-    .tagline {{
-        color: rgba(255, 255, 255, 0.9);
-        font-size: 14px;
-        font-weight: 500;
-        letter-spacing: 0.5px;
-    }}
-    
-    /* Hero Section */
-    .hero-section {{
-        background: linear-gradient(135deg, {bg_card}, {bg_secondary});
-        border-radius: 24px;
-        padding: 48px;
-        margin: 32px 0;
-        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.08);
-        border: 1px solid {border_color};
-        text-align: center;
-        position: relative;
-        overflow: hidden;
-    }}
-    
-    .hero-section::before {{
-        content: '';
-        position: absolute;
-        top: -50%;
-        left: -50%;
-        width: 200%;
-        height: 200%;
-        background: radial-gradient(circle, rgba(99, 102, 241, 0.05) 0%, transparent 70%);
-        animation: rotate 20s linear infinite;
-    }}
-    
-    @keyframes rotate {{
-        0% {{ transform: rotate(0deg); }}
-        100% {{ transform: rotate(360deg); }}
-    }}
-    
-    .hero-content {{
-        position: relative;
-        z-index: 1;
-    }}
-    
-    .hero-title {{
-        font-size: 56px;
-        font-weight: 800;
-        background: linear-gradient(135deg, {accent_primary}, {accent_secondary});
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        margin-bottom: 16px;
-        line-height: 1.2;
-    }}
-    
-    .hero-subtitle {{
-        font-size: 20px;
-        color: {text_secondary};
-        margin-bottom: 32px;
-        font-weight: 500;
-    }}
-    
-    .feature-grid {{
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-        gap: 16px;
-        margin-top: 32px;
-    }}
-    
-    .feature-item {{
-        background: {bg_card};
-        padding: 20px;
-        border-radius: 16px;
-        border: 1px solid {border_color};
-        text-align: center;
-        transition: transform 0.3s ease, box-shadow 0.3s ease;
-    }}
-    
-    .feature-item:hover {{
-        transform: translateY(-4px);
-        box-shadow: 0 12px 24px rgba(99, 102, 241, 0.15);
-    }}
-    
-    .feature-icon {{
-        font-size: 32px;
-        margin-bottom: 12px;
-    }}
-    
-    .feature-title {{
-        font-size: 14px;
-        font-weight: 600;
-        color: {text_primary};
-        margin-bottom: 4px;
-    }}
-    
-    .feature-desc {{
-        font-size: 12px;
-        color: {text_secondary};
-    }}
-    
-    /* Card Components */
-    .modern-card {{
-        background: {bg_card};
-        border-radius: 20px;
-        padding: 32px;
-        margin: 24px 0;
-        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.06);
-        border: 1px solid {border_color};
-        transition: transform 0.3s ease, box-shadow 0.3s ease;
-    }}
-    
-    .modern-card:hover {{
-        transform: translateY(-2px);
-        box-shadow: 0 12px 40px rgba(0, 0, 0, 0.1);
-    }}
-    
-    .card-header {{
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 24px;
-        padding-bottom: 16px;
-        border-bottom: 2px solid {border_color};
-    }}
-    
-    .card-title {{
-        font-size: 24px;
-        font-weight: 700;
-        color: {text_primary};
-        display: flex;
-        align-items: center;
-        gap: 12px;
-    }}
-    
-    /* Question Card */
-    .question-card {{
-        background: {bg_card};
-        border-radius: 20px;
-        padding: 32px;
-        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.06);
-        border: 2px solid {border_color};
-        margin: 24px 0;
-    }}
-    
-    .question-header {{
-        display: flex;
-        justify-content: space-between;
-        align-items: start;
-        margin-bottom: 24px;
-    }}
-    
-    .question-number {{
-        background: linear-gradient(135deg, {accent_primary}, {accent_secondary});
-        color: white;
-        width: 48px;
-        height: 48px;
-        border-radius: 12px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 20px;
-        font-weight: 700;
-        box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
-    }}
-    
-    .question-meta {{
-        display: flex;
-        gap: 12px;
-        align-items: center;
-    }}
-    
-    .difficulty-badge {{
-        padding: 6px 16px;
-        border-radius: 20px;
-        font-size: 12px;
-        font-weight: 600;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-    }}
-    
-    .diff-easy {{
-        background: linear-gradient(135deg, #10b981, #059669);
-        color: white;
-    }}
-    
-    .diff-medium {{
-        background: linear-gradient(135deg, #f59e0b, #d97706);
-        color: white;
-    }}
-    
-    .diff-hard {{
-        background: linear-gradient(135deg, #ef4444, #dc2626);
-        color: white;
-    }}
-    
-    .points-badge {{
-        background: {bg_secondary};
-        border: 2px solid {accent_primary};
-        color: {accent_primary};
-        padding: 6px 16px;
-        border-radius: 20px;
-        font-size: 12px;
-        font-weight: 700;
-    }}
-    
-    /* Progress Components */
-    .progress-section {{
-        background: linear-gradient(135deg, {bg_card}, {bg_secondary});
-        border-radius: 20px;
-        padding: 24px;
-        margin: 24px 0;
-        border: 1px solid {border_color};
-    }}
-    
-    .progress-header {{
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 16px;
-    }}
-    
-    .progress-title {{
-        font-size: 16px;
-        font-weight: 600;
-        color: {text_primary};
-    }}
-    
-    .progress-value {{
-        font-size: 14px;
-        font-weight: 700;
-        color: {accent_primary};
-    }}
-    
-    .progress-bar-container {{
-        background: {bg_secondary};
-        border-radius: 12px;
-        height: 12px;
-        overflow: hidden;
-        position: relative;
-    }}
-    
-    .progress-bar-fill {{
-        height: 100%;
-        background: linear-gradient(90deg, {accent_primary}, {accent_secondary});
-        border-radius: 12px;
-        transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
-        position: relative;
-        overflow: hidden;
-    }}
-    
-    .progress-bar-fill::after {{
-        content: '';
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
-        animation: shimmer 2s infinite;
-    }}
-    
-    @keyframes shimmer {{
-        0% {{ transform: translateX(-100%); }}
-        100% {{ transform: translateX(100%); }}
-    }}
-    
-    /* Stats Grid */
-    .stats-grid {{
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-        gap: 20px;
-        margin: 24px 0;
-    }}
-    
-    .stat-card {{
-        background: linear-gradient(135deg, {bg_card}, {bg_secondary});
-        border-radius: 16px;
-        padding: 24px;
-        border: 1px solid {border_color};
-        text-align: center;
-        transition: transform 0.3s ease;
-    }}
-    
-    .stat-card:hover {{
-        transform: scale(1.05);
-    }}
-    
-    .stat-value {{
-        font-size: 36px;
-        font-weight: 800;
-        background: linear-gradient(135deg, {accent_primary}, {accent_secondary});
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        margin-bottom: 8px;
-    }}
-    
-    .stat-label {{
-        font-size: 14px;
-        color: {text_secondary};
-        font-weight: 600;
-        text-transform: uppercase;
-        letter-spacing: 1px;
-    }}
-    
-    /* AI Feedback */
-    .ai-feedback-container {{
-        background: linear-gradient(135deg, rgba(99, 102, 241, 0.1), rgba(139, 92, 246, 0.1));
-        border: 2px solid {accent_primary};
-        border-radius: 20px;
-        padding: 28px;
-        margin: 24px 0;
-        position: relative;
-        overflow: hidden;
-    }}
-    
-    .ai-feedback-container::before {{
-        content: '';
-        position: absolute;
-        top: -50%;
-        right: -50%;
-        width: 200%;
-        height: 200%;
-        background: radial-gradient(circle, rgba(99, 102, 241, 0.1) 0%, transparent 70%);
-        animation: pulse 4s ease-in-out infinite;
-    }}
-    
-    @keyframes pulse {{
-        0%, 100% {{ opacity: 0.5; }}
-        50% {{ opacity: 1; }}
-    }}
-    
-    .ai-badge {{
-        background: linear-gradient(135deg, {accent_primary}, {accent_secondary});
-        color: white;
-        padding: 8px 16px;
-        border-radius: 20px;
-        font-size: 12px;
-        font-weight: 700;
-        display: inline-flex;
-        align-items: center;
-        gap: 8px;
-        margin-bottom: 16px;
-        box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
-    }}
-    
-    .feedback-content {{
-        position: relative;
-        z-index: 1;
-    }}
-    
-    .feedback-score {{
-        text-align: center;
-        padding: 32px;
-        margin: 24px 0;
-    }}
-    
-    .score-circle {{
-        width: 160px;
-        height: 160px;
-        border-radius: 50%;
-        background: linear-gradient(135deg, {accent_primary}, {accent_secondary});
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        margin: 0 auto 16px;
-        box-shadow: 0 12px 40px rgba(99, 102, 241, 0.4);
-        position: relative;
-    }}
-    
-    .score-circle::before {{
-        content: '';
-        position: absolute;
-        inset: 8px;
-        background: {bg_card};
-        border-radius: 50%;
-    }}
-    
-    .score-content {{
-        position: relative;
-        z-index: 1;
-        text-align: center;
-    }}
-    
-    .score-number {{
-        font-size: 48px;
-        font-weight: 800;
-        background: linear-gradient(135deg, {accent_primary}, {accent_secondary});
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-    }}
-    
-    .score-label {{
-        font-size: 14px;
-        color: {text_secondary};
-        font-weight: 600;
-    }}
-    
-    /* Insight Boxes */
-    .insight-box {{
-        border-radius: 16px;
-        padding: 20px;
-        margin: 16px 0;
-        border-left: 4px solid;
-    }}
-    
-    .insight-strength {{
-        background: linear-gradient(135deg, rgba(34, 197, 94, 0.1), rgba(34, 197, 94, 0.05));
-        border-left-color: #22c55e;
-    }}
-    
-    .insight-weakness {{
-        background: linear-gradient(135deg, rgba(239, 68, 68, 0.1), rgba(239, 68, 68, 0.05));
-        border-left-color: #ef4444;
-    }}
-    
-    .insight-recommendation {{
-        background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(59, 130, 246, 0.05));
-        border-left-color: #3b82f6;
-    }}
-    
-    .insight-title {{
-        font-size: 16px;
-        font-weight: 700;
-        margin-bottom: 12px;
-        display: flex;
-        align-items: center;
-        gap: 8px;
-    }}
-    
-    /* Buttons */
-    .stButton > button {{
-        background: linear-gradient(135deg, {accent_primary}, {accent_secondary}) !important;
-        color: white !important;
-        font-weight: 600 !important;
-        padding: 14px 32px !important;
-        border-radius: 12px !important;
-        border: none !important;
-        font-size: 16px !important;
-        transition: all 0.3s ease !important;
-        box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3) !important;
-    }}
-    
-    .stButton > button:hover {{
-        transform: translateY(-2px) !important;
-        box-shadow: 0 8px 24px rgba(99, 102, 241, 0.4) !important;
-    }}
-    
-    /* Code Editor Styling */
-    .stCodeBlock {{
-        border-radius: 12px !important;
-        border: 1px solid {border_color} !important;
-    }}
-    
-    /* Input Fields */
-    .stTextInput > div > div > input,
-    .stTextArea > div > div > textarea {{
-        border-radius: 12px !important;
-        border: 2px solid {border_color} !important;
-        padding: 12px 16px !important;
-        font-size: 14px !important;
-        transition: border-color 0.3s ease !important;
-    }}
-    
-    .stTextInput > div > div > input:focus,
-    .stTextArea > div > div > textarea:focus {{
-        border-color: {accent_primary} !important;
-        box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1) !important;
-    }}
-    
-    /* Success/Error Messages */
-    .element-container .stAlert {{
-        border-radius: 12px !important;
-        border: none !important;
-        padding: 16px 20px !important;
-    }}
-    
-    /* Animations */
-    @keyframes fadeIn {{
-        from {{ opacity: 0; transform: translateY(20px); }}
-        to {{ opacity: 1; transform: translateY(0); }}
-    }}
-    
-    .fade-in {{
-        animation: fadeIn 0.6s ease;
-    }}
-    
-    /* Learning Path */
-    .learning-path-item {{
-        background: {bg_card};
-        border: 2px solid {border_color};
-        border-radius: 16px;
-        padding: 24px;
-        margin: 16px 0;
-        transition: all 0.3s ease;
-    }}
-    
-    .learning-path-item:hover {{
-        border-color: {accent_primary};
-        transform: translateX(8px);
-    }}
-    
-    .priority-high {{
-        border-left: 4px solid #ef4444;
-    }}
-    
-    .priority-medium {{
-        border-left: 4px solid #f59e0b;
-    }}
-    
-    .priority-low {{
-        border-left: 4px solid #22c55e;
-    }}
-    
-    /* Sidebar Styling */
-    [data-testid="stSidebar"] {{
-        background: {bg_secondary} !important;
-        border-right: 1px solid {border_color} !important;
-    }}
-    
-    [data-testid="stSidebar"] .element-container {{
-        padding: 8px 0;
-    }}
-    </style>
-    """
-
-# Datasets
+# Datasets & Questions (unchanged)
 students_df = pd.DataFrame({
     "student_id": range(1, 21),
     "hours_studied": [2, 3, 5, 1, 4, 6, 2, 8, 7, 3, 5, 9, 4, 6, 3, 7, 8, 2, 5, 4],
@@ -663,7 +58,6 @@ students_df = pd.DataFrame({
     "passed": [0, 0, 1, 0, 1, 1, 0, 1, 1, 0, 1, 1, 1, 1, 0, 1, 1, 0, 1, 1],
     "attendance": [60, 70, 95, 50, 80, 98, 65, 100, 92, 72, 88, 97, 85, 90, 68, 94, 99, 55, 87, 82]
 })
-
 sales_df = pd.DataFrame({
     "product_id": range(1, 16),
     "product": ['A', 'B', 'C', 'A', 'B', 'C', 'A', 'B', 'C', 'A', 'B', 'C', 'A', 'B', 'C'],
@@ -671,10 +65,8 @@ sales_df = pd.DataFrame({
     "region": ['North', 'North', 'North', 'South', 'South', 'South', 'East', 'East', 'East', 'West', 'West', 'West', 'North', 'South', 'East'],
     "quarter": ['Q1', 'Q1', 'Q1', 'Q1', 'Q1', 'Q1', 'Q2', 'Q2', 'Q2', 'Q2', 'Q2', 'Q2', 'Q3', 'Q3', 'Q3']
 })
-
 DATASETS = {"students": students_df, "sales": sales_df}
 
-# Questions Bank
 QUESTIONS = [
     {
         "id": 1, "type": "theory", "difficulty": "easy",
@@ -729,6 +121,297 @@ QUESTIONS = [
         "starter_code": "# Create performance_score feature\n# Calculate correlation with 'passed'\n\nresult = None"
     }
 ]
+
+# === NEW: STUNNING FRONT PAGE UI (Replaces old hero) ===
+if not st.session_state.started:
+
+    # Ultra-modern 3D Glassmorphic CSS
+    st.markdown("""
+    <style>
+    @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap');
+
+    * { box-sizing: border-box; }
+
+    html, body, [class*="css"] {
+        font-family: 'Space Grotesk', -apple-system, BlinkMacSystemFont, sans-serif;
+        background: linear-gradient(135deg, #0f0f23 0%, #1a1a2e 25%, #16213e 50%, #0f3460 75%, #533483 100%);
+        background-attachment: fixed;
+        min-height: 100vh;
+        overflow-x: hidden;
+    }
+
+    /* 3D Rotating Cube */
+    .cube-container {
+        position: fixed;
+        top: 50%; right: 10%;
+        width: 80px; height: 80px;
+        perspective: 1000px;
+        pointer-events: none;
+        z-index: 1;
+    }
+
+    .cube {
+        width: 100%; height: 100%;
+        position: relative;
+        transform-style: preserve-3d;
+        animation: rotateCube 15s linear infinite;
+    }
+
+    .cube-face {
+        position: absolute;
+        width: 80px; height: 80px;
+        background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05));
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        backdrop-filter: blur(10px);
+    }
+
+    .cube-face.front { transform: rotateY(0deg) translateZ(40px); }
+    .cube-face.back { transform: rotateY(180deg) translateZ(40px); }
+    .cube-face.right { transform: rotateY(90deg) translateZ(40px); }
+    .cube-face.left { transform: rotateY(-90deg) translateZ(40px); }
+    .cube-face.top { transform: rotateX(90deg) translateZ(40px); }
+    .cube-face.bottom { transform: rotateX(-90deg) translateZ(40px); }
+
+    @keyframes rotateCube {
+        0% { transform: rotateX(0deg) rotateY(0deg); }
+        100% { transform: rotateX(360deg) rotateY(360deg); }
+    }
+
+    /* Hero Container */
+    .hero-container {
+        background: linear-gradient(135deg,
+            rgba(255, 255, 255, 0.15) 0%,
+            rgba(255, 255, 255, 0.1) 50%,
+            rgba(255, 255, 255, 0.05) 100%);
+        backdrop-filter: blur(30px);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        padding: 1rem 2rem;
+        border-radius: 40px;
+        margin: -7rem auto 0.5rem auto;
+        max-width: 1100px;
+        box-shadow: 0 40px 100px rgba(0, 0, 0, 0.3),
+                    0 20px 50px rgba(120, 119, 198, 0.2),
+                    inset 0 1px 0 rgba(255, 255, 255, 0.3);
+        position: relative;
+        overflow: hidden;
+        z-index: 10;
+        transform: perspective(1000px) rotateX(5deg);
+        transition: transform 0.3s ease;
+    }
+
+    .hero-container:hover {
+        transform: perspective(1000px) rotateX(0deg) translateY(-10px);
+    }
+
+    .hero-title {
+        font-size: 4.5rem;
+        font-weight: 800;
+        margin-bottom: 1.5rem;
+        background: linear-gradient(135deg, #ffffff 0%, #e2e8f0 50%, #cbd5e1 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        line-height: 1.1;
+        letter-spacing: -3px;
+        text-shadow: 0 10px 30px rgba(255, 255, 255, 0.3);
+    }
+
+    .hero-subtitle {
+        font-size: 1.4rem;
+        color: rgba(255, 255, 255, 0.8);
+        margin-bottom: 3rem;
+        font-weight: 400;
+        max-width: 700px;
+        margin-left: auto;
+        margin-right: auto;
+        line-height: 1.6;
+        text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+    }
+
+    /* CTA Button - Yellow Gradient */
+    .stButton > button {
+        background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%) !important;
+        color: #000000 !important;
+        border-radius: 60px !important;
+        border: none !important;
+        padding: 2rem 5rem !important;
+        font-weight: 700 !important;
+        font-size: 1.8rem !important;
+        box-shadow: 0 15px 35px rgba(255, 215, 0, 0.4) !important;
+        text-transform: uppercase !important;
+        letter-spacing: 1px !important;
+    }
+
+    .stButton > button:hover {
+        transform: translateY(-3px) !important;
+        box-shadow: 0 20px 45px rgba(255, 215, 0, 0.5) !important;
+        background: linear-gradient(135deg, #FFE44D 0%, #FFB347 100%) !important;
+    }
+
+    /* Stats Cards */
+    .stats-container {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 2rem;
+        margin: 3rem 0 2rem 0;
+    }
+
+    .stat-card {
+        background: linear-gradient(135deg, rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0.1));
+        border-radius: 25px;
+        padding: 2rem;
+        text-align: center;
+        height: 200px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        backdrop-filter: blur(20px);
+    }
+
+    .stat-icon { font-size: 3.5rem; margin-bottom: 1rem; }
+    .stat-number { font-size: 1.5rem; font-weight: 800; color: #ffffff; margin-bottom: 0.5rem; }
+    .stat-label { color: rgba(255, 255, 255, 0.8); font-weight: 600; font-size: 1.1rem; text-transform: uppercase; }
+
+    /* Learning Path & Features */
+    .learning-path, .features-grid, .testimonial {
+        background: linear-gradient(135deg, rgba(255, 255, 255, 0.15), rgba(255, 255, 255, 0.05));
+        padding: 3rem;
+        border-radius: 30px;
+        margin: 4rem 0;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        backdrop-filter: blur(25px);
+    }
+
+    @media (max-width: 768px) {
+        .hero-title { font-size: 2.8rem; }
+        .hero-container { margin: -9rem auto -1rem auto; padding: 1rem; }
+        .cube-container { display: none; }
+    }
+    </style>
+    """, unsafe_allow_html=True)
+
+    # Animated Cube
+    st.markdown("""
+    <div class="cube-container">
+        <div class="cube">
+            <div class="cube-face front"></div>
+            <div class="cube-face back"></div>
+            <div class="cube-face right"></div>
+            <div class="cube-face left"></div>
+            <div class="cube-face top"></div>
+            <div class="cube-face bottom"></div>
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
+
+    # Hero Section
+    st.markdown("""
+    <div class="hero-container">
+        <h1 class="hero-title" style="text-align: center;">DataMentor AI</h1>
+        <p class="hero-subtitle" style="text-align: center;">
+            Master Data Science with AI-powered practice, real-time feedback, and personalized learning paths.<br>
+            Join <strong>thousands of learners</strong> advancing their careers one challenge at a time.
+        </p>
+    </div>
+    """, unsafe_allow_html=True)
+
+    # Centered Start Button
+    col1, col2, col3 = st.columns([1, 2, 1])
+    with col2:
+        if st.button("🚀 Start Practice Session", key="start_session", use_container_width=True):
+            st.session_state.started = True
+            st.session_state.start_time = datetime.now()
+            st.rerun()
+
+    # Topics Covered
+    st.markdown("""
+    <div style="background: linear-gradient(90deg, #1f2937 60%, #374151 100%);
+                border-radius: 14px; padding: 2rem; margin: 3rem 0; box-shadow: 0 6px 32px rgba(0,0,0,0.12);">
+      <h2 style="color: #60a5fa; text-align: center;">🚀 What You'll Master</h2>
+      <ul style="color: #f3f4f6; font-size: 1.2rem; columns: 2; padding-left: 2rem;">
+        <li>🧠 Bias-Variance & Overfitting</li>
+        <li>🔄 Cross-Validation Techniques</li>
+        <li>📏 Feature Scaling & Preprocessing</li>
+        <li>⚖️ Precision, Recall & F1 Score</li>
+        <li>📊 Correlation & Data Analysis</li>
+        <li>✂️ Train-Test Splitting</li>
+        <li>🗃️ GroupBy & Aggregation</li>
+        <li>🔧 Feature Engineering</li>
+      </ul>
+    </div>
+    """, unsafe_allow_html=True)
+
+    # Stats
+    st.markdown("""
+    <div class="stats-container">
+        <div class="stat-card">
+            <div class="stat-icon">🎯</div>
+            <span class="stat-number">8</span>
+            <div class="stat-label">Challenges</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon">⏱️</div>
+            <span class="stat-number">20-40</span>
+            <div class="stat-label">Minutes</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon">🏆</div>
+            <span class="stat-number">70+</span>
+            <div class="stat-label">Points Possible</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon">🤖</div>
+            <span class="stat-number">AI</span>
+            <div class="stat-label">Mentor Feedback</div>
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
+
+    # Learning Journey
+    st.markdown("""
+    <div class="learning-path">
+        <h3 style="text-align: center; color: white;">🎯 Your Learning Journey</h3>
+        <div style="display: flex; justify-content: space-around; flex-wrap: wrap; gap: 2rem; margin-top: 2rem;">
+            <div style="text-align:center; color:white;"><div style="font-size:3rem;">1</div><div>Assessment</div></div>
+            <div style="text-align:center; color:white;"><div style="font-size:3rem;">2</div><div>AI Feedback</div></div>
+            <div style="text-align:center; color:white;"><div style="font-size:3rem;">3</div><div>Deep Practice</div></div>
+            <div style="text-align:center; color:white;"><div style="font-size:3rem;">4</div><div>Mastery</div></div>
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
+
+    # Features
+    st.markdown("""
+    <div class="features-grid">
+        <div style="padding:2rem; text-align:center;">
+            <div style="font-size:3rem; margin-bottom:1rem;">🤖</div>
+            <h3 style="color:white;">Personalized AI Mentor</h3>
+            <p style="color:rgba(255,255,255,0.8);">Instant, detailed feedback on every answer</p>
+        </div>
+        <div style="padding:2rem; text-align:center;">
+            <div style="font-size:3rem; margin-bottom:1rem;">📊</div>
+            <h3 style="color:white;">Real Datasets</h3>
+            <p style="color:rgba(255,255,255,0.8);">Practice with realistic data scenarios</p>
+        </div>
+        <div style="padding:2rem; text-align:center;">
+            <div style="font-size:3rem; margin-bottom:1rem;">🔄</div>
+            <h3 style="color:white;">Adaptive Challenges</h3>
+            <p style="color:rgba(255,255,255,0.8);">Mixed theory and coding for complete mastery</p>
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
+
+    # Testimonials
+    st.markdown("""
+    <div class="testimonial">
+        <p style="font-size:1.3rem; font-style:italic; color:rgba(255,255,255,0.9);">
+            "This platform helped me finally understand bias-variance and cross-validation. The AI feedback is incredibly insightful!"
+        </p>
+        <p style="color:white; font-weight:700;">— Adarsh, Data Science Learner</p>
+    </div>
+    """, unsafe_allow_html=True)
+
 
 # LLM Functions
 def get_gemini_model():
@@ -1504,4 +1187,5 @@ st.markdown("""
     <div>Powered by Gemini AI | Built with Streamlit</div>
 </div>
 """, unsafe_allow_html=True)
+
 
