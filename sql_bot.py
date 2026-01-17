@@ -288,6 +288,51 @@ if not st.session_state.started:
         .hero-container { margin: -9rem auto -1rem auto; padding: 1rem; }
         .cube-container { display: none; }
     }
+
+    /* New: ensure hero HTML injected via components.html appears white */
+    .hero-section,
+    .hero-section .hero-content,
+    .hero-section .hero-title,
+    .hero-section .hero-subtitle,
+    .hero-section .feature-grid,
+    .hero-section .feature-item,
+    .hero-section .feature-title,
+    .hero-section .feature-desc,
+    .hero-section .feature-icon {
+        color: #ffffff !important;
+    }
+
+    .hero-section .hero-subtitle,
+    .hero-section .feature-desc {
+        color: rgba(255,255,255,0.95) !important;
+    }
+
+    .hero-section .hero-title {
+        font-weight: 800;
+        font-size: 2.8rem;
+        color: #ffffff !important;
+    }
+
+    .hero-section .feature-grid {
+        display: flex;
+        justify-content: center;
+        gap: 1.25rem;
+        margin-top: 1.25rem;
+        flex-wrap: wrap;
+    }
+
+    .hero-section .feature-item {
+        background: transparent;
+        padding: 0.6rem 1rem;
+        border-radius: 10px;
+        text-align: center;
+    }
+
+    .hero-section .feature-icon {
+        font-size: 2.2rem;
+        margin-bottom: 0.4rem;
+    }
+
     </style>
     """, unsafe_allow_html=True)
 
@@ -615,7 +660,7 @@ JSON response:
         return result
     except:
             score = 1.0 if is_correct else 0.3
-            return {"is_correct": is_correct, "score": score, "feedback": "AI error", "code_quality": "unknown", "strengths": ["Executed"], "improvements": ["Review"], "points_earned": int(question.get("points", 0) * score)}
+            return {"is_correct": is_correct, "score": score, "feedback": "AI error", "code_quality": "unknown", "strengths": ["Executed"], "improvements": ["Review"], "points_earned": int(round(score * question.get("points", 0)))}
 
 def generate_final_report(all_answers: List[Dict], model) -> Dict:
     if not model:
@@ -655,12 +700,12 @@ JSON response:
             text = text.split("```json")[1].split("```")[0].strip()
         return json.loads(text)
     except:
-        return {"overall_feedback": "Great effort!", "strengths": ["Persistence"], "weaknesses": ["Review"], "recommendations": ["Practice more"], "learning_path": [{"topic": "Review basics", "priority": "medium", "resources": "Revisit core concepts"}], "closing_message": "Keep going!"}
-    
+        return {"overall_feedback": "Great effort!", "strengths": ["Persistence"], "weaknesses": ["Review"], "recommendations": ["Practice more"], "learning_path": [{"topic": "Review basics", "priority": "medium", "resources": "Practice problems"}]}
+
 # Code Execution
 def safe_execute_code(user_code: str, dataframe: pd.DataFrame) -> Tuple[bool, Any, str, dict]:
     allowed_globals = {
-        "__builtins__": {"abs": abs, "min": min, "max": max, "round": round, "len": len, "range": range, "sum": sum, "sorted": sorted, "list": list, "dict": dict, "set": set, "int": int, "float": float, "str": str},
+        "__builtins__": {"abs": abs, "min": min, "max": max, "round": round, "len": len, "range": range, "sum": sum, "sorted": sorted, "list": list, "dict": dict, "set": set, "int": int, "float": float},
         "pd": pd, "np": np,
     }
     local_vars = {"df": dataframe.copy()}
@@ -770,32 +815,6 @@ if not st.session_state.started:
     """, unsafe_allow_html=True)
     
 # Hero Section
-/* Make hero and feature text white */
-.hero-section,
-.hero-section .hero-content,
-.hero-section .hero-title,
-.hero-section .hero-subtitle,
-.hero-section .feature-grid,
-.hero-section .feature-item,
-.hero-section .feature-title,
-.hero-section .feature-desc,
-.hero-section .feature-icon {
-  color: #ffffff !important;
-}
-
-/* Optional: tweak subtitle and feature text opacity */
-.hero-section .hero-subtitle,
-.hero-section .feature-desc {
-  color: rgba(255,255,255,0.9) !important;
-}
-
-/* Optional: larger hero title if you want */
-.hero-section .hero-title {
-  font-weight: 700;
-  font-size: 2.4rem;
-  color: #ffffff !important;
-}
-    
     components.html("""
     <div class="hero-section">
         <div class="hero-content">
@@ -1047,11 +1066,11 @@ else:
                             status_color = "#ef4444"
                             emoji = "📚"
 
-                        feedback_text = escape_html(ai_analysis.get('feedback', ''))
-                        strengths_html = ''.join([f'<div class="insight-box insight-strength">✅ {escape_html(s)}</div>' for s in ai_analysis.get('strengths', [])])
-                        improvements_html = ''.join([f'<div class="insight-box insight-weakness">📚 {escape_html(i)}</div>' for i in ai_analysis.get('improvements', [])])
+                        feedback_text = html.escape(ai_analysis.get('feedback', ''))
+                        strengths_html = ''.join([f'<div class="insight-box insight-strength">✅ {html.escape(s)}</div>' for s in ai_analysis.get('strengths', [])])
+                        improvements_html = ''.join([f'<div class="insight-box insight-weakness">📚 {html.escape(i)}</div>' for i in ai_analysis.get('improvements', [])])
                         
-                        html = f"""
+                        html_content = f"""
                         <div class="ai-feedback-container fade-in">
                             <div class="feedback-content">
                                 <div class="ai-badge">{emoji} AI MENTOR FEEDBACK</div>
@@ -1074,7 +1093,7 @@ else:
                         </div>
                         """
                         # Use components.html to avoid accidental markdown code-block parsing
-                        components.html(html, height=360, scrolling=True)
+                        components.html(html_content, height=360, scrolling=True)
                         
                         st.session_state.current_q += 1
                         if st.session_state.current_q >= len(QUESTIONS):
@@ -1132,13 +1151,13 @@ else:
                                 emoji = "❌"
                             
                             # Present result/expected without letting any backticks or raw HTML break the UI
-                            result_display = escape_html(json.dumps(result, indent=2)) if not isinstance(result, str) else escape_html(result)
-                            expected_display = escape_html(json.dumps(expected, indent=2)) if not isinstance(expected, str) else escape_html(expected)
-                            feedback_text = escape_html(ai_analysis.get('feedback', ''))
-                            strengths_html = ''.join([f'<div class="insight-box insight-strength">✅ {escape_html(s)}</div>' for s in ai_analysis.get('strengths', [])])
-                            improvements_html = ''.join([f'<div class="insight-box insight-weakness">📚 {escape_html(i)}</div>' for i in ai_analysis.get('improvements', [])])
+                            result_display = html.escape(json.dumps(result, indent=2)) if not isinstance(result, str) else html.escape(result)
+                            expected_display = html.escape(json.dumps(expected, indent=2)) if not isinstance(expected, str) else html.escape(expected)
+                            feedback_text = html.escape(ai_analysis.get('feedback', ''))
+                            strengths_html = ''.join([f'<div class="insight-box insight-strength">✅ {html.escape(s)}</div>' for s in ai_analysis.get('strengths', [])])
+                            improvements_html = ''.join([f'<div class="insight-box insight-weakness">📚 {html.escape(i)}</div>' for i in ai_analysis.get('improvements', [])])
                             
-                            html = f"""
+                            html_content = f"""
                             <div class="ai-feedback-container fade-in">
                                 <div class="feedback-content">
                                     <div class="ai-badge">{emoji} AI MENTOR FEEDBACK</div>
@@ -1172,7 +1191,7 @@ else:
                                 </div>
                             </div>
                             """
-                            components.html(html, height=460, scrolling=True)
+                            components.html(html_content, height=460, scrolling=True)
                             
                             st.session_state.current_q += 1
                             if st.session_state.current_q >= len(QUESTIONS):
@@ -1194,8 +1213,3 @@ st.markdown("""
     <div>Powered by Gemini AI | Built with Streamlit</div>
 </div>
 """, unsafe_allow_html=True)
-
-
-
-
-
