@@ -415,25 +415,18 @@ if not st.session_state.started:
 
 # LLM Functions
 def get_gemini_model():
-    # Prefer explicit hard-coded key if provided, otherwise session state or environment
-    api_key = None
-    if HARD_CODED_GEMINI_API_KEY and HARD_CODED_GEMINI_API_KEY != "REPLACE_WITH_YOUR_GEMINI_KEY":
-        api_key = HARD_CODED_GEMINI_API_KEY
-    elif "gemini_api_key" in st.session_state and st.session_state.gemini_api_key:
-        api_key = st.session_state.gemini_api_key
-    elif "GEMINI_API_KEY" in os.environ:
-        api_key = os.environ.get("GEMINI_API_KEY")
-
+    api_key = HARD_CODED_GEMINI_API_KEY or st.session_state.get("gemini_api_key") or os.environ.get("GEMINI_API_KEY")
     if not api_key:
         return None
-
     try:
         if GEMINI_AVAILABLE:
             genai.configure(api_key=api_key)
             return genai.GenerativeModel('gemini-2.0-flash-exp')
-    except Exception:
+    except:
         return None
     return None
+
+ai_model = get_gemini_model()
 
 # ---- Add / Replace these helper functions and AI handlers ----
 
@@ -743,35 +736,22 @@ ai_model = get_gemini_model()
 
 # Sidebar
 # Sidebar
+# Sidebar (keep your existing one)
 with st.sidebar:
     st.markdown("### 🎓 DataMentor AI")
     st.markdown("---")
-    
-    # Show AI Mentor status
     if ai_model:
         st.success("🤖 AI Mentor Active")
     else:
         st.warning("⚠️ AI Mentor Inactive")
-        st.info("💡 Configure API key in code")
-    
     st.markdown("---")
-    
-    if st.button("🌓 Toggle Theme", use_container_width=True):
+    if st.button("🌓 Toggle Theme"):
         st.session_state.theme = "dark" if st.session_state.theme == "light" else "light"
         st.rerun()
-    
     if st.session_state.started and not st.session_state.completed:
-        st.markdown("---")
-        st.markdown("#### 📊 Progress")
         progress = len(st.session_state.user_answers) / len(QUESTIONS)
-        st.markdown(f'<div class="progress-bar-container"><div class="progress-bar-fill" style="width: {progress*100}%"></div></div>', unsafe_allow_html=True)
-        st.markdown(f"**{len(st.session_state.user_answers)}/{len(QUESTIONS)}** completed")
-        
-        if st.session_state.user_answers:
-            correct = sum(1 for a in st.session_state.user_answers if a.get("is_correct"))
-            points = sum(a.get("points_earned", 0) for a in st.session_state.user_answers)
-            st.metric("✅ Correct", f"{correct}/{len(st.session_state.user_answers)}")
-            st.metric("⭐ Points", points)
+        st.progress(progress)
+        st.write(f"**{len(st.session_state.user_answers)}/{len(QUESTIONS)}** completed")
 
 # Main Content
 if not st.session_state.started:
@@ -1180,12 +1160,14 @@ else:
                     st.warning("Please write code before running.")
 
 # Footer
+# Footer
 st.markdown("---")
 st.markdown("""
 <div style="text-align: center; padding: 20px; color: #94a3b8; font-size: 14px;">
-    <div style="margin-bottom: 8px;">🎓 <strong>DataMentor AI</strong> - Your Personal Data Science Practice Platform</div>
+    <div>🎓 <strong>DataMentor AI</strong> - Master Data Science with AI Guidance</div>
     <div>Powered by Gemini AI | Built with Streamlit</div>
 </div>
 """, unsafe_allow_html=True)
+
 
 
