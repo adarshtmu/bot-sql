@@ -1210,12 +1210,12 @@ else:
             else:
                 st.warning("Please provide an answer before submitting.")
     
-    else:  # Code question
-        if 'dataset' in q:
-            with st.expander("📊 View Dataset"):
-                st.dataframe(DATASETS[q['dataset']], use_container_width=True)
-        
-        code = st.text_area("Your Code:", value=q.get('starter_code', ''), height=200)
+       else:  # Code question
+            if 'dataset' in q:
+                with st.expander("📊 View Dataset"):
+                    st.dataframe(DATASETS[q['dataset']], use_container_width=True)
+            
+            code = st.text_area("Your Code:", value=q.get('starter_code', ''), height=200)
 
 
             
