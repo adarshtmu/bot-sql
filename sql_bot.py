@@ -20,6 +20,7 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
+# API KEY
 HARD_CODED_GEMINI_API_KEY = "AIzaSyCipiGM8HxiPiVtfePpGN-TiIk5JVBO6_M"
 
 # --- DATASETS ---
@@ -40,395 +41,348 @@ def load_data():
 
 DATASETS = load_data()
 
-# --- 8-QUESTION CURRICULUM ---
+# --- MODULES & QUESTION BANK ---
+# We define modules first, then assign questions to them.
+MODULES = {
+    "m1": {"title": "Supervised Learning", "icon": "🧠", "desc": "Regression, Classification & Bias"},
+    "m2": {"title": "Data Wrangling", "icon": "🐼", "desc": "Pandas Filtering & Aggregations"},
+    "m3": {"title": "Model Evaluation", "icon": "⚖️", "desc": "Precision, Recall & Metrics"},
+    "m4": {"title": "Unsupervised Learning", "icon": "✨", "desc": "Clustering & Dimensionality"}
+}
+
 QUESTIONS = [
+    # MODULE 1: SUPERVISED LEARNING
     {
-        "id": 1,
-        "title": "Bias-Variance Tradeoff",
-        "type": "theory",
-        "topic": "Machine Learning",
-        "difficulty": "Easy",
-        "points": 100,
+        "id": 1, "module": "m1", "title": "Bias-Variance Tradeoff", "type": "theory", "difficulty": "Easy", "points": 100,
         "content": "Explain the Bias-Variance Tradeoff. What happens to bias and variance as model complexity increases?",
         "context": "",
         "hint": "Think about Underfitting (High Bias) vs Overfitting (High Variance)."
     },
     {
-        "id": 2,
-        "title": "Filter High Spenders",
-        "type": "code",
-        "topic": "Pandas",
-        "difficulty": "Easy",
-        "points": 100,
-        "content": "Using the `ecommerce` dataset, filter for rows where 'spend' is greater than 400. Assign the result to `high_rollers`.",
-        "dataset": "ecommerce",
-        "starter_code": "# Filter rows where spend > 400\n\nhigh_rollers = df[...]"
-    },
-    {
-        "id": 3,
-        "title": "Precision vs Recall",
-        "type": "theory",
-        "topic": "Metrics",
-        "difficulty": "Medium",
-        "points": 150,
-        "content": "In a cancer detection model, which metric is more critical to maximize: Precision or Recall? Explain why.",
-        "context": "",
-        "hint": "Recall = True Positives / (True Positives + False Negatives). Is a False Negative dangerous here?"
-    },
-    {
-        "id": 4,
-        "title": "Group Aggregation",
-        "type": "code",
-        "topic": "Pandas",
-        "difficulty": "Medium",
-        "points": 150,
-        "content": "Calculate the average 'clicks' per 'category' in the `ecommerce` dataset. Assign the resulting Series to `cat_clicks`.",
-        "dataset": "ecommerce",
-        "starter_code": "# Group by category and find mean of clicks\n\ncat_clicks = ..."
-    },
-    {
-        "id": 5,
-        "title": "K-Means Elbow Method",
-        "type": "theory",
-        "topic": "Clustering",
-        "difficulty": "Medium",
-        "points": 150,
-        "content": "Describe the 'Elbow Method' in K-Means clustering. What does the x-axis and y-axis represent in the elbow plot?",
-        "context": "",
-        "hint": "We are looking at Inertia (WCSS) vs Number of Clusters (k)."
-    },
-    {
-        "id": 6,
-        "title": "Feature Engineering",
-        "type": "code",
-        "topic": "Feature Eng",
-        "difficulty": "Hard",
-        "points": 200,
-        "content": "Create a new column 'price_per_sqft' in the `housing` dataset (price / sqft). Return the correlation between 'bedrooms' and this new column.",
+        "id": 2, "module": "m1", "title": "Feature Importance", "type": "code", "difficulty": "Hard", "points": 200,
+        "content": "Create a new column 'price_per_sqft' in the `housing` dataset. Return the correlation between 'bedrooms' and this new feature.",
         "dataset": "housing",
-        "starter_code": "# Create 'price_per_sqft'\n# Calculate corr with 'bedrooms'\n\nresult = ..."
+        "starter_code": "# Calculate corr between bedrooms and price_per_sqft\n\nresult = ..."
     },
+
+    # MODULE 2: DATA WRANGLING
     {
-        "id": 7,
-        "title": "Handling Imbalanced Data",
-        "type": "theory",
-        "topic": "Data Prep",
-        "difficulty": "Hard",
-        "points": 200,
-        "content": "Your dataset has 99% Class A and 1% Class B. Name 2 techniques to handle this imbalance during training.",
-        "context": "",
-        "hint": "Think about resampling techniques (Up/Down) or algorithmic changes."
-    },
-    {
-        "id": 8,
-        "title": "Missing Data Imputation",
-        "type": "code",
-        "topic": "Cleaning",
-        "difficulty": "Hard",
-        "points": 200,
-        "content": "Assume the 'spend' column has missing values. Write code to fill NaNs with the median of the column.",
+        "id": 3, "module": "m2", "title": "Filter Logic", "type": "code", "difficulty": "Easy", "points": 100,
+        "content": "Using `ecommerce`, filter for rows where 'spend' > 400. Assign the DataFrame to `high_rollers`.",
         "dataset": "ecommerce",
-        "starter_code": "# Fill NA in 'spend' with median\n\ndf['spend'] = ..."
+        "starter_code": "high_rollers = df[...]"
+    },
+    {
+        "id": 4, "module": "m2", "title": "Group Aggregation", "type": "code", "difficulty": "Medium", "points": 150,
+        "content": "Calculate the average 'clicks' per 'category' in `ecommerce`. Assign the Series to `cat_clicks`.",
+        "dataset": "ecommerce",
+        "starter_code": "cat_clicks = ..."
+    },
+
+    # MODULE 3: MODEL EVALUATION
+    {
+        "id": 5, "module": "m3", "title": "Precision vs Recall", "type": "theory", "difficulty": "Medium", "points": 150,
+        "content": "In cancer detection, why is Recall often prioritized over Precision? Explain in terms of False Negatives.",
+        "context": "",
+        "hint": "What is the cost of missing a positive case?"
+    },
+    {
+        "id": 6, "module": "m3", "title": "Handling Imbalance", "type": "theory", "difficulty": "Hard", "points": 200,
+        "content": "Your dataset has 99% Class A and 1% Class B. Name 2 techniques to handle this imbalance.",
+        "context": "",
+        "hint": "Resampling or Class Weights."
+    },
+
+    # MODULE 4: UNSUPERVISED LEARNING
+    {
+        "id": 7, "module": "m4", "title": "K-Means Elbow", "type": "theory", "difficulty": "Medium", "points": 150,
+        "content": "Describe the 'Elbow Method'. What variable is plotted on the Y-axis?",
+        "context": "",
+        "hint": "Inertia or WCSS."
+    },
+    {
+        "id": 8, "module": "m4", "title": "Missing Imputation", "type": "code", "difficulty": "Hard", "points": 200,
+        "content": "Fill missing values in the 'spend' column with the median. Write the Pandas syntax.",
+        "dataset": "ecommerce",
+        "starter_code": "df['spend'] = ..."
     }
 ]
 
 # --- STATE MANAGEMENT ---
 def init_state():
-    if "page" not in st.session_state: st.session_state.page = "home"
-    if "current_q_index" not in st.session_state: st.session_state.current_q_index = 0
-    if "answers" not in st.session_state: st.session_state.answers = []
-    if "gemini_key" not in st.session_state: st.session_state.gemini_key = HARD_CODED_GEMINI_API_KEY
-    if "last_feedback" not in st.session_state: st.session_state.last_feedback = None
+    defaults = {
+        "page": "home",
+        "active_module_id": None,     # Tracks which module is clicked
+        "active_questions": [],       # The subset of questions for that module
+        "current_q_index": 0,
+        "answers": [],
+        "gemini_key": HARD_CODED_GEMINI_API_KEY,
+        "last_feedback": None
+    }
+    for k, v in defaults.items():
+        if k not in st.session_state:
+            st.session_state[k] = v
 
 init_state()
 
-# --- ADVANCED CSS ENGINE ---
+# --- CSS ENGINE ---
 def inject_css():
     st.markdown("""
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;700;900&family=JetBrains+Mono:wght@400;600&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&family=JetBrains+Mono:wght@400;600&display=swap');
         
-        /* CORE THEME */
         .stApp {
-            background-color: #030712;
-            background-image: radial-gradient(at 50% 0%, rgba(56, 189, 248, 0.1) 0px, transparent 50%);
+            background-color: #020617;
+            background-image: radial-gradient(at 50% 0%, rgba(124, 58, 237, 0.15) 0px, transparent 50%);
             font-family: 'Inter', sans-serif;
             color: #f8fafc;
         }
 
-        /* ANIMATIONS */
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        
-        @keyframes glow {
-            0% { box-shadow: 0 0 5px rgba(56, 189, 248, 0.2); }
-            50% { box-shadow: 0 0 20px rgba(56, 189, 248, 0.6); }
-            100% { box-shadow: 0 0 5px rgba(56, 189, 248, 0.2); }
-        }
-
-        /* HERO TEXT */
-        .hero-text {
-            font-size: 4rem;
-            font-weight: 900;
-            background: linear-gradient(to right, #ffffff, #94a3b8);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            letter-spacing: -0.05em;
-            line-height: 1.1;
-            margin-bottom: 24px;
-            animation: fadeIn 0.8s ease-out;
-        }
-
-        /* CARDS */
-        .glass-card {
-            background: rgba(17, 24, 39, 0.7);
-            backdrop-filter: blur(20px);
+        /* CARD STYLING */
+        .module-card {
+            background: rgba(30, 41, 59, 0.6);
+            backdrop-filter: blur(12px);
             border: 1px solid rgba(255, 255, 255, 0.08);
             border-radius: 16px;
             padding: 24px;
-            margin-bottom: 20px;
-            transition: all 0.3s ease;
+            transition: transform 0.2s;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
         }
         
-        .glass-card:hover {
-            border-color: rgba(56, 189, 248, 0.4);
-            transform: translateY(-4px);
-            background: rgba(30, 41, 59, 0.8);
-        }
-
-        /* MODULE BADGES */
-        .module-badge {
-            font-size: 0.75rem;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-            padding: 4px 12px;
-            border-radius: 99px;
-            font-weight: 700;
-        }
-        .badge-theory { background: rgba(167, 139, 250, 0.2); color: #a78bfa; border: 1px solid #a78bfa; }
-        .badge-code { background: rgba(56, 189, 248, 0.2); color: #38bdf8; border: 1px solid #38bdf8; }
-
-        /* BUTTONS */
-        .stButton button {
-            background: linear-gradient(90deg, #2563eb, #3b82f6);
-            border: none;
-            color: white;
-            padding: 16px 32px;
-            font-size: 1.1rem;
-            font-weight: 600;
-            border-radius: 12px;
+        /* CUSTOM BUTTON WRAPPER */
+        div[data-testid="column"] button {
             width: 100%;
+            background: transparent;
+            border: 1px solid rgba(56, 189, 248, 0.3);
+            color: #38bdf8;
+            border-radius: 8px;
+            padding: 8px;
             transition: all 0.3s;
-            box-shadow: 0 4px 15px rgba(37, 99, 235, 0.3);
         }
-        .stButton button:hover {
-            transform: scale(1.02);
-            box-shadow: 0 0 30px rgba(37, 99, 235, 0.6);
+        div[data-testid="column"] button:hover {
+            background: rgba(56, 189, 248, 0.1);
+            border-color: #38bdf8;
+            color: white;
+            box-shadow: 0 0 15px rgba(56, 189, 248, 0.3);
+        }
+        
+        /* HERO & HEADERS */
+        h1, h2 { font-weight: 800; letter-spacing: -1px; }
+        .gradient-text {
+            background: linear-gradient(to right, #60a5fa, #c084fc);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
         }
 
-        /* PROGRESS BAR */
+        /* EDITOR */
+        .stTextArea textarea {
+            background: #0f172a !important;
+            color: #f1f5f9 !important;
+            font-family: 'JetBrains Mono', monospace;
+            border: 1px solid #334155 !important;
+        }
+        
+        /* PROGRESS */
         .stProgress > div > div > div > div {
-            background: linear-gradient(90deg, #38bdf8, #818cf8);
-        }
-
-        /* SIDEBAR */
-        section[data-testid="stSidebar"] {
-            background-color: #020617;
-            border-right: 1px solid #1e293b;
+            background: linear-gradient(90deg, #818cf8, #c084fc);
         }
     </style>
     """, unsafe_allow_html=True)
 
-# --- AI LOGIC ---
+# --- AI ENGINE ---
 def get_ai_evaluation(prompt):
     if not GEMINI_AVAILABLE:
-        time.sleep(1.5)
-        return {"score": 0.85, "feedback": "AI unavailable. Simulated valid response.", "correct": True}
+        time.sleep(1)
+        return {"score": 0.9, "feedback": "Simulated AI: Excellent work. Logic holds up.", "correct": True}
     try:
         genai.configure(api_key=st.session_state.gemini_key)
         model = genai.GenerativeModel('gemini-2.0-flash-exp')
         response = model.generate_content(prompt + " Return strict JSON: {'score': float, 'feedback': str, 'correct': bool}")
         return json.loads(response.text.replace("```json", "").replace("```", "").strip())
     except:
-        return {"score": 0, "feedback": "API Error.", "correct": False}
+        return {"score": 0, "feedback": "AI Connection Failure.", "correct": False}
 
-# --- PAGE RENDERING ---
+# --- PAGE LOGIC ---
 
-def render_sidebar():
-    with st.sidebar:
-        st.markdown("<h2 style='margin-left:10px;'>🧬 DataMentor</h2>", unsafe_allow_html=True)
-        st.markdown("---")
-        
+def start_module(module_id):
+    """Filters questions for the specific module and starts practice"""
+    subset = [q for q in QUESTIONS if q['module'] == module_id]
+    st.session_state.active_questions = subset
+    st.session_state.active_module_id = module_id
+    st.session_state.current_q_index = 0
+    st.session_state.page = "practice"
+    st.rerun()
+
+def render_navbar():
+    col1, col2 = st.columns([1, 5])
+    with col1:
+        st.markdown("### 🧬 DataMentor")
+    with col2:
         if st.session_state.page == "practice":
-            st.markdown("### 🗺️ Your Journey")
-            total = len(QUESTIONS)
-            current = st.session_state.current_q_index
-            
-            st.progress(current / total)
-            st.caption(f"{int((current/total)*100)}% Complete")
-            
-            st.markdown("<div style='height: 20px;'></div>", unsafe_allow_html=True)
-            
-            for i, q in enumerate(QUESTIONS):
-                color = "#94a3b8"  # Pending (Gray)
-                icon = "○"
-                weight = "normal"
-                
-                if i < current:
-                    color = "#4ade80"  # Done (Green)
-                    icon = "✔"
-                elif i == current:
-                    color = "#38bdf8"  # Active (Blue)
-                    icon = "▶"
-                    weight = "bold"
-                    
-                st.markdown(f"""
-                <div style='color: {color}; margin-bottom: 12px; font-weight: {weight}; font-size: 0.9rem;'>
-                    <span style='display:inline-block; width:20px;'>{icon}</span> {q['title']}
-                </div>
-                """, unsafe_allow_html=True)
+            mod_title = MODULES[st.session_state.active_module_id]['title']
+            idx = st.session_state.current_q_index + 1
+            total = len(st.session_state.active_questions)
+            st.markdown(f"<div style='text-align:right; color:#94a3b8; padding-top:10px;'>Active Module: <b>{mod_title}</b> | Q {idx}/{total}</div>", unsafe_allow_html=True)
 
 def render_home():
-    # --- HERO SECTION ---
+    # Hero
     st.markdown("""
-    <div style='text-align: center; padding: 80px 20px;'>
-        <div class='hero-text'>
-            Master Data Science <br> With Corporate Precision.
-        </div>
-        <p style='font-size: 1.25rem; color: #94a3b8; max-width: 600px; margin: 0 auto 40px auto; line-height: 1.6;'>
-            The definitive enterprise assessment platform. Validate your skills in Pandas, ML Theory, and Statistical Analysis with real-time AI feedback.
+    <div style='text-align: center; padding: 60px 0 40px 0;'>
+        <h1 style='font-size: 3.5rem; margin-bottom: 10px;'>
+            Enterprise <span class='gradient-text'>Skill Validation</span>
+        </h1>
+        <p style='color: #cbd5e1; font-size: 1.2rem; max-width: 600px; margin: 0 auto;'>
+            Select a specialized module below to begin your targeted assessment.
         </p>
     </div>
     """, unsafe_allow_html=True)
 
-    # --- CTA ---
-    c1, c2, c3 = st.columns([1, 1, 1])
-    with c2:
-        if st.button("🚀 Launch Assessment Workspace"):
-            st.session_state.page = "practice"
-            st.rerun()
-            
-    # --- VISUAL CONTEXT ---
     st.markdown("---")
-    col_vis, col_desc = st.columns([1, 1])
-    with col_vis:
-        # Instruction: Visual diagram of the workflow
-        st.markdown("**Platform Workflow Architecture:**")
-        st.markdown("") 
-    with col_desc:
-        st.markdown("### How It Works")
-        st.info("1. **Select a Module:** Choose from our curriculum below.")
-        st.info("2. **Execute:** Run code in our secure sandbox or answer theory prompts.")
-        st.info("3. **Iterate:** Receive instant, line-by-line AI code review.")
-
-    # --- CURRICULUM GRID ---
-    st.markdown("<h2 style='text-align:center; margin: 60px 0 30px 0;'>📚 The Curriculum</h2>", unsafe_allow_html=True)
     
-    # Create a grid layout for 8 cards (2 rows of 4)
-    for i in range(0, len(QUESTIONS), 4):
-        cols = st.columns(4)
-        for j in range(4):
-            if i + j < len(QUESTIONS):
-                q = QUESTIONS[i + j]
-                with cols[j]:
-                    badge_class = "badge-code" if q['type'] == 'code' else "badge-theory"
-                    icon = "💻" if q['type'] == 'code' else "🧠"
-                    
-                    st.markdown(f"""
-                    <div class='glass-card' style='height: 220px; position: relative;'>
-                        <span class='module-badge {badge_class}'>{q['type']}</span>
-                        <div style='margin-top: 20px; font-size: 1.5rem;'>{icon}</div>
-                        <h4 style='margin-top: 10px; font-size: 1.1rem; color: #f1f5f9;'>{q['title']}</h4>
-                        <p style='font-size: 0.85rem; color: #94a3b8; margin-top: 8px;'>{q['topic']}</p>
-                        <div style='position: absolute; bottom: 20px; right: 20px; font-weight: bold; color: #64748b;'>
-                            {q['points']} pts
-                        </div>
+    # --- INTERACTIVE CURRICULUM GRID ---
+    st.markdown("### 📚 Select a Learning Module")
+    st.markdown("Click 'Start Module' to load the specific question set for that topic.")
+    
+    # We iterate through modules and create columns
+    module_keys = list(MODULES.keys())
+    
+    # Row 1
+    cols = st.columns(4)
+    for i, col in enumerate(cols):
+        if i < len(module_keys):
+            mid = module_keys[i]
+            mod = MODULES[mid]
+            q_count = len([q for q in QUESTIONS if q['module'] == mid])
+            
+            with col:
+                # Visual Card
+                st.markdown(f"""
+                <div class='module-card'>
+                    <div style='font-size: 3rem; margin-bottom: 10px;'>{mod['icon']}</div>
+                    <h3 style='font-size: 1.2rem; color: #f8fafc; margin-bottom: 5px;'>{mod['title']}</h3>
+                    <p style='font-size: 0.9rem; color: #94a3b8; height: 40px;'>{mod['desc']}</p>
+                    <div style='display:flex; justify-content:space-between; margin-top:15px; font-size:0.8rem; color:#64748b;'>
+                        <span>{q_count} Challenges</span>
+                        <span>Avg: 15m</span>
                     </div>
-                    """, unsafe_allow_html=True)
+                </div>
+                """, unsafe_allow_html=True)
+                
+                # FUNCTIONAL BUTTON BELOW CARD
+                st.markdown("<div style='height:10px'></div>", unsafe_allow_html=True)
+                if st.button(f"Start {mod['title']}", key=f"btn_{mid}"):
+                    start_module(mid)
 
 def render_practice():
-    q = QUESTIONS[st.session_state.current_q_index]
-    
-    # Header
-    st.markdown(f"## {q['title']}")
+    # Use the active subset of questions
+    q_list = st.session_state.active_questions
+    q = q_list[st.session_state.current_q_index]
     
     # Layout
     col_q, col_work = st.columns([1, 1], gap="medium")
     
     with col_q:
         st.markdown(f"""
-        <div class='glass-card'>
-            <div style='display:flex; justify-content:space-between;'>
-                <span class='module-badge badge-{'code' if q['type']=='code' else 'theory'}'>{q['type']}</span>
-                <span style='color: #64748b; font-weight:bold;'>{q['points']} PTS</span>
+        <div style='background:rgba(255,255,255,0.03); padding:24px; border-radius:16px; border:1px solid rgba(255,255,255,0.1);'>
+            <div style='display:flex; justify-content:space-between; margin-bottom:16px;'>
+                <span style='background:rgba(56, 189, 248, 0.2); color:#38bdf8; padding:4px 12px; border-radius:12px; font-size:0.8rem; font-weight:bold;'>{q['type'].upper()}</span>
+                <span style='color:#94a3b8;'>{q['points']} PTS</span>
             </div>
-            <h3 style='margin-top:15px; color:#e2e8f0;'>Problem Statement</h3>
-            <p style='font-size: 1.1rem; line-height: 1.6;'>{q['content']}</p>
+            <h2 style='font-size:1.5rem; margin-bottom:16px;'>{q['title']}</h2>
+            <p style='font-size:1.1rem; line-height:1.6;'>{q['content']}</p>
         </div>
         """, unsafe_allow_html=True)
         
+        # Context Image Trigger
         if "context" in q:
-            st.markdown(f"**Visual Aid:** {q['context']}")
+            st.markdown(f"**Visual Reference:** {q['context']}")
             
         if q['type'] == 'code':
-            st.markdown("#### 📂 Dataset Preview")
-            st.dataframe(DATASETS[q['dataset']].head(5), use_container_width=True)
-    
+            st.markdown("#### 📂 Active Dataset")
+            st.dataframe(DATASETS[q['dataset']].head(3), use_container_width=True)
+            
     with col_work:
-        st.markdown("#### 🛠️ Workspace")
+        st.markdown("#### 🛠️ Solution Workspace")
+        
         if q['type'] == 'code':
-            user_input = st.text_area("code_editor", value=q['starter_code'], height=300, label_visibility="collapsed")
-            if st.button("▶ Run & Check"):
+            user_input = st.text_area("Code Editor", value=q['starter_code'], height=300, label_visibility="collapsed")
+            if st.button("▶ Run Code"):
                 try:
                     env = {"df": DATASETS[q['dataset']], "pd": pd, "np": np}
                     exec(user_input, {}, env)
-                    st.success("Execution Successful. Ready to Submit.")
-                    st.session_state.temp_ans = user_input
+                    st.success("Code Executed Successfully.")
+                    st.session_state.temp_input = user_input
                 except Exception as e:
-                    st.error(f"Error: {e}")
+                    st.error(f"Runtime Error: {e}")
         else:
-            user_input = st.text_area("text_editor", height=300, placeholder="Type your answer here...", label_visibility="collapsed")
-            st.session_state.temp_ans = user_input
-            
+            user_input = st.text_area("Theory Editor", height=300, placeholder="Type your detailed answer...", label_visibility="collapsed")
+            st.session_state.temp_input = user_input
+
         st.markdown("<br>", unsafe_allow_html=True)
         
-        if st.button("Submit Response", type="primary"):
-            with st.spinner("AI Analyzing..."):
-                ans = st.session_state.get('temp_ans', '')
+        if st.button("Submit Response", type="primary", use_container_width=True):
+            with st.spinner("AI Analyst Evaluating..."):
+                ans = st.session_state.get('temp_input', '')
                 fb = get_ai_evaluation(f"Question: {q['content']} Answer: {ans}")
                 st.session_state.last_feedback = fb
                 st.session_state.answers.append({**q, "score": fb['score']*q['points']})
                 st.rerun()
 
+    # Feedback Overlay
     if st.session_state.last_feedback:
         fb = st.session_state.last_feedback
         color = "#22c55e" if fb['correct'] else "#f59e0b"
         st.markdown(f"""
-        <div class='glass-card' style='border: 1px solid {color};'>
-            <h3 style='color:{color}'>Evaluation Result</h3>
-            <p>{fb['feedback']}</p>
+        <div style='margin-top:20px; padding:20px; background:rgba(15, 23, 42, 0.9); border-left:4px solid {color}; border-radius:8px;'>
+            <h3 style='color:{color}; margin:0;'>Analysis Complete</h3>
+            <p style='color:#e2e8f0; margin-top:8px;'>{fb['feedback']}</p>
         </div>
         """, unsafe_allow_html=True)
-        if st.button("Next Module ➡️"):
+        
+        if st.button("Next Challenge ➡️", type="secondary"):
             st.session_state.last_feedback = None
-            if st.session_state.current_q_index < len(QUESTIONS) - 1:
+            if st.session_state.current_q_index < len(q_list) - 1:
                 st.session_state.current_q_index += 1
             else:
                 st.session_state.page = "report"
             st.rerun()
 
 def render_report():
-    total = sum(a['score'] for a in st.session_state.answers)
-    st.markdown(f"<h1 style='text-align:center'>Final Score: {int(total)}</h1>", unsafe_allow_html=True)
-    if st.button("Restart"):
-        st.session_state.clear()
+    st.markdown("<h1 style='text-align:center; margin-bottom:40px;'>Module Complete! 🎓</h1>", unsafe_allow_html=True)
+    
+    # Filter answers for this specific module run
+    mod_id = st.session_state.active_module_id
+    relevant_answers = [a for a in st.session_state.answers if a['module'] == mod_id]
+    
+    total = sum(a['score'] for a in relevant_answers)
+    max_pts = sum(a['points'] for a in relevant_answers)
+    
+    c1, c2 = st.columns([1, 1])
+    with c1:
+         st.markdown(f"""
+         <div style='text-align:center; background:rgba(30,41,59,0.5); padding:40px; border-radius:20px;'>
+            <div style='font-size:4rem; font-weight:bold; color:#38bdf8;'>{int(total)}</div>
+            <div style='color:#94a3b8;'>Points Earned</div>
+         </div>
+         """, unsafe_allow_html=True)
+         
+    with c2:
+        st.markdown("### 🔍 Performance Breakdown")
+        if relevant_answers:
+            df = pd.DataFrame(relevant_answers)
+            st.dataframe(df[['title', 'type', 'score']], use_container_width=True)
+    
+    st.markdown("<br><hr><br>", unsafe_allow_html=True)
+    if st.button("⬅️ Return to Module Selection", use_container_width=True):
+        st.session_state.page = "home"
         st.rerun()
 
-# --- MAIN ---
+# --- MAIN CONTROLLER ---
 inject_css()
-render_sidebar()
+render_navbar()
 
 if st.session_state.page == "home":
     render_home()
