@@ -577,19 +577,20 @@ else:
                         
  
                             
-                            time.sleep(0.5)
-                            st.rerun()
+                                time.sleep(0.5)
+                                st.rerun()
+                        else:
+                            st.error(error)
                     else:
-                        st.error(error)
-                else:
-                    st.warning("Please write code before running.")
+                        st.warning("Please write code before running.")
+    
+    st.markdown("---")
+    st.markdown("""
+    <div style="text-align: center; padding: 40px 20px; color: rgba(255,255,255,0.7);">
+        <h3 style="color: white; margin-bottom: 16px;">🎓 Corporate Bhaiya Learning Platform</h3>
+        <p style="font-size: 1.1rem; margin-bottom: 8px;">Empowering careers through expert mentorship</p>
+        <p style="opacity: 0.8;">© 2025 All rights reserved</p>
+    </div>
+    """, unsafe_allow_html=True)
 
-st.markdown("---")
-st.markdown("""
-<div style="text-align: center; padding: 40px 20px; color: rgba(255,255,255,0.7);">
-    <h3 style="color: white; margin-bottom: 16px;">🎓 Corporate Bhaiya Learning Platform</h3>
-    <p style="font-size: 1.1rem; margin-bottom: 8px;">Empowering careers through expert mentorship</p>
-    <p style="opacity: 0.8;">© 2025 All rights reserved</p>
-</div>
-""", unsafe_allow_html=True)
 
