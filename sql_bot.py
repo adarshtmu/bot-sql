@@ -52,7 +52,7 @@ if "api_key_validated" not in st.session_state:
 if "final_report" not in st.session_state:
     st.session_state.final_report = None
 
-# Datasets & Questions (unchanged)
+# Datasets & Questions
 students_df = pd.DataFrame({
     "student_id": range(1, 21),
     "hours_studied": [2, 3, 5, 1, 4, 6, 2, 8, 7, 3, 5, 9, 4, 6, 3, 7, 8, 2, 5, 4],
@@ -124,172 +124,504 @@ QUESTIONS = [
     }
 ]
 
-# === NEW: STUNNING FRONT PAGE UI (Replaces old hero) ===
-if not st.session_state.started:
+# Helper Functions
+def parse_json_from_text(text: str) -> dict:
+    if not text:
+        raise ValueError("Empty text")
+    m = re.search(r"```json\s*(\{.*?\})\s*```", text, flags=re.S)
+    if m:
+        try:
+            return json.loads(m.group(1))
+        except:
+            pass
+    start = text.find('{')
+    if start != -1:
+        depth = 0
+        for i in range(start, len(text)):
+            if text[i] == '{':
+                depth += 1
+            elif text[i] == '}':
+                depth -= 1
+                if depth == 0:
+                    try:
+                        return json.loads(text[start:i+1])
+                    except:
+                        try:
+                            return ast.literal_eval(text[start:i+1])
+                        except:
+                            break
+    raise ValueError("Could not extract JSON")
 
-    # Ultra-modern 3D Glassmorphic CSS
+def simple_local_theory_analyzer(question: dict, student_answer: str) -> dict:
+    text = (student_answer or "").lower()
+    tokens = set(re.findall(r"\w+", text))
+    keywords_by_q = {
+        1: {"bias", "variance", "overfitting", "underfitting", "regularization"},
+        2: {"k-fold", "cross", "validation", "folds", "train", "test"},
+        3: {"scaling", "standardization", "normalization", "z-score", "min-max"},
+        4: {"precision", "recall", "f1", "false", "positive", "negative"},
+    }
+    kws = keywords_by_q.get(question.get("id"), set())
+    hits = len([k for k in kws if k in text])
+    length_score = min(max(len(text.split()) / 60, 0.0), 1.0)
+    kw_score = min(hits / max(len(kws), 1), 1.0)
+    score = 0.6 * kw_score + 0.4 * length_score
+    feedback = "Good attempt. "
+    if score > 0.7:
+        feedback += "You covered the main points."
+    elif score > 0.4:
+        feedback += "You mentioned some concepts but can expand with examples."
+    else:
+        feedback += "Your answer needs more detail and key terms."
+    return {
+        "is_correct": score > 0.6,
+        "score": float(round(score, 3)),
+        "feedback": feedback,
+        "strengths": ["Attempted the question"] if score > 0 else [],
+        "improvements": ["Expand with examples and definitions"],
+        "points_earned": int(round(score * question.get("points", 0)))
+    }
+
+def get_gemini_model():
+    api_key = HARD_CODED_GEMINI_API_KEY or st.session_state.get("gemini_api_key") or os.environ.get("GEMINI_API_KEY")
+    if not api_key:
+        return None
+    try:
+        if GEMINI_AVAILABLE:
+            genai.configure(api_key=api_key)
+            return genai.GenerativeModel('gemini-2.0-flash-exp')
+    except:
+        return None
+    return None
+
+ai_model = get_gemini_model()
+
+def get_ai_feedback_theory(question: dict, student_answer: str, model) -> Dict:
+    if not model:
+        return simple_local_theory_analyzer(question, student_answer)
+    prompt = f"""Analyze this student answer.
+
+Question: {question['prompt']}
+Student Answer: {student_answer}
+
+Provide JSON only:
+{{
+  "is_correct": true/false,
+  "score": 0.0-1.0,
+  "feedback": "2-3 sentences",
+  "strengths": ["point1"],
+  "improvements": ["point1"]
+}}"""
+    try:
+        response = model.generate_content(prompt)
+        raw_text = response.text.strip()
+        parsed = parse_json_from_text(raw_text)
+        parsed["score"] = float(parsed.get("score", 0.0))
+        parsed["points_earned"] = int(parsed["score"] * question["points"])
+        return parsed
+    except:
+        return simple_local_theory_analyzer(question, student_answer)
+
+def get_ai_feedback_code(question: dict, code: str, result_value: Any, expected: Any, is_correct: bool, stats: dict, model) -> Dict:
+    if not model:
+        score = 1.0 if is_correct else 0.3
+        return {
+            "is_correct": is_correct,
+            "score": score,
+            "feedback": "Correct!" if is_correct else "Incorrect",
+            "code_quality": "N/A",
+            "strengths": ["Executed"],
+            "improvements": ["Review logic"],
+            "points_earned": int(score * question.get("points", 0))
+        }
+    prompt = f"""Analyze code solution.
+
+Question: {question.get('prompt')}
+Code: {code}
+Expected: {expected}
+Got: {result_value}
+Correct: {is_correct}
+
+JSON only:
+{{
+    "is_correct": true/false,
+    "score": 0.0-1.0,
+    "feedback": "explanation",
+    "code_quality": "excellent/good/fair/poor",
+    "strengths": ["point1"],
+    "improvements": ["point1"]
+}}"""
+    try:
+        response = model.generate_content(prompt)
+        result = parse_json_from_text(response.text)
+        result["points_earned"] = int(result["score"] * question["points"])
+        return result
+    except:
+        score = 1.0 if is_correct else 0.3
+        return {"is_correct": is_correct, "score": score, "feedback": "AI error", "code_quality": "unknown", "strengths": ["Executed"], "improvements": ["Review"], "points_earned": int(score * question.get("points", 0))}
+
+def generate_final_report(all_answers: List[Dict], model) -> Dict:
+    if not model:
+        return {
+            "overall_feedback": "Practice completed!",
+            "strengths": ["Completed all questions"],
+            "weaknesses": ["AI unavailable"],
+            "recommendations": ["Keep practicing"],
+            "learning_path": []
+        }
+    summary = [{"question": a["title"], "correct": a.get("is_correct", False)} for a in all_answers]
+    prompt = f"""Create performance report.
+
+Summary: {json.dumps(summary)}
+
+JSON only:
+{{
+    "overall_feedback": "2-3 sentences",
+    "strengths": ["point1", "point2"],
+    "weaknesses": ["point1"],
+    "recommendations": ["rec1", "rec2"],
+    "learning_path": [{{"topic": "name", "priority": "high/medium/low", "resources": "suggestion"}}]
+}}"""
+    try:
+        response = model.generate_content(prompt)
+        return parse_json_from_text(response.text)
+    except:
+        return {"overall_feedback": "Great effort!", "strengths": ["Persistence"], "weaknesses": ["Review"], "recommendations": ["Practice more"], "learning_path": []}
+
+def safe_execute_code(user_code: str, dataframe: pd.DataFrame) -> Tuple[bool, Any, str, dict]:
+    allowed_globals = {
+        "__builtins__": {"abs": abs, "min": min, "max": max, "round": round, "len": len, "range": range, "sum": sum, "sorted": sorted, "list": list, "dict": dict, "set": set, "int": int, "float": float},
+        "pd": pd, "np": np,
+    }
+    local_vars = {"df": dataframe.copy()}
+    stats = {"lines": len(user_code.split('\n')), "chars": len(user_code), "execution_time": 0}
+    try:
+        start_time = time.time()
+        exec(user_code, allowed_globals, local_vars)
+        stats["execution_time"] = time.time() - start_time
+        if "result" not in local_vars:
+            return False, None, "⚠️ Assign to `result`", stats
+        return True, local_vars["result"], "", stats
+    except Exception as e:
+        stats["execution_time"] = time.time() - start_time
+        return False, None, f"❌ Error: {str(e)}", stats
+
+def validator_numeric_tol(student_value: Any, expected_value: Any, tol=1e-3) -> Tuple[bool, str]:
+    try:
+        s, e = float(student_value), float(expected_value)
+        return (abs(s - e) <= tol, f"✅ Correct!" if abs(s - e) <= tol else f"❌ Expected: {e}, Got: {s}")
+    except:
+        return False, "❌ Cannot compare"
+
+def validator_dict_compare(student_value: Any, expected_value: Any) -> Tuple[bool, str]:
+    if not isinstance(student_value, dict):
+        return False, f"❌ Expected dict"
+    if set(student_value.keys()) != set(expected_value.keys()):
+        return False, "❌ Keys don't match"
+    for key in expected_value:
+        if abs(student_value[key] - expected_value[key]) > 0.01:
+            return False, f"❌ Wrong value for '{key}'"
+    return True, "✅ Perfect!"
+
+def compute_reference(q):
+    qid = q["id"]
+    if qid == 5:
+        return round(DATASETS[q["dataset"]]["hours_studied"].corr(DATASETS[q["dataset"]]["score"]), 3)
+    elif qid == 6:
+        return round(DATASETS[q["dataset"]].sample(frac=0.3, random_state=42)["score"].mean(), 2)
+    elif qid == 7:
+        return DATASETS[q["dataset"]].groupby('region')['sales'].sum().to_dict()
+    elif qid == 8:
+        df = DATASETS[q["dataset"]].copy()
+        df['performance_score'] = (df['score'] * 0.7) + (df['attendance'] * 0.3)
+        return round(df['performance_score'].corr(df['passed']), 3)
+    return None
+
+REFERENCE_RESULTS = {q["id"]: compute_reference(q) for q in QUESTIONS if q["type"] == "code"}
+
+# === ADVANCED FRONT PAGE UI ===
+if not st.session_state.started:
     st.markdown("""
     <style>
-    @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap');
-
-    * { box-sizing: border-box; }
-
-    html, body, [class*="css"] {
-        font-family: 'Space Grotesk', -apple-system, BlinkMacSystemFont, sans-serif;
-        background: linear-gradient(135deg, #0f0f23 0%, #1a1a2e 25%, #16213e 50%, #0f3460 75%, #533483 100%);
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@400;500;600;700;800&display=swap');
+    
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    
+    html, body, [class*="css"], .stApp {
+        font-family: 'Inter', -apple-system, sans-serif;
+        background: linear-gradient(135deg, #0a0e27 0%, #1a1d3e 25%, #2d1b4e 50%, #1e0836 75%, #0f0520 100%);
         background-attachment: fixed;
-        min-height: 100vh;
         overflow-x: hidden;
     }
-
-    /* 3D Rotating Cube */
-    .cube-container {
-        position: fixed;
-        top: 50%; right: 10%;
-        width: 80px; height: 80px;
-        perspective: 1000px;
-        pointer-events: none;
-        z-index: 1;
+    
+    /* Animated gradient background */
+    @keyframes gradientShift {
+        0%, 100% { background-position: 0% 50%; }
+        50% { background-position: 100% 50%; }
     }
-
-    .cube {
-        width: 100%; height: 100%;
-        position: relative;
-        transform-style: preserve-3d;
-        animation: rotateCube 15s linear infinite;
-    }
-
-    .cube-face {
-        position: absolute;
-        width: 80px; height: 80px;
-        background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05));
-        border: 1px solid rgba(255, 255, 255, 0.2);
-        backdrop-filter: blur(10px);
-    }
-
-    .cube-face.front { transform: rotateY(0deg) translateZ(40px); }
-    .cube-face.back { transform: rotateY(180deg) translateZ(40px); }
-    .cube-face.right { transform: rotateY(90deg) translateZ(40px); }
-    .cube-face.left { transform: rotateY(-90deg) translateZ(40px); }
-    .cube-face.top { transform: rotateX(90deg) translateZ(40px); }
-    .cube-face.bottom { transform: rotateX(-90deg) translateZ(40px); }
-
-    @keyframes rotateCube {
-        0% { transform: rotateX(0deg) rotateY(0deg); }
-        100% { transform: rotateX(360deg) rotateY(360deg); }
-    }
-
-    /* Hero Container */
-    .hero-container {
-        background: linear-gradient(135deg,
-            rgba(255, 255, 255, 0.15) 0%,
-            rgba(255, 255, 255, 0.1) 50%,
-            rgba(255, 255, 255, 0.05) 100%);
-        backdrop-filter: blur(30px);
-        border: 1px solid rgba(255, 255, 255, 0.2);
-        padding: 1rem 2rem;
-        border-radius: 40px;
-        margin: -7rem auto 0.5rem auto;
-        max-width: 1100px;
-        box-shadow: 0 40px 100px rgba(0, 0, 0, 0.3),
-                    0 20px 50px rgba(120, 119, 198, 0.2),
-                    inset 0 1px 0 rgba(255, 255, 255, 0.3);
+    
+    .hero-wrapper {
+        background: linear-gradient(270deg, #1e1b4b, #312e81, #4c1d95, #581c87);
+        background-size: 800% 800%;
+        animation: gradientShift 15s ease infinite;
+        min-height: 100vh;
         position: relative;
         overflow: hidden;
+    }
+    
+    /* Floating particles */
+    @keyframes float {
+        0%, 100% { transform: translateY(0px) rotate(0deg); }
+        50% { transform: translateY(-20px) rotate(180deg); }
+    }
+    
+    .particle {
+        position: absolute;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 50%;
+        animation: float 6s ease-in-out infinite;
+    }
+    
+    /* 3D Card effect */
+    .hero-card {
+        background: linear-gradient(145deg, rgba(255,255,255,0.12), rgba(255,255,255,0.05));
+        backdrop-filter: blur(40px);
+        border: 1px solid rgba(255, 255, 255, 0.18);
+        border-radius: 32px;
+        padding: 4rem 3rem;
+        max-width: 1400px;
+        margin: 0 auto;
+        box-shadow: 
+            0 8px 32px rgba(0,0,0,0.37),
+            inset 0 1px 0 rgba(255,255,255,0.3),
+            0 50px 100px -20px rgba(139, 92, 246, 0.3);
+        transform: perspective(1000px) rotateX(2deg);
+        transition: all 0.6s cubic-bezier(0.23, 1, 0.32, 1);
+        position: relative;
         z-index: 10;
-        transform: perspective(1000px) rotateX(5deg);
-        transition: transform 0.3s ease;
     }
-
-    .hero-container:hover {
-        transform: perspective(1000px) rotateX(0deg) translateY(-10px);
+    
+    .hero-card:hover {
+        transform: perspective(1000px) rotateX(0deg) translateY(-8px);
+        box-shadow: 
+            0 12px 48px rgba(0,0,0,0.5),
+            inset 0 1px 0 rgba(255,255,255,0.4),
+            0 60px 120px -20px rgba(139, 92, 246, 0.4);
     }
-
+    
+    /* Main title with gradient */
     .hero-title {
-        font-size: 4.5rem;
-        font-weight: 800;
-        margin-bottom: 1.5rem;
-        background: linear-gradient(135deg, #ffffff 0%, #e2e8f0 50%, #cbd5e1 100%);
+        font-family: 'Space Grotesk', sans-serif;
+        font-size: 5.5rem;
+        font-weight: 900;
+        line-height: 1.1;
+        background: linear-gradient(135deg, #ffffff 0%, #f0f0ff 30%, #e0e0ff 60%, #d0d0ff 100%);
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
         background-clip: text;
-        line-height: 1.1;
-        letter-spacing: -3px;
-        text-shadow: 0 10px 30px rgba(255, 255, 255, 0.3);
+        text-align: center;
+        margin-bottom: 1.5rem;
+        letter-spacing: -4px;
+        text-shadow: 0 4px 24px rgba(255,255,255,0.2);
+        animation: titleGlow 3s ease-in-out infinite;
     }
-
+    
+    @keyframes titleGlow {
+        0%, 100% { filter: brightness(1) drop-shadow(0 0 20px rgba(168, 85, 247, 0.4)); }
+        50% { filter: brightness(1.1) drop-shadow(0 0 30px rgba(168, 85, 247, 0.6)); }
+    }
+    
     .hero-subtitle {
-        font-size: 1.4rem;
-        color: rgba(255, 255, 255, 0.8);
-        margin-bottom: 3rem;
+        font-size: 1.5rem;
+        color: rgba(255, 255, 255, 0.85);
+        text-align: center;
+        max-width: 850px;
+        margin: 0 auto 3rem;
+        line-height: 1.7;
         font-weight: 400;
-        max-width: 700px;
-        margin-left: auto;
-        margin-right: auto;
-        line-height: 1.6;
-        text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
     }
-
-    /* CTA Button - Yellow Gradient */
+    
+    /* CTA Button with pulse */
     .stButton > button {
-        background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%) !important;
+        background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 50%, #d97706 100%) !important;
         color: #000000 !important;
-        border-radius: 60px !important;
+        font-family: 'Space Grotesk', sans-serif !important;
+        font-size: 1.9rem !important;
+        font-weight: 800 !important;
+        padding: 2.2rem 6rem !important;
+        border-radius: 70px !important;
         border: none !important;
-        padding: 2rem 5rem !important;
-        font-weight: 700 !important;
-        font-size: 1.8rem !important;
-        box-shadow: 0 15px 35px rgba(255, 215, 0, 0.4) !important;
+        box-shadow: 0 20px 40px rgba(251, 191, 36, 0.4), 0 0 0 0 rgba(251, 191, 36, 0.7) !important;
         text-transform: uppercase !important;
-        letter-spacing: 1px !important;
+        letter-spacing: 2px !important;
+        transition: all 0.3s ease !important;
+        animation: pulse 2s infinite !important;
     }
-
+    
+    @keyframes pulse {
+        0%, 100% { box-shadow: 0 20px 40px rgba(251, 191, 36, 0.4), 0 0 0 0 rgba(251, 191, 36, 0.7); }
+        50% { box-shadow: 0 20px 40px rgba(251, 191, 36, 0.6), 0 0 0 20px rgba(251, 191, 36, 0); }
+    }
+    
     .stButton > button:hover {
-        transform: translateY(-3px) !important;
-        box-shadow: 0 20px 45px rgba(255, 215, 0, 0.5) !important;
-        background: linear-gradient(135deg, #FFE44D 0%, #FFB347 100%) !important;
+        transform: translateY(-4px) scale(1.03) !important;
+        background: linear-gradient(135deg, #fcd34d 0%, #fbbf24 50%, #f59e0b 100%) !important;
+        box-shadow: 0 25px 50px rgba(251, 191, 36, 0.6) !important;
     }
-
-    /* Stats Cards */
-    .stats-container {
+    
+    /* Feature cards grid */
+    .features-grid {
         display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
         gap: 2rem;
-        margin: 3rem 0 2rem 0;
+        margin: 4rem 0;
     }
-
-    .stat-card {
-        background: linear-gradient(135deg, rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0.1));
-        border-radius: 25px;
+    
+    .feature-card {
+        background: linear-gradient(145deg, rgba(255,255,255,0.1), rgba(255,255,255,0.05));
+        backdrop-filter: blur(20px);
+        border: 1px solid rgba(255,255,255,0.15);
+        border-radius: 24px;
+        padding: 2.5rem;
+        text-align: center;
+        transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+        cursor: pointer;
+    }
+    
+    .feature-card:hover {
+        transform: translateY(-8px) scale(1.02);
+        background: linear-gradient(145deg, rgba(255,255,255,0.15), rgba(255,255,255,0.08));
+        box-shadow: 0 20px 40px rgba(168, 85, 247, 0.3);
+        border-color: rgba(168, 85, 247, 0.4);
+    }
+    
+    .feature-icon {
+        font-size: 4rem;
+        margin-bottom: 1.5rem;
+        display: inline-block;
+        animation: bounce 2s ease-in-out infinite;
+    }
+    
+    @keyframes bounce {
+        0%, 100% { transform: translateY(0); }
+        50% { transform: translateY(-10px); }
+    }
+    
+    .feature-title {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: #ffffff;
+        margin-bottom: 0.8rem;
+    }
+    
+    .feature-desc {
+        color: rgba(255, 255, 255, 0.8);
+        font-size: 1.05rem;
+        line-height: 1.6;
+    }
+    
+    /* Stats counter */
+    .stats-row {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 2rem;
+        margin: 3rem 0;
+    }
+    
+    .stat-box {
+        background: linear-gradient(145deg, rgba(168, 85, 247, 0.2), rgba(139, 92, 246, 0.1));
+        backdrop-filter: blur(20px);
+        border: 1px solid rgba(168, 85, 247, 0.3);
+        border-radius: 20px;
         padding: 2rem;
         text-align: center;
-        height: 200px;
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        border: 1px solid rgba(255, 255, 255, 0.2);
-        backdrop-filter: blur(20px);
+        transition: all 0.3s ease;
     }
-
-    .stat-icon { font-size: 3.5rem; margin-bottom: 1rem; }
-    .stat-number { font-size: 1.5rem; font-weight: 800; color: #ffffff; margin-bottom: 0.5rem; }
-    .stat-label { color: rgba(255, 255, 255, 0.8); font-weight: 600; font-size: 1.1rem; text-transform: uppercase; }
-
-    /* Learning Path & Features */
-    .learning-path, .features-grid, .testimonial {
-        background: linear-gradient(135deg, rgba(255, 255, 255, 0.15), rgba(255, 255, 255, 0.05));
+    
+    .stat-box:hover {
+        transform: scale(1.05);
+        border-color: rgba(168, 85, 247, 0.5);
+    }
+    
+    .stat-number {
+        font-size: 3rem;
+        font-weight: 900;
+        color: #fbbf24;
+        margin-bottom: 0.5rem;
+    }
+    
+    .stat-label {
+        color: rgba(255, 255, 255, 0.9);
+        font-size: 1.1rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+    
+    /* Topics section */
+    .topics-section {
+        background: linear-gradient(145deg, rgba(30, 27, 75, 0.6), rgba(49, 46, 129, 0.4));
+        backdrop-filter: blur(30px);
+        border: 1px solid rgba(168, 85, 247, 0.2);
+        border-radius: 28px;
         padding: 3rem;
-        border-radius: 30px;
         margin: 4rem 0;
-        border: 1px solid rgba(255, 255, 255, 0.2);
-        backdrop-filter: blur(25px);
     }
-
+    
+    .topics-title {
+        font-size: 2.5rem;
+        font-weight: 800;
+        color: #ffffff;
+        text-align: center;
+        margin-bottom: 2rem;
+    }
+    
+    .topics-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1.5rem;
+    }
+    
+    .topic-item {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        padding: 1rem;
+        background: rgba(255, 255, 255, 0.05);
+        border-radius: 12px;
+        transition: all 0.3s ease;
+    }
+    
+    .topic-item:hover {
+        background: rgba(168, 85, 247, 0.15);
+        transform: translateX(8px);
+    }
+    
+    .topic-emoji {
+        font-size: 2rem;
+    }
+    
+    .topic-text {
+        color: rgba(255, 255, 255, 0.9);
+        font-size: 1.15rem;
+        font-weight: 500;
+    }
+    
+    /* Responsive */
     @media (max-width: 768px) {
-        .hero-title { font-size: 2.8rem; }
-        .hero-container { margin: -9rem auto -1rem auto; padding: 1rem; }
-        .cube-container { display: none; }
+        .hero-title { font-size: 3rem; letter-spacing: -2px; }
+        .hero-subtitle { font-size: 1.1rem; }
+        .hero-card { padding: 2rem 1.5rem; }
+        .stats-row, .features-grid, .topics-grid { grid-template-columns: 1fr; }
+        .stButton > button { padding: 1.5rem 3rem !important; font-size: 1.4rem !important; }
     }
+    </style>
+    
+    <div class="hero-wrapper">
+        <!-- Floating particles -->
+        <div class="particle" style="top: 10%; left: 10%; width: 80px; height: 80px; animation-delay: 0s;"></div>
+        <div class="particle" style="top: 70%; left: 80%; width: 60px; height: 60px; animation-delay: 2s;"></div>
+        <div class="particle" style="top:
 
     /* New: ensure hero HTML injected via components.html appears white */
     .hero-section,
@@ -1325,6 +1657,7 @@ st.markdown("""
     <p style='opacity: 0.8; font-size: 0.9rem;'>© 2025 All rights reserved</p>
 </div>
 """, unsafe_allow_html=True)
+
 
 
 
