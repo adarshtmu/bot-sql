@@ -711,6 +711,7 @@ elif st.session_state.completed:
     total_points = sum(a.get("points_earned", 0) for a in st.session_state.user_answers)
     max_points = sum(q["points"] for q in QUESTIONS)
     correct = sum(1 for a in st.session_state.user_answers if a.get("is_correct"))
+    wrong = len(st.session_state.user_answers) - correct
     percentage = (total_points / max_points) * 100
     
     st.markdown(f"""
@@ -726,12 +727,12 @@ elif st.session_state.completed:
     with col1:
         st.metric("Total Points", f"{total_points}/{max_points}")
     with col2:
-        st.metric("Correct Answers", f"{correct}/8")
+        st.metric("✅ Correct", f"{correct}")
     with col3:
-        st.metric("Completion", "100%")
+        st.metric("❌ Wrong", f"{wrong}")
     with col4:
         duration = (datetime.now() - st.session_state.start_time).seconds // 60
-        st.metric("Time Taken", f"{duration} min")
+        st.metric("⏱️ Time", f"{duration} min")
     
     if not st.session_state.final_report:
         with st.spinner("🤖 Generating your personalized report..."):
@@ -740,7 +741,7 @@ elif st.session_state.completed:
     report = st.session_state.final_report
     
     st.markdown("---")
-    st.markdown("### 🤖 AI Mentor's Assessment")
+    st.markdown("### 🤖 AI Mentor's Overall Assessment")
     st.info(report.get('overall_feedback', 'Great work!'))
     
     col1, col2 = st.columns(2)
@@ -764,11 +765,92 @@ elif st.session_state.completed:
             color = "🔴" if priority == "high" else "🟡" if priority == "medium" else "🟢"
             st.markdown(f"{color} **{item.get('topic', 'Topic')}** ({priority} priority): {item.get('resources', 'Practice')}")
     
-    if st.button("🔄 Start New Session", use_container_width=True, type="primary"):
-        for key in ['user_answers', 'current_q', 'started', 'completed', 'final_report']:
-            if key in st.session_state:
-                del st.session_state[key]
-        st.rerun()
+    # DETAILED QUESTION-BY-QUESTION REPORT
+    st.markdown("---")
+    st.markdown("## 📋 Detailed Question Report")
+    
+    for idx, answer_data in enumerate(st.session_state.user_answers, 1):
+        q_status = "✅ Correct" if answer_data.get("is_correct") else "❌ Wrong"
+        status_color = "#22c55e" if answer_data.get("is_correct") else "#ef4444"
+        
+        with st.expander(f"**Question {idx}: {answer_data['title']}** - {q_status}", expanded=False):
+            st.markdown(f"""
+            <div style="background: linear-gradient(145deg, rgba(255,255,255,0.08), rgba(255,255,255,0.03)); 
+                        border-left: 4px solid {status_color}; padding: 20px; border-radius: 12px; margin-bottom: 16px;">
+                <div style="display: flex; justify-content: space-between; margin-bottom: 16px;">
+                    <span style="color: white; font-weight: 600;">Type: {answer_data['type'].title()}</span>
+                    <span style="color: white; font-weight: 600;">Difficulty: {answer_data['difficulty'].title()}</span>
+                    <span style="color: {status_color}; font-weight: 700;">
+                        {answer_data.get('points_earned', 0)}/{answer_data.get('max_points', 0)} points
+                    </span>
+                </div>
+            </div>
+            """, unsafe_allow_html=True)
+            
+            if answer_data['type'] == 'theory':
+                st.markdown("**📝 Your Answer:**")
+                st.text_area("", value=answer_data.get('answer', ''), height=150, disabled=True, key=f"review_answer_{idx}")
+            else:
+                st.markdown("**💻 Your Code:**")
+                st.code(answer_data.get('code', ''), language="python")
+                
+                col1, col2 = st.columns(2)
+                with col1:
+                    st.markdown("**Your Result:**")
+                    st.code(str(answer_data.get('result', '')), language="python")
+                with col2:
+                    st.markdown("**Expected Result:**")
+                    st.code(str(answer_data.get('expected', '')), language="python")
+            
+            ai_feedback = answer_data.get('ai_analysis', {})
+            
+            st.markdown("**🤖 AI Feedback:**")
+            st.info(ai_feedback.get('feedback', 'No feedback available'))
+            
+            if ai_feedback.get('strengths'):
+                st.markdown("**💪 Strengths:**")
+                for s in ai_feedback.get('strengths', []):
+                    st.success(f"• {s}")
+            
+            if ai_feedback.get('improvements'):
+                st.markdown("**📈 Improvements:**")
+                for i in ai_feedback.get('improvements', []):
+                    st.warning(f"• {i}")
+            
+            if answer_data['type'] == 'code' and ai_feedback.get('code_quality'):
+                quality = ai_feedback.get('code_quality', 'N/A')
+                quality_color = {"excellent": "#22c55e", "good": "#3b82f6", "fair": "#f59e0b", "poor": "#ef4444"}.get(quality.lower(), "#64748b")
+                st.markdown(f"**Code Quality:** <span style='color: {quality_color}; font-weight: 700;'>{quality.upper()}</span>", unsafe_allow_html=True)
+    
+    st.markdown("---")
+    
+    col1, col2 = st.columns(2)
+    with col1:
+        if st.button("🔄 Start New Session", use_container_width=True, type="primary"):
+            for key in list(st.session_state.keys()):
+                if key.startswith(('answer_', 'code_', 'user_answers', 'current_q', 'started', 'completed', 'final_report')):
+                    del st.session_state[key]
+            st.rerun()
+    with col2:
+        # Download report as JSON
+        report_data = {
+            "summary": {
+                "total_points": total_points,
+                "max_points": max_points,
+                "percentage": percentage,
+                "correct": correct,
+                "wrong": wrong
+            },
+            "questions": st.session_state.user_answers,
+            "ai_report": report
+        }
+        st.download_button(
+            label="📥 Download Full Report",
+            data=json.dumps(report_data, indent=2),
+            file_name=f"datamentor_report_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json",
+            mime="application/json",
+            use_container_width=True
+        )
 
 else:
     # Active Question
@@ -796,9 +878,15 @@ else:
         """, unsafe_allow_html=True)
         
         if q['type'] == 'theory':
-            answer = st.text_area("Your Answer:", height=200, placeholder="Write your detailed answer here...")
+            # Use session state key to track current answer
+            answer_key = f"answer_{q['id']}"
+            if answer_key not in st.session_state:
+                st.session_state[answer_key] = ""
             
-            if st.button("Submit Answer", type="primary"):
+            answer = st.text_area("Your Answer:", value=st.session_state[answer_key], height=200, placeholder="Write your detailed answer here...", key=f"textarea_{q['id']}")
+            st.session_state[answer_key] = answer
+            
+            if st.button("Submit Answer", type="primary", key=f"submit_{q['id']}"):
                 if answer.strip():
                     with st.spinner("🤖 AI analyzing your answer..."):
                         ai_analysis = get_ai_feedback_theory(q, answer, ai_model)
@@ -830,11 +918,14 @@ else:
                                 st.write(f"• {i}")
                         
                         st.session_state.current_q += 1
+                        # Clear the answer for next question
+                        st.session_state[answer_key] = ""
+                        
                         if st.session_state.current_q >= len(QUESTIONS):
                             st.session_state.completed = True
                         
-                        if st.button("➡️ Next Question", type="primary"):
-                            st.rerun()
+                        time.sleep(0.5)  # Brief pause to show feedback
+                        st.rerun()
                 else:
                     st.warning("Please provide an answer before submitting.")
         
@@ -843,9 +934,15 @@ else:
                 with st.expander("📊 View Dataset"):
                     st.dataframe(DATASETS[q['dataset']], use_container_width=True)
             
-            code = st.text_area("Your Code:", value=q.get('starter_code', ''), height=200)
+            # Use session state for code editor
+            code_key = f"code_{q['id']}"
+            if code_key not in st.session_state:
+                st.session_state[code_key] = q.get('starter_code', '')
             
-            if st.button("▶️ Run Code", type="primary"):
+            code = st.text_area("Your Code:", value=st.session_state[code_key], height=200, key=f"code_editor_{q['id']}")
+            st.session_state[code_key] = code
+            
+            if st.button("▶️ Run Code", type="primary", key=f"run_{q['id']}"):
                 if code.strip():
                     success, result, error, stats = safe_execute_code(code, DATASETS.get(q['dataset'], pd.DataFrame()))
                     
@@ -853,6 +950,18 @@ else:
                         expected = REFERENCE_RESULTS.get(q['id'])
                         validator = globals()[f"validator_{q['validator']}"]
                         is_correct, msg = validator(result, expected)
+                        
+                        # Show output immediately
+                        st.markdown("### 📤 Output")
+                        col1, col2 = st.columns(2)
+                        with col1:
+                            st.markdown("**Your Result:**")
+                            st.code(str(result), language="python")
+                        with col2:
+                            st.markdown("**Expected:**")
+                            st.code(str(expected), language="python")
+                        
+                        st.markdown(f"**Execution Time:** {stats.get('execution_time', 0):.4f}s")
                         
                         with st.spinner("🤖 AI analyzing your code..."):
                             ai_analysis = get_ai_feedback_code(q, code, result, expected, is_correct, stats, ai_model)
@@ -876,20 +985,27 @@ else:
                             else:
                                 st.error(f"❌ Incorrect. {ai_analysis.get('points_earned', 0)}/{q['points']} points")
                             
-                            col1, col2 = st.columns(2)
-                            with col1:
-                                st.write("**Your Result:**", result)
-                            with col2:
-                                st.write("**Expected:**", expected)
-                            
                             st.info(ai_analysis.get('feedback', ''))
                             
+                            col1, col2 = st.columns(2)
+                            with col1:
+                                st.markdown("**💪 Code Strengths:**")
+                                for s in ai_analysis.get('strengths', []):
+                                    st.write(f"• {s}")
+                            with col2:
+                                st.markdown("**📈 Improvements:**")
+                                for i in ai_analysis.get('improvements', []):
+                                    st.write(f"• {i}")
+                            
                             st.session_state.current_q += 1
+                            # Clear code for next question
+                            st.session_state[code_key] = ""
+                            
                             if st.session_state.current_q >= len(QUESTIONS):
                                 st.session_state.completed = True
                             
-                            if st.button("➡️ Next Question", type="primary"):
-                                st.rerun()
+                            time.sleep(0.5)
+                            st.rerun()
                     else:
                         st.error(error)
                 else:
