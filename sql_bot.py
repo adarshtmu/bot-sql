@@ -4,7 +4,6 @@ import numpy as np
 import json
 import time
 import plotly.express as px
-import plotly.graph_objects as go
 
 # LLM Integration
 try:
@@ -21,21 +20,17 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# API KEY (Replace with your actual key)
 HARD_CODED_GEMINI_API_KEY = "AIzaSyCipiGM8HxiPiVtfePpGN-TiIk5JVBO6_M"
 
 # --- DATASETS ---
 @st.cache_data
 def load_data():
-    # Dataset 1: E-commerce
     ecommerce = pd.DataFrame({
         "user_id": range(101, 121),
         "spend": [500, 150, 300, 450, 600, 120, 800, 320, 110, 90, 550, 620, 410, 200, 300, 400, 700, 150, 250, 900],
         "clicks": [25, 10, 15, 22, 35, 8, 45, 18, 5, 4, 30, 32, 21, 12, 16, 20, 38, 9, 14, 50],
         "category": ['Electronics', 'Fashion', 'Home', 'Electronics', 'Fashion', 'Home', 'Electronics', 'Fashion', 'Home', 'Electronics', 'Fashion', 'Home', 'Electronics', 'Fashion', 'Home', 'Electronics', 'Fashion', 'Home', 'Electronics', 'Fashion']
     })
-    
-    # Dataset 2: Housing
     housing = pd.DataFrame({
         "sqft": [1500, 2000, 1200, 1800, 2500, 1100, 3000, 1600, 2100, 1400],
         "price": [300, 450, 250, 380, 550, 220, 700, 320, 460, 290],
@@ -51,6 +46,7 @@ QUESTIONS = [
         "id": 1,
         "title": "Bias-Variance Tradeoff",
         "type": "theory",
+        "topic": "Machine Learning",
         "difficulty": "Easy",
         "points": 100,
         "content": "Explain the Bias-Variance Tradeoff. What happens to bias and variance as model complexity increases?",
@@ -61,6 +57,7 @@ QUESTIONS = [
         "id": 2,
         "title": "Filter High Spenders",
         "type": "code",
+        "topic": "Pandas",
         "difficulty": "Easy",
         "points": 100,
         "content": "Using the `ecommerce` dataset, filter for rows where 'spend' is greater than 400. Assign the result to `high_rollers`.",
@@ -71,6 +68,7 @@ QUESTIONS = [
         "id": 3,
         "title": "Precision vs Recall",
         "type": "theory",
+        "topic": "Metrics",
         "difficulty": "Medium",
         "points": 150,
         "content": "In a cancer detection model, which metric is more critical to maximize: Precision or Recall? Explain why.",
@@ -81,6 +79,7 @@ QUESTIONS = [
         "id": 4,
         "title": "Group Aggregation",
         "type": "code",
+        "topic": "Pandas",
         "difficulty": "Medium",
         "points": 150,
         "content": "Calculate the average 'clicks' per 'category' in the `ecommerce` dataset. Assign the resulting Series to `cat_clicks`.",
@@ -91,6 +90,7 @@ QUESTIONS = [
         "id": 5,
         "title": "K-Means Elbow Method",
         "type": "theory",
+        "topic": "Clustering",
         "difficulty": "Medium",
         "points": 150,
         "content": "Describe the 'Elbow Method' in K-Means clustering. What does the x-axis and y-axis represent in the elbow plot?",
@@ -101,6 +101,7 @@ QUESTIONS = [
         "id": 6,
         "title": "Feature Engineering",
         "type": "code",
+        "topic": "Feature Eng",
         "difficulty": "Hard",
         "points": 200,
         "content": "Create a new column 'price_per_sqft' in the `housing` dataset (price / sqft). Return the correlation between 'bedrooms' and this new column.",
@@ -111,9 +112,10 @@ QUESTIONS = [
         "id": 7,
         "title": "Handling Imbalanced Data",
         "type": "theory",
+        "topic": "Data Prep",
         "difficulty": "Hard",
         "points": 200,
-        "content": "Your dataset has 99% Class A and 1% Class B. Naming 2 techniques to handle this imbalance during training.",
+        "content": "Your dataset has 99% Class A and 1% Class B. Name 2 techniques to handle this imbalance during training.",
         "context": "",
         "hint": "Think about resampling techniques (Up/Down) or algorithmic changes."
     },
@@ -121,6 +123,7 @@ QUESTIONS = [
         "id": 8,
         "title": "Missing Data Imputation",
         "type": "code",
+        "topic": "Cleaning",
         "difficulty": "Hard",
         "points": 200,
         "content": "Assume the 'spend' column has missing values. Write code to fill NaNs with the median of the column.",
@@ -139,268 +142,276 @@ def init_state():
 
 init_state()
 
-# --- CSS STYLING ENGINE ---
+# --- ADVANCED CSS ENGINE ---
 def inject_css():
     st.markdown("""
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&family=Fira+Code:wght@400;600&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;700;900&family=JetBrains+Mono:wght@400;600&display=swap');
         
-        /* APP CONTAINER */
+        /* CORE THEME */
         .stApp {
-            background-color: #020617;
-            background-image: 
-                radial-gradient(at 0% 0%, rgba(99, 102, 241, 0.15) 0px, transparent 50%),
-                radial-gradient(at 100% 100%, rgba(168, 85, 247, 0.15) 0px, transparent 50%);
+            background-color: #030712;
+            background-image: radial-gradient(at 50% 0%, rgba(56, 189, 248, 0.1) 0px, transparent 50%);
             font-family: 'Inter', sans-serif;
+            color: #f8fafc;
         }
 
-        /* SIDEBAR */
-        section[data-testid="stSidebar"] {
-            background-color: #0f172a;
-            border-right: 1px solid rgba(255,255,255,0.05);
+        /* ANIMATIONS */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        @keyframes glow {
+            0% { box-shadow: 0 0 5px rgba(56, 189, 248, 0.2); }
+            50% { box-shadow: 0 0 20px rgba(56, 189, 248, 0.6); }
+            100% { box-shadow: 0 0 5px rgba(56, 189, 248, 0.2); }
         }
 
-        /* GLASS CARD */
+        /* HERO TEXT */
+        .hero-text {
+            font-size: 4rem;
+            font-weight: 900;
+            background: linear-gradient(to right, #ffffff, #94a3b8);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: -0.05em;
+            line-height: 1.1;
+            margin-bottom: 24px;
+            animation: fadeIn 0.8s ease-out;
+        }
+
+        /* CARDS */
         .glass-card {
-            background: rgba(30, 41, 59, 0.4);
-            backdrop-filter: blur(12px);
+            background: rgba(17, 24, 39, 0.7);
+            backdrop-filter: blur(20px);
             border: 1px solid rgba(255, 255, 255, 0.08);
             border-radius: 16px;
             padding: 24px;
             margin-bottom: 20px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+            transition: all 0.3s ease;
         }
         
-        /* CODE EDITOR */
-        .stTextArea textarea {
-            background-color: #020617 !important;
-            color: #e2e8f0 !important;
-            font-family: 'Fira Code', monospace !important;
-            border: 1px solid #334155 !important;
+        .glass-card:hover {
+            border-color: rgba(56, 189, 248, 0.4);
+            transform: translateY(-4px);
+            background: rgba(30, 41, 59, 0.8);
         }
+
+        /* MODULE BADGES */
+        .module-badge {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            padding: 4px 12px;
+            border-radius: 99px;
+            font-weight: 700;
+        }
+        .badge-theory { background: rgba(167, 139, 250, 0.2); color: #a78bfa; border: 1px solid #a78bfa; }
+        .badge-code { background: rgba(56, 189, 248, 0.2); color: #38bdf8; border: 1px solid #38bdf8; }
 
         /* BUTTONS */
         .stButton button {
-            background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
-            color: white;
+            background: linear-gradient(90deg, #2563eb, #3b82f6);
             border: none;
-            padding: 0.6rem 1.2rem;
-            border-radius: 8px;
+            color: white;
+            padding: 16px 32px;
+            font-size: 1.1rem;
             font-weight: 600;
+            border-radius: 12px;
+            width: 100%;
             transition: all 0.3s;
+            box-shadow: 0 4px 15px rgba(37, 99, 235, 0.3);
         }
         .stButton button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(79, 70, 229, 0.4);
+            transform: scale(1.02);
+            box-shadow: 0 0 30px rgba(37, 99, 235, 0.6);
         }
 
-        /* TYPOGRAPHY */
-        h1, h2, h3 { color: #f8fafc; font-weight: 800; }
-        p, li { color: #94a3b8; line-height: 1.6; }
-        
-        /* PROGRESS INDICATORS */
-        .step-indicator {
-            padding: 8px 12px;
-            border-radius: 6px;
-            margin-bottom: 8px;
-            font-size: 13px;
-            cursor: default;
+        /* PROGRESS BAR */
+        .stProgress > div > div > div > div {
+            background: linear-gradient(90deg, #38bdf8, #818cf8);
         }
-        .step-active { background: rgba(56, 189, 248, 0.2); color: #38bdf8; border: 1px solid rgba(56, 189, 248, 0.3); }
-        .step-done { background: rgba(34, 197, 94, 0.1); color: #4ade80; border: 1px solid rgba(34, 197, 94, 0.2); }
-        .step-pending { background: rgba(255, 255, 255, 0.03); color: #64748b; }
+
+        /* SIDEBAR */
+        section[data-testid="stSidebar"] {
+            background-color: #020617;
+            border-right: 1px solid #1e293b;
+        }
     </style>
     """, unsafe_allow_html=True)
 
-# --- AI ENGINE ---
+# --- AI LOGIC ---
 def get_ai_evaluation(prompt):
     if not GEMINI_AVAILABLE:
         time.sleep(1.5)
-        return {"score": 0.9, "feedback": "Simulation: Excellent answer. You covered key points.", "correct": True}
-    
+        return {"score": 0.85, "feedback": "AI unavailable. Simulated valid response.", "correct": True}
     try:
         genai.configure(api_key=st.session_state.gemini_key)
         model = genai.GenerativeModel('gemini-2.0-flash-exp')
         response = model.generate_content(prompt + " Return strict JSON: {'score': float, 'feedback': str, 'correct': bool}")
-        clean_text = response.text.replace("```json", "").replace("```", "").strip()
-        return json.loads(clean_text)
+        return json.loads(response.text.replace("```json", "").replace("```", "").strip())
     except:
-        return {"score": 0, "feedback": "AI Connection Error.", "correct": False}
+        return {"score": 0, "feedback": "API Error.", "correct": False}
 
-# --- COMPONENTS ---
+# --- PAGE RENDERING ---
 
 def render_sidebar():
     with st.sidebar:
-        st.markdown("### 🧬 DataMentor")
+        st.markdown("<h2 style='margin-left:10px;'>🧬 DataMentor</h2>", unsafe_allow_html=True)
         st.markdown("---")
         
         if st.session_state.page == "practice":
-            st.markdown("#### 🗺️ Challenge Map")
+            st.markdown("### 🗺️ Your Journey")
+            total = len(QUESTIONS)
+            current = st.session_state.current_q_index
             
-            for idx, q in enumerate(QUESTIONS):
-                status = "step-pending"
+            st.progress(current / total)
+            st.caption(f"{int((current/total)*100)}% Complete")
+            
+            st.markdown("<div style='height: 20px;'></div>", unsafe_allow_html=True)
+            
+            for i, q in enumerate(QUESTIONS):
+                color = "#94a3b8"  # Pending (Gray)
                 icon = "○"
+                weight = "normal"
                 
-                # Logic to determine status
-                if idx < st.session_state.current_q_index:
-                    status = "step-done"
+                if i < current:
+                    color = "#4ade80"  # Done (Green)
                     icon = "✔"
-                elif idx == st.session_state.current_q_index:
-                    status = "step-active"
+                elif i == current:
+                    color = "#38bdf8"  # Active (Blue)
                     icon = "▶"
-                
+                    weight = "bold"
+                    
                 st.markdown(f"""
-                <div class='step-indicator {status}'>
-                    {icon} <b>Q{idx+1}:</b> {q['title']}
+                <div style='color: {color}; margin-bottom: 12px; font-weight: {weight}; font-size: 0.9rem;'>
+                    <span style='display:inline-block; width:20px;'>{icon}</span> {q['title']}
                 </div>
                 """, unsafe_allow_html=True)
-            
-            st.markdown("---")
-            current = st.session_state.current_q_index + 1
-            total = len(QUESTIONS)
-            st.caption(f"Progress: {int((current/total)*100)}%")
-            st.progress(current/total)
 
 def render_home():
-    # Dynamic Stats
-    total_q = len(QUESTIONS)
-    total_pts = sum(q['points'] for q in QUESTIONS)
-    est_time = f"{total_q * 3} mins"
-    
+    # --- HERO SECTION ---
     st.markdown("""
-    <div style='text-align: center; padding: 60px 0;'>
-        <h1 style='font-size: 64px; margin-bottom: 16px; background: linear-gradient(to right, #60a5fa, #c084fc); -webkit-background-clip: text; -webkit-text-fill-color: transparent;'>
-            Data Science Bootcamp
-        </h1>
-        <p style='font-size: 20px; max-width: 700px; margin: 0 auto; color: #94a3b8;'>
-            Advanced Enterprise Assessment Platform.
+    <div style='text-align: center; padding: 80px 20px;'>
+        <div class='hero-text'>
+            Master Data Science <br> With Corporate Precision.
+        </div>
+        <p style='font-size: 1.25rem; color: #94a3b8; max-width: 600px; margin: 0 auto 40px auto; line-height: 1.6;'>
+            The definitive enterprise assessment platform. Validate your skills in Pandas, ML Theory, and Statistical Analysis with real-time AI feedback.
         </p>
     </div>
     """, unsafe_allow_html=True)
-    
-    # Metrics Grid
-    c1, c2, c3, c4 = st.columns(4)
-    with c1: st.metric("Total Challenges", total_q)
-    with c2: st.metric("Max Points", total_pts)
-    with c3: st.metric("Est. Duration", est_time)
-    with c4: st.metric("Difficulty", "Adaptive")
-    
-    st.markdown("<br>", unsafe_allow_html=True)
-    
-    # Syllabus Preview
-    st.markdown("### 📚 Syllabus Preview")
-    
-    col1, col2 = st.columns(2)
-    with col1:
-        st.markdown("#### Theory Modules")
-        for q in QUESTIONS:
-            if q['type'] == 'theory':
-                st.markdown(f"**{q['title']}** - *{q['difficulty']}*")
-                
-    with col2:
-        st.markdown("#### Coding Labs")
-        for q in QUESTIONS:
-            if q['type'] == 'code':
-                st.markdown(f"**{q['title']}** - *{q['difficulty']}*")
-    
-    st.markdown("<br><hr><br>", unsafe_allow_html=True)
-    
-    _, btn_col, _ = st.columns([1,2,1])
-    with btn_col:
-        if st.button("🚀 Begin Assessment", use_container_width=True):
+
+    # --- CTA ---
+    c1, c2, c3 = st.columns([1, 1, 1])
+    with c2:
+        if st.button("🚀 Launch Assessment Workspace"):
             st.session_state.page = "practice"
             st.rerun()
+            
+    # --- VISUAL CONTEXT ---
+    st.markdown("---")
+    col_vis, col_desc = st.columns([1, 1])
+    with col_vis:
+        # Instruction: Visual diagram of the workflow
+        st.markdown("**Platform Workflow Architecture:**")
+        st.markdown("") 
+    with col_desc:
+        st.markdown("### How It Works")
+        st.info("1. **Select a Module:** Choose from our curriculum below.")
+        st.info("2. **Execute:** Run code in our secure sandbox or answer theory prompts.")
+        st.info("3. **Iterate:** Receive instant, line-by-line AI code review.")
+
+    # --- CURRICULUM GRID ---
+    st.markdown("<h2 style='text-align:center; margin: 60px 0 30px 0;'>📚 The Curriculum</h2>", unsafe_allow_html=True)
+    
+    # Create a grid layout for 8 cards (2 rows of 4)
+    for i in range(0, len(QUESTIONS), 4):
+        cols = st.columns(4)
+        for j in range(4):
+            if i + j < len(QUESTIONS):
+                q = QUESTIONS[i + j]
+                with cols[j]:
+                    badge_class = "badge-code" if q['type'] == 'code' else "badge-theory"
+                    icon = "💻" if q['type'] == 'code' else "🧠"
+                    
+                    st.markdown(f"""
+                    <div class='glass-card' style='height: 220px; position: relative;'>
+                        <span class='module-badge {badge_class}'>{q['type']}</span>
+                        <div style='margin-top: 20px; font-size: 1.5rem;'>{icon}</div>
+                        <h4 style='margin-top: 10px; font-size: 1.1rem; color: #f1f5f9;'>{q['title']}</h4>
+                        <p style='font-size: 0.85rem; color: #94a3b8; margin-top: 8px;'>{q['topic']}</p>
+                        <div style='position: absolute; bottom: 20px; right: 20px; font-weight: bold; color: #64748b;'>
+                            {q['points']} pts
+                        </div>
+                    </div>
+                    """, unsafe_allow_html=True)
 
 def render_practice():
     q = QUESTIONS[st.session_state.current_q_index]
     
     # Header
-    st.markdown(f"""
-    <div style='display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;'>
-        <h2 style='margin:0'>Question {q['id']}: {q['title']}</h2>
-        <span style='background: #334155; padding: 6px 16px; border-radius: 20px; font-size: 14px; font-weight: bold; color: #e2e8f0;'>
-            {q['points']} PTS
-        </span>
-    </div>
-    """, unsafe_allow_html=True)
-
-    # Main Split
-    left, right = st.columns([1, 1], gap="medium")
+    st.markdown(f"## {q['title']}")
     
-    with left:
+    # Layout
+    col_q, col_work = st.columns([1, 1], gap="medium")
+    
+    with col_q:
         st.markdown(f"""
         <div class='glass-card'>
-            <h4 style='color: #93c5fd; margin-bottom: 8px;'>📋 Problem Statement</h4>
-            <p style='font-size: 1.1rem; color: #f1f5f9;'>{q['content']}</p>
+            <div style='display:flex; justify-content:space-between;'>
+                <span class='module-badge badge-{'code' if q['type']=='code' else 'theory'}'>{q['type']}</span>
+                <span style='color: #64748b; font-weight:bold;'>{q['points']} PTS</span>
+            </div>
+            <h3 style='margin-top:15px; color:#e2e8f0;'>Problem Statement</h3>
+            <p style='font-size: 1.1rem; line-height: 1.6;'>{q['content']}</p>
         </div>
         """, unsafe_allow_html=True)
         
-        # Context Image Trigger
         if "context" in q:
-            st.markdown(f"**Visual Reference:** {q['context']}")
+            st.markdown(f"**Visual Aid:** {q['context']}")
             
         if q['type'] == 'code':
-            with st.expander(f"📂 Dataset Preview: {q['dataset']}", expanded=True):
-                st.dataframe(DATASETS[q['dataset']].head(), use_container_width=True)
-                st.caption(f"Rows: {len(DATASETS[q['dataset']])} | Columns: {list(DATASETS[q['dataset']].columns)}")
+            st.markdown("#### 📂 Dataset Preview")
+            st.dataframe(DATASETS[q['dataset']].head(5), use_container_width=True)
     
-    with right:
+    with col_work:
         st.markdown("#### 🛠️ Workspace")
-        
         if q['type'] == 'code':
-            code = st.text_area("Python Editor", value=q['starter_code'], height=250, label_visibility="collapsed")
-            
-            if st.button("▶ Run Code"):
+            user_input = st.text_area("code_editor", value=q['starter_code'], height=300, label_visibility="collapsed")
+            if st.button("▶ Run & Check"):
                 try:
-                    local_env = {"df": DATASETS[q['dataset']], "pd": pd, "np": np}
-                    exec(code, {}, local_env)
-                    # Try to find a variable result
-                    output = "Code executed successfully."
-                    for key, val in local_env.items():
-                        if key not in ["df", "pd", "np", "__builtins__"]:
-                            output = f"{key} = {val}"
-                    st.success(f"Output: {output}")
-                    st.session_state.temp_input = code
+                    env = {"df": DATASETS[q['dataset']], "pd": pd, "np": np}
+                    exec(user_input, {}, env)
+                    st.success("Execution Successful. Ready to Submit.")
+                    st.session_state.temp_ans = user_input
                 except Exception as e:
-                    st.error(f"Runtime Error: {e}")
-            else:
-                st.session_state.temp_input = code
-                
+                    st.error(f"Error: {e}")
         else:
-            ans = st.text_area("Your Response", height=250, placeholder="Explain your reasoning...")
-            st.session_state.temp_input = ans
+            user_input = st.text_area("text_editor", height=300, placeholder="Type your answer here...", label_visibility="collapsed")
+            st.session_state.temp_ans = user_input
             
         st.markdown("<br>", unsafe_allow_html=True)
         
-        if st.button("Submit & Verify", type="primary", use_container_width=True):
-            with st.spinner("🤖 AI Analyst Evaluating..."):
-                prompt = f"Question: {q['content']}. User Answer: {st.session_state.temp_input}. Type: {q['type']}. Strict Evaluation."
-                feedback = get_ai_evaluation(prompt)
-                st.session_state.last_feedback = feedback
-                
-                # Save Answer
-                st.session_state.answers.append({
-                    "id": q['id'],
-                    "score": feedback['score'] * q['points'],
-                    "max": q['points'],
-                    "title": q['title'],
-                    "type": q['type']
-                })
+        if st.button("Submit Response", type="primary"):
+            with st.spinner("AI Analyzing..."):
+                ans = st.session_state.get('temp_ans', '')
+                fb = get_ai_evaluation(f"Question: {q['content']} Answer: {ans}")
+                st.session_state.last_feedback = fb
+                st.session_state.answers.append({**q, "score": fb['score']*q['points']})
                 st.rerun()
 
-    # Feedback Overlay
     if st.session_state.last_feedback:
         fb = st.session_state.last_feedback
         color = "#22c55e" if fb['correct'] else "#f59e0b"
-        
         st.markdown(f"""
-        <div class='glass-card' style='border: 1px solid {color}; box-shadow: 0 0 20px {color}40;'>
-            <h3 style='color: {color}'>Evaluation Complete</h3>
-            <p><b>Feedback:</b> {fb['feedback']}</p>
+        <div class='glass-card' style='border: 1px solid {color};'>
+            <h3 style='color:{color}'>Evaluation Result</h3>
+            <p>{fb['feedback']}</p>
         </div>
         """, unsafe_allow_html=True)
-        
-        if st.button("Next Challenge ➡️", type="primary"):
+        if st.button("Next Module ➡️"):
             st.session_state.last_feedback = None
             if st.session_state.current_q_index < len(QUESTIONS) - 1:
                 st.session_state.current_q_index += 1
@@ -409,49 +420,13 @@ def render_practice():
             st.rerun()
 
 def render_report():
-    st.markdown("## 📊 Comprehensive Analytics Report")
-    
-    total_score = sum(a['score'] for a in st.session_state.answers)
-    max_score = sum(a['max'] for a in st.session_state.answers)
-    
-    col1, col2 = st.columns([1, 2])
-    
-    with col1:
-        st.markdown(f"""
-        <div class='glass-card' style='text-align:center'>
-            <h1 style='font-size: 4rem; color: #38bdf8;'>{int(total_score)}</h1>
-            <p>Total Points Scored</p>
-            <hr style='border-color: rgba(255,255,255,0.1)'>
-            <h3>{int(total_score/max_score*100)}%</h3>
-            <p>Proficiency Rating</p>
-        </div>
-        """, unsafe_allow_html=True)
-        
-    with col2:
-        # Performance by Category (Theory vs Code)
-        theory_pts = sum(a['score'] for a in st.session_state.answers if a['type']=='theory')
-        code_pts = sum(a['score'] for a in st.session_state.answers if a['type']=='code')
-        
-        data = pd.DataFrame({
-            "Category": ["Theory Mastery", "Coding Skills"],
-            "Score": [theory_pts, code_pts]
-        })
-        
-        fig = px.bar(data, x="Score", y="Category", orientation='h', text="Score", color="Category", 
-                     color_discrete_sequence=['#818cf8', '#34d399'])
-        fig.update_layout(paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)', font_color='white')
-        st.plotly_chart(fig, use_container_width=True)
-
-    st.markdown("### 📝 Detailed Question Breakdown")
-    for ans in st.session_state.answers:
-        with st.expander(f"{ans['title']} - {int(ans['score'])}/{ans['max']}"):
-            st.write("Review complete. Specific feedback available in previous session steps.")
-
-    if st.button("🔄 Restart Assessment"):
+    total = sum(a['score'] for a in st.session_state.answers)
+    st.markdown(f"<h1 style='text-align:center'>Final Score: {int(total)}</h1>", unsafe_allow_html=True)
+    if st.button("Restart"):
         st.session_state.clear()
         st.rerun()
 
-# --- APP FLOW ---
+# --- MAIN ---
 inject_css()
 render_sidebar()
 
