@@ -734,123 +734,270 @@ elif st.session_state.completed:
         duration = (datetime.now() - st.session_state.start_time).seconds // 60
         st.metric("⏱️ Time", f"{duration} min")
     
-    if not st.session_state.final_report:
-        with st.spinner("🤖 Generating your personalized report..."):
-            st.session_state.final_report = generate_final_report(st.session_state.user_answers, ai_model)
-    
-    report = st.session_state.final_report
-    
     st.markdown("---")
-    st.markdown("### 🤖 AI Mentor's Overall Assessment")
-    st.info(report.get('overall_feedback', 'Great work!'))
     
-    col1, col2 = st.columns(2)
-    with col1:
-        st.markdown("#### 💪 Strengths")
-        for strength in report.get('strengths', [])[:3]:
-            st.success(f"✅ {strength}")
+    # Generate Report Button
+    if 'show_detailed_report' not in st.session_state:
+        st.session_state.show_detailed_report = False
+    
+    col1, col2, col3 = st.columns([1, 2, 1])
     with col2:
-        st.markdown("#### 📈 Areas to Improve")
-        for weakness in report.get('weaknesses', [])[:3]:
-            st.warning(f"📚 {weakness}")
+        if not st.session_state.show_detailed_report:
+            if st.button("📊 Generate Detailed Feedback Report", use_container_width=True, type="primary", key="gen_report"):
+                with st.spinner("🤖 AI Mentor analyzing all your answers and generating comprehensive report..."):
+                    # Generate final report if not exists
+                    if not st.session_state.final_report:
+                        st.session_state.final_report = generate_final_report(st.session_state.user_answers, ai_model)
+                    st.session_state.show_detailed_report = True
+                    time.sleep(1)
+                    st.rerun()
     
-    st.markdown("#### 🎯 Recommendations")
-    for rec in report.get('recommendations', [])[:3]:
-        st.info(f"💡 {rec}")
-    
-    if report.get('learning_path'):
-        st.markdown("#### 🗺️ Your Learning Path")
-        for item in report['learning_path'][:3]:
-            priority = item.get('priority', 'medium')
-            color = "🔴" if priority == "high" else "🟡" if priority == "medium" else "🟢"
-            st.markdown(f"{color} **{item.get('topic', 'Topic')}** ({priority} priority): {item.get('resources', 'Practice')}")
-    
-    # DETAILED QUESTION-BY-QUESTION REPORT
-    st.markdown("---")
-    st.markdown("## 📋 Detailed Question Report")
-    
-    for idx, answer_data in enumerate(st.session_state.user_answers, 1):
-        q_status = "✅ Correct" if answer_data.get("is_correct") else "❌ Wrong"
-        status_color = "#22c55e" if answer_data.get("is_correct") else "#ef4444"
+    # Show detailed report only after button click
+    if st.session_state.show_detailed_report:
+        report = st.session_state.final_report
         
-        with st.expander(f"**Question {idx}: {answer_data['title']}** - {q_status}", expanded=False):
-            st.markdown(f"""
-            <div style="background: linear-gradient(145deg, rgba(255,255,255,0.08), rgba(255,255,255,0.03)); 
-                        border-left: 4px solid {status_color}; padding: 20px; border-radius: 12px; margin-bottom: 16px;">
-                <div style="display: flex; justify-content: space-between; margin-bottom: 16px;">
-                    <span style="color: white; font-weight: 600;">Type: {answer_data['type'].title()}</span>
-                    <span style="color: white; font-weight: 600;">Difficulty: {answer_data['difficulty'].title()}</span>
-                    <span style="color: {status_color}; font-weight: 700;">
-                        {answer_data.get('points_earned', 0)}/{answer_data.get('max_points', 0)} points
-                    </span>
-                </div>
-            </div>
-            """, unsafe_allow_html=True)
+        st.markdown("---")
+        st.markdown("## 🤖 AI Mentor's Overall Assessment")
+        st.info(report.get('overall_feedback', 'Great work!'))
+        
+        col1, col2 = st.columns(2)
+        with col1:
+            st.markdown("### 💪 Your Strengths")
+            for strength in report.get('strengths', [])[:4]:
+                st.success(f"✅ {strength}")
+        with col2:
+            st.markdown("### 📈 Areas to Improve")
+            for weakness in report.get('weaknesses', [])[:4]:
+                st.warning(f"📚 {weakness}")
+        
+        st.markdown("### 🎯 Personalized Recommendations")
+        for rec in report.get('recommendations', [])[:4]:
+            st.info(f"💡 {rec}")
+        
+        if report.get('learning_path'):
+            st.markdown("### 🗺️ Your Learning Path")
+            for item in report['learning_path'][:4]:
+                priority = item.get('priority', 'medium')
+                color = "🔴" if priority == "high" else "🟡" if priority == "medium" else "🟢"
+                st.markdown(f"{color} **{item.get('topic', 'Topic')}** ({priority} priority): {item.get('resources', 'Practice')}")
+        
+        # DETAILED QUESTION-BY-QUESTION REPORT
+        st.markdown("---")
+        st.markdown("## 📋 Detailed Question-by-Question Feedback")
+        st.markdown("*Review each question with AI mentor's comprehensive analysis*")
+        
+        for idx, answer_data in enumerate(st.session_state.user_answers, 1):
+            q_status = "✅ CORRECT" if answer_data.get("is_correct") else "❌ INCORRECT"
+            status_color = "#22c55e" if answer_data.get("is_correct") else "#ef4444"
+            status_bg = "rgba(34, 197, 94, 0.1)" if answer_data.get("is_correct") else "rgba(239, 68, 68, 0.1)"
             
-            if answer_data['type'] == 'theory':
-                st.markdown("**📝 Your Answer:**")
-                st.text_area("", value=answer_data.get('answer', ''), height=150, disabled=True, key=f"review_answer_{idx}")
-            else:
-                st.markdown("**💻 Your Code:**")
-                st.code(answer_data.get('code', ''), language="python")
+            with st.expander(f"**Question {idx}: {answer_data['title']}** - {q_status}", expanded=False):
+                st.markdown(f"""
+                <div style="background: {status_bg}; 
+                            border-left: 5px solid {status_color}; 
+                            padding: 24px; 
+                            border-radius: 12px; 
+                            margin-bottom: 20px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px;">
+                        <div>
+                            <span style="color: white; font-weight: 600; font-size: 1.1rem;">📌 Type: {answer_data['type'].title()}</span>
+                            <span style="color: white; margin-left: 20px; font-weight: 600;">🎯 Difficulty: {answer_data['difficulty'].title()}</span>
+                        </div>
+                        <div style="background: {status_color}; color: white; padding: 12px 24px; border-radius: 20px; font-weight: 700; font-size: 1.2rem;">
+                            Score: {answer_data.get('points_earned', 0)}/{answer_data.get('max_points', 0)} points
+                        </div>
+                    </div>
+                </div>
+                """, unsafe_allow_html=True)
+                
+                # Get the original question for reference
+                original_q = next((q for q in QUESTIONS if q['id'] == answer_data['id']), None)
+                if original_q:
+                    st.markdown("**📝 Question:**")
+                    st.info(original_q['prompt'])
+                
+                if answer_data['type'] == 'theory':
+                    st.markdown("**✍️ Your Answer:**")
+                    st.markdown(f"""
+                    <div style="background: rgba(255,255,255,0.05); 
+                                padding: 20px; 
+                                border-radius: 12px; 
+                                border: 1px solid rgba(255,255,255,0.1);
+                                color: rgba(255,255,255,0.9);
+                                line-height: 1.6;">
+                        {answer_data.get('answer', '').replace(chr(10), '<br>')}
+                    </div>
+                    """, unsafe_allow_html=True)
+                    
+                else:  # Code question
+                    st.markdown("**💻 Your Code Solution:**")
+                    st.code(answer_data.get('code', ''), language="python")
+                    
+                    col1, col2 = st.columns(2)
+                    with col1:
+                        st.markdown("**📤 Your Output:**")
+                        result_str = str(answer_data.get('result', ''))
+                        st.code(result_str, language="python")
+                    with col2:
+                        st.markdown("**✅ Expected Output:**")
+                        expected_str = str(answer_data.get('expected', ''))
+                        st.code(expected_str, language="python")
+                
+                st.markdown("---")
+                
+                ai_feedback = answer_data.get('ai_analysis', {})
+                
+                st.markdown("**🤖 AI Mentor's Detailed Feedback:**")
+                st.markdown(f"""
+                <div style="background: linear-gradient(135deg, rgba(139, 92, 246, 0.15), rgba(168, 85, 247, 0.1)); 
+                            padding: 20px; 
+                            border-radius: 12px; 
+                            border-left: 4px solid #8b5cf6;
+                            color: rgba(255,255,255,0.95);
+                            font-size: 1.05rem;
+                            line-height: 1.7;">
+                    {ai_feedback.get('feedback', 'No feedback available')}
+                </div>
+                """, unsafe_allow_html=True)
+                
+                st.markdown("")
                 
                 col1, col2 = st.columns(2)
+                
                 with col1:
-                    st.markdown("**Your Result:**")
-                    st.code(str(answer_data.get('result', '')), language="python")
+                    if ai_feedback.get('strengths'):
+                        st.markdown("**💪 What You Did Well:**")
+                        for s in ai_feedback.get('strengths', []):
+                            st.markdown(f"""
+                            <div style="background: rgba(34, 197, 94, 0.1); 
+                                        padding: 12px 16px; 
+                                        border-radius: 8px; 
+                                        margin-bottom: 8px;
+                                        border-left: 3px solid #22c55e;">
+                                <span style="color: rgba(255,255,255,0.9);">✅ {s}</span>
+                            </div>
+                            """, unsafe_allow_html=True)
+                
                 with col2:
-                    st.markdown("**Expected Result:**")
-                    st.code(str(answer_data.get('expected', '')), language="python")
+                    if ai_feedback.get('improvements'):
+                        st.markdown("**📈 How to Improve:**")
+                        for i in ai_feedback.get('improvements', []):
+                            st.markdown(f"""
+                            <div style="background: rgba(251, 191, 36, 0.1); 
+                                        padding: 12px 16px; 
+                                        border-radius: 8px; 
+                                        margin-bottom: 8px;
+                                        border-left: 3px solid #fbbf24;">
+                                <span style="color: rgba(255,255,255,0.9);">💡 {i}</span>
+                            </div>
+                            """, unsafe_allow_html=True)
+                
+                if answer_data['type'] == 'code' and ai_feedback.get('code_quality'):
+                    quality = ai_feedback.get('code_quality', 'N/A')
+                    quality_colors = {
+                        "excellent": ("#22c55e", "🌟"),
+                        "good": ("#3b82f6", "👍"),
+                        "fair": ("#f59e0b", "⚠️"),
+                        "poor": ("#ef4444", "❌")
+                    }
+                    quality_color, quality_emoji = quality_colors.get(quality.lower(), ("#64748b", "ℹ️"))
+                    
+                    st.markdown(f"""
+                    <div style="background: rgba(255,255,255,0.05); 
+                                padding: 16px; 
+                                border-radius: 12px; 
+                                margin-top: 16px;
+                                text-align: center;">
+                        <span style="color: rgba(255,255,255,0.7); font-size: 0.95rem;">Code Quality Assessment:</span><br>
+                        <span style="color: {quality_color}; font-weight: 800; font-size: 1.4rem;">
+                            {quality_emoji} {quality.upper()}
+                        </span>
+                    </div>
+                    """, unsafe_allow_html=True)
+        
+        st.markdown("---")
+        
+        # Action buttons at the bottom
+        col1, col2, col3 = st.columns(3)
+        
+        with col1:
+            if st.button("🔄 Start New Practice Session", use_container_width=True, type="primary"):
+                for key in list(st.session_state.keys()):
+                    if key.startswith(('answer_', 'code_', 'user_answers', 'current_q', 'started', 'completed', 'final_report', 'show_detailed_report')):
+                        del st.session_state[key]
+                st.rerun()
+        
+        with col2:
+            # Download report as JSON
+            report_data = {
+                "summary": {
+                    "total_points": total_points,
+                    "max_points": max_points,
+                    "percentage": percentage,
+                    "correct": correct,
+                    "wrong": wrong,
+                    "duration_minutes": (datetime.now() - st.session_state.start_time).seconds // 60
+                },
+                "questions": st.session_state.user_answers,
+                "ai_overall_report": report
+            }
+            st.download_button(
+                label="📥 Download Complete Report (JSON)",
+                data=json.dumps(report_data, indent=2),
+                file_name=f"datamentor_report_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json",
+                mime="application/json",
+                use_container_width=True
+            )
+        
+        with col3:
+            # Create a text summary report
+            text_report = f"""
+DataMentor AI - Practice Session Report
+{'='*50}
+
+SUMMARY
+Total Score: {total_points}/{max_points} points ({percentage:.1f}%)
+Correct Answers: {correct}/8
+Wrong Answers: {wrong}/8
+Time Taken: {(datetime.now() - st.session_state.start_time).seconds // 60} minutes
+
+OVERALL FEEDBACK
+{report.get('overall_feedback', 'N/A')}
+
+STRENGTHS
+{chr(10).join(f"• {s}" for s in report.get('strengths', []))}
+
+AREAS TO IMPROVE
+{chr(10).join(f"• {w}" for w in report.get('weaknesses', []))}
+
+RECOMMENDATIONS
+{chr(10).join(f"• {r}" for r in report.get('recommendations', []))}
+
+{'='*50}
+DETAILED QUESTION BREAKDOWN
+{'='*50}
+
+"""
+            for idx, ans in enumerate(st.session_state.user_answers, 1):
+                text_report += f"""
+Question {idx}: {ans['title']}
+Status: {'CORRECT ✓' if ans.get('is_correct') else 'INCORRECT ✗'}
+Points: {ans.get('points_earned', 0)}/{ans.get('max_points', 0)}
+Type: {ans['type'].title()}
+Difficulty: {ans['difficulty'].title()}
+
+Feedback: {ans.get('ai_analysis', {}).get('feedback', 'N/A')}
+
+{'='*50}
+"""
             
-            ai_feedback = answer_data.get('ai_analysis', {})
-            
-            st.markdown("**🤖 AI Feedback:**")
-            st.info(ai_feedback.get('feedback', 'No feedback available'))
-            
-            if ai_feedback.get('strengths'):
-                st.markdown("**💪 Strengths:**")
-                for s in ai_feedback.get('strengths', []):
-                    st.success(f"• {s}")
-            
-            if ai_feedback.get('improvements'):
-                st.markdown("**📈 Improvements:**")
-                for i in ai_feedback.get('improvements', []):
-                    st.warning(f"• {i}")
-            
-            if answer_data['type'] == 'code' and ai_feedback.get('code_quality'):
-                quality = ai_feedback.get('code_quality', 'N/A')
-                quality_color = {"excellent": "#22c55e", "good": "#3b82f6", "fair": "#f59e0b", "poor": "#ef4444"}.get(quality.lower(), "#64748b")
-                st.markdown(f"**Code Quality:** <span style='color: {quality_color}; font-weight: 700;'>{quality.upper()}</span>", unsafe_allow_html=True)
-    
-    st.markdown("---")
-    
-    col1, col2 = st.columns(2)
-    with col1:
-        if st.button("🔄 Start New Session", use_container_width=True, type="primary"):
-            for key in list(st.session_state.keys()):
-                if key.startswith(('answer_', 'code_', 'user_answers', 'current_q', 'started', 'completed', 'final_report')):
-                    del st.session_state[key]
-            st.rerun()
-    with col2:
-        # Download report as JSON
-        report_data = {
-            "summary": {
-                "total_points": total_points,
-                "max_points": max_points,
-                "percentage": percentage,
-                "correct": correct,
-                "wrong": wrong
-            },
-            "questions": st.session_state.user_answers,
-            "ai_report": report
-        }
-        st.download_button(
-            label="📥 Download Full Report",
-            data=json.dumps(report_data, indent=2),
-            file_name=f"datamentor_report_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json",
-            mime="application/json",
-            use_container_width=True
-        )
+            st.download_button(
+                label="📄 Download Text Report",
+                data=text_report,
+                file_name=f"datamentor_report_{datetime.now().strftime('%Y%m%d_%H%M%S')}.txt",
+                mime="text/plain",
+                use_container_width=True
+            )
 
 else:
     # Active Question
