@@ -577,7 +577,7 @@ else:
                         
  
                             
-                                st.rerun()
+                        st.rerun()
                         else:
                             st.error(error)
                     else:
@@ -591,6 +591,7 @@ else:
         <p style="opacity: 0.8;">© 2025 All rights reserved</p>
     </div>
     """, unsafe_allow_html=True)
+
 
 
 
