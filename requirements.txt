@@ -4,3 +4,9 @@ pandas
 duckdb
 mysql-connector-python
 openai
+
+streamlit
+pandas
+numpy
+google-generativeai
+plotly
