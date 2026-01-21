@@ -21,7 +21,7 @@ st.set_page_config(
 )
 
 # API KEY
-HARD_CODED_GEMINI_API_KEY = "AIzaSyCipiGM8HxiPiVtfePpGN-TiIk5JVBO6_M"
+HARD_CODED_GEMINI_API_KEY = "AIzaSyCbgdqoXv30zSd1s1WfuZfvA5ggvN48578"
 
 # --- DATASETS ---
 @st.cache_data
@@ -409,4 +409,5 @@ elif st.session_state.page == "practice":
     render_practice()
 elif st.session_state.page == "report":
     render_report()
+
 
