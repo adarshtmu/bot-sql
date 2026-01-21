@@ -207,7 +207,7 @@ def get_ai_evaluation(prompt):
     # 2. Try Real AI Connection
     try:
         genai.configure(api_key=st.session_state.gemini_key)
-        model = genai.GenerativeModel('gemini-2.0-flash-exp')
+        model = genai.GenerativeModel('gemini-3-flash-preview')
         response = model.generate_content(prompt + " Return strict JSON: {'score': float, 'feedback': str, 'correct': bool}")
         
         # Cleanup JSON response
@@ -409,5 +409,6 @@ elif st.session_state.page == "practice":
     render_practice()
 elif st.session_state.page == "report":
     render_report()
+
 
 
