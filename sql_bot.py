@@ -1,8 +1,3 @@
-"""
-AI-Powered Data Science Practice Platform
-Enterprise-Grade EdTech UI with Advanced Features
-"""
-
 import os
 import streamlit as st
 import pandas as pd
@@ -47,10 +42,15 @@ if "completed" not in st.session_state:
     st.session_state.completed = False
 if "gemini_api_key" not in st.session_state:
     st.session_state.gemini_api_key = ""
-if "api_key_validated" not in st.session_state:
-    st.session_state.api_key_validated = False
 if "final_report" not in st.session_state:
     st.session_state.final_report = None
+
+# --- NEW STATE VARIABLES FOR NAVIGATION CONTROL ---
+if "feedback_shown" not in st.session_state:
+    st.session_state.feedback_shown = False
+if "temp_submit_data" not in st.session_state:
+    st.session_state.temp_submit_data = None
+# --------------------------------------------------
 
 # Datasets
 students_df = pd.DataFrame({
@@ -154,7 +154,6 @@ def parse_json_from_text(text: str) -> dict:
 
 def simple_local_theory_analyzer(question: dict, student_answer: str) -> dict:
     text = (student_answer or "").lower()
-    tokens = set(re.findall(r"\w+", text))
     keywords_by_q = {
         1: {"bias", "variance", "overfitting", "underfitting", "regularization"},
         2: {"k-fold", "cross", "validation", "folds", "train", "test"},
@@ -366,21 +365,21 @@ if not st.session_state.started:
     <head>
     <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@400;500;600;700;800&display=swap');
-    
+     
     * { box-sizing: border-box; margin: 0; padding: 0; }
-    
+     
     body {
         font-family: 'Inter', -apple-system, sans-serif;
         background: linear-gradient(135deg, #0a0e27 0%, #1a1d3e 25%, #2d1b4e 50%, #1e0836 75%, #0f0520 100%);
         overflow-x: hidden;
         padding: 20px;
     }
-    
+     
     @keyframes gradientShift {
         0%, 100% { background-position: 0% 50%; }
         50% { background-position: 100% 50%; }
     }
-    
+     
     .hero-wrapper {
         background: linear-gradient(270deg, #1e1b4b, #312e81, #4c1d95, #581c87);
         background-size: 800% 800%;
@@ -390,19 +389,19 @@ if not st.session_state.started:
         overflow: hidden;
         padding: 40px 20px;
     }
-    
+     
     @keyframes float {
         0%, 100% { transform: translateY(0px) rotate(0deg); }
         50% { transform: translateY(-20px) rotate(180deg); }
     }
-    
+     
     .particle {
         position: absolute;
         background: rgba(255, 255, 255, 0.1);
         border-radius: 50%;
         animation: float 6s ease-in-out infinite;
     }
-    
+     
     .hero-card {
         background: linear-gradient(145deg, rgba(255,255,255,0.12), rgba(255,255,255,0.05));
         backdrop-filter: blur(40px);
@@ -418,7 +417,7 @@ if not st.session_state.started:
         transform: perspective(1000px) rotateX(2deg);
         transition: all 0.6s cubic-bezier(0.23, 1, 0.32, 1);
     }
-    
+     
     .hero-card:hover {
         transform: perspective(1000px) rotateX(0deg) translateY(-8px);
         box-shadow: 
@@ -426,7 +425,7 @@ if not st.session_state.started:
             inset 0 1px 0 rgba(255,255,255,0.4),
             0 60px 120px -20px rgba(139, 92, 246, 0.4);
     }
-    
+     
     .hero-title {
         font-family: 'Space Grotesk', sans-serif;
         font-size: 5.5rem;
@@ -441,12 +440,12 @@ if not st.session_state.started:
         letter-spacing: -4px;
         animation: titleGlow 3s ease-in-out infinite;
     }
-    
+     
     @keyframes titleGlow {
         0%, 100% { filter: brightness(1) drop-shadow(0 0 20px rgba(168, 85, 247, 0.4)); }
         50% { filter: brightness(1.1) drop-shadow(0 0 30px rgba(168, 85, 247, 0.6)); }
     }
-    
+     
     .hero-subtitle {
         font-size: 1.5rem;
         color: rgba(255, 255, 255, 0.85);
@@ -456,14 +455,14 @@ if not st.session_state.started:
         line-height: 1.7;
         font-weight: 400;
     }
-    
+     
     .stats-row {
         display: grid;
         grid-template-columns: repeat(4, 1fr);
         gap: 24px;
         margin: 48px 0;
     }
-    
+     
     .stat-box {
         background: linear-gradient(145deg, rgba(168, 85, 247, 0.2), rgba(139, 92, 246, 0.1));
         backdrop-filter: blur(20px);
@@ -473,19 +472,19 @@ if not st.session_state.started:
         text-align: center;
         transition: all 0.3s ease;
     }
-    
+     
     .stat-box:hover {
         transform: scale(1.05);
         border-color: rgba(168, 85, 247, 0.5);
     }
-    
+     
     .stat-number {
         font-size: 3rem;
         font-weight: 900;
         color: #fbbf24;
         margin-bottom: 8px;
     }
-    
+     
     .stat-label {
         color: rgba(255, 255, 255, 0.9);
         font-size: 1.1rem;
@@ -493,14 +492,14 @@ if not st.session_state.started:
         text-transform: uppercase;
         letter-spacing: 1px;
     }
-    
+     
     .features-grid {
         display: grid;
         grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
         gap: 32px;
         margin: 64px 0;
     }
-    
+     
     .feature-card {
         background: linear-gradient(145deg, rgba(255,255,255,0.1), rgba(255,255,255,0.05));
         backdrop-filter: blur(20px);
@@ -511,39 +510,39 @@ if not st.session_state.started:
         transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
         cursor: pointer;
     }
-    
+     
     .feature-card:hover {
         transform: translateY(-8px) scale(1.02);
         background: linear-gradient(145deg, rgba(255,255,255,0.15), rgba(255,255,255,0.08));
         box-shadow: 0 20px 40px rgba(168, 85, 247, 0.3);
         border-color: rgba(168, 85, 247, 0.4);
     }
-    
+     
     .feature-icon {
         font-size: 4rem;
         margin-bottom: 24px;
         display: inline-block;
         animation: bounce 2s ease-in-out infinite;
     }
-    
+     
     @keyframes bounce {
         0%, 100% { transform: translateY(0); }
         50% { transform: translateY(-10px); }
     }
-    
+     
     .feature-title {
         font-size: 1.5rem;
         font-weight: 700;
         color: #ffffff;
         margin-bottom: 12px;
     }
-    
+     
     .feature-desc {
         color: rgba(255, 255, 255, 0.8);
         font-size: 1.05rem;
         line-height: 1.6;
     }
-    
+     
     .topics-section {
         background: linear-gradient(145deg, rgba(30, 27, 75, 0.6), rgba(49, 46, 129, 0.4));
         backdrop-filter: blur(30px);
@@ -552,7 +551,7 @@ if not st.session_state.started:
         padding: 48px;
         margin: 64px 0;
     }
-    
+     
     .topics-title {
         font-size: 2.5rem;
         font-weight: 800;
@@ -560,13 +559,13 @@ if not st.session_state.started:
         text-align: center;
         margin-bottom: 32px;
     }
-    
+     
     .topics-grid {
         display: grid;
         grid-template-columns: repeat(2, 1fr);
         gap: 24px;
     }
-    
+     
     .topic-item {
         display: flex;
         align-items: center;
@@ -576,22 +575,22 @@ if not st.session_state.started:
         border-radius: 12px;
         transition: all 0.3s ease;
     }
-    
+     
     .topic-item:hover {
         background: rgba(168, 85, 247, 0.15);
         transform: translateX(8px);
     }
-    
+     
     .topic-emoji {
         font-size: 2rem;
     }
-    
+     
     .topic-text {
         color: rgba(255, 255, 255, 0.9);
         font-size: 1.15rem;
         font-weight: 500;
     }
-    
+     
     @media (max-width: 768px) {
         .hero-title { font-size: 3rem; letter-spacing: -2px; }
         .hero-subtitle { font-size: 1.1rem; }
@@ -606,7 +605,7 @@ if not st.session_state.started:
         <div class="particle" style="top: 70%; left: 80%; width: 60px; height: 60px; animation-delay: 2s;"></div>
         <div class="particle" style="top: 30%; right: 15%; width: 100px; height: 100px; animation-delay: 1s;"></div>
         <div class="particle" style="bottom: 20%; left: 70%; width: 70px; height: 70px; animation-delay: 3s;"></div>
-        
+         
         <div class="hero-card">
             <h1 class="hero-title">DataMentor AI</h1>
             <p class="hero-subtitle">
@@ -870,10 +869,10 @@ elif st.session_state.completed:
                         for s in ai_feedback.get('strengths', []):
                             st.markdown(f"""
                             <div style="background: rgba(34, 197, 94, 0.1); 
-                                        padding: 12px 16px; 
-                                        border-radius: 8px; 
-                                        margin-bottom: 8px;
-                                        border-left: 3px solid #22c55e;">
+                                            padding: 12px 16px; 
+                                            border-radius: 8px; 
+                                            margin-bottom: 8px;
+                                            border-left: 3px solid #22c55e;">
                                 <span style="color: rgba(255,255,255,0.9);">✅ {s}</span>
                             </div>
                             """, unsafe_allow_html=True)
@@ -884,10 +883,10 @@ elif st.session_state.completed:
                         for i in ai_feedback.get('improvements', []):
                             st.markdown(f"""
                             <div style="background: rgba(251, 191, 36, 0.1); 
-                                        padding: 12px 16px; 
-                                        border-radius: 8px; 
-                                        margin-bottom: 8px;
-                                        border-left: 3px solid #fbbf24;">
+                                            padding: 12px 16px; 
+                                            border-radius: 8px; 
+                                            margin-bottom: 8px;
+                                            border-left: 3px solid #fbbf24;">
                                 <span style="color: rgba(255,255,255,0.9);">💡 {i}</span>
                             </div>
                             """, unsafe_allow_html=True)
@@ -904,10 +903,10 @@ elif st.session_state.completed:
                     
                     st.markdown(f"""
                     <div style="background: rgba(255,255,255,0.05); 
-                                padding: 16px; 
-                                border-radius: 12px; 
-                                margin-top: 16px;
-                                text-align: center;">
+                                    padding: 16px; 
+                                    border-radius: 12px; 
+                                    margin-top: 16px;
+                                    text-align: center;">
                         <span style="color: rgba(255,255,255,0.7); font-size: 0.95rem;">Code Quality Assessment:</span><br>
                         <span style="color: {quality_color}; font-weight: 800; font-size: 1.4rem;">
                             {quality_emoji} {quality.upper()}
@@ -923,7 +922,7 @@ elif st.session_state.completed:
         with col1:
             if st.button("🔄 Start New Practice Session", use_container_width=True, type="primary"):
                 for key in list(st.session_state.keys()):
-                    if key.startswith(('answer_', 'code_', 'user_answers', 'current_q', 'started', 'completed', 'final_report', 'show_detailed_report')):
+                    if key.startswith(('answer_', 'code_', 'user_answers', 'current_q', 'started', 'completed', 'final_report', 'show_detailed_report', 'feedback_shown', 'temp_submit_data')):
                         del st.session_state[key]
                 st.rerun()
         
@@ -1033,49 +1032,30 @@ else:
             answer = st.text_area("Your Answer:", value=st.session_state[answer_key], height=200, placeholder="Write your detailed answer here...", key=f"textarea_{q['id']}")
             st.session_state[answer_key] = answer
             
-            if st.button("Submit Answer", type="primary", key=f"submit_{q['id']}"):
-                if answer.strip():
-                    with st.spinner("🤖 AI analyzing your answer..."):
-                        ai_analysis = get_ai_feedback_theory(q, answer, ai_model)
-                        
-                        st.session_state.user_answers.append({
-                            "id": q['id'],
-                            "title": q['title'],
-                            "type": q['type'],
-                            "difficulty": q['difficulty'],
-                            "answer": answer,
-                            "ai_analysis": ai_analysis,
-                            "is_correct": ai_analysis.get("is_correct"),
-                            "points_earned": ai_analysis.get("points_earned"),
-                            "max_points": q['points']
-                        })
-                        
-                        score = ai_analysis.get("score", 0)
-                        st.success(f"✅ Score: {ai_analysis.get('points_earned', 0)}/{q['points']} points ({score*100:.0f}%)")
-                        st.info(ai_analysis.get('feedback', ''))
-                        
-                        col1, col2 = st.columns(2)
-                        with col1:
-                            st.markdown("**💪 Strengths:**")
-                            for s in ai_analysis.get('strengths', []):
-                                st.write(f"• {s}")
-                        with col2:
-                            st.markdown("**📈 Improvements:**")
-                            for i in ai_analysis.get('improvements', []):
-                                st.write(f"• {i}")
-                        
-                        st.session_state.current_q += 1
-                        # Clear the answer for next question
-                        st.session_state[answer_key] = ""
-                        
-                        if st.session_state.current_q >= len(QUESTIONS):
-                            st.session_state.completed = True
-                        
-                        time.sleep(0.5)  # Brief pause to show feedback
-                        st.rerun()
-                else:
-                    st.warning("Please provide an answer before submitting.")
-        
+            # Show submit button only if feedback hasn't been shown yet
+            if not st.session_state.feedback_shown:
+                if st.button("Submit Answer", type="primary", key=f"submit_{q['id']}"):
+                    if answer.strip():
+                        with st.spinner("🤖 AI analyzing your answer..."):
+                            ai_analysis = get_ai_feedback_theory(q, answer, ai_model)
+                            
+                            # STORE DATA IN TEMP STATE (Don't submit yet)
+                            st.session_state.temp_submit_data = {
+                                "id": q['id'],
+                                "title": q['title'],
+                                "type": q['type'],
+                                "difficulty": q['difficulty'],
+                                "answer": answer,
+                                "ai_analysis": ai_analysis,
+                                "is_correct": ai_analysis.get("is_correct"),
+                                "points_earned": ai_analysis.get("points_earned"),
+                                "max_points": q['points']
+                            }
+                            st.session_state.feedback_shown = True
+                            st.rerun()
+                    else:
+                        st.warning("Please provide an answer before submitting.")
+            
         else:  # Code question
             if 'dataset' in q:
                 with st.expander("📊 View Dataset"):
@@ -1089,74 +1069,106 @@ else:
             code = st.text_area("Your Code:", value=st.session_state[code_key], height=200, key=f"code_editor_{q['id']}")
             st.session_state[code_key] = code
             
-            if st.button("▶️ Run Code", type="primary", key=f"run_{q['id']}"):
-                if code.strip():
-                    success, result, error, stats = safe_execute_code(code, DATASETS.get(q['dataset'], pd.DataFrame()))
-                    
-                    if success and result is not None:
-                        expected = REFERENCE_RESULTS.get(q['id'])
-                        validator = globals()[f"validator_{q['validator']}"]
-                        is_correct, msg = validator(result, expected)
+            # Show Run button only if feedback hasn't been shown yet
+            if not st.session_state.feedback_shown:
+                if st.button("▶️ Run & Check Code", type="primary", key=f"run_{q['id']}"):
+                    if code.strip():
+                        success, result, error, stats = safe_execute_code(code, DATASETS.get(q['dataset'], pd.DataFrame()))
                         
-                        # Show output immediately
-                        st.markdown("### 📤 Output")
-                        col1, col2 = st.columns(2)
-                        with col1:
-                            st.markdown("**Your Result:**")
-                            st.code(str(result), language="python")
-                        with col2:
-                            st.markdown("**Expected:**")
-                            st.code(str(expected), language="python")
-                        
-                        st.markdown(f"**Execution Time:** {stats.get('execution_time', 0):.4f}s")
-                        
-                        with st.spinner("🤖 AI analyzing your code..."):
-                            ai_analysis = get_ai_feedback_code(q, code, result, expected, is_correct, stats, ai_model)
+                        if success and result is not None:
+                            expected = REFERENCE_RESULTS.get(q['id'])
+                            validator = globals()[f"validator_{q['validator']}"]
+                            is_correct, msg = validator(result, expected)
                             
-                            st.session_state.user_answers.append({
-                                "id": q['id'],
-                                "title": q['title'],
-                                "type": q['type'],
-                                "difficulty": q['difficulty'],
-                                "code": code,
-                                "result": result,
-                                "expected": expected,
-                                "ai_analysis": ai_analysis,
-                                "is_correct": is_correct,
-                                "points_earned": ai_analysis.get("points_earned"),
-                                "max_points": q['points']
-                            })
-                            
-                            if is_correct:
-                                st.success(f"✅ Correct! {ai_analysis.get('points_earned', 0)}/{q['points']} points")
-                            else:
-                                st.error(f"❌ Incorrect. {ai_analysis.get('points_earned', 0)}/{q['points']} points")
-                            
-                            st.info(ai_analysis.get('feedback', ''))
-                            
-                            col1, col2 = st.columns(2)
-                            with col1:
-                                st.markdown("**💪 Code Strengths:**")
-                                for s in ai_analysis.get('strengths', []):
-                                    st.write(f"• {s}")
-                            with col2:
-                                st.markdown("**📈 Improvements:**")
-                                for i in ai_analysis.get('improvements', []):
-                                    st.write(f"• {i}")
-                            
-                            st.session_state.current_q += 1
-                            # Clear code for next question
-                            st.session_state[code_key] = ""
-                            
-                            if st.session_state.current_q >= len(QUESTIONS):
-                                st.session_state.completed = True
-                            
-                            time.sleep(0.5)
-                            st.rerun()
+                            with st.spinner("🤖 AI analyzing your code..."):
+                                ai_analysis = get_ai_feedback_code(q, code, result, expected, is_correct, stats, ai_model)
+                                
+                                # STORE DATA IN TEMP STATE (Don't submit yet)
+                                st.session_state.temp_submit_data = {
+                                    "id": q['id'],
+                                    "title": q['title'],
+                                    "type": q['type'],
+                                    "difficulty": q['difficulty'],
+                                    "code": code,
+                                    "result": result,
+                                    "expected": expected,
+                                    "ai_analysis": ai_analysis,
+                                    "is_correct": is_correct,
+                                    "points_earned": ai_analysis.get("points_earned"),
+                                    "max_points": q['points'],
+                                    "stats": stats
+                                }
+                                st.session_state.feedback_shown = True
+                                st.rerun()
+                        else:
+                            st.error(error)
                     else:
-                        st.error(error)
-                else:
-                    st.warning("Please write code before running.")
+                        st.warning("Please write code before running.")
+
+        # --- FEEDBACK & NEXT BUTTON SECTION (Common for both types) ---
+        if st.session_state.feedback_shown and st.session_state.temp_submit_data:
+            data = st.session_state.temp_submit_data
+            ai_analysis = data['ai_analysis']
+            
+            st.markdown("---")
+            st.subheader("📊 Results & Feedback")
+            
+            # Score
+            score = ai_analysis.get("score", 0)
+            if data['is_correct']:
+                st.success(f"✅ Correct! Score: {data.get('points_earned', 0)}/{q['points']} points")
+            else:
+                st.error(f"❌ Incorrect. Score: {data.get('points_earned', 0)}/{q['points']} points")
+            
+            # For Code Questions, show outputs
+            if data['type'] == 'code':
+                 col1, col2 = st.columns(2)
+                 with col1:
+                     st.markdown("**Your Result:**")
+                     st.code(str(data.get('result', '')), language="python")
+                 with col2:
+                     st.markdown("**Expected Result:**")
+                     st.code(str(data.get('expected', '')), language="python")
+                 st.markdown(f"**Execution Time:** {data.get('stats', {}).get('execution_time', 0):.4f}s")
+            
+            # AI Feedback
+            st.info(ai_analysis.get('feedback', ''))
+            
+            col1, col2 = st.columns(2)
+            with col1:
+                st.markdown("**💪 Strengths:**")
+                for s in ai_analysis.get('strengths', []):
+                    st.write(f"• {s}")
+            with col2:
+                st.markdown("**📈 Improvements:**")
+                for i in ai_analysis.get('improvements', []):
+                    st.write(f"• {i}")
+            
+            st.markdown("---")
+            
+            # THE NEXT BUTTON
+            if st.button("➡️ Next Question", type="primary", use_container_width=True):
+                # Save answer to permanent history
+                st.session_state.user_answers.append(st.session_state.temp_submit_data)
+                
+                # Advance question index
+                st.session_state.current_q += 1
+                
+                # Reset temporary states
+                st.session_state.feedback_shown = False
+                st.session_state.temp_submit_data = None
+                
+                # Clear inputs for next question
+                if f"answer_{q['id']}" in st.session_state:
+                     del st.session_state[f"answer_{q['id']}"]
+                if f"code_{q['id']}" in st.session_state:
+                     del st.session_state[f"code_{q['id']}"]
+                
+                # Check for completion
+                if st.session_state.current_q >= len(QUESTIONS):
+                    st.session_state.completed = True
+                
+                st.rerun()
 
 st.markdown("---")
 st.markdown("""
