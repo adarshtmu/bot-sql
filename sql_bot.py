@@ -242,7 +242,7 @@ def get_ai_evaluation(prompt):
     try:
         genai.configure(api_key=st.session_state.gemini_key)
         # UPDATED TO 'gemini-pro' for better compatibility
-        model = genai.GenerativeModel('gemini-1.5-flash-latest') 
+        model = genai.GenerativeModel('gemini-3-pro-preview') 
         response = model.generate_content(prompt + " Return strict JSON: {'score': float, 'feedback': str, 'correct': bool}")
         
         # Cleanup JSON response
@@ -470,4 +470,5 @@ elif st.session_state.page == "practice":
     render_practice()
 elif st.session_state.page == "report":
     render_report()
+
 
