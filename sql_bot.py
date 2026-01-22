@@ -3,6 +3,8 @@ import pandas as pd
 import numpy as np
 import json
 import time
+import io
+import sys
 
 # LLM Integration
 try:
@@ -19,13 +21,12 @@ st.set_page_config(
     initial_sidebar_state="collapsed"
 )
 
-# API KEY (Keep your key here)
+# API KEY
 HARD_CODED_GEMINI_API_KEY = "AIzaSyCbgdqoXv30zSd1s1WfuZfvA5ggvN48578"
 
-# --- DATASETS (kept for compatibility, though used less in basics) ---
+# --- DATASETS ---
 @st.cache_data
 def load_data():
-    # A simple dummy dataset for any list manipulation tasks if needed
     return {
         "sales": pd.DataFrame({"item": ["Apple", "Banana", "Cherry"], "cost": [10, 20, 15]}),
         "students": pd.DataFrame({"name": ["Alice", "Bob"], "grade": [85, 90]})
@@ -34,7 +35,6 @@ def load_data():
 DATASETS = load_data()
 
 # --- MODULES ---
-# Strictly 2 Sections: Theory and Practical
 MODULES = {
     "theory": {
         "title": "Python Theory", 
@@ -48,9 +48,9 @@ MODULES = {
     }
 }
 
-# --- QUESTION BANK (8 Theory, 8 Practical) ---
+# --- QUESTION BANK ---
 QUESTIONS = [
-    # --- THEORY SECTION (8 Questions) ---
+    # --- THEORY SECTION ---
     {
         "id": 1, "module": "theory", "title": "Mutable vs Immutable", "type": "theory", "difficulty": "Easy", "points": 100,
         "content": "Explain the key difference between a List and a Tuple in Python. Give one example scenario for when to use each.",
@@ -92,7 +92,7 @@ QUESTIONS = [
         "hint": "Cleanup code often goes in the last block."
     },
 
-    # --- PRACTICAL SECTION (8 Questions) ---
+    # --- PRACTICAL SECTION ---
     {
         "id": 9, "module": "practical", "title": "Hello World Function", "type": "code", "difficulty": "Easy", "points": 100,
         "content": "Write a function named `greet` that takes a `name` argument and prints 'Hello, [name]!'.",
@@ -241,7 +241,7 @@ def get_ai_evaluation(prompt):
     # 2. Try Real AI Connection
     try:
         genai.configure(api_key=st.session_state.gemini_key)
-        model = genai.GenerativeModel('gemini-1.5-flash') # Updated model name if needed
+        model = genai.GenerativeModel('gemini-1.5-flash')
         response = model.generate_content(prompt + " Return strict JSON: {'score': float, 'feedback': str, 'correct': bool}")
         
         # Cleanup JSON response
@@ -297,7 +297,6 @@ def render_home():
     # --- 2 MODULE LAYOUT ---
     st.markdown("### 📚 Select a Learning Module")
     
-    # Using columns for the 2 modules
     col1, col2 = st.columns(2)
     
     # THEORY MODULE
@@ -356,11 +355,11 @@ def render_practice():
         </div>
         """, unsafe_allow_html=True)
         
-        # Hint Toggle
+        # Hint
         if st.checkbox("Show Hint"):
             st.info(q.get('hint', 'No hint available.'))
             
-        # Optional: Show Dataset if the question requires it
+        # Optional: Show Dataset
         if q.get('dataset'):
             st.markdown("#### 📂 Reference Data")
             st.dataframe(DATASETS[q['dataset']], use_container_width=True)
@@ -368,22 +367,17 @@ def render_practice():
     with col_work:
         st.markdown("#### 🛠️ Solution Workspace")
         
+        # 1. Editor Area
         if q['type'] == 'code':
             user_input = st.text_area("Code Editor", value=q.get('starter_code', ''), height=300, label_visibility="collapsed")
-            
-            # Simple Python Execution Sandbox
             if st.button("▶ Run Code"):
                 try:
-                    # Capture stdout
-                    import io, sys
                     old_stdout = sys.stdout
                     new_stdout = io.StringIO()
                     sys.stdout = new_stdout
                     
-                    # Environment with just standard libraries + pandas/numpy if needed
                     env = {"pd": pd, "np": np}
-                    if q.get('dataset'):
-                        env["df"] = DATASETS[q['dataset']]
+                    if q.get('dataset'): env["df"] = DATASETS[q['dataset']]
                     
                     exec(user_input, {}, env)
                     
@@ -404,6 +398,7 @@ def render_practice():
 
         st.markdown("<br>", unsafe_allow_html=True)
         
+        # 2. Buttons Area
         if st.button("Submit Response", type="primary", use_container_width=True):
             with st.spinner("AI Evaluating..."):
                 ans = st.session_state.get('temp_input', '')
@@ -412,29 +407,33 @@ def render_practice():
                 st.session_state.answers.append({**q, "score": fb['score']*q['points']})
                 st.rerun()
 
-    # Feedback Overlay
-    if st.session_state.last_feedback:
-        fb = st.session_state.last_feedback
-        color = "#22c55e" if fb['correct'] else "#f59e0b"
-        st.markdown(f"""
-        <div style='margin-top:20px; padding:20px; background:rgba(15, 23, 42, 0.9); border-left:4px solid {color}; border-radius:8px;'>
-            <h3 style='color:{color}; margin:0;'>Analysis Complete</h3>
-            <p style='color:#e2e8f0; margin-top:8px;'>{fb['feedback']}</p>
-        </div>
-        """, unsafe_allow_html=True)
-        
-        if st.button("Next Challenge ➡️", type="secondary"):
-            st.session_state.last_feedback = None
-            if st.session_state.current_q_index < len(q_list) - 1:
-                st.session_state.current_q_index += 1
-            else:
-                st.session_state.page = "report"
-            st.rerun()
+        # 3. Next Button & Feedback (Only appears if feedback exists)
+        if st.session_state.last_feedback:
+            # Spacer
+            st.markdown("<div style='height:10px'></div>", unsafe_allow_html=True)
+            
+            # Next Button
+            if st.button("Next Challenge ➡️", type="secondary", use_container_width=True):
+                st.session_state.last_feedback = None
+                if st.session_state.current_q_index < len(q_list) - 1:
+                    st.session_state.current_q_index += 1
+                else:
+                    st.session_state.page = "report"
+                st.rerun()
+                
+            # Feedback Box
+            fb = st.session_state.last_feedback
+            color = "#22c55e" if fb['correct'] else "#f59e0b"
+            st.markdown(f"""
+            <div style='margin-top:20px; padding:20px; background:rgba(15, 23, 42, 0.9); border-left:4px solid {color}; border-radius:8px;'>
+                <h3 style='color:{color}; margin:0;'>Analysis Complete</h3>
+                <p style='color:#e2e8f0; margin-top:8px;'>{fb['feedback']}</p>
+            </div>
+            """, unsafe_allow_html=True)
 
 def render_report():
     st.markdown("<h1 style='text-align:center; margin-bottom:40px;'>Module Complete! 🎓</h1>", unsafe_allow_html=True)
     
-    # Filter answers for this specific module run
     mod_id = st.session_state.active_module_id
     relevant_answers = [a for a in st.session_state.answers if a['module'] == mod_id]
     
