@@ -227,7 +227,7 @@ def inject_css():
     </style>
     """, unsafe_allow_html=True)
 
-# --- AI ENGINE (UPDATED) ---
+# --- AI ENGINE (UPDATED FOR FRIENDLY TONE) ---
 def get_ai_evaluation(prompt):
     # 1. Check if Library is installed
     if not GEMINI_AVAILABLE:
@@ -241,9 +241,24 @@ def get_ai_evaluation(prompt):
     # 2. Try Real AI Connection
     try:
         genai.configure(api_key=st.session_state.gemini_key)
-        # UPDATED TO 'gemini-pro' for better compatibility
+        
+        # Using gemini-pro for stability
         model = genai.GenerativeModel('gemini-2.5-flash') 
-        response = model.generate_content(prompt + " Return strict JSON: {'score': float, 'feedback': str, 'correct': bool}")
+        
+        # --- NEW SYSTEM INSTRUCTION FOR FRIENDLY TONE ---
+        system_instruction = """
+        Act as a friendly, encouraging, and enthusiastic Python Mentor. 
+        Analyze the user's answer.
+        1. Start with a warm, conversational opening (e.g., "Great effort!", "Spot on!", "Nice try!").
+        2. Provide a short, crisp summary of whether it is correct or not.
+        3. Give a detailed but easy-to-understand explanation of the concept. Avoid complex jargon.
+        4. If the code/answer is wrong, explain 'why' simply and offer a correction.
+        5. Return ONLY strict JSON in this format: {'score': float (0.0 to 1.0), 'feedback': 'your friendly text here', 'correct': bool}
+        """
+        
+        full_prompt = f"{system_instruction}\n\nUser Question/Code: {prompt}"
+        
+        response = model.generate_content(full_prompt)
         
         # Cleanup JSON response
         clean_text = response.text.replace("```json", "").replace("```", "").strip()
@@ -254,7 +269,7 @@ def get_ai_evaluation(prompt):
         time.sleep(1) 
         return {
             "score": 0.9, 
-            "feedback": f"⚠️ Simulation Mode (AI Error). Proceeding with success. Details: {str(e)[:50]}...", 
+            "feedback": f"⚠️ Simulation Mode (AI Error). Details: {str(e)[:50]}...", 
             "correct": True
         }
 
@@ -401,7 +416,7 @@ def render_practice():
         
         # 2. Buttons Area
         if st.button("Submit Response", type="primary", use_container_width=True):
-            with st.spinner("AI Evaluating..."):
+            with st.spinner("AI Mentor Evaluating..."):
                 ans = st.session_state.get('temp_input', '')
                 fb = get_ai_evaluation(f"Question: {q['content']} Answer: {ans}")
                 st.session_state.last_feedback = fb
@@ -425,10 +440,14 @@ def render_practice():
             # Feedback Box
             fb = st.session_state.last_feedback
             color = "#22c55e" if fb['correct'] else "#f59e0b"
+            
+            # Formatted Feedback Display
             st.markdown(f"""
             <div style='margin-top:20px; padding:20px; background:rgba(15, 23, 42, 0.9); border-left:4px solid {color}; border-radius:8px;'>
-                <h3 style='color:{color}; margin:0;'>Analysis Complete</h3>
-                <p style='color:#e2e8f0; margin-top:8px;'>{fb['feedback']}</p>
+                <h3 style='color:{color}; margin:0; font-size:1.2rem;'>Mentor Feedback</h3>
+                <div style='color:#e2e8f0; margin-top:10px; font-size:1.05rem; line-height:1.6;'>
+                    {fb['feedback']}
+                </div>
             </div>
             """, unsafe_allow_html=True)
 
@@ -470,7 +489,3 @@ elif st.session_state.page == "practice":
     render_practice()
 elif st.session_state.page == "report":
     render_report()
-
-
-
-
