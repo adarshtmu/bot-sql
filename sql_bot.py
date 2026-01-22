@@ -227,7 +227,7 @@ def inject_css():
     </style>
     """, unsafe_allow_html=True)
 
-# --- AI ENGINE ---
+# --- AI ENGINE (UPDATED) ---
 def get_ai_evaluation(prompt):
     # 1. Check if Library is installed
     if not GEMINI_AVAILABLE:
@@ -241,7 +241,8 @@ def get_ai_evaluation(prompt):
     # 2. Try Real AI Connection
     try:
         genai.configure(api_key=st.session_state.gemini_key)
-        model = genai.GenerativeModel('gemini-1.5-flash')
+        # UPDATED TO 'gemini-pro' for better compatibility
+        model = genai.GenerativeModel('gemini-pro') 
         response = model.generate_content(prompt + " Return strict JSON: {'score': float, 'feedback': str, 'correct': bool}")
         
         # Cleanup JSON response
