@@ -145,7 +145,7 @@ QUESTIONS = [
 def init_state():
     # 1. Try to get the key from Streamlit Secrets
     try:
-        secure_key = st.secrets["GEMINI_API_KEY"]
+        secure_key = st.secrets["HARD_CODED_GEMINI_API_KEY"]
     except Exception:
         # If running locally without secrets.toml or on Cloud without secrets set
         st.error("🚨 API Key not found! Please set GEMINI_API_KEY in Streamlit secrets.")
@@ -504,6 +504,7 @@ elif st.session_state.page == "practice":
     render_practice()
 elif st.session_state.page == "report":
     render_report()
+
 
 
 
