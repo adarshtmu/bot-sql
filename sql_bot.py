@@ -141,16 +141,26 @@ QUESTIONS = [
 ]
 
 # --- STATE MANAGEMENT ---
+# --- STATE MANAGEMENT ---
 def init_state():
+    # 1. Try to get the key from Streamlit Secrets
+    try:
+        secure_key = st.secrets["GEMINI_API_KEY"]
+    except Exception:
+        # If running locally without secrets.toml or on Cloud without secrets set
+        st.error("🚨 API Key not found! Please set GEMINI_API_KEY in Streamlit secrets.")
+        st.stop()
+
     defaults = {
         "page": "home",
-        "active_module_id": None,     
-        "active_questions": [],       
+        "active_module_id": None,      
+        "active_questions": [],        
         "current_q_index": 0,
         "answers": [],
-        "gemini_key": HARD_CODED_GEMINI_API_KEY,
+        "gemini_key": secure_key,  # <--- CHANGED: Uses the secure key now
         "last_feedback": None
     }
+    
     for k, v in defaults.items():
         if k not in st.session_state:
             st.session_state[k] = v
@@ -494,5 +504,6 @@ elif st.session_state.page == "practice":
     render_practice()
 elif st.session_state.page == "report":
     render_report()
+
 
 
