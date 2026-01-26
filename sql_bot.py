@@ -22,7 +22,12 @@ st.set_page_config(
 )
 
 # API KEY
-HARD_CODED_GEMINI_API_KEY = "AIzaSyB2oG1_GZ25gTpy0w6_XD4oxNh3SoyQBNw"
+try:
+    api_key = st.secrets["GEMINI_API_KEY"]
+except FileNotFoundError:
+    st.error("API Key not found. Please set it in secrets.toml or Streamlit Cloud.")
+    st.stop()
+#HARD_CODED_GEMINI_API_KEY = "AIzaSyB2oG1_GZ25gTpy0w6_XD4oxNh3SoyQBNw"
 
 # --- DATASETS ---
 @st.cache_data
@@ -489,3 +494,4 @@ elif st.session_state.page == "practice":
     render_practice()
 elif st.session_state.page == "report":
     render_report()
+
